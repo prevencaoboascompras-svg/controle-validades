@@ -695,6 +695,7 @@ function drawEncarte(){
     );
   }
 
+ ```js
   // TELEFONE
   if(tel){
 
@@ -711,4 +712,208 @@ function drawEncarte(){
     );
   }
 }
-```
+
+function downloadEncarte(){
+
+  drawEncarte();
+
+  const cv = document.getElementById('encarteCanvas');
+
+  const a = document.createElement('a');
+
+  const prod =
+    document.getElementById('eProduto')
+    .value
+    .substring(0,20) || 'encarte';
+
+  a.download =
+    'encarte-' +
+    prod.replace(/\s+/g,'-').toLowerCase() +
+    '.png';
+
+  a.href = cv.toDataURL('image/png');
+
+  a.click();
+}
+
+function openEncarteModal(idx){
+
+  if(idx!==null && idx!==undefined){
+
+    const p = products[idx];
+
+    document.getElementById('eProduto').value =
+      p.nome || '';
+
+    document.getElementById('eDe').value =
+      p.precoNormal
+        ? fmtR(p.precoNormal)
+        : '';
+
+    document.getElementById('ePor').value =
+      p.precoPromo
+        ? fmtR(p.precoPromo)
+        : '';
+
+    const pct =
+      p.pctDesc < 1
+        ? p.pctDesc * 100
+        : p.pctDesc;
+
+    document.getElementById('ePct').value =
+      p.pctDesc
+        ? pct.toFixed(0) + '%'
+        : '';
+
+    document.getElementById('eValidade').value =
+      fmt(p.validade);
+  }
+
+  fotoImg = null;
+
+  document.getElementById('eFoto').value = '';
+
+  document
+    .getElementById('encarteModal')
+    .classList
+    .add('open');
+
+  setTimeout(drawEncarte,100);
+}
+
+// ── TABS & MISC ───────────────────────────────────────────────────────────────
+function goTab(name){
+
+  document
+    .querySelectorAll('.tab')
+    .forEach((t,i)=>
+      t.classList.toggle(
+        'active',
+        ['validades','promocoes','relatorio','ajuda'][i]===name
+      )
+    );
+
+  document
+    .querySelectorAll('.sec')
+    .forEach(s=>s.classList.remove('active'));
+
+  document
+    .getElementById('sec-'+name)
+    .classList.add('active');
+
+  if(name==='relatorio')
+    setTimeout(renderCharts,50);
+
+  if(name==='promocoes')
+    renderPromos();
+}
+
+function closeModal(id){
+  document
+    .getElementById(id)
+    .classList
+    .remove('open');
+}
+
+function openAddModal(){
+  document
+    .getElementById('addModal')
+    .classList
+    .add('open');
+}
+
+function addManual(){
+
+  const cod =
+    document.getElementById('fCod')
+    .value
+    .trim();
+
+  if(
+    !cod &&
+    !document
+      .getElementById('fNome')
+      .value
+      .trim()
+  ){
+    alert(
+      'Preencha ao menos o código ou o nome.'
+    );
+    return;
+  }
+
+  products.push({
+    cod,
+    nome:
+      document
+        .getElementById('fNome')
+        .value
+        .trim(),
+
+    setor:
+      document
+        .getElementById('fSetorM')
+        .value,
+
+    validade:
+      document
+        .getElementById('fVal')
+        .value,
+
+    qtde:
+      parseInt(
+        document
+          .getElementById('fQtde')
+          .value
+      ) || 1,
+
+    src:'manual'
+  });
+
+  saveProd();
+
+  closeModal('addModal');
+
+  refresh();
+}
+
+function rmProduct(idx){
+
+  if(confirm('Remover?')){
+
+    products.splice(idx,1);
+
+    saveProd();
+
+    refresh();
+  }
+}
+
+function refresh(){
+
+  renderMetrics();
+
+  renderTable();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.getElementById('cfgBox').style.display='none';
+
+const _cfg = loadCfg();
+
+if(_cfg.id){
+
+  setDot(
+    'loading',
+    'Reconectando...'
+  );
+
+  syncAll();
+
+}else{
+
+  refresh();
+}
+</script>
+</body>
+</html>
