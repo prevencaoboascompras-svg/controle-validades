@@ -538,31 +538,51 @@ async function syncAll(){
     const rows=rawRows(table);
     if(!rows.length) throw new Error('Nenhuma linha');
 
-    // Detecta cabeçalho (pula linha de banner/imagem)
+    // Detecta cabecalho — tenta nos labels do gviz E nas linhas de dados
     let hIdx=-1, hCells=[];
-    for(let i=0;i<Math.min(5,rows.length);i++){
-      const cells=rows[i].c||[];
-      const hasProd=cells.some(c=>String(c?.f||c?.v||'').toUpperCase().includes('PRODUTO'));
-      if(hasProd){hIdx=i;hCells=cells;break;}
-    }
-    if(hIdx<0) throw new Error('Cabeçalho não encontrado');
+    const HKW=['PRODUTO','SETOR','VALIDADE','STATUS','VENDA','DESCONTO','CUSTO'];
 
+    // 1) Tenta nos labels das colunas retornadas pelo gviz
+    const colLabels=table.cols.map(c=>({v:c.label||'',f:c.label||''}));
+    const labelHits=HKW.filter(k=>colLabels.some(c=>String(c.v).toUpperCase().includes(k))).length;
+    if(labelHits>=3){hIdx=-1;hCells=colLabels;}
+
+    // 2) Se nao achou, busca nas linhas
+    if(!hCells.length){
+      for(let i=0;i<Math.min(10,rows.length);i++){
+        const cells=rows[i].c||[];
+        const txt=cells.map(c=>String(c&&c.f?c.f:c&&c.v?c.v:'').toUpperCase()).join('|');
+        const hits=HKW.filter(k=>txt.includes(k)).length;
+        if(hits>=2){hIdx=i;hCells=cells;break;}
+      }
+    }
+    if(!hCells.length) throw new Error('Cabecalho nao encontrado — verifique o nome da aba e se a planilha esta publica. Aba configurada: '+cfg.aba);
+
+    function colIdx(kws){
+      for(const kw of kws){
+        const i=hCells.findIndex(c=>{const s=String(c&&c.f?c.f:c&&c.v?c.v:'').toUpperCase();return s.includes(kw.toUpperCase());});
+        if(i>=0)return i;
+      }
+      return -1;
+    }
     const ci={
-      setor: findColIdx(hCells,['SETOR']),
-      produto: findColIdx(hCells,['PRODUTO']),
-      validade: findColIdx(hCells,['VALIDADE']),
-      acao: findColIdx(hCells,['AÇÃO','ACAO','AÇ']),
-      status: findColIdx(hCells,['STATUS']),
-      custo: findColIdx(hCells,['CUSTO']),
-      venda: findColIdx(hCells,['VALOR','VENDA']),
-      precodia: findColIdx(hCells,['PREÇO DO DIA','PRECO DO DIA','DO DIA']),
-      pct: findColIdx(hCells,['% REAL','REAL DE DESCONTO','DESCONTO']),
-      valordesc: findColIdx(hCells,['VALOR DO DESCONTO','VALOR DO DESC']),
+      setor:    colIdx(['SETOR']),
+      produto:  colIdx(['PRODUTO']),
+      validade: colIdx(['VALIDADE']),
+      acao:     colIdx(['ACAO','ACA']),
+      status:   colIdx(['STATUS']),
+      custo:    colIdx(['CUSTO']),
+      venda:    colIdx(['VALOR VENDA','VALOR\nVENDA','VENDA']),
+      precodia: colIdx(['DO DIA','PRECO DO DIA']),
+      pct:      colIdx(['% REAL','REAL DE DESCONTO','% REAL DE']),
+      valordesc:colIdx(['VALOR DO DESCONTO','VALOR DO DESC']),
     };
+    console.log('Colunas detectadas:',JSON.stringify(ci));
 
     const local=products.filter(p=>p.src==='manual');
     const sheetsData=[];
-    for(let i=hIdx+1;i<rows.length;i++){
+    const startRow=(hIdx<0)?0:hIdx+1;
+    for(let i=startRow;i<rows.length;i++){
       const cells=rows[i].c||[];
       const nome=cellStr(cells[ci.produto]);
       if(!nome) continue;
