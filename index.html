@@ -428,376 +428,82 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
+```js
 // ── CONFIG ──────────────────────────────────────────────────────────────────
-const CFG_KEY = 'aura_cfg', PROD_KEY = 'aura_prod';
-const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+const CFG_KEY = 'aura_cfg',
+      PROD_KEY = 'aura_prod';
+
+const TODAY = new Date();
+TODAY.setHours(0,0,0,0);
+
 let encarteColor = '#E8000D';
+
 let fotoImg = null;
-  const templateImg = new Image();
+
+const templateImg = new Image();
 templateImg.src = './assets/template-encarte.png';
-let products = JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
 
-function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}
-function saveProd(){localStorage.setItem(PROD_KEY,JSON.stringify(products))}
+let products = JSON.parse(
+  localStorage.getItem(PROD_KEY) || '[]'
+);
 
-function saveConfig(){
-  const cfg={
-    id: document.getElementById('cId').value.trim(),
-    aba: document.getElementById('cAba').value.trim()||'2025',
-    idBanco: document.getElementById('cIdBanco').value.trim(),
-    abaBanco: document.getElementById('cAbaBanco').value.trim()||'BANCO DE DADOS',
-    abaResp: document.getElementById('cAbaResp').value.trim()||'Respostas ao formulário 1',
-  };
-  if(!cfg.id){alert('Informe o ID da planilha.');return}
-  if(!cfg.idBanco) cfg.idBanco=cfg.id;
-  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
-  toggleCfg(); syncAll();
-}
-function toggleCfg(){
-  const b=document.getElementById('cfgBox');
-  const show=b.style.display==='none'||!b.style.display;
-  b.style.display=show?'block':'none';
-  if(show){const c=loadCfg();document.getElementById('cId').value=c.id||'';document.getElementById('cAba').value=c.aba||'2025';document.getElementById('cIdBanco').value=c.idBanco||'';document.getElementById('cAbaBanco').value=c.abaBanco||'BANCO DE DADOS';document.getElementById('cAbaResp').value=c.abaResp||'Respostas ao formulário 1';}
-}
-
-// ── SHEETS API ───────────────────────────────────────────────────────────────
-function sheetsURL(id,aba){return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(aba)}`}
-async function fetchSheet(id,aba){
-  const r=await fetch(sheetsURL(id,aba));
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  const t=await r.text();
-  const j=JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
-  if(j.status==='error') throw new Error(j.errors?.[0]?.message||'Erro planilha');
-  return j.table;
-}
-function rawRows(table){return table.rows||[]}
-function cellVal(cell){if(!cell)return null;return cell.f||cell.v}
-function cellStr(cell){return String(cellVal(cell)||'').trim()}
-function cellNum(cell){
-  if(!cell)return 0;
-  let v=cell.f||cell.v;
-  if(typeof v==='string') v=v.replace(/[R$\s%]/g,'').replace(',','.');
-  return parseFloat(v)||0;
-}
-
-function findColIdx(headerCells, keywords){
-  for(const kw of keywords){
-    const i=headerCells.findIndex(c=>String(c?.f||c?.v||'').toLowerCase().includes(kw.toLowerCase()));
-    if(i>=0)return i;
-  }
-  return -1;
-}
-
-function parseDate(v){
-  if(!v&&v!==0)return '';
-  const s=String(v);
-  // Date(y,m,d)
-  const dm=s.match(/Date\((\d+),(\d+),(\d+)\)/);
-  if(dm) return `${dm[1]}-${String(+dm[2]+1).padStart(2,'0')}-${String(dm[3]).padStart(2,'0')}`;
-  // DD/MM/YYYY
-  const dd=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(dd) return `${dd[3]}-${dd[2].padStart(2,'0')}-${dd[1].padStart(2,'0')}`;
-  // YYYY-MM-DD
-  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
-  // número (serial Excel)
-  if(!isNaN(v)&&Number(v)>1000){const d=new Date((Number(v)-25569)*86400000);return d.toISOString().substring(0,10);}
-  return s.substring(0,10);
-}
-
-// ── BANCO DE DADOS ────────────────────────────────────────────────────────────
-let banco={};
-async function loadBanco(cfg){
-  if(!cfg.idBanco)return;
-  try{
-    const table=await fetchSheet(cfg.idBanco,cfg.abaBanco);
-    const rows=rawRows(table);
-    banco={};
-    // Encontra linha de cabeçalho real
-    let hIdx=-1,ciCod=-1,ciNome=-1;
-    for(let i=0;i<rows.length;i++){
-      const cells=rows[i].c||[];
-      const ci=cells.findIndex(c=>String(c?.f||c?.v||'').toUpperCase().includes('CÓD')||String(c?.f||c?.v||'').toUpperCase().includes('COD')||String(c?.f||c?.v||'').toUpperCase().includes('BARRA'));
-      const ni=cells.findIndex(c=>String(c?.f||c?.v||'').toUpperCase().includes('DESC')||String(c?.f||c?.v||'').toUpperCase().includes('NOME')||String(c?.f||c?.v||'').toUpperCase().includes('PRODUTO'));
-      if(ci>=0&&ni>=0){hIdx=i;ciCod=ci;ciNome=ni;break;}
-    }
-    if(hIdx<0)return;
-    for(let i=hIdx+1;i<rows.length;i++){
-      const cells=rows[i].c||[];
-      const cod=String(cells[ciCod]?.f||cells[ciCod]?.v||'').trim().replace(/[^0-9]/g,'');
-      const nome=String(cells[ciNome]?.f||cells[ciNome]?.v||'').replace(/^,\s*/,'').trim();
-      if(cod&&nome) banco[cod]=nome;
-    }
-    console.log('Banco:',Object.keys(banco).length,'produtos');
-  }catch(e){console.warn('Banco:',e.message)}
-}
-
-// ── SYNC PRINCIPAL ────────────────────────────────────────────────────────────
-async function syncAll(){
-  const cfg=loadCfg();
-  if(!cfg.id){setDot('err','Configure o Google Sheets primeiro');toggleCfg();return;}
-  const btn=document.getElementById('btnSync');
-  btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Sincronizando...';
-  setDot('loading','Sincronizando...');
-  try{
-    await loadBanco(cfg);
-    // Carrega aba principal (AURA VENCIMENTOS)
-    const table=await fetchSheet(cfg.id,cfg.aba);
-    const rows=rawRows(table);
-    if(!rows.length) throw new Error('Nenhuma linha');
-
-    // Detecta cabecalho — tenta nos labels do gviz E nas linhas de dados
-    let hIdx=-1, hCells=[];
-    const HKW=['PRODUTO','SETOR','VALIDADE','STATUS','VENDA','DESCONTO','CUSTO'];
-
-    // 1) Tenta nos labels das colunas retornadas pelo gviz
-    const colLabels=table.cols.map(c=>({v:c.label||'',f:c.label||''}));
-    const labelHits=HKW.filter(k=>colLabels.some(c=>String(c.v).toUpperCase().includes(k))).length;
-    if(labelHits>=3){hIdx=-1;hCells=colLabels;}
-
-    // 2) Se nao achou, busca nas linhas
-    if(!hCells.length){
-      for(let i=0;i<Math.min(10,rows.length);i++){
-        const cells=rows[i].c||[];
-        const txt=cells.map(c=>String(c&&c.f?c.f:c&&c.v?c.v:'').toUpperCase()).join('|');
-        const hits=HKW.filter(k=>txt.includes(k)).length;
-        if(hits>=2){hIdx=i;hCells=cells;break;}
-      }
-    }
-    if(!hCells.length) throw new Error('Cabecalho nao encontrado — verifique o nome da aba e se a planilha esta publica. Aba configurada: '+cfg.aba);
-
-    function colIdx(kws){
-      for(const kw of kws){
-        const i=hCells.findIndex(c=>{const s=String(c&&c.f?c.f:c&&c.v?c.v:'').toUpperCase();return s.includes(kw.toUpperCase());});
-        if(i>=0)return i;
-      }
-      return -1;
-    }
-    const ci={
-      setor:    colIdx(['SETOR']),
-      produto:  colIdx(['PRODUTO']),
-      validade: colIdx(['VALIDADE']),
-      acao:     colIdx(['ACAO','ACA']),
-      status:   colIdx(['STATUS']),
-      custo:    colIdx(['CUSTO']),
-      venda:    colIdx(['VALOR VENDA','VALOR\nVENDA','VENDA']),
-      precodia: colIdx(['DO DIA','PRECO DO DIA']),
-      pct:      colIdx(['% REAL','REAL DE DESCONTO','% REAL DE']),
-      valordesc:colIdx(['VALOR DO DESCONTO','VALOR DO DESC']),
-    };
-    console.log('Colunas detectadas:',JSON.stringify(ci));
-
-    const local=products.filter(p=>p.src==='manual');
-    const sheetsData=[];
-    const startRow=(hIdx<0)?0:hIdx+1;
-    for(let i=startRow;i<rows.length;i++){
-      const cells=rows[i].c||[];
-      const nome=cellStr(cells[ci.produto]);
-      if(!nome) continue;
-      const validadeRaw=cellVal(cells[ci.validade]);
-      const validade=parseDate(validadeRaw);
-      const status=cellStr(cells[ci.status]);
-      // Tenta pegar código do nome (formato: "PRODUTO (QUN) {COD}" não existe — usa banco reverso)
-      // Código: busca no banco pelo nome
-      let cod='';
-      for(const [k,v] of Object.entries(banco)){
-        const nomeClean=nome.replace(/\s*\(.*?\)\s*\{.*?\}/g,'').trim().toUpperCase();
-        if(v.toUpperCase().includes(nomeClean.substring(0,20))){cod=k;break;}
-      }
-      sheetsData.push({
-        cod, nome,
-        setor: cellStr(cells[ci.setor]),
-        validade,
-        status,
-        qtde: (() => {const m=nome.match(/\{(\d+)\}/);return m?parseInt(m[1]):1})(),
-        custo: cellNum(cells[ci.custo]),
-        precoNormal: cellNum(cells[ci.venda]),
-        precoPromo: cellNum(cells[ci.precodia]),
-        pctDesc: cellNum(cells[ci.pct]),
-        valorDesc: cellNum(cells[ci.valordesc]),
-        src:'sheets',
-      });
-    }
-    products=[...sheetsData,...local];
-    saveProd();
-    setDot('ok',`Conectado — ${sheetsData.length} registros carregados`);
-    document.getElementById('syncTime').textContent='Última sinc: '+new Date().toLocaleTimeString('pt-BR');
-    refresh();
-  }catch(e){
-    setDot('err','Erro: '+e.message);console.error(e);
-  }finally{
-    btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Sincronizar';
-  }
-}
-
-function setDot(type,msg){
-  const d=document.getElementById('dot'),t=document.getElementById('stText');
-  d.className='dot'+(type==='ok'?' ok':type==='err'?' err':type==='loading'?' loading':'');
-  t.textContent=msg;
-}
-
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function daysDiff(v){if(!v)return null;const d=new Date(v);d.setHours(0,0,0,0);return Math.round((d-TODAY)/86400000)}
-function statusFromDays(d){if(d===null)return 'sem-data';if(d<0)return 'vencido';if(d<=3)return 'critico';if(d<=7)return 'urgente';if(d<=15)return 'atencao';return 'ok';}
-function badge(s){const m={vencido:['b-danger','Vencido'],critico:['b-danger','Crítico'],urgente:['b-warn','Urgente'],atencao:['b-warn','Atenção'],ok:['b-ok','OK'],'sem-data':['b-gray','Sem data']};const[c,l]=m[s]||['b-gray','—'];return`<span class="badge ${c}">${l}</span>`}
-function barColor(s){return{vencido:'#E24B4A',critico:'#E24B4A',urgente:'#BA7517',atencao:'#EF9F27',ok:'#1D9E75','sem-data':'#888'}[s]||'#888'}
-function fmt(d){return d?d.split('-').reverse().join('/'):'—'}
-function fmtR(v){if(!v)return '—';return 'R$ '+v.toFixed(2).replace('.',',')}
-function fmtPct(v){if(!v)return '—';const pct=v<1?v*100:v;return pct.toFixed(2).replace('.',',')+'%'}
-
-// ── RENDER TABLE ──────────────────────────────────────────────────────────────
-function renderTable(){
-  const setor=document.getElementById('fSetor').value;
-  const status=document.getElementById('fStatus').value;
-  const busca=document.getElementById('fBusca').value.toLowerCase();
-  let list=products.filter(p=>{
-    const s=statusFromDays(daysDiff(p.validade));
-    if(setor&&p.setor!==setor)return false;
-    if(status&&s!==status)return false;
-    if(busca&&!(p.nome||'').toLowerCase().includes(busca)&&!(p.cod||'').toLowerCase().includes(busca))return false;
-    return true;
-  }).sort((a,b)=>(daysDiff(a.validade)??9999)-(daysDiff(b.validade)??9999));
-
-  const tb=document.getElementById('tbody');
-  if(!list.length){tb.innerHTML='<tr><td colspan="11" class="empty">Nenhum produto encontrado.</td></tr>';return;}
-  tb.innerHTML=list.map(p=>{
-    const days=daysDiff(p.validade);
-    const s=statusFromDays(days);
-    const pct=days===null?0:Math.min(100,Math.max(0,days>30?100:(days/30)*100));
-    const dTxt=days===null?'—':days<0?`${Math.abs(days)}d atrás`:days===0?'Hoje':`${days}d`;
-    const idx=products.indexOf(p);
-    const needsPromo=['vencido','critico','urgente','atencao'].includes(s);
-    const srcTag=p.src==='sheets'?'<span class="src-tag sheets">Sheets</span>':'<span class="src-tag">Manual</span>';
-    return`<tr>
-      <td style="font-family:monospace;font-size:11px;color:var(--tx2)">${p.cod||'—'}${srcTag}</td>
-      <td style="max-width:220px;font-weight:500;font-size:12px">${p.nome||'—'}</td>
-      <td style="font-size:12px">${p.setor||'—'}</td>
-      <td style="font-size:12px;white-space:nowrap">${fmt(p.validade)}</td>
-      <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor(s)}"></div></div><span style="font-size:12px;min-width:50px">${dTxt}</span></div></td>
-      <td style="font-size:12px">${p.qtde||'—'}</td>
-      <td style="font-size:12px;white-space:nowrap">${fmtR(p.precoNormal)}</td>
-      <td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">${fmtR(p.precoPromo)}</td>
-      <td style="font-size:12px;white-space:nowrap">${fmtPct(p.pctDesc)}</td>
-      <td>${badge(s)}</td>
-      <td>
-        ${needsPromo?`<button class="abtn encarte" onclick="openEncarteModal(${idx})"><i class="ti ti-photo"></i> Encarte</button>`:''}
-        ${p.src!=='sheets'?`<button class="abtn" onclick="rmProduct(${idx})"><i class="ti ti-trash"></i></button>`:''}
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// ── RENDER PROMOS ─────────────────────────────────────────────────────────────
-function renderPromos(){
-  const list=products.filter(p=>{
-    if(p.src!=='sheets')return false;
-    const s=(p.status||'').toLowerCase();
-    return s.includes('aguarda')||s.includes('aguard');
-  }).sort((a,b)=>(daysDiff(a.validade)??9999)-(daysDiff(b.validade)??9999));
-
-  const el=document.getElementById('promoGrid');
-  if(!list.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><i class="ti ti-tag-off"></i>Nenhum produto com status "Aguarda" encontrado.<br>Sincronize a planilha ou aguarde novos registros.</div>';return;}
-
-  el.innerHTML=list.map(p=>{
-    const days=daysDiff(p.validade);
-    const s=statusFromDays(days);
-    const dTxt=days===null?'—':days<0?`${Math.abs(days)}d atrás`:days===0?'Hoje':`${days}d`;
-    const idx=products.indexOf(p);
-    const pct=p.pctDesc<1?p.pctDesc*100:p.pctDesc;
-    return`<div class="promo-card">
-      <div class="promo-card-header">
-        <div class="pct">${pct?pct.toFixed(0):'?'}%<small>de desconto</small></div>
-        <div class="promo-name">${p.nome||'—'}</div>
-        ${badge(s)}
-      </div>
-      <div class="promo-card-body">
-        <div class="promo-prices">
-          <div>
-            <div style="font-size:11px;color:var(--tx2);margin-bottom:2px">De</div>
-            <div class="price-de">${fmtR(p.precoNormal)}</div>
-          </div>
-          <div style="font-size:20px;color:var(--tx2)">→</div>
-          <div>
-            <div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Por</div>
-            <div class="price-por">${fmtR(p.precoPromo)}</div>
-          </div>
-          <div style="margin-left:auto;text-align:right">
-            <div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Economia</div>
-            <div style="font-size:16px;font-weight:600;color:var(--amber)">${fmtR(p.valorDesc)}</div>
-          </div>
-        </div>
-        <div class="promo-meta">
-          <span><i class="ti ti-calendar" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>Validade ${fmt(p.validade)}</span>
-          <span><i class="ti ti-clock" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>${dTxt}</span>
-          <span><i class="ti ti-package" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>Qtde: ${p.qtde}</span>
-        </div>
-        <div class="promo-actions">
-          <button class="btn btn-green btn-sm" onclick="openEncarteModal(${idx})"><i class="ti ti-photo"></i> Gerar encarte</button>
-          <span style="font-size:12px;color:var(--tx2)">Setor: ${p.setor}</span>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ── METRICS ───────────────────────────────────────────────────────────────────
-function renderMetrics(){
-  const c={vencido:0,critico:0,urgente:0,atencao:0,ok:0};
-  const aguarda=products.filter(p=>(p.status||'').toLowerCase().includes('aguard')).length;
-  products.forEach(p=>{const s=statusFromDays(daysDiff(p.validade));if(s in c)c[s]++;});
-  const al=c.vencido+c.critico;
-  const b=document.getElementById('alertBanner');
-  b.classList.toggle('show',al>0);
-  document.getElementById('alertTxt').textContent=`${al} produto(s) vencido(s) ou crítico(s) (≤3 dias). Verifique e acione promoções imediatamente.`;
-  document.getElementById('metrics').innerHTML=`
-    <div class="metric"><div class="metric-lbl">Total</div><div class="metric-val">${products.length}</div></div>
-    <div class="metric"><div class="metric-lbl">Vencidos</div><div class="metric-val danger">${c.vencido}</div></div>
-    <div class="metric"><div class="metric-lbl">Crítico ≤3d</div><div class="metric-val danger">${c.critico}</div></div>
-    <div class="metric"><div class="metric-lbl">Urgente ≤7d</div><div class="metric-val warn">${c.urgente}</div></div>
-    <div class="metric"><div class="metric-lbl">Atenção ≤15d</div><div class="metric-val warn">${c.atencao}</div></div>
-    <div class="metric"><div class="metric-lbl">OK</div><div class="metric-val ok">${c.ok}</div></div>
-    <div class="metric"><div class="metric-lbl">Aguardando ação</div><div class="metric-val info">${aguarda}</div></div>
-  `;
-}
-
-// ── CHARTS ────────────────────────────────────────────────────────────────────
-let charts={};
-function renderCharts(){
-  Object.values(charts).forEach(c=>c.destroy()); charts={};
-  const sc={vencido:0,critico:0,urgente:0,atencao:0,ok:0},sm={};
-  products.forEach(p=>{
-    const s=statusFromDays(daysDiff(p.validade));
-    if(s in sc)sc[s]++;
-    sm[p.setor]=(sm[p.setor]||0)+1;
-  });
-  charts.st=new Chart(document.getElementById('cStatus'),{type:'doughnut',data:{labels:['Vencido','Crítico','Urgente','Atenção','OK'],datasets:[{data:[sc.vencido,sc.critico,sc.urgente,sc.atencao,sc.ok],backgroundColor:['#E24B4A','#F09595','#EF9F27','#FAC775','#639922'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}});
-  const ss=Object.keys(sm);
-  charts.se=new Chart(document.getElementById('cSetor'),{type:'bar',data:{labels:ss,datasets:[{data:ss.map(s=>sm[s]),backgroundColor:'#378ADD',borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{font:{size:10}}}}}});
-  const top=products.filter(p=>{const d=daysDiff(p.validade);return d!==null&&d>=0&&d<=15&&p.valorDesc>0;}).sort((a,b)=>b.valorDesc-a.valorDesc).slice(0,15);
-  charts.dc=new Chart(document.getElementById('cDesconto'),{type:'bar',data:{labels:top.map(p=>(p.nome||'').substring(0,25)),datasets:[{label:'Valor do desconto',data:top.map(p=>p.valorDesc),backgroundColor:'#BA7517',borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{font:{size:10},callback:v=>'R$'+v.toFixed(2)}},y:{ticks:{font:{size:10}}}}}});
-}
-
-// ── ENCARTE CANVAS ────────────────────────────────────────────────────────────
-function setColor(c){encarteColor=c;drawEncarte();}
-function loadFoto(input){
-  if(!input.files[0])return;
-  const r=new FileReader();
-  r.onload=e=>{const img=new Image();img.onload=()=>{fotoImg=img;drawEncarte();};img.src=e.target.result;};
-  r.readAsDataURL(input.files[0]);
-}
-
+// ── HELPERS ─────────────────────────────────────────────────────────────────
 function wrapText(ctx,text,x,y,maxW,lineH){
-  const words=text.split(' ');let line='',lines=[];
+
+  const words = text.split(' ');
+  let line = '';
+  let lines = [];
+
   for(const w of words){
-    const test=line?line+' '+w:w;
-    if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=w;}
-    else line=test;
+
+    const test = line ? line + ' ' + w : w;
+
+    if(ctx.measureText(test).width > maxW && line){
+      lines.push(line);
+      line = w;
+    }else{
+      line = test;
+    }
   }
+
   lines.push(line);
-  lines.forEach((l,i)=>ctx.fillText(l,x,y+i*lineH));
+
+  lines.forEach((l,i)=>{
+    ctx.fillText(l,x,y + (i * lineH));
+  });
+
   return lines.length;
 }
 
+// ── ENCARTE ─────────────────────────────────────────────────────────────────
+function setColor(c){
+  encarteColor = c;
+  drawEncarte();
+}
+
+function loadFoto(input){
+
+  if(!input.files[0]) return;
+
+  const r = new FileReader();
+
+  r.onload = e => {
+
+    const img = new Image();
+
+    img.onload = () => {
+      fotoImg = img;
+      drawEncarte();
+    };
+
+    img.src = e.target.result;
+  };
+
+  r.readAsDataURL(input.files[0]);
+}
+
 function drawEncarte(){
+
   const cv = document.getElementById('encarteCanvas');
   const ctx = cv.getContext('2d');
 
@@ -807,16 +513,31 @@ function drawEncarte(){
   cv.width = W;
   cv.height = H;
 
+  // CAMPOS
   const produto = document.getElementById('eProduto').value || 'NOME DO PRODUTO';
+
   const de = document.getElementById('eDe').value || '0,00';
+
   const por = document.getElementById('ePor').value || '0,00';
+
+  const pct = document.getElementById('ePct').value || '';
+
+  const validade = document.getElementById('eValidade').value || '';
+
+  const obs = document.getElementById('eObs').value || '';
+
+  const loja = document.getElementById('eLoja').value || '';
+
+  const tel = document.getElementById('eTel').value || '';
 
   ctx.clearRect(0,0,W,H);
 
-  // TEMPLATE FIXO
-  ctx.drawImage(templateImg,0,0,W,H);
+  // TEMPLATE
+  if(templateImg.complete){
+    ctx.drawImage(templateImg,0,0,W,H);
+  }
 
-  // FOTO PRODUTO
+  // FOTO
   if(fotoImg){
 
     const areaX = 90;
@@ -832,15 +553,46 @@ function drawEncarte(){
     const nw = fotoImg.width * ratio;
     const nh = fotoImg.height * ratio;
 
-    const nx = areaX + ((areaW - nw)/2);
-    const ny = areaY + ((areaH - nh)/2);
+    const nx = areaX + ((areaW - nw) / 2);
+    const ny = areaY + ((areaH - nh) / 2);
 
-    ctx.drawImage(fotoImg,nx,ny,nw,nh);
+    ctx.drawImage(
+      fotoImg,
+      nx,
+      ny,
+      nw,
+      nh
+    );
+
+  } else {
+
+    ctx.fillStyle = '#f2f2f2';
+
+    ctx.fillRect(
+      90,
+      430,
+      900,
+      760
+    );
+
+    ctx.fillStyle = '#999';
+
+    ctx.font = 'bold 42px Arial';
+
+    ctx.textAlign = 'center';
+
+    ctx.fillText(
+      'ADICIONE A FOTO DO PRODUTO',
+      W/2,
+      820
+    );
   }
 
-  // NOME PRODUTO
+  // PRODUTO
   ctx.fillStyle = '#222';
+
   ctx.font = 'bold 58px Arial';
+
   ctx.textAlign = 'center';
 
   wrapText(
@@ -854,7 +606,9 @@ function drawEncarte(){
 
   // PREÇO DE
   ctx.fillStyle = '#FFFFFF';
+
   ctx.font = 'bold 68px Arial';
+
   ctx.textAlign = 'left';
 
   ctx.fillText(
@@ -865,6 +619,7 @@ function drawEncarte(){
 
   // PREÇO POR
   ctx.fillStyle = '#FFD400';
+
   ctx.font = 'bold 120px Arial';
 
   ctx.fillText(
@@ -872,120 +627,88 @@ function drawEncarte(){
     510,
     1435
   );
-}
 
-  // Área da foto
-  const fotoH=fotoImg?200:180;
-  if(fotoImg){
-    const ratio=Math.min(220/fotoImg.width,fotoH/fotoImg.height);
-    const fw=fotoImg.width*ratio,fh=fotoImg.height*ratio;
-    ctx.drawImage(fotoImg,(W-fw)/2,88,(fw),(fh));
-  } else {
-    // placeholder
-    ctx.fillStyle='#f0f0f0';ctx.fillRect(100,90,300,160);
-    ctx.fillStyle='#ccc';ctx.font='14px Arial';ctx.textAlign='center';
-    ctx.fillText('Foto do produto',W/2,178);
-  }
-
-  // Caixa DE / POR
-  const boxY=fotoImg?300:275;
-
-  // DE
-  ctx.fillStyle='#222';ctx.fillRect(60,boxY,170,90);
-  ctx.fillStyle='#fff';ctx.font='bold 16px Arial';ctx.textAlign='center';
-  ctx.fillText('DE',145,boxY+22);
-  ctx.font='bold 28px Arial';
-  ctx.fillStyle='#ffcccb';
-  // Riscado
-  const deW=ctx.measureText(de).width;
-  ctx.fillText(de,145,boxY+62);
-  ctx.strokeStyle='#ff4444';ctx.lineWidth=3;
-  ctx.beginPath();ctx.moveTo(145-deW/2-4,boxY+52);ctx.lineTo(145+deW/2+4,boxY+52);ctx.stroke();
-
-  // POR
-  ctx.fillStyle=encarteColor;ctx.fillRect(240,boxY-10,210,110);
-  ctx.fillStyle='#fff';ctx.font='bold 16px Arial';ctx.textAlign='center';
-  ctx.fillText('POR CADA',345,boxY+14);
-  ctx.font='bold 36px Arial';
-  ctx.fillText(por,345,boxY+62);
-
-  // Badge %
+  // DESCONTO
   if(pct){
-    ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(W-50,boxY-10,38,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#000';ctx.font='bold 14px Arial';ctx.textAlign='center';
-    ctx.fillText(pct,W-50,boxY-14);
-    ctx.font='bold 11px Arial';
-    ctx.fillText('desc.',W-50,boxY+2);
+
+    ctx.fillStyle = '#FFFFFF';
+
+    ctx.font = 'bold 56px Arial';
+
+    ctx.textAlign = 'center';
+
+    ctx.fillText(
+      pct,
+      900,
+      290
+    );
   }
 
-  // Validade
+  // VALIDADE
   if(validade){
-    ctx.fillStyle='#444';ctx.font='12px Arial';ctx.textAlign='center';
-    ctx.fillText('Válido até: '+validade,W/2,boxY+120);
+
+    ctx.fillStyle = '#FFFFFF';
+
+    ctx.font = 'bold 32px Arial';
+
+    ctx.textAlign = 'center';
+
+    ctx.fillText(
+      'VÁLIDO ATÉ ' + validade,
+      W/2,
+      1695
+    );
   }
 
-  // Faixa observação
-  const obsY=boxY+135;
-  ctx.fillStyle=encarteColor;ctx.fillRect(0,obsY,W,46);
-  ctx.fillStyle='#fff';ctx.font='bold 11px Arial';ctx.textAlign='center';
-  wrapText(ctx,obs,W/2,obsY+16,W-20,16);
+  // OBSERVAÇÃO
+  if(obs){
 
-  // Faixa loja/tel
-  ctx.fillStyle='#222';ctx.fillRect(0,obsY+50,W,H-(obsY+50));
-  ctx.fillStyle='#fff';ctx.font='bold 14px Arial';ctx.textAlign='center';
-  ctx.fillText(loja,W/2,obsY+70);
-  if(tel){ctx.font='13px Arial';ctx.fillStyle='#aaa';ctx.fillText(tel,W/2,obsY+90);}
-}
+    ctx.fillStyle = '#333';
 
-function downloadEncarte(){
-  drawEncarte();
-  const cv=document.getElementById('encarteCanvas');
-  const a=document.createElement('a');
-  const prod=document.getElementById('eProduto').value.substring(0,20)||'encarte';
-  a.download='encarte-'+prod.replace(/\s+/g,'-').toLowerCase()+'.png';
-  a.href=cv.toDataURL('image/png');a.click();
-}
+    ctx.font = '28px Arial';
 
-function openEncarteModal(idx){
-  if(idx!==null&&idx!==undefined){
-    const p=products[idx];
-    document.getElementById('eProduto').value=p.nome||'';
-    document.getElementById('eDe').value=p.precoNormal?fmtR(p.precoNormal):'';
-    document.getElementById('ePor').value=p.precoPromo?fmtR(p.precoPromo):'';
-    const pct=p.pctDesc<1?p.pctDesc*100:p.pctDesc;
-    document.getElementById('ePct').value=p.pctDesc?pct.toFixed(0)+'%':'';
-    document.getElementById('eValidade').value=fmt(p.validade);
+    ctx.textAlign = 'center';
+
+    wrapText(
+      ctx,
+      obs,
+      W/2,
+      1760,
+      920,
+      36
+    );
   }
-  fotoImg=null;
-  document.getElementById('eFoto').value='';
-  document.getElementById('encarteModal').classList.add('open');
-  setTimeout(drawEncarte,100);
-}
 
-// ── TABS & MISC ───────────────────────────────────────────────────────────────
-function goTab(name){
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['validades','promocoes','relatorio','ajuda'][i]===name));
-  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sec-'+name).classList.add('active');
-  if(name==='relatorio')setTimeout(renderCharts,50);
-  if(name==='promocoes')renderPromos();
-}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function openAddModal(){document.getElementById('addModal').classList.add('open');}
-function addManual(){
-  const cod=document.getElementById('fCod').value.trim();
-  if(!cod&&!document.getElementById('fNome').value.trim()){alert('Preencha ao menos o código ou o nome.');return;}
-  products.push({cod,nome:document.getElementById('fNome').value.trim(),setor:document.getElementById('fSetorM').value,validade:document.getElementById('fVal').value,qtde:parseInt(document.getElementById('fQtde').value)||1,src:'manual'});
-  saveProd();closeModal('addModal');refresh();
-}
-function rmProduct(idx){if(confirm('Remover?')){products.splice(idx,1);saveProd();refresh();}}
-function refresh(){renderMetrics();renderTable();}
+  // LOJA
+  if(loja){
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-document.getElementById('cfgBox').style.display='none';
-const _cfg=loadCfg();
-if(_cfg.id){setDot('loading','Reconectando...');syncAll();}
-else refresh();
-</script>
-</body>
-</html>
+    ctx.fillStyle = '#FFFFFF';
+
+    ctx.font = 'bold 40px Arial';
+
+    ctx.textAlign = 'center';
+
+    ctx.fillText(
+      loja,
+      W/2,
+      1855
+    );
+  }
+
+  // TELEFONE
+  if(tel){
+
+    ctx.fillStyle = '#FFFFFF';
+
+    ctx.font = '30px Arial';
+
+    ctx.textAlign = 'center';
+
+    ctx.fillText(
+      tel,
+      W/2,
+      1900
+    );
+  }
+}
+```
