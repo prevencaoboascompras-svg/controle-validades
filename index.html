@@ -482,15 +482,54 @@ async function loadBanco(cfg) {
   if (!cfg.sheetIdBanco) return;
   try {
     const table = await fetchSheet(cfg.sheetIdBanco, cfg.abaBanco);
-    const rows = tableToObjects(table);
     bancoDados = {};
-    rows.forEach(r => {
-      const cod = findCol(r, ['CÓD','COD','BARRAS','codigo','código']);
-      const nome = findCol(r, ['DESCRIÇÃO','DESCRICAO','NOME','nome']);
-      if (cod && nome && r[cod] && r[nome]) {
-        bancoDados[String(r[cod]).trim()] = String(r[nome]).trim();
+
+    // Estratégia 1: usar tableToObjects normalmente
+    const rows = tableToObjects(table);
+
+    // Encontra índices de coluna de código e descrição em qualquer row
+    // (resolve caso onde cabeçalho real está na linha 1 e não nos cols do gviz)
+    const codKeywords = ['cód','cod','barras','ean'];
+    const nomeKeywords = ['descri','nome','produto'];
+
+    // Tenta primeiro com os labels das colunas do gviz
+    let colCod = null, colNome = null;
+    if (rows.length > 0) {
+      colCod  = findCol(rows[0], codKeywords);
+      colNome = findCol(rows[0], nomeKeywords);
+    }
+
+    if (colCod && colNome) {
+      // Cabeçalho detectado normalmente
+      rows.forEach(r => {
+        const cod = String(r[colCod] || '').trim().replace(/[^0-9]/g, '');
+        const nome = String(r[colNome] || '').replace(/^,/, '').trim();
+        if (cod && nome) bancoDados[cod] = nome;
+      });
+    } else {
+      // Fallback: cabeçalho está dentro dos dados (linha deslocada)
+      // Varre todas as rows bruta buscando a linha de cabeçalho real
+      const rawRows = table.rows || [];
+      let headerRowIdx = -1;
+      let codColIdx = -1, nomeColIdx = -1;
+
+      for (let i = 0; i < rawRows.length; i++) {
+        const cells = (rawRows[i].c || []).map(c => String(c?.f || c?.v || '').toLowerCase());
+        const ci = cells.findIndex(c => codKeywords.some(k => c.includes(k)));
+        const ni = cells.findIndex(c => nomeKeywords.some(k => c.includes(k)));
+        if (ci >= 0 && ni >= 0) { headerRowIdx = i; codColIdx = ci; nomeColIdx = ni; break; }
       }
-    });
+
+      if (headerRowIdx >= 0) {
+        for (let i = headerRowIdx + 1; i < rawRows.length; i++) {
+          const cells = rawRows[i].c || [];
+          const cod  = String(cells[codColIdx]?.f  || cells[codColIdx]?.v  || '').trim().replace(/[^0-9]/g, '');
+          const nome = String(cells[nomeColIdx]?.f || cells[nomeColIdx]?.v || '').replace(/^,/, '').trim();
+          if (cod && nome) bancoDados[cod] = nome;
+        }
+      }
+    }
+    console.log(`Banco de dados carregado: ${Object.keys(bancoDados).length} produtos`);
   } catch(e) {
     console.warn('Banco de dados não carregado:', e.message);
   }
@@ -524,7 +563,8 @@ async function syncSheets() {
       .filter(r => r[colCod] || r[colVal])
       .map(r => {
         const cod = String(r[colCod] || '').trim();
-        const nome = bancoDados[cod] || '';
+        const codDigits = cod.replace(/[^0-9]/g, '');
+        const nome = bancoDados[cod] || bancoDados[codDigits] || '';
         return {
           cod,
           nome,
