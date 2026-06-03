@@ -138,8 +138,13 @@ tr:hover td{background:var(--bg2)}
 .modal-foot{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0}
 
 /* ENCARTE CANVAS */
-#encarteCanvas{border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);max-width:100%}
-.canvas-hint{font-size:12px;color:var(--tx2);text-align:center}
+#encarteCanvas{
+  width:320px;
+  height:auto;
+  border-radius:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,.2);
+  background:#fff;
+}
 
 /* MODAL SIMPLES */
 .smodal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:28px;width:480px;max-width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
@@ -382,7 +387,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         </div>
       </div>
       <div class="encarte-preview">
-        <canvas id="encarteCanvas" width="500" height="600"></canvas>
+       <canvas id="encarteCanvas"></canvas>
         <p class="canvas-hint">Clique em "Baixar" para salvar o encarte como imagem</p>
       </div>
     </div>
@@ -428,6 +433,8 @@ const CFG_KEY = 'aura_cfg', PROD_KEY = 'aura_prod';
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 let encarteColor = '#E8000D';
 let fotoImg = null;
+  const templateImg = new Image();
+templateImg.src = './assets/template-encarte.png';
 let products = JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
 
 function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}
@@ -791,37 +798,81 @@ function wrapText(ctx,text,x,y,maxW,lineH){
 }
 
 function drawEncarte(){
-  const cv=document.getElementById('encarteCanvas');
-  const ctx=cv.getContext('2d');
-  const W=500,H=600;
-  cv.width=W;cv.height=H;
+  const cv = document.getElementById('encarteCanvas');
+  const ctx = cv.getContext('2d');
 
-  const produto=document.getElementById('eProduto').value||'NOME DO PRODUTO';
-  const de=document.getElementById('eDe').value||'R$ 0,00';
-  const por=document.getElementById('ePor').value||'R$ 0,00';
-  const pct=document.getElementById('ePct').value||'';
-  const obs=document.getElementById('eObs').value||'';
-  const loja=document.getElementById('eLoja').value||'';
-  const tel=document.getElementById('eTel').value||'';
-  const validade=document.getElementById('eValidade').value||'';
+  const W = 1080;
+  const H = 1920;
 
-  // Fundo branco
-  ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  cv.width = W;
+  cv.height = H;
 
-  // Header cor principal
-  ctx.fillStyle=encarteColor;ctx.fillRect(0,0,W,80);
+  const produto = document.getElementById('eProduto').value || 'NOME DO PRODUTO';
+  const de = document.getElementById('eDe').value || '0,00';
+  const por = document.getElementById('ePor').value || '0,00';
 
-  // Nome do produto no header
-  ctx.fillStyle='#fff';ctx.font='bold 22px Arial, sans-serif';
-  ctx.textAlign='center';
-  const nome2=produto.length>40?produto.substring(0,38)+'...':produto;
-  if(produto.length>24){
-    ctx.font='bold 17px Arial';
-    wrapText(ctx,nome2,W/2,30,W-40,24);
-  } else {
-    ctx.font='bold 22px Arial';
-    ctx.fillText(nome2,W/2,52);
+  ctx.clearRect(0,0,W,H);
+
+  // TEMPLATE FIXO
+  ctx.drawImage(templateImg,0,0,W,H);
+
+  // FOTO PRODUTO
+  if(fotoImg){
+
+    const areaX = 90;
+    const areaY = 430;
+    const areaW = 900;
+    const areaH = 760;
+
+    const ratio = Math.min(
+      areaW / fotoImg.width,
+      areaH / fotoImg.height
+    );
+
+    const nw = fotoImg.width * ratio;
+    const nh = fotoImg.height * ratio;
+
+    const nx = areaX + ((areaW - nw)/2);
+    const ny = areaY + ((areaH - nh)/2);
+
+    ctx.drawImage(fotoImg,nx,ny,nw,nh);
   }
+
+  // NOME PRODUTO
+  ctx.fillStyle = '#222';
+  ctx.font = 'bold 58px Arial';
+  ctx.textAlign = 'center';
+
+  wrapText(
+    ctx,
+    produto.toUpperCase(),
+    W/2,
+    1320,
+    900,
+    68
+  );
+
+  // PREÇO DE
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 68px Arial';
+  ctx.textAlign = 'left';
+
+  ctx.fillText(
+    de.replace('R$','').trim(),
+    705,
+    1040
+  );
+
+  // PREÇO POR
+  ctx.fillStyle = '#FFD400';
+  ctx.font = 'bold 120px Arial';
+
+  ctx.fillText(
+    por.replace('R$','').trim(),
+    510,
+    1435
+  );
+}
 
   // Área da foto
   const fotoH=fotoImg?200:180;
