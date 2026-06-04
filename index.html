@@ -1,1 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Validades — Prevenção de Perdas</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;
+  --tx:#1a1a18;--tx2:#6b6b67;
+  --bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);
+  --r:8px;--rl:12px;
+  --green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1e1e1c;--bg2:#282825;--bg3:#323230;
+  --tx:#f0efe8;--tx2:#9b9b95;
+  --bd:rgba(255,255,255,.1);--bds:rgba(255,255,255,.2);
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--tx);min-height:100vh}
+.app{max-width:1280px;margin:0 auto;padding:24px 20px}
 
+/* CONFIG */
+.cfg{background:var(--bg);border:2px dashed var(--bds);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;display:none}
+.cfg h3{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--amber)}
+.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cfg-field label{display:block;font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+.cfg-field input{width:100%;font-size:13px;padding:8px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg2);color:var(--tx);outline:none}
+.cfg-field input:focus{border-color:var(--green)}
+.cfg-hint{font-size:12px;color:var(--tx2);margin-top:10px;line-height:1.7}
+.cfg-hint code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:11px}
+
+/* STATUS */
+.status-row{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.dot{width:8px;height:8px;border-radius:50%;background:#888;flex-shrink:0}
+.dot.ok{background:var(--green)}.dot.err{background:var(--red)}.dot.loading{background:var(--amber)}
+.st{font-size:13px;color:var(--tx2)}
+.sync-time{font-size:12px;color:var(--tx2);margin-left:auto}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.topbar h1{font-size:20px;font-weight:600;display:flex;align-items:center;gap:8px}
+.topbar h1 i{color:var(--green)}
+.topbar p{font-size:13px;color:var(--tx2);margin-top:3px}
+.topbar-right{display:flex;gap:8px;flex-wrap:wrap}
+
+/* BUTTONS */
+.btn{border:1px solid var(--bds);background:var(--bg);color:var(--tx);font-size:13px;font-weight:500;padding:7px 16px;border-radius:var(--r);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s;white-space:nowrap}
+.btn:hover{background:var(--bg2)}.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-green{background:var(--green);border-color:var(--green);color:#fff}.btn-green:hover{background:var(--gd)}
+.btn-blue{background:var(--blue);border-color:var(--blue);color:#fff}.btn-blue:hover{background:#185FA5}
+.btn-red{background:var(--red);border-color:var(--red);color:#fff}.btn-red:hover{background:#b53333}
+.btn-sm{padding:5px 11px;font-size:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{animation:spin 1s linear infinite;display:inline-block}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-bottom:20px}
+.metric{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+.metric-lbl{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.metric-val{font-size:28px;font-weight:600}
+.metric-val.danger{color:var(--red)}.metric-val.warn{color:var(--amber)}.metric-val.ok{color:var(--green)}.metric-val.info{color:var(--blue)}
+
+/* ALERT */
+.alert{background:#FAEEDA;border-left:4px solid var(--amber);border-radius:0 var(--r) var(--r) 0;padding:11px 16px;font-size:13px;color:#854F0B;margin-bottom:16px;display:none;align-items:center;gap:10px}
+.alert.show{display:flex}
+
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--bd)}
+.tab{font-size:13px;font-weight:500;padding:10px 18px;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:7px;transition:color .15s}
+.tab.active{color:var(--tx);border-bottom-color:var(--green)}
+.tab:hover:not(.active){color:var(--tx)}
+.sec{display:none}.sec.active{display:block}
+
+/* FILTERS */
+.filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filters select,.filters input[type=text]{font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none}
+.filters input[type=text]{min-width:220px}
+
+/* TABLE */
+.twrap{border:1px solid var(--bd);border-radius:var(--rl);overflow:auto;background:var(--bg)}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}
+th{background:var(--bg2);padding:10px 12px;text-align:left;font-weight:500;color:var(--tx2);font-size:11px;border-bottom:1px solid var(--bd);white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
+td{padding:10px 12px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2)}
+
+/* BADGES */
+.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block;white-space:nowrap}
+.b-danger{background:#FCEBEB;color:#A32D2D}
+.b-warn{background:#FAEEDA;color:#854F0B}
+.b-ok{background:#EAF3DE;color:#3B6D11}
+.b-blue{background:#E6F1FB;color:#185FA5}
+.b-gray{background:var(--bg2);color:var(--tx2)}
+.b-green{background:#EAF3DE;color:#3B6D11}
+
+/* BAR */
+.bar-wrap{display:flex;align-items:center;gap:8px}
+.bar-bg{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;max-width:70px}
+.bar-fill{height:100%;border-radius:3px}
+
+/* ACTION BTNS */
+.abtn{font-size:12px;padding:4px 9px;border:1px solid var(--bds);border-radius:var(--r);cursor:pointer;background:var(--bg);color:var(--tx);margin-right:3px;display:inline-flex;align-items:center;gap:4px;transition:background .15s}
+.abtn:hover{background:var(--bg2)}
+.abtn.promo{border-color:var(--blue);color:var(--blue)}.abtn.promo:hover{background:#E6F1FB}
+.abtn.encarte{border-color:var(--green);color:var(--green)}.abtn.encarte:hover{background:#EAF3DE}
+
+/* PROMOS TAB */
+.promo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.promo-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;display:flex;flex-direction:column}
+.promo-card-header{background:linear-gradient(135deg,#1D9E75,#0F6E56);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.promo-card-header .pct{font-size:26px;font-weight:700;color:#fff;line-height:1;flex-shrink:0}
+.promo-card-header .pct small{font-size:11px;font-weight:400;display:block;margin-top:2px}
+.promo-card-header .promo-name{font-size:13px;color:rgba(255,255,255,.9);flex:1;margin:0;font-weight:500;min-width:0;word-break:break-word;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.promo-card-header .badge{flex-shrink:0}
+.promo-card-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;justify-content:space-between}
+.promo-prices{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.price-de{font-size:13px;color:var(--tx2);text-decoration:line-through}
+.price-por{font-size:22px;font-weight:700;color:var(--green)}
+.promo-meta{font-size:12px;color:var(--tx2);display:flex;gap:12px;flex-wrap:wrap;margin-top:auto}
+.promo-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd);flex-wrap:wrap}
+
+/* ENCARTE MODAL */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:20px}
+.modal-ov.open{display:flex}
+.modal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:0;width:900px;max-width:98vw;max-height:96vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-head h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.modal-body{display:grid;grid-template-columns:1fr 380px;overflow:auto;flex:1}
+.encarte-controls{padding:20px;border-right:1px solid var(--bd);overflow-y:auto}
+.encarte-preview{padding:20px;background:var(--bg2);display:flex;flex-direction:column;align-items:center;gap:14px;overflow-y:auto}
+.form-row{margin-bottom:14px}
+.form-row label{display:block;font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em}
+.form-row input,.form-row select,.form-row textarea{width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;font-family:inherit}
+.form-row input:focus,.form-row select:focus{border-color:var(--green)}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0}
+
+/* ENCARTE CANVAS */
+#encarteCanvas{border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);max-width:100%}
+.canvas-hint{font-size:12px;color:var(--tx2);text-align:center}
+
+/* MODAL SIMPLES */
+.smodal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:28px;width:480px;max-width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.smodal h3{font-size:16px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.smodal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid var(--bd)}
+
+/* HELP */
+.help-box{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:20px 24px;margin-bottom:16px}
+.help-box h4{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.steps{counter-reset:s}
+.step{counter-increment:s;display:flex;gap:12px;margin-bottom:12px;font-size:13px;line-height:1.6}
+.step::before{content:counter(s);background:var(--green);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+pre{background:var(--bg2);border-radius:var(--r);padding:14px;font-size:12px;overflow:auto;line-height:1.6;color:var(--tx)}
+code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font-family:monospace}
+
+/* EMPTY */
+.empty{text-align:center;padding:50px 20px;color:var(--tx2);font-size:14px}
+.empty i{font-size:36px;display:block;margin-bottom:10px;opacity:.4}
+
+.src-tag{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bg2);color:var(--tx2);display:inline-block;margin-left:5px;vertical-align:middle}
+.src-tag.sheets{background:#EAF3DE;color:#3B6D11}
+
+@media(max-width:700px){
+  .cfg-grid,.form-row-2{grid-template-columns:1fr}
+  .modal-body{grid-template-columns:1fr}
+  .promo-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div>
+      <h1><i class="ti ti-calendar-due"></i> Controle de Validades</h1>
+      <p>Prevenção de perdas — integrado ao Google Sheets · AURA Boas Compras</p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn" id="btnSync" onclick="syncAll()"><i class="ti ti-refresh"></i> Sincronizar</button>
+      <button class="btn" onclick="openAddModal()"><i class="ti ti-plus"></i> Registro manual</button>
+      <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Gerar encarte</button>
+    </div>
+  </div>
+
+  <div class="cfg" id="cfgBox">
+    <h3><i class="ti ti-settings"></i> Configurar conexão com Google Sheets</h3>
+    <div class="cfg-grid">
+      <div class="cfg-field"><label>ID da planilha principal (AURA VENCIMENTOS)</label><input id="cId" placeholder="ID da URL do Google Sheets"></div>
+      <div class="cfg-field"><label>Nome da aba principal</label><input id="cAba" placeholder="2025"></div>
+      <div class="cfg-field"><label>ID da planilha Banco de Dados (pode ser o mesmo)</label><input id="cIdBanco" placeholder="mesmo ID ou outro"></div>
+      <div class="cfg-field"><label>Nome da aba Banco de Dados</label><input id="cAbaBanco" placeholder="BANCO DE DADOS"></div>
+      <div class="cfg-field"><label>Nome da aba Respostas do Formulário</label><input id="cAbaResp" placeholder="Respostas ao formulário 1"></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn btn-green" onclick="saveConfig()"><i class="ti ti-check"></i> Salvar e conectar</button>
+      <button class="btn" onclick="toggleCfg()">Fechar</button>
+    </div>
+    <div class="cfg-hint">
+      ⚠️ A planilha precisa estar <strong>pública para leitura</strong>: Compartilhar → Qualquer pessoa com o link → Leitor<br>
+      ID está na URL: <code>docs.google.com/spreadsheets/d/<strong>SEU_ID</strong>/edit</code><br>
+      Colunas esperadas na aba principal: <code>SETOR · PRODUTO · VALIDADE · STATUS · CUSTO GERENCIAL · VALOR VENDA · PREÇO DO DIA · % REAL DE DESCONTO · VALOR DO DESCONTO</code>
+    </div>
+  </div>
+
+  <div class="status-row">
+    <div class="dot" id="dot"></div>
+    <span class="st" id="stText">Não conectado — configure o Google Sheets</span>
+    <button class="btn btn-sm" onclick="toggleCfg()"><i class="ti ti-settings"></i> Configurar</button>
+    <span class="sync-time" id="syncTime"></span>
+  </div>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="alert" id="alertBanner">
+    <i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0"></i>
+    <span id="alertTxt"></span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
+    <div class="tab" onclick="goTab('promocoes')"><i class="ti ti-tag"></i> Promoções</div>
+    <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório</div>
+    <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i> Como configurar</div>
+  </div>
+
+  <div id="sec-validades" class="sec active">
+    <div class="filters">
+      <select id="fSetor" onchange="renderTable()">
+        <option value="">Todos os setores</option>
+        <option>Açougue</option><option>Bebidas</option><option>Congelados</option>
+        <option>FLV</option><option>Frios</option><option>Laticínios</option>
+        <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
+      </select>
+      <select id="fStatus" onchange="renderTable()">
+        <option value="">Todos os status</option>
+        <option value="vencido">Vencido</option>
+        <option value="critico">Crítico (≤3d)</option>
+        <option value="urgente">Urgente (≤7d)</option>
+        <option value="atencao">Atenção (≤15d)</option>
+        <option value="ok">OK</option>
+      </select>
+      <input type="text" id="fBusca" placeholder="Buscar produto ou código..." oninput="renderTable()">
+    </div>
+    <div class="twrap">
+      <table>
+        <thead><tr>
+          <th>Código</th><th>Produto</th><th>Setor</th><th>Validade</th>
+          <th>Dias</th><th>Qtde</th><th>Preço normal</th><th>Preço promoção</th><th>Desconto</th><th>Status</th><th>Ações</th>
+        </tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="sec-promocoes" class="sec">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <p style="font-size:13px;color:var(--tx2)">Produtos com status <strong>Aguarda</strong> da planilha — preços calculados automaticamente</p>
+      <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Novo encarte</button>
+    </div>
+    <div class="promo-grid" id="promoGrid"></div>
+  </div>
+
+  <div id="sec-relatorio" class="sec">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
+        <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Produtos por status</h4>
+        <canvas id="cStatus" role="img" aria-label="Status" height="200"></canvas>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
+        <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Por setor</h4>
+        <canvas id="cSetor" role="img" aria-label="Setor" height="200"></canvas>
+      </div>
+    </div>
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
+      <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Valor do desconto por produto (top 15 — ≤15 dias)</h4>
+      <canvas id="cDesconto" role="img" aria-label="Desconto" height="220"></canvas>
+    </div>
+  </div>
+
+  <div id="sec-ajuda" class="sec">
+    <div class="help-box">
+      <h4><i class="ti ti-brand-google" style="color:#4285F4"></i> Como conectar ao Google Sheets</h4>
+      <div class="steps">
+        <div class="step">Abra a planilha AURA VENCIMENTOS no Google Sheets → <strong>Compartilhar → Qualquer pessoa com o link → Leitor</strong></div>
+        <div class="step">Copie o ID da URL: <code>docs.google.com/spreadsheets/d/<strong>[ID]</strong>/edit</code></div>
+        <div class="step">Clique em <strong>Configurar</strong> no topo, cole o ID e informe os nomes das abas (<code>2025</code>, <code>BANCO DE DADOS</code>, <code>Respostas ao formulário 1</code>)</div>
+        <div class="step">Clique <strong>Salvar e conectar</strong> — os dados carregam automaticamente com preços e descontos</div>
+        <div class="step">A aba <strong>Promoções</strong> mostra automaticamente todos os itens com status <em>Aguarda</em> com preço DE/POR e botão para gerar encarte</div>
+      </div>
+    </div>
+    <div class="help-box">
+      <h4><i class="ti ti-table" style="color:var(--green)"></i> Colunas esperadas na aba principal (2025)</h4>
+      <div class="twrap"><table>
+        <thead><tr><th>Coluna</th><th>Descrição</th><th>Exemplo</th></tr></thead>
+        <tbody>
+          <tr><td><code>SETOR</code></td><td>Setor do produto</td><td>Laticínios, Frios, Seca...</td></tr>
+          <tr><td><code>PRODUTO</code></td><td>Nome completo</td><td>IOGURTE BATAVO CEREAL 1,150KG (2UN)</td></tr>
+          <tr><td><code>VALIDADE</code></td><td>Data de vencimento</td><td>04/06/2026</td></tr>
+          <tr><td><code>AÇÃO</code></td><td>Data de início da ação</td><td>25/05/2026</td></tr>
+          <tr><td><code>STATUS</code></td><td>Status atual</td><td>Aguarda, Concluída, Troca</td></tr>
+          <tr><td><code>CUSTO GERENCIAL</code></td><td>Custo do produto</td><td>R$ 11,00</td></tr>
+          <tr><td><code>VALOR VENDA</code></td><td>Preço normal de venda</td><td>R$ 18,99</td></tr>
+          <tr><td><code>PREÇO DO DIA</code></td><td>Preço com desconto calculado</td><td>R$ 12,10</td></tr>
+          <tr><td><code>% REAL DE DESCONTO</code></td><td>Percentual de desconto</td><td>36,28%</td></tr>
+          <tr><td><code>VALOR DO DESCONTO</code></td><td>Valor economizado</td><td>R$ 6,89</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-ov" id="encarteModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3><i class="ti ti-photo" style="color:var(--green)"></i> Gerar encarte de promoção</h3>
+      <button class="btn btn-sm" onclick="closeModal('encarteModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="encarte-controls">
+        <div class="form-row">
+          <label>Produto</label>
+          <input type="text" id="eProduto" placeholder="Nome do produto" oninput="drawEncarte()">
+        </div>
+        <div class="form-row-2">
+          <div class="form-row">
+            <label>Preço normal (DE)</label>
+            <input type="text" id="eDe" placeholder="R$ 18,99" oninput="drawEncarte()">
+          </div>
+          <div class="form-row">
+            <label>Preço promoção (POR)</label>
+            <input type="text" id="ePor" placeholder="R$ 12,10" oninput="drawEncarte()">
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-row">
+            <label>% de desconto</label>
+            <input type="text" id="ePct" placeholder="36,28%" oninput="drawEncarte()">
+          </div>
+          <div class="form-row">
+            <label>Validade</label>
+            <input type="text" id="eValidade" placeholder="04/06/2026" oninput="drawEncarte()">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Observação</label>
+          <input type="text" id="eObs" value="PRODUTO COM VALIDADE PRÓXIMA AO VENCIMENTO. VÁLIDO ENQUANTO DURAR O ESTOQUE." oninput="drawEncarte()">
+        </div>
+        <div class="form-row">
+          <label>Foto do produto (opcional)</label>
+          <input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)">
+        </div>
+        <div class="form-row" style="background:var(--bg2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx2)">
+          <i class="ti ti-info-circle" style="margin-right:5px"></i>
+          O cabeçalho, rodapé e layout de preços usam os assets oficiais do Supermercado Boas Compras.
+        </div>
+      </div>
+      <div class="encarte-preview">
+        <canvas id="encarteCanvas" width="500" height="600"></canvas>
+        <p class="canvas-hint">Clique em "Baixar" para salvar o encarte como imagem</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('encarteModal')">Fechar</button>
+      <button class="btn btn-green" onclick="downloadEncarte()"><i class="ti ti-download"></i> Baixar PNG</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-ov" id="addModal">
+  <div class="modal-ov-inner" style="display:flex;align-items:center;justify-content:center;width:100%">
+  <div class="smodal">
+    <h3><i class="ti ti-clipboard-plus" style="color:var(--green)"></i> Registro manual</h3>
+    <div class="form-row-2">
+      <div class="form-row"><label>Código de barras</label><input id="fCod" type="text" placeholder="7896200052986"></div>
+      <div class="form-row"><label>Setor</label>
+        <select id="fSetorM">
+          <option>Açougue</option><option>Bebidas</option><option>Congelados</option>
+          <option>FLV</option><option>Frios</option><option>Laticínios</option>
+          <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row"><label>Produto</label><input id="fNome" type="text" placeholder="Nome do produto"></div>
+    <div class="form-row-2">
+      <div class="form-row"><label>Validade</label><input id="fVal" type="date"></div>
+      <div class="form-row"><label>Quantidade</label><input id="fQtde" type="number" value="1" min="1"></div>
+    </div>
+    <div class="smodal-foot">
+      <button class="btn" onclick="closeModal('addModal')">Cancelar</button>
+      <button class="btn btn-green" onclick="addManual()">Salvar</button>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// ── ASSETS ENCARTE ────────────────────────────────────────────────────────────
+const ASSET_HEAD  = 'data:image/png;base64,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
+  // ── CONFIGURAÇÕES E LOCALSUBMIT ──────────────────────────────────────────────
+function loadCfg(){
+  try {
+    return JSON.parse(localStorage.getItem('aura_val_cfg')) || {};
+  } catch(e) { return {}; }
+}
+
+function saveConfig(){
+  const cfg = {
+    id: document.getElementById('cId').value.trim(),
+    aba: document.getElementById('cAba').value.trim(),
+    idBanco: document.getElementById('cIdBanco').value.trim(),
+    abaBanco: document.getElementById('cAbaBanco').value.trim(),
+    abaResp: document.getElementById('cAbaResp').value.trim()
+  };
+  localStorage.setItem('aura_val_cfg', JSON.stringify(cfg));
+  document.getElementById('cfgBox').style.display = 'none';
+  initSync(cfg);
+}
+
+function toggleCfg(){
+  const box = document.getElementById('cfgBox');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── CORREÇÃO DO ERRO PROD IS NOT DEFINED ──────────────────────────────────────
+// Inicializa os produtos manuais salvos ou cria um array vazio
+let products = [];
+try {
+  products = JSON.parse(localStorage.getItem('meus_produtos')) || [];
+} catch(e) {
+  products = [];
+}
+
+// Função que estava em falta e causava o erro
+function saveProd() {
+  localStorage.setItem('meus_produtos', JSON.stringify(products));
+}
+
+// ── NAVEGAÇÃO E MODAIS ────────────────────────────────────────────────────────
+function goTab(name){
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active',['validades','promocoes','relatorio','ajuda'][i]===name));
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  if(name==='relatorio') setTimeout(renderCharts,50);
+  if(name==='promocoes') renderPromos();
+}
+
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function openAddModal(){ document.getElementById('addModal').classList.add('open'); }
+
+function addManual(){
+  const cod = document.getElementById('fCod').value.trim();
+  if(!cod && !document.getElementById('fNome').value.trim()){
+    alert('Preencha ao menos o código ou o nome.');
+    return;
+  }
+  products.push({
+    cod,
+    nome: document.getElementById('fNome').value.trim(),
+    setor: document.getElementById('fSetorM').value,
+    validade: document.getElementById('fVal').value,
+    qtde: parseInt(document.getElementById('fQtde').value) || 1,
+    src: 'manual'
+  });
+  saveProd(); // Agora funciona!
+  closeModal('addModal');
+  refresh();
+}
+
+function rmProduct(idx){
+  if(confirm('Remover?')){
+    products.splice(idx,1);
+    saveProd(); // Agora funciona!
+    refresh();
+  }
+}
+
+function refresh(){
+  renderMetrics();
+  renderTable();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.getElementById('cfgBox').style.display = 'none';
+const _cfg = loadCfg();
+// Preenche os inputs se já existirem configurações salvas
+if(_cfg.id){
+  document.getElementById('cId').value = _cfg.id;
+  document.getElementById('cAba').value = _cfg.aba || '';
+  document.getElementById('cIdBanco').value = _cfg.idBanco || '';
+  document.getElementById('cAbaBanco').value = _cfg.abaBanco || '';
+  document.getElementById('cAbaResp').value = _cfg.abaResp || '';
+}
+
+// Chame a renderização inicial para mostrar produtos já salvos se houverem
+refresh();
+</script>
+</body>
+</html>
