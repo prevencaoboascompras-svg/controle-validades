@@ -7,36 +7,38 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{\n  --bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;\n  --tx:#1a1a18;--tx2:#6b6b67;\n  --bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);\n  --r:8px;--rl:12px;\n  --green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;\n}
-@media(prefers-color-scheme:dark){:root{\n  --bg:#1e1e1c;--bg2:#282825;--bg3:#323230;\n  --tx:#f0efe8;--tx2:#9b9b95;\n  --bd:rgba(255,255,255,.1);--bds:rgba(255,255,255,.2);\n}}
+:root{
+  --bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;
+  --tx:#1a1a18;--tx2:#6b6b67;
+  --bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);
+  --r:8px;--rl:12px;
+  --green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1e1e1c;--bg2:#282825;--bg3:#323230;
+  --tx:#f0efe8;--tx2:#9b9b95;
+  --bd:rgba(255,255,255,.1);--bds:rgba(255,255,255,.2);
+}}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--tx);min-height:100vh}
 .app{max-width:1280px;margin:0 auto;padding:24px 20px}
-
-/* CONFIG */
 .cfg{background:var(--bg);border:2px dashed var(--bds);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;display:none}
 .cfg h3{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--amber)}
-.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cfg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
 .cfg-field label{display:block;font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
 .cfg-field input{width:100%;font-size:13px;padding:8px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg2);color:var(--tx);outline:none}
 .cfg-field input:focus{border-color:var(--green)}
 .cfg-hint{font-size:12px;color:var(--tx2);margin-top:10px;line-height:1.7}
 .cfg-hint code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:11px}
-
-/* STATUS */
 .status-row{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
 .dot{width:8px;height:8px;border-radius:50%;background:#888;flex-shrink:0}
 .dot.ok{background:var(--green)}.dot.err{background:var(--red)}.dot.loading{background:var(--amber)}
-.st{font-size:13px;color:var(--tx2)}
+.st{font-size:13px;font-weight:500}
 .sync-time{font-size:12px;color:var(--tx2);margin-left:auto}
-
-/* TOPBAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
 .topbar h1{font-size:20px;font-weight:600;display:flex;align-items:center;gap:8px}
 .topbar h1 i{color:var(--green)}
 .topbar p{font-size:13px;color:var(--tx2);margin-top:3px}
 .topbar-right{display:flex;gap:8px;flex-wrap:wrap}
-
-/* BUTTONS */
 .btn{border:1px solid var(--bds);background:var(--bg);color:var(--tx);font-size:13px;font-weight:500;padding:7px 16px;border-radius:var(--r);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s;white-space:nowrap}
 .btn:hover{background:var(--bg2)}.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-green{background:var(--green);border-color:var(--green);color:#fff}.btn-green:hover{background:var(--gd)}
@@ -45,64 +47,59 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .btn-sm{padding:5px 11px;font-size:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{animation:spin 1s linear infinite;display:inline-block}
-
-/* METRICS */
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-bottom:20px}
 .metric{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
 .metric-lbl{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
 .metric-val{font-size:28px;font-weight:600}
 .metric-val.danger{color:var(--red)}.metric-val.warn{color:var(--amber)}.metric-val.ok{color:var(--green)}.metric-val.info{color:var(--blue)}
-
-/* ALERT */
 .alert{background:#FAEEDA;border-left:4px solid var(--amber);border-radius:0 var(--r) var(--r) 0;padding:11px 16px;font-size:13px;color:#854F0B;margin-bottom:16px;display:none;align-items:center;gap:10px}
 .alert.show{display:flex}
-
-/* TABS */
 .tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--bd)}
 .tab{font-size:13px;font-weight:500;padding:10px 18px;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:7px;transition:color .15s}
 .tab.active{color:var(--tx);border-bottom-color:var(--green)}
 .tab:hover:not(.active){color:var(--tx)}
 .sec{display:none}.sec.active{display:block}
-
-/* FILTERS */
 .filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .filters select,.filters input[type=text]{font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none}
 .filters input[type=text]{min-width:220px}
-
-/* TABLE */
 .twrap{border:1px solid var(--bd);border-radius:var(--rl);overflow:auto;background:var(--bg)}
 table{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}
 th{background:var(--bg2);padding:10px 12px;text-align:left;font-weight:500;color:var(--tx2);font-size:11px;border-bottom:1px solid var(--bd);white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
 td{padding:10px 12px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--bg2)}
-
-/* BADGES */
 .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block;white-space:nowrap}
 .b-danger{background:#FCEBEB;color:#A32D2D}
 .b-warn{background:#FAEEDA;color:#854F0B}
 .b-ok{background:#EAF3DE;color:#3B6D11}
 .b-blue{background:#E6F1FB;color:#185FA5}
-.b-gray{background:var(--bg2);color:var(--tx2)}
-.b-green{background:#EAF3DE;color:#3B6D11}
-
-/* BAR */
+.b-gray{background:var(--bg3);color:var(--tx2)}
+.src-tag{font-size:9px;font-weight:700;text-transform:uppercase;padding:2px 5px;border-radius:4px;margin-left:6px;letter-spacing:.02em}
+.src-tag.sheets{background:#EAF3DE;color:#3B6D11;border:1px solid rgba(59,109,17,.2)}
+.src-tag.manual{background:#E6F1FB;color:#185FA5;border:1px solid rgba(24,95,165,.2)}
 .bar-wrap{display:flex;align-items:center;gap:8px}
 .bar-bg{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;max-width:70px}
 .bar-fill{height:100%;border-radius:3px}
-
-/* ACTION BTNS */
 .abtn{font-size:12px;padding:4px 9px;border:1px solid var(--bds);border-radius:var(--r);cursor:pointer;background:var(--bg);color:var(--tx);margin-right:3px;display:inline-flex;align-items:center;gap:4px;transition:background .15s}
 .abtn:hover{background:var(--bg2)}
 .abtn.promo{border-color:var(--blue);color:var(--blue)}.abtn.promo:hover{background:#E6F1FB}
 .abtn.encarte{border-color:var(--green);color:var(--green)}.abtn.encarte:hover{background:#EAF3DE}
-
-/* MODAL OVERLAY CORREÇÃO */
+.empty{padding:40px !important;text-align:center !important;color:var(--tx2);font-size:14px}
+.empty i{font-size:24px;display:block;margin-bottom:8px;color:var(--tx2)}
+.promo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.pcard{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
+.pcard-head{display:flex;justify-content:between;align-items:start;gap:8px}
+.pcard-title{font-size:14px;font-weight:600;line-height:1.4;flex:1}
+.pcard-prices{background:var(--bg2);border-radius:var(--r);padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center}
+.pcard-price-lbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
+.pcard-price-val{font-size:15px;font-weight:600}
+.pcard-price-val.promo{color:var(--red);font-size:18px}
+.pcard-foot{display:flex;align-items:center;justify-content:between;margin-top:4px;font-size:11px;color:var(--tx2)}
+.pcard-tag{position:absolute;top:0;right:0;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:0 0 0 var(--r)}
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:20px}
 .modal-ov.open{display:flex}
-
-.modal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:0;width:900px;max-width:98vw;max-height:96vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.25)}
-.modal-head{padding:18px 22px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:0;width:900px;max-width:95vw;max-height:92vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.modal-head{padding:18px 22px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:between;flex-shrink:0}
 .modal-head h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
 .modal-body{display:grid;grid-template-columns:1fr 380px;overflow:auto;flex:1}
 .encarte-controls{padding:20px;border-right:1px solid var(--bd);overflow-y:auto}
@@ -110,14 +107,12 @@ tr:hover td{background:var(--bg2)}
 .form-row{margin-bottom:14px}
 .form-row label{display:block;font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em}
 .form-row input,.form-row select,.form-row textarea{width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;font-family:inherit}
-.modal-foot{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0}
-
-/* MODAL SIMPLES CORREÇÃO */
-.smodal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:28px;width:480px;max-width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2);margin:auto}
-.smodal h3{font-size:16px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:8px}
-.smodal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid var(--bd)}
-
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--green)}
 .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-foot{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0}
+.smodal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:24px;width:400px;max-width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.smodal h3{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.smodal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
 #encarteCanvas{border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);max-width:100%}
 .canvas-hint{font-size:12px;color:var(--tx2);text-align:center}
 .help-box{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:20px 24px;margin-bottom:16px}
@@ -125,109 +120,156 @@ tr:hover td{background:var(--bg2)}
 .steps{counter-reset:s}
 .step{counter-increment:s;display:flex;gap:12px;margin-bottom:12px;font-size:13px;line-height:1.6}
 .step::before{content:counter(s);background:var(--green);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
-
-@media(max-width:700px){
-  .cfg-grid,.form-row-2{grid-template-columns:1fr}
+@media(max-width:768px){
   .modal-body{grid-template-columns:1fr}
+  .encarte-controls{border-right:none;border-bottom:1px solid var(--bd)}
 }
 </style>
 </head>
 <body>
 <div class="app">
-
   <div class="topbar">
     <div>
-      <h1><i class="ti ti-calendar-due"></i> Controle de Validades</h1>
-      <p>Prevenção de perdas — integrado ao Google Sheets · AURA Boas Compras</p>
+      <h1><i class="ti ti-shield-half"></i> AURA Validades</h1>
+      <p>Gestão Inteligente de Vencimentos & Campanhas de Quebra Zero</p>
     </div>
     <div class="topbar-right">
-      <button class="btn" id="btnSync" onclick="syncAll()"><i class="ti ti-refresh"></i> Sincronizar</button>
-      <button class="btn" onclick="openAddModal()"><i class="ti ti-plus"></i> Registro manual</button>
-      <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Gerar encarte</button>
+      <button class="btn btn-green" onclick="openAddModal()"><i class="ti ti-plus"></i> Registrar Validade</button>
+      <button class="btn btn-blue" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Gerador de Encarte</button>
     </div>
   </div>
-
-  <div class="cfg" id="cfgBox">
-    <h3><i class="ti ti-settings"></i> Configurar conexão com Google Sheets</h3>
-    <div class="cfg-grid">
-      <div class="cfg-field"><label>ID da planilha principal</label><input id="cId" placeholder="ID da URL do Google Sheets"></div>
-      <div class="cfg-field"><label>Nome da aba principal</label><input id="cAba" placeholder="2025"></div>
-      <div class="cfg-field"><label>ID da planilha Banco de Dados</label><input id="cIdBanco" placeholder="mesmo ID ou outro"></div>
-      <div class="cfg-field"><label>Nome da aba Banco de Dados</label><input id="cAbaBanco" placeholder="BANCO DE DADOS"></div>
-      <div class="cfg-field"><label>Nome da aba Respostas do Formulário</label><input id="cAbaResp" placeholder="Respostas ao formulário 1"></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-      <button class="btn btn-green" onclick="saveConfig()"><i class="ti ti-check"></i> Salvar e conectar</button>
-      <button class="btn" onclick="toggleCfg()">Fechar</button>
-    </div>
-  </div>
-
   <div class="status-row">
-    <div class="dot" id="dot"></div>
-    <span class="st" id="stText">Não conectado — configure o Google Sheets</span>
-    <button class="btn btn-sm" onclick="toggleCfg()"><i class="ti ti-settings"></i> Configurar</button>
+    <div class="dot" id="syncDot"></div>
+    <span class="st" id="syncText">Iniciando...</span>
     <span class="sync-time" id="syncTime"></span>
+    <button class="btn btn-sm" onclick="toggleCfg()"><i class="ti ti-settings"></i> Parâmetros</button>
+    <button class="btn btn-sm" id="btnSync" onclick="initSync()"><i class="ti ti-refresh"></i> Atualizar Dados</button>
   </div>
-
+  <div class="cfg" id="cfgBox">
+    <h3><i class="ti ti-settings"></i> Chaves de Integração (Google Sheets API)</h3>
+    <div class="cfg-grid">
+      <div class="cfg-field"><label>ID da Planilha Mestra</label><input type="text" id="cId"></div>
+      <div class="cfg-field"><label>Nome da Aba Principal</label><input type="text" id="cAba"></div>
+      <div class="cfg-field"><label>ID Planilha Banco Dados</label><input type="text" id="cIdBanco"></div>
+      <div class="cfg-field"><label>Aba Banco Dados</label><input type="text" id="cAbaBanco"></div>
+      <div class="cfg-field"><label>Aba Respostas Formulário</label><input type="text" id="cAbaResp"></div>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:10px">
+      <button class="btn btn-green btn-sm" onclick="saveConfig()">Salvar Parâmetros</button>
+      <button class="btn btn-sm" onclick="toggleCfg()">Ocultar</button>
+    </div>
+    <p class="cfg-hint">Dica: A planilha precisa estar configurada como <code>Qualquer pessoa com o link pode ler</code> para permitir a sincronização direta com o sistema.</p>
+  </div>
   <div class="metrics" id="metrics"></div>
-
   <div class="alert" id="alertBanner">
-    <i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0"></i>
-    <span id="alertTxt"></span>
+    <i class="ti ti-alert-triangle" style="font-size:18px;color:var(--amber)"></i>
+    <div id="alertTxt"></div>
   </div>
-
   <div class="tabs">
-    <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
-    <div class="tab" onclick="goTab('promocoes')"><i class="ti ti-tag"></i> Promoções</div>
-    <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório</div>
-    <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i> Como configurar</div>
+    <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Painel de Validades</div>
+    <div class="tab" onclick="goTab('promocoes')"><i class="ti ti-tag"></i> Campanhas Ativas</div>
+    <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-pie"></i> Diagnóstico Gráfico</div>
+    <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i> Guia Operacional</div>
   </div>
-
   <div id="sec-validades" class="sec active">
     <div class="filters">
+      <input type="text" id="fBusca" placeholder="Filtrar por EAN, Descrição ou Setor..." oninput="renderTable()">
       <select id="fSetor" onchange="renderTable()">
-        <option value="">Todos os setores</option>
-        <option>Açougue</option><option>Bebidas</option><option>Congelados</option>
-        <option>FLV</option><option>Frios</option><option>Laticínios</option>
-        <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
+        <option value="">Filtrar por Setor</option>
       </select>
       <select id="fStatus" onchange="renderTable()">
-        <option value="">Todos os status</option>
-        <option value="vencido">Vencido</option>
-        <option value="critico">Crítico (≤3d)</option>
-        <option value="urgente">Urgente (≤7d)</option>
-        <option value="atencao">Atenção (≤15d)</option>
-        <option value="ok">OK</option>
+        <option value="">Filtrar por Urgência</option>
+        <option value="Vencido">Vencido (0 ou menos dias)</option>
+        <option value="Crítico">Crítico (Até 3 dias)</option>
+        <option value="Urgente">Urgente (Até 7 dias)</option>
+        <option value="Atenção">Atenção (Até 15 dias)</option>
+        <option value="Regular">Regular (Mais de 15 dias)</option>
       </select>
-      <input type="text" id="fBusca" placeholder="Buscar produto ou código..." oninput="renderTable()">
     </div>
     <div class="twrap">
       <table>
-        <thead><tr>
-          <th>Código</th><th>Produto</th><th>Setor</th><th>Validade</th>
-          <th>Dias</th><th>Qtde</th><th>Preço normal</th><th>Preço promoção</th><th>Desconto</th><th>Status</th><th>Ações</th>
-        </tr></thead>
+        <thead>
+          <tr>
+            <th>Cód. Barras</th>
+            <th>Descrição do Item</th>
+            <th>Setor</th>
+            <th>Data Venc.</th>
+            <th>Prazo Restante</th>
+            <th>Qtd</th>
+            <th>Preço Regular</th>
+            <th>Preço Oferta</th>
+            <th>Margem Redução</th>
+            <th>Status</th>
+            <th style="width:180px">Ações Corretivas</th>
+          </tr>
+        </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
   </div>
-
   <div id="sec-promocoes" class="sec">
     <div class="promo-grid" id="promoGrid"></div>
   </div>
-
   <div id="sec-relatorio" class="sec">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <div><canvas id="cStatus" height="200"></canvas></div>
-      <div><canvas id="cSetor" height="200"></canvas></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;margin-bottom:20px">
+      <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:20px">
+        <h4 style="font-size:13px;color:var(--tx2);text-transform:uppercase;margin-bottom:14px">Distribuição por criticidade</h4>
+        <div style="max-height:240px;display:flex;justify-content:center"><canvas id="chartStatus"></canvas></div>
+      </div>
+      <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:20px">
+        <h4 style="font-size:13px;color:var(--tx2);text-transform:uppercase;margin-bottom:14px">Volume crítico por setor</h4>
+        <div style="max-height:240px;display:flex;justify-content:center"><canvas id="chartSetor"></canvas></div>
+      </div>
     </div>
-    <div><canvas id="cDesconto" height="220"></canvas></div>
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:20px">
+      <h4 style="font-size:13px;color:var(--tx2);text-transform:uppercase;margin-bottom:14px">Curva de Descontos Ofertados</h4>
+      <div style="max-height:260px"><canvas id="chartDesconto"></canvas></div>
+    </div>
   </div>
-
   <div id="sec-ajuda" class="sec">
     <div class="help-box">
-      <h4>Como configurar</h4>
-      <p>Configure o ID da planilha para carregar os dados automaticamente.</p>
+      <h4><i class="ti ti-info-circle" style="color:var(--blue)"></i> Integração Automática de Planilhas</h4>
+      <div class="steps">
+        <div class="step">Abra sua planilha Google e copie o ID longo contido na URL (o código entre <code>/d/</code> e <code>/edit</code>).</div>
+        <div class="step">Clique em <strong>Parâmetros</strong> no topo deste sistema e cole o ID e os nomes exatos das abas.</div>
+        <div class="step">Certifique-se de que a planilha possui as seguintes colunas na ordem exata: Setor, Produto, Validade, Status, Dias, Quantidade, Preço Normal, Preço Promoção, Desconto, Código de Barras.</div>
+      </div>
+    </div>
+    <div class="help-box">
+      <h4><i class="ti ti-alert-circle" style="color:var(--amber)"></i> Regras Operacionais de Classificação</h4>
+      <p style="font-size:13px;color:var(--tx2);line-height:1.6">O sistema analisa as datas em tempo real e emite alertas visuais:</p>
+      <ul style="margin-left:20px;margin-top:8px;font-size:13px;color:var(--tx2);display:flex;flex-direction:column;gap:6px">
+        <li><span class="badge b-danger">Vencido</span>: Já ultrapassou a data limite de comercialização. Recolhimento imediato.</li>
+        <li><span class="badge b-warn">Crítico (≤ 3 dias)</span>: Necessita de desconto agressivo e exposição no ponto de quebra.</li>
+        <li><span class="badge b-blue">Urgente (≤ 7 dias)</span>: Inclusão obrigatória em encartes e ilhas promocionais.</li>
+        <li><span class="badge b-green">Atenção (≤ 15 dias)</span>: Monitoramento e redução preventiva de preço se o giro for baixo.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="modal-ov" id="addModal">
+  <div class="smodal">
+    <h3><i class="ti ti-clipboard-plus" style="color:var(--green)"></i> Registrar Validade Manual</h3>
+    <div class="form-row-2">
+      <div class="form-row"><label>Cód. Barras</label><input type="text" id="fCod"></div>
+      <div class="form-row">
+        <label>Setor</label>
+        <select id="fSetorM">
+          <option>Açougue</option><option>Bebidas</option><option>Congelados</option>
+          <option>FLV</option><option>Frios</option><option>Laticínios</option>
+          <option>Pet</option><option>Seca</option><option>Seca Doce</option><option>Outros</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row"><label>Descrição do Item</label><input type="text" id="fNome"></div>
+    <div class="form-row-2">
+      <div class="form-row"><label>Data Vencimento</label><input type="date" id="fVal"></div>
+      <div class="form-row"><label>Quantidade</label><input type="number" id="fQtde" value="1"></div>
+    </div>
+    <div class="smodal-foot">
+      <button class="btn btn-sm" onclick="closeModal('addModal')">Descartar</button>
+      <button class="btn btn-green btn-sm" onclick="addManual()">Salvar Registro</button>
     </div>
   </div>
 </div>
@@ -235,71 +277,57 @@ tr:hover td{background:var(--bg2)}
 <div class="modal-ov" id="encarteModal">
   <div class="modal">
     <div class="modal-head">
-      <h3>Gerar encarte</h3>
-      <button class="btn btn-sm" onclick="closeModal('encarteModal')">X</button>
+      <h3><i class="ti ti-photo" style="color:var(--blue)"></i> Estúdio de Cartazeamento Digital</h3>
+      <button class="btn btn-sm" onclick="closeModal('encarteModal')"><i class="ti ti-x"></i></button>
     </div>
     <div class="modal-body">
       <div class="encarte-controls">
-        <div class="form-row"><label>Produto</label><input type="text" id="eProduto" oninput="drawEncarte()"></div>
+        <div class="form-row"><label>Título do Produto</label><input type="text" id="eProduto" oninput="drawEncarte()"></div>
         <div class="form-row-2">
-          <div class="form-row"><label>De</label><input type="text" id="eDe" oninput="drawEncarte()"></div>
-          <div class="form-row"><label>Por</label><input type="text" id="ePor" oninput="drawEncarte()"></div>
+          <div class="form-row"><label>Preço Regular (R$)</label><input type="text" id="eDe" placeholder="0,00" oninput="drawEncarte()"></div>
+          <div class="form-row"><label>Preço Promocional (R$)</label><input type="text" id="ePor" placeholder="0,00" oninput="drawEncarte()"></div>
         </div>
+        <div class="form-row">
+          <label>Modelo Visual</label>
+          <select id="eTema" onchange="drawEncarte()">
+            <option value="danger">Vermelho Impacto (Oportunidade Crítica)</option>
+            <option value="green">Verde Comercial (Quebra Zero Aura)</option>
+            <option value="dark">Preto Premium (Oferta Exclusiva)</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Notas de Rodapé</label><input type="text" id="eNota" value="Preço exclusivo para escoamento de lote. Validade próxima." oninput="drawEncarte()"></div>
+        <button class="btn btn-blue" style="width:100%;justify-content:center;margin-top:10px" onclick="downloadEncarte()"><i class="ti ti-download"></i> Exportar Imagem (PNG)</button>
       </div>
       <div class="encarte-preview">
-        <canvas id="encarteCanvas" width="500" height="600"></canvas>
+        <canvas id="encarteCanvas" width="400" height="500"></canvas>
+        <span class="canvas-hint">Visualização em tempo real ideal para telas e impressão A4</span>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn" onclick="closeModal('encarteModal')">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-ov" id="addModal">
-  <div class="smodal">
-    <h3><i class="ti ti-clipboard-plus" style="color:var(--green)"></i> Registro manual</h3>
-    <div class="form-row-2">
-      <div class="form-row"><label>Código de barras</label><input id="fCod" type="text"></div>
-      <div class="form-row"><label>Setor</label>
-        <select id="fSetorM">
-          <option>Açougue</option><option>Bebidas</option><option>Congelados</option>
-          <option>FLV</option><option>Frios</option><option>Laticínios</option>
-          <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row"><label>Produto</label><input id="fNome" type="text"></div>
-    <div class="form-row-2">
-      <div class="form-row"><label>Validade</label><input id="fVal" type="date"></div>
-      <div class="form-row"><label>Quantidade</label><input id="fQtde" type="number" value="1"></div>
-    </div>
-    <div class="smodal-foot">
-      <button class="btn" onclick="closeModal('addModal')">Cancelar</button>
-      <button class="btn btn-green" onclick="addManual()">Salvar</button>
+      <button class="btn btn-sm" onclick="closeModal('encarteModal')">Concluir</button>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-let products = [];
-let sheetProducts = [];
+let sheetData = [];
+let localData = [];
+let cStatusInstance = null;
+let cSetorInstance = null;
+let cDescontoInstance = null;
 
 try {
-  products = JSON.parse(localStorage.getItem('meus_produtos')) || [];
-} catch(e) {
-  products = [];
-}
+  localData = JSON.parse(localStorage.getItem('aura_val_local')) || [];
+} catch(e) { localData = []; }
 
-function saveProd() {
-  localStorage.setItem('meus_produtos', JSON.stringify(products));
+function saveLocal(){
+  localStorage.setItem('aura_val_local', JSON.stringify(localData));
 }
 
 function loadCfg(){
   try { return JSON.parse(localStorage.getItem('aura_val_cfg')) || {}; } catch(e) { return {}; }
 }
-
 function saveConfig(){
   const cfg = {
     id: document.getElementById('cId').value.trim(),
@@ -310,151 +338,451 @@ function saveConfig(){
   };
   localStorage.setItem('aura_val_cfg', JSON.stringify(cfg));
   document.getElementById('cfgBox').style.display = 'none';
-  syncAll();
+  initSync();
 }
-
 function toggleCfg(){
-  const box = document.getElementById('cfgBox');
-  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+  const b = document.getElementById('cfgBox');
+  b.style.display = b.style.display === 'block' ? 'none' : 'block';
+}
+function setDot(text, cls){
+  const d = document.getElementById('syncDot');
+  const t = document.getElementById('syncText');
+  d.className = 'dot ' + cls;
+  t.innerText = text;
 }
 
-function setStatus(text, type){
-  const dot = document.getElementById('dot');
-  const txt = document.getElementById('stText');
-  dot.className = "dot " + type;
-  txt.innerText = text;
-}
-
-function syncAll(){
+function initSync(){
   const cfg = loadCfg();
-  if(!cfg.id) {
-    setStatus("Não conectado — configure o Google Sheets", "err");
+  if(!cfg.id || !cfg.aba){
+    setDot('Desconectado - Configure os parâmetros da Planilha','err');
+    refresh();
     return;
   }
-  setStatus("Sincronizando...", "loading");
+  setDot('Conectando ao ecossistema Google...','loading');
+  document.getElementById('btnSync').disabled = true;
   
-  // URL para ler dados da planilha como JSON público
   const url = `https://docs.google.com/spreadsheets/d/${cfg.id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(cfg.aba)}`;
   
   fetch(url)
     .then(r => r.text())
     .then(txt => {
-      // Limpa string do Google para transformar em objeto válido
-      const jsonStr = txt.match(/google\.visualization\.Query\.setResponse\(([\s\S\x00-\x7F]+)\)/)[1];
-      const data = JSON.parse(jsonStr);
+      const m = txt.match(/google\.visualization\.Query\.setResponse\(([\s\S\x00-\x7F]+)\)/);
+      if(!m) throw new Error('Estrutura de dados inválida');
+      const data = JSON.parse(m[1]);
       const rows = data.table.rows;
       
-      sheetProducts = rows.map(row => {
+      sheetData = rows.map(r => {
+        if(!r || !r.c) return null;
+        const vRaw = r.c[2] ? r.c[2].v : '';
+        let vFmt = '';
+        if(vRaw){
+          if(typeof vRaw === 'string' && vRaw.includes('Date')){
+            const dMatch = vRaw.match(/Date\((\d+),(\d+),(\d+)\)/);
+            if(dMatch) vFmt = new Date(dMatch[1], dMatch[2], dMatch[3]).toISOString().split('T')[0];
+          } else if(r.c[2].f) {
+            const parts = r.c[2].f.split('/');
+            if(parts.length===3) vFmt = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          } else { vFmt = vRaw; }
+        }
         return {
-          setor: row.c[0] ? row.c[0].v : '',
-          nome: row.c[1] ? row.c[1].v : '',
-          validade: row.c[2] ? row.c[2].f || row.c[2].v : '',
-          status: row.c[3] ? row.c[3].v : '',
-          precoNormal: row.c[6] ? row.c[6].f || row.c[6].v : '',
-          precoPromo: row.c[7] ? row.c[7].f || row.c[7].v : '',
-          desconto: row.c[8] ? row.c[8].f || row.c[8].v : '',
+          setor: r.c[0] ? String(r.c[0].v).trim() : 'Outros',
+          produto: r.c[1] ? String(r.c[1].v).trim() : 'Item sem descrição',
+          validade: vFmt,
+          precoNormal: r.c[6] ? r.c[6].v : '',
+          precoPromo: r.c[7] ? r.c[7].v : '',
+          desconto: r.c[8] ? r.c[8].v : '',
+          cod: r.c[9] ? String(r.c[9].v).trim() : '',
           src: 'sheets'
         };
-      });
-      setStatus("Sincronizado com sucesso!", "ok");
-      document.getElementById('syncTime').innerText = "Última atualização: " + new Date().toLocaleTimeString();
+      }).filter(x => x !== null && x.produto !== 'Produto' && x.produto !== '');
+      
+      setDot('Sincronizado via Google Cloud API','ok');
+      document.getElementById('syncTime').innerText = `Última leitura: ${new Date().toLocaleTimeString()}`;
       refresh();
     })
     .catch(err => {
       console.error(err);
-      setStatus("Erro ao conectar com a planilha. Verifique o ID e permissões.", "err");
+      setDot('Falha na requisição. Verifique permissões da planilha.','err');
+      refresh();
+    })
+    .finally(() => {
+      document.getElementById('btnSync').disabled = false;
     });
+}
+
+function parseDate(str){
+  if(!str) return null;
+  const p = str.split('-');
+  if(p.length===3) return new Date(p[0], p[1]-1, p[2]);
+  const p2 = str.split('/');
+  if(p2.length===3) return new Date(p2[2], p2[1]-1, p2[0]);
+  return null;
+}
+
+function calcData(p){
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const vDate = parseDate(p.validade);
+  if(!vDate) return { dias: 999, status: 'Regular', badge: 'b-gray' };
+  
+  const diffTime = vDate - today;
+  const dias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if(dias <= 0) return { dias, status: 'Vencido', badge: 'b-danger' };
+  if(dias <= 3) return { dias, status: 'Crítico', badge: 'b-danger' };
+  if(dias <= 7) return { dias, status: 'Urgente', badge: 'b-warn' };
+  if(dias <= 15) return { dias, status: 'Atenção', badge: 'b-blue' };
+  return { dias, status: 'Regular', badge: 'b-ok' };
+}
+
+function refresh(){
+  const all = [...localData, ...sheetData];
+  
+  // Atualiza Select Filtro Setor
+  const sSel = document.getElementById('fSetor');
+  const curr = sSel.value;
+  const setores = [...new Set(all.map(x=>x.setor))].filter(Boolean).sort();
+  sSel.innerHTML = '<option value="">Filtrar por Setor</option>';
+  setores.forEach(s => {
+    sSel.innerHTML += `<option ${curr===s?'selected':''}>${s}</option>`;
+  });
+  
+  renderMetrics(all);
+  renderTable(all);
+  renderPromos(all);
+  renderCharts(all);
+}
+
+function renderMetrics(all){
+  let vencidos = 0, criticos = 0, urgentes = 0;
+  all.forEach(x => {
+    const c = calcData(x);
+    if(c.status === 'Vencido') vencidos++;
+    else if(c.status === 'Crítico') criticos++;
+    else if(c.status === 'Urgente') urgentes++;
+  });
+  
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric"><div class="metric-lbl">Monitorados</div><div class="metric-val info">${all.length}</div></div>
+    <div class="metric"><div class="metric-lbl">Vencidos</div><div class="metric-val danger">${vencidos}</div></div>
+    <div class="metric"><div class="metric-lbl">Críticos (3d)</div><div class="metric-val danger">${criticos}</div></div>
+    <div class="metric"><div class="metric-lbl">Urgentes (7d)</div><div class="metric-val warn">${urgentes}</div></div>
+  `;
+  
+  const ab = document.getElementById('alertBanner');
+  if(vencidos > 0 || criticos > 0){
+    ab.classList.add('show');
+    document.getElementById('alertTxt').innerHTML = `<strong>Plano de Ação Necessário:</strong> Existem <strong>${vencidos} itens vencidos</strong> e <strong>${criticos} em estado crítico</strong>. Realize o descarte ou aplique descontos imediatos.`;
+  } else {
+    ab.classList.remove('show');
+  }
+}
+
+function renderTable(all){
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  
+  const b = document.getElementById('fBusca').value.toLowerCase().trim();
+  const s = document.getElementById('fSetor').value;
+  const st = document.getElementById('fStatus').value;
+  
+  let filtrados = all.filter(x => {
+    const c = calcData(x);
+    if(b && !x.produto.toLowerCase().includes(b) && !x.cod.includes(b) && !x.setor.toLowerCase().includes(b)) return false;
+    if(s && x.setor !== s) return false;
+    if(st && c.status !== st) return false;
+    return true;
+  });
+  
+  // Ordenação natural por criticidade de prazo
+  filtrados.sort((x,y) => calcData(x).dias - calcData(y).dias);
+  
+  if(filtrados.length === 0){
+    tbody.innerHTML = `<tr><td colspan="11" class="empty"><i class="ti ti-box-align-bottom-center"></i> Nenhum lote localizado nos critérios de busca.</td></tr>`;
+    return;
+  }
+  
+  filtrados.forEach(x => {
+    const calc = calcData(x);
+    const tr = document.createElement('tr');
+    
+    let acaoHtml = '';
+    if(x.src === 'manual'){
+      const localIdx = localData.indexOf(x);
+      acaoHtml = `<button class="btn btn-sm btn-red" onclick="removeLocal(${localIdx})"><i class="ti ti-trash"></i> Remover</button>`;
+    } else {
+      acaoHtml = `
+        <button class="abtn promo" onclick="goPromoCamp('${x.produto.replace(/'/g,"\\'")}', '${x.precoNormal}')"><i class="ti ti-tag"></i> Oferta</button>
+        <button class="abtn encarte" onclick="openEncarteModal({p:'${x.produto.replace(/'/g,"\\'")}',n:'${x.precoNormal}',d:'${x.precoPromo}'})"><i class="ti ti-photo"></i> Encarte</button>
+      `;
+    }
+    
+    let pNormal = x.precoNormal ? (typeof x.precoNormal==='number'?`R$ ${x.precoNormal.toFixed(2)}`:x.precoNormal) : '-';
+    let pPromo = x.precoPromo ? (typeof x.precoPromo==='number'?`R$ ${x.precoPromo.toFixed(2)}`:x.precoPromo) : '-';
+    let desc = x.desconto ? (typeof x.desconto==='number'?`${(x.desconto*100).toFixed(0)}%`:x.desconto) : '-';
+    
+    let dataFormatada = x.validade;
+    if(x.validade && x.validade.includes('-')){
+      const pts = x.validade.split('-');
+      dataFormatada = `${pts[2]}/${pts[1]}/${pts[0]}`;
+    }
+    
+    tr.innerHTML = `
+      <td><span style="font-family:monospace;color:var(--tx2)">${x.cod || '-'}</span></td>
+      <td><strong>${x.produto}</strong><span class="src-tag ${x.src}">${x.src==='sheets'?'nuvem':'local'}</span></td>
+      <td>${x.setor}</td>
+      <td>${dataFormatada}</td>
+      <td><div class="bar-wrap"><strong>${calc.dias <= 0 ? 'Expirado' : calc.dias + 'd'}</strong></div></td>
+      <td>1</td>
+      <td>${pNormal}</td>
+      <td>${pPromo}</td>
+      <td><span style="color:var(--red);font-weight:500">${desc}</span></td>
+      <td><span class="badge ${calc.badge}">${calc.status}</span></td>
+      <td>${acaoHtml}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderPromos(all){
+  const grid = document.getElementById('promoGrid');
+  grid.innerHTML = '';
+  
+  const promos = all.filter(x => x.precoPromo && calcData(x).status !== 'Vencido');
+  if(promos.length === 0){
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="ti ti-tag-off"></i> Nenhuma campanha ou oferta parametrizada na planilha.</div>';
+    return;
+  }
+  
+  promos.forEach(x => {
+    const calc = calcData(x);
+    let pN = typeof x.precoNormal==='number'?`R$ ${x.precoNormal.toFixed(2)}`:x.precoNormal;
+    let pP = typeof x.precoPromo==='number'?`R$ ${x.precoPromo.toFixed(2)}`:x.precoPromo;
+    let desc = typeof x.desconto==='number'?`${(x.desconto*100).toFixed(0)}%`:x.desconto;
+    
+    grid.innerHTML += `
+      <div class="pcard">
+        <span class="pcard-tag">-${desc}</span>
+        <div class="pcard-head">
+          <div class="pcard-title">${x.produto}</div>
+        </div>
+        <div style="font-size:12px;color:var(--tx2);margin-top:-4px">Setor: ${x.setor}</div>
+        <div class="pcard-prices">
+          <div><div class="pcard-price-lbl">De Normal</div><div class="pcard-price-val" style="text-decoration:line-through;color:var(--tx2)">${pN}</div></div>
+          <div><div class="pcard-price-lbl">Por Oferta</div><div class="pcard-price-val promo">${pP}</div></div>
+        </div>
+        <div class="pcard-foot">
+          <span>Gatilho: ${calc.dias} dias restantes</span>
+          <button class="btn btn-sm" style="padding:4px 8px" onclick="openEncarteModal({p:'${x.produto.replace(/'/g,"\\'")}',n:'${x.precoNormal}',d:'${x.precoPromo}'})"><i class="ti ti-photo"></i> Encarte</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function renderCharts(all){
+  if(document.getElementById('sec-relatorio').style.display === 'none') return;
+  
+  // Agrupamentos
+  const statusCounts = { Vencido:0, Crítico:0, Urgente:0, Atenção:0, Regular:0 };
+  const setorCounts = {};
+  const descontos = [];
+  
+  all.forEach(x => {
+    const c = calcData(x);
+    statusCounts[c.status]++;
+    if(x.setor) setorCounts[x.setor] = (setorCounts[x.setor]||0) + 1;
+    if(x.desconto){
+      let v = 0;
+      if(typeof x.desconto==='number') v = x.desconto*100;
+      else if(x.desconto.includes('%')) v = parseFloat(x.desconto);
+      if(v>0) descontos.push(v);
+    }
+  });
+
+  if(cStatusInstance) cStatusInstance.destroy();
+  if(cSetorInstance) cSetorInstance.destroy();
+  if(cDescontoInstance) cDescontoInstance.destroy();
+
+  const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+  cStatusInstance = new Chart(ctxStatus, {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(statusCounts),
+      datasets: [{
+        data: Object.values(statusCounts),
+        backgroundColor: ['#E24B4A','#E24B4A','#BA7517','#378ADD','#1D9E75']
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+
+  const ctxSetor = document.getElementById('chartSetor').getContext('2d');
+  cSetorInstance = new Chart(ctxSetor, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(setorCounts),
+      datasets: [{
+        label: 'Lotes Críticos',
+        data: Object.values(setorCounts),
+        backgroundColor: '#378ADD'
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { display:false } } }
+  });
+
+  const ctxDesc = document.getElementById('chartDesconto').getContext('2d');
+  cDescontoInstance = new Chart(ctxDesc, {
+    type: 'line',
+    data: {
+      labels: descontos.map((_,i)=>`Oferta ${i+1}`),
+      datasets: [{
+        label: 'Intensidade do Desconto (%)',
+        data: descontos,
+        borderColor: '#E24B4A',
+        tension: 0.2,
+        fill: false
+      }]
+    },
+    options: { responsive: true, scalar: { min:0, max:100 } }
+  });
 }
 
 function goTab(name){
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active',['validades','promocoes','relatorio','ajuda'][i]===name));
   document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
   document.getElementById('sec-'+name).classList.add('active');
+  if(name==='relatorio') setTimeout(() => { renderCharts([...localData, ...sheetData]); }, 60);
 }
 
+function openAddModal(){ document.getElementById('addModal').classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-function openAddModal(){ document.getElementById('addModal').addModal ? null : document.getElementById('addModal').classList.add('open'); }
-function openEncarteModal(prod){ document.getElementById('encarteModal').classList.add('open'); }
 
 function addManual(){
   const cod = document.getElementById('fCod').value.trim();
   const nome = document.getElementById('fNome').value.trim();
-  if(!cod && !nome){
-    alert('Preencha ao menos o código ou o nome.');
+  const setor = document.getElementById('fSetorM').value;
+  const val = document.getElementById('fVal').value;
+  
+  if(!nome){
+    alert('A descrição do item é obrigatória.');
     return;
   }
-  products.push({
+  
+  localData.push({
     cod,
-    nome,
-    setor: document.getElementById('fSetorM').value,
-    validade: document.getElementById('fVal').value,
-    qtde: parseInt(document.getElementById('fQtde').value) || 1,
+    produto: nome,
+    setor,
+    validade: val,
     src: 'manual'
   });
-  saveProd();
+  
+  saveLocal();
   closeModal('addModal');
+  
+  // Limpar formulário
+  document.getElementById('fCod').value = '';
+  document.getElementById('fNome').value = '';
+  document.getElementById('fVal').value = '';
+  
   refresh();
 }
 
-function rmProduct(idx){
-  if(confirm('Remover?')){
-    products.splice(idx,1);
-    saveProd();
+function removeLocal(idx){
+  if(confirm('Tem certeza que deseja apagar permanentemente este lote local?')){
+    localData.splice(idx, 1);
+    saveLocal();
     refresh();
   }
 }
 
-function getAllProducts() {
-  return [...products, ...sheetProducts];
+function goPromoCamp(nome, preco){
+  goTab('promocoes');
 }
 
-function renderTable(){
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
-  const list = getAllProducts();
-  
-  list.forEach((p, idx) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${p.cod || '-'}</td>
-      <td>${p.nome} ${p.src === 'sheets' ? '<span class="src-tag sheets">Planilha</span>' : '<span class="src-tag">Manual</span>'}</td>
-      <td>${p.setor}</td>
-      <td>${p.validade}</td>
-      <td>-</td>
-      <td>${p.qtde || 1}</td>
-      <td>${p.precoNormal || '-'}</td>
-      <td>${p.precoPromo || '-'}</td>
-      <td>${p.desconto || '-'}</td>
-      <td><span class="badge b-ok">${p.status || 'OK'}</span></td>
-      <td>
-        ${p.src === 'manual' ? `<button class="btn btn-sm btn-red" onclick="rmProduct(${idx})">Remover</button>` : '-'}
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-  if(list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="11" class="empty"><i class="ti ti-database-off"></i> Nenhum produto encontrado</td></tr>`;
+function openEncarteModal(obj){
+  document.getElementById('encarteModal').classList.add('open');
+  if(obj){
+    document.getElementById('eProduto').value = obj.p || '';
+    document.getElementById('eDe').value = obj.n || '';
+    document.getElementById('ePor').value = obj.d || '';
   }
+  setTimeout(drawEncarte, 50);
 }
 
-function renderMetrics(){
-  const container = document.getElementById('metrics');
-  const total = getAllProducts().length;
-  container.innerHTML = `
-    <div class="metric"><div class="metric-lbl">Total Monitorado</div><div class="metric-val info">${total}</div></div>
-    <div class="metric"><div class="metric-lbl">Vencidos</div><div class="metric-val danger">0</div></div>
-    <div class="metric"><div class="metric-lbl">Críticos</div><div class="metric-val warn">0</div></div>
-  `;
+function drawEncarte(){
+  const canvas = document.getElementById('encarteCanvas');
+  const ctx = canvas.getContext('2d');
+  const t = document.getElementById('eTema').value;
+  
+  // Cores do Encarte
+  let cPrimary = '#E24B4A';
+  if(t==='green') cPrimary = '#1D9E75';
+  if(t==='dark') cPrimary = '#1A1A18';
+  
+  // Fundo
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0,0,400,500);
+  
+  // Cabeçalho institucional
+  ctx.fillStyle = cPrimary;
+  ctx.fillRect(0,0,400,90);
+  
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 22px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('OPORTUNIDADE IMPERDÍVEL', 200, 42);
+  ctx.font = '13px sans-serif';
+  ctx.fillText('Combate ao Desperdício — Oferta Relâmpago Aura', 200, 68);
+  
+  // Produto
+  ctx.fillStyle = '#1A1A18';
+  ctx.font = 'bold 24px sans-serif';
+  const prodTxt = document.getElementById('eProduto').value || 'NOME DO PRODUTO';
+  ctx.fillText(prodTxt.toUpperCase(), 200, 180);
+  
+  // Preços
+  const deVal = document.getElementById('eDe').value || '0,00';
+  ctx.fillStyle = '#6b6b67';
+  ctx.font = '16px sans-serif';
+  ctx.fillText(`Preço Regular R$ ${deVal}`, 200, 240);
+  
+  // Linha cortando o preço antigo
+  ctx.strokeStyle = '#E24B4A';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(130, 234); ctx.lineTo(270, 234); ctx.stroke();
+  
+  ctx.fillStyle = cPrimary;
+  ctx.font = 'bold 55px sans-serif';
+  const porVal = document.getElementById('ePor').value || '0,00';
+  ctx.fillText(`R$ ${porVal}`, 200, 315);
+  
+  // Badge Promocional
+  ctx.fillStyle = cPrimary;
+  ctx.beginPath(); ctx.roundRect(100, 350, 200, 35, 8); ctx.fill();
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.fillText('PREÇO EXCLUSIVO', 200, 372);
+  
+  // Rodapé institucional
+  ctx.fillStyle = '#f5f5f3';
+  ctx.fillRect(0, 440, 400, 60);
+  ctx.fillStyle = '#6b6b67';
+  ctx.font = '11px sans-serif';
+  const nota = document.getElementById('eNota').value || '';
+  ctx.fillText(nota, 200, 475);
 }
 
-function drawEncarte(){}
-
-function refresh(){
-  renderMetrics();
-  renderTable();
+function downloadEncarte(){
+  const canvas = document.getElementById('encarteCanvas');
+  const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+  const link = document.createElement('a');
+  link.download = `oferta_aura_${Date.now()}.png`;
+  link.href = image;
+  link.click();
 }
 
-// Inicialização
+// Inicialização e Carga Manual de Parâmetros
 const _cfg = loadCfg();
 if(_cfg.id){
   document.getElementById('cId').value = _cfg.id || '';
@@ -462,10 +790,8 @@ if(_cfg.id){
   document.getElementById('cIdBanco').value = _cfg.idBanco || '';
   document.getElementById('cAbaBanco').value = _cfg.abaBanco || '';
   document.getElementById('cAbaResp').value = _cfg.abaResp || '';
-  syncAll();
-} else {
-  refresh();
 }
+initSync();
 </script>
 </body>
 </html>
