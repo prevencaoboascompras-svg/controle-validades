@@ -377,6 +377,17 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
           <label>Foto do produto (opcional)</label>
           <input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)">
         </div>
+        <div class="form-row">
+          <label>Cor do texto do produto</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input type="color" id="eCorTexto" value="#000000" oninput="drawEncarte()" style="width:40px;height:36px;border:1px solid var(--bds);border-radius:6px;cursor:pointer;padding:2px">
+            <button class="btn btn-sm" onclick="document.getElementById('eCorTexto').value='#000000';drawEncarte()" style="background:#000;color:#fff;border-color:#000">Preto</button>
+            <button class="btn btn-sm" onclick="document.getElementById('eCorTexto').value='#ffffff';drawEncarte()" style="background:#fff;color:#000;border-color:#ccc">Branco</button>
+            <button class="btn btn-sm" onclick="document.getElementById('eCorTexto').value='#E8000D';drawEncarte()" style="background:#E8000D;color:#fff;border-color:#E8000D">Vermelho</button>
+            <button class="btn btn-sm" onclick="document.getElementById('eCorTexto').value='#FFD600';drawEncarte()" style="background:#FFD600;color:#000;border-color:#c9a800">Amarelo</button>
+            <button class="btn btn-sm" onclick="document.getElementById('eCorTexto').value='#8B0000';drawEncarte()" style="background:#8B0000;color:#fff;border-color:#8B0000">Vinho</button>
+          </div>
+        </div>
         <div class="form-row" style="background:var(--bg2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx2)">
           <i class="ti ti-info-circle" style="margin-right:5px"></i>
           O cabeçalho, rodapé e layout de preços usam os assets oficiais do Supermercado Boas Compras.
@@ -804,12 +815,13 @@ async function drawEncarte(){
   const W=1054, headH=477, precoH=776, rodapeH=231, H=1484;
   cv.width=W; cv.height=H;
 
-  const produto =document.getElementById('eProduto').value||'NOME DO PRODUTO';
-  const de      =(document.getElementById('eDe').value||'').replace(/R\$\s*/i,'').trim();
-  const por     =(document.getElementById('ePor').value||'').replace(/R\$\s*/i,'').trim();
-  const pct     =document.getElementById('ePct').value||'';
-  const validade=document.getElementById('eValidade').value||'';
-  const unidade =document.getElementById('eUnidade').value||'CADA';
+  const produto  = document.getElementById('eProduto').value||'NOME DO PRODUTO';
+  const de       = (document.getElementById('eDe').value||'').replace(/R\$\s*/i,'').trim();
+  const por      = (document.getElementById('ePor').value||'').replace(/R\$\s*/i,'').trim();
+  const pct      = document.getElementById('ePct').value||'';
+  const validade = document.getElementById('eValidade').value||'';
+  const unidade  = document.getElementById('eUnidade').value||'CADA';
+  const corTexto = document.getElementById('eCorTexto').value||'#000000';
 
   const [imgHead,imgPreco,imgRodape]=await Promise.all([
     loadAsset(ASSET_HEAD),loadAsset(ASSET_PRECO),loadAsset(ASSET_RODAPE)
@@ -821,96 +833,128 @@ async function drawEncarte(){
   // ── CABEÇALHO ──
   ctx.drawImage(imgHead,0,0,W,headH);
 
-  // ── NOME DO PRODUTO (faixa branca) ──
-  const nomeClean=produto.replace(/\s*\(\d+\s*UN\)\s*\{\d+\}/gi,'').replace(/\s*\{.*?\}/g,'').trim();
-  ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle='#000';
+  // ── NOME DO PRODUTO (faixa branca entre head e preco) ──
+  const nomeClean=produto
+    .replace(/\s*\(\d+\s*[A-Z]*\)\s*\{\d+\}/gi,'')
+    .replace(/\s*\{.*?\}/g,'')
+    .replace(/\s*\(\d+\)/g,'')
+    .trim();
 
   function splitLines(text,maxW){
-    const words=text.split(' '); const lines=[]; let line='';
+    const words=text.split(' ');const lines=[];let line='';
     for(const w of words){
       const test=line?line+' '+w:w;
       if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=w;}else line=test;
     }
-    if(line)lines.push(line); return lines;
+    if(line)lines.push(line);return lines;
   }
 
-  let fontSize=82;
-  while(fontSize>34){
+  let fontSize=86;
+  ctx.textAlign='center';ctx.textBaseline='top';
+  while(fontSize>30){
     ctx.font=`900 ${fontSize}px 'Arial Black',Arial,sans-serif`;
-    if(splitLines(nomeClean,960).length<=3)break;
+    if(splitLines(nomeClean,980).length<=3)break;
     fontSize-=4;
   }
   ctx.font=`900 ${fontSize}px 'Arial Black',Arial,sans-serif`;
-  const nomeLines=splitLines(nomeClean,960);
-  const lh=fontSize*1.15;
-  const nomeY=headH+40;
+  ctx.fillStyle=corTexto;
+  const nomeLines=splitLines(nomeClean,980);
+  const lh=fontSize*1.18;
+  // Centraliza verticalmente na faixa branca (headH até headH+precoH*0.1 aprox)
+  const nomeFaixaH=200;
+  const nomeBlockH=nomeLines.length*lh;
+  const nomeY=headH+(nomeFaixaH-nomeBlockH)/2;
   nomeLines.forEach((l,i)=>ctx.fillText(l,W/2,nomeY+i*lh));
 
-  // ── ASSET PREÇOS ──
-  ctx.drawImage(imgPreco,0,headH,W,precoH);
+  // ── ASSET PREÇOS (começa após a faixa do nome) ──
+  // O asset preco.png começa logo abaixo da faixa branca do nome
+  const precoStartY=headH+nomeFaixaH;
+  ctx.drawImage(imgPreco,0,precoStartY,W,precoH);
 
   // ── FOTO ──
-  const fotoX=40,fotoY=headH+60,fotoMaxW=500,fotoMaxH=560;
+  // Lado esquerdo da área de preços
+  const fotoX=30, fotoY=precoStartY+40, fotoMaxW=490, fotoMaxH=530;
   if(fotoImg){
     const ratio=Math.min(fotoMaxW/fotoImg.width,fotoMaxH/fotoImg.height);
     const fw=fotoImg.width*ratio,fh=fotoImg.height*ratio;
     ctx.drawImage(fotoImg,fotoX+(fotoMaxW-fw)/2,fotoY+(fotoMaxH-fh)/2,fw,fh);
   } else {
-    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(fotoX,fotoY,fotoMaxW,fotoMaxH);
-    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='26px Arial';
+    ctx.fillStyle='rgba(255,255,255,0.10)';ctx.fillRect(fotoX,fotoY,fotoMaxW,fotoMaxH);
+    ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='26px Arial';
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('Foto do produto',fotoX+fotoMaxW/2,fotoY+fotoMaxH/2);
   }
 
+  // ── VALORES sobre os retângulos do asset ──
+  // O asset preco.png tem:
+  //   - Caixa DE: lado direito, topo  (~x:560 y:60 w:460 h:200 relativo ao bloco)
+  //   - Caixa POR: lado direito, meio (~x:530 y:300 w:490 h:320 relativo ao bloco)
+  //   - Círculo %: canto direito, entre DE e POR (~x:890 y:260 r:80)
+
   ctx.textBaseline='alphabetic';
 
-  // ── VALOR DE ── (só o número, sem R$ e sem risco — já no asset)
-  const deBaseY=headH+195;
-  ctx.fillStyle='#fff';
-  ctx.font=`900 115px 'Arial Black',Arial,sans-serif`;
-  ctx.textAlign='left';
-  ctx.fillText(de||'0,00', 700, deBaseY);
+  // VALOR DE — centralizado horizontalmente na caixa DE do asset
+  const deCaixaX=560+precoStartY*0; // x absoluto
+  const deCaixaCX=560+(460/2); // centro X da caixa DE = ~790
+  const deBaseY=precoStartY+195;
+  ctx.fillStyle='#ffffff';
+  ctx.font=`900 118px 'Arial Black',Arial,sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText(de||'0,00', 790, deBaseY);
 
-  // ── UNIDADE acima do POR ──
+  // UNIDADE — sobre a aba amarela "CADA" do asset, acima da caixa POR
+  const unidadeCX=800; // centro X área POR
+  ctx.fillStyle='#8B0000';
+  ctx.font=`900 56px 'Arial Black',Arial,sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText(unidade, unidadeCX, precoStartY+345);
+
+  // VALOR POR — centralizado na caixa POR do asset
+  const porBaseY=precoStartY+620;
   ctx.fillStyle='#FFD600';
-  ctx.font=`bold 52px Arial`;
-  ctx.textAlign='right';
-  ctx.fillText(unidade, 1010, headH+460);
+  ctx.font=`900 210px 'Arial Black',Arial,sans-serif`;
+  ctx.textAlign='center';
+  // Ajusta fonte se valor for longo
+  let porFont=210;
+  while(porFont>80){
+    ctx.font=`900 ${porFont}px 'Arial Black',Arial,sans-serif`;
+    if(ctx.measureText(por||'0,00').width<400)break;
+    porFont-=10;
+  }
+  ctx.fillText(por||'0,00', 790, porBaseY);
 
-  // ── VALOR POR ── (só o número, sem R$)
-  const porBaseY=headH+590;
-  ctx.fillStyle='#FFD600';
-  ctx.font=`900 200px 'Arial Black',Arial,sans-serif`;
-  ctx.textAlign='left';
-  ctx.fillText(por||'0,00', 660, porBaseY);
-
-  // ── % desconto sobre o círculo do asset ──
+  // % desconto — no círculo amarelo do asset
   if(pct){
     const pctNum=pct.replace(/[^0-9,.]/g,'');
     ctx.fillStyle='#8B0000';
-    ctx.font=`900 52px 'Arial Black',Arial,sans-serif`;
+    ctx.font=`900 54px 'Arial Black',Arial,sans-serif`;
     ctx.textAlign='center';
-    ctx.fillText(pctNum+'%', 938, headH+348);
+    ctx.fillText(pctNum+'%', 944, precoStartY+310);
   }
 
   // Validade discreta
   if(validade){
-    ctx.fillStyle='rgba(255,255,255,0.65)';
-    ctx.font='22px Arial'; ctx.textAlign='center';
-    ctx.fillText('Validade: '+validade, W*0.75, headH+precoH-18);
+    ctx.fillStyle='rgba(255,255,255,0.6)';
+    ctx.font='22px Arial';ctx.textAlign='center';
+    ctx.fillText('Validade: '+validade, 790, precoStartY+precoH-20);
   }
 
   // ── RODAPÉ ──
-  ctx.drawImage(imgRodape,0,headH+precoH,W,rodapeH);
+  ctx.drawImage(imgRodape,0,precoStartY+precoH,W,rodapeH);
 }
 
-function downloadEncarte(){
-  drawEncarte();
+async function downloadEncarte(){
+  await drawEncarte();
   const cv=document.getElementById('encarteCanvas');
-  const a=document.createElement('a');
   const prod=document.getElementById('eProduto').value.substring(0,20)||'encarte';
-  a.download='encarte-'+prod.replace(/\s+/g,'-').toLowerCase()+'.png';
-  a.href=cv.toDataURL('image/png');a.click();
+  const fname='encarte-'+prod.replace(/\s+/g,'-').toLowerCase()+'.png';
+  cv.toBlob(blob=>{
+    const a=document.createElement('a');
+    a.download=fname;
+    a.href=URL.createObjectURL(blob);
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  },'image/png');
 }
 
 function openEncarteModal(idx){
@@ -926,6 +970,7 @@ function openEncarteModal(idx){
   fotoImg=null;
   document.getElementById('eFoto').value='';
   document.getElementById('eUnidade').value='CADA';
+  document.getElementById('eCorTexto').value='#000000';
   document.getElementById('encarteModal').classList.add('open');
   setTimeout(drawEncarte,100);
 }
