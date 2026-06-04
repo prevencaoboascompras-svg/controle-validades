@@ -355,6 +355,21 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
           </div>
         </div>
         <div class="form-row">
+          <label>Unidade / medida</label>
+          <select id="eUnidade" onchange="drawEncarte()" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx)">
+            <option value="CADA">CADA</option>
+            <option value="UN">UN</option>
+            <option value="KG">KG</option>
+            <option value="PCT">PCT</option>
+            <option value="CX">CX</option>
+            <option value="FD">FD</option>
+            <option value="LT">LT</option>
+            <option value="DZ">DZ</option>
+            <option value="ML">ML</option>
+            <option value="G">G</option>
+          </select>
+        </div>
+        <div class="form-row">
           <label>Observação</label>
           <input type="text" id="eObs" value="PRODUTO COM VALIDADE PRÓXIMA AO VENCIMENTO. VÁLIDO ENQUANTO DURAR O ESTOQUE." oninput="drawEncarte()">
         </div>
@@ -786,150 +801,103 @@ async function drawEncarte(){
   const cv=document.getElementById('encarteCanvas');
   const ctx=cv.getContext('2d');
 
-  // Proporção original dos assets: 1054px largura
-  // head: 1054x477, preco: 1054x776, rodape: 1054x231
-  // Total original: 1484px altura — escalamos para W=600
-  const W=600;
-  const headH  =Math.round(477/1054*W); // ~271
-  const precoH =Math.round(776/1054*W); // ~441
-  const rodapeH=Math.round(231/1054*W); // ~131
-  const H=headH+precoH+rodapeH;
+  const W=1054, headH=477, precoH=776, rodapeH=231, H=1484;
   cv.width=W; cv.height=H;
 
   const produto =document.getElementById('eProduto').value||'NOME DO PRODUTO';
-  const de      =document.getElementById('eDe').value||'';
-  const por     =document.getElementById('ePor').value||'';
+  const de      =(document.getElementById('eDe').value||'').replace(/R\$\s*/i,'').trim();
+  const por     =(document.getElementById('ePor').value||'').replace(/R\$\s*/i,'').trim();
   const pct     =document.getElementById('ePct').value||'';
   const validade=document.getElementById('eValidade').value||'';
+  const unidade =document.getElementById('eUnidade').value||'CADA';
 
-  // Carrega assets
   const [imgHead,imgPreco,imgRodape]=await Promise.all([
     loadAsset(ASSET_HEAD),loadAsset(ASSET_PRECO),loadAsset(ASSET_RODAPE)
   ]);
 
+  // Fundo branco
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+
   // ── CABEÇALHO ──
   ctx.drawImage(imgHead,0,0,W,headH);
 
-  // Nome do produto sobre o header (área esquerda, ~55% da largura)
-  const nomeX=W*0.28, nomeY=headH*0.38, nomeW=W*0.48;
-  ctx.textAlign='center';
-  ctx.fillStyle='#fff';
-  // Fonte adaptativa
-  let fontSize=Math.round(W*0.048);
-  ctx.font=`bold ${fontSize}px Arial`;
-  while(ctx.measureText(produto).width>nomeW*1.8&&fontSize>12){fontSize--;ctx.font=`bold ${fontSize}px Arial`;}
-  // Wrap em até 3 linhas
-  const words=produto.split(' ');
-  let lines=[],line='';
-  for(const w of words){
-    const test=line?line+' '+w:w;
-    if(ctx.measureText(test).width>nomeW&&line){lines.push(line);line=w;}else line=test;
-  }
-  lines.push(line);
-  lines=lines.slice(0,3);
-  const lh=fontSize*1.2;
-  const startY=nomeY-(lines.length-1)*lh/2;
-  lines.forEach((l,i)=>ctx.fillText(l,nomeX,startY+i*lh));
+  // ── NOME DO PRODUTO (faixa branca) ──
+  const nomeClean=produto.replace(/\s*\(\d+\s*UN\)\s*\{\d+\}/gi,'').replace(/\s*\{.*?\}/g,'').trim();
+  ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle='#000';
 
-  // ── ÁREA DE PREÇOS (fundo) ──
+  function splitLines(text,maxW){
+    const words=text.split(' '); const lines=[]; let line='';
+    for(const w of words){
+      const test=line?line+' '+w:w;
+      if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=w;}else line=test;
+    }
+    if(line)lines.push(line); return lines;
+  }
+
+  let fontSize=82;
+  while(fontSize>34){
+    ctx.font=`900 ${fontSize}px 'Arial Black',Arial,sans-serif`;
+    if(splitLines(nomeClean,960).length<=3)break;
+    fontSize-=4;
+  }
+  ctx.font=`900 ${fontSize}px 'Arial Black',Arial,sans-serif`;
+  const nomeLines=splitLines(nomeClean,960);
+  const lh=fontSize*1.15;
+  const nomeY=headH+40;
+  nomeLines.forEach((l,i)=>ctx.fillText(l,W/2,nomeY+i*lh));
+
+  // ── ASSET PREÇOS ──
   ctx.drawImage(imgPreco,0,headH,W,precoH);
 
-  // Foto do produto — área central superior do bloco preco
-  const fotoAreaX=W*0.04, fotoAreaY=headH+precoH*0.04;
-  const fotoAreaW=W*0.55, fotoAreaH=precoH*0.52;
+  // ── FOTO ──
+  const fotoX=40,fotoY=headH+60,fotoMaxW=500,fotoMaxH=560;
   if(fotoImg){
-    const ratio=Math.min(fotoAreaW/fotoImg.width,fotoAreaH/fotoImg.height);
+    const ratio=Math.min(fotoMaxW/fotoImg.width,fotoMaxH/fotoImg.height);
     const fw=fotoImg.width*ratio,fh=fotoImg.height*ratio;
-    const fx=fotoAreaX+(fotoAreaW-fw)/2, fy=fotoAreaY+(fotoAreaH-fh)/2;
-    ctx.drawImage(fotoImg,fx,fy,fw,fh);
+    ctx.drawImage(fotoImg,fotoX+(fotoMaxW-fw)/2,fotoY+(fotoMaxH-fh)/2,fw,fh);
   } else {
-    ctx.fillStyle='rgba(255,255,255,0.12)';
-    ctx.roundRect(fotoAreaX,fotoAreaY,fotoAreaW,fotoAreaH,12);
-    ctx.fill();
-    ctx.fillStyle='rgba(255,255,255,0.5)';
-    ctx.font=`${Math.round(W*0.028)}px Arial`;
-    ctx.textAlign='center';
-    ctx.fillText('Adicione a foto do produto',fotoAreaX+fotoAreaW/2,fotoAreaY+fotoAreaH/2);
+    ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fillRect(fotoX,fotoY,fotoMaxW,fotoMaxH);
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='26px Arial';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('Foto do produto',fotoX+fotoMaxW/2,fotoY+fotoMaxH/2);
   }
 
-  // ── PREÇO DE (caixa preta/vermelha — canto direito superior) ──
-  // Posição relativa ao asset preco.png: ~57% x, 5% y
-  const deBoxX=W*0.575, deBoxY=headH+precoH*0.04;
-  const deBoxW=W*0.39,  deBoxH=precoH*0.22;
+  ctx.textBaseline='alphabetic';
 
-  // Label DE (topo preto)
-  ctx.fillStyle='#111';
-  ctx.beginPath();ctx.roundRect(deBoxX,deBoxY,deBoxW,deBoxH*0.38,8);ctx.fill();
+  // ── VALOR DE ── (só o número, sem R$ e sem risco — já no asset)
+  const deBaseY=headH+195;
+  ctx.fillStyle='#fff';
+  ctx.font=`900 115px 'Arial Black',Arial,sans-serif`;
+  ctx.textAlign='left';
+  ctx.fillText(de||'0,00', 700, deBaseY);
+
+  // ── UNIDADE acima do POR ──
   ctx.fillStyle='#FFD600';
-  ctx.font=`bold ${Math.round(deBoxW*0.28)}px Arial`;
-  ctx.textAlign='center';
-  ctx.fillText('DE',deBoxX+deBoxW/2,deBoxY+deBoxH*0.3);
+  ctx.font=`bold 52px Arial`;
+  ctx.textAlign='right';
+  ctx.fillText(unidade, 1010, headH+460);
 
-  // Fundo vermelho com valor
-  ctx.fillStyle='#C00';
-  ctx.beginPath();ctx.roundRect(deBoxX,deBoxY+deBoxH*0.35,deBoxW,deBoxH*0.65,[0,0,8,8]);ctx.fill();
-  if(de){
-    ctx.fillStyle='#fff';
-    ctx.font=`bold ${Math.round(deBoxW*0.13)}px Arial`;
-    ctx.textAlign='left';
-    ctx.fillText('R$',deBoxX+deBoxW*0.08,deBoxY+deBoxH*0.82);
-    ctx.font=`bold ${Math.round(deBoxW*0.32)}px Arial`;
-    const deVal=de.replace(/R\$\s*/i,'');
-    ctx.fillText(deVal,deBoxX+deBoxW*0.28,deBoxY+deBoxH*0.88);
-    // Riscar
-    ctx.strokeStyle='rgba(255,255,255,0.7)';ctx.lineWidth=Math.round(deBoxH*0.06);
-    const tw=ctx.measureText(deVal).width;
-    const rx=deBoxX+deBoxW*0.28, ry=deBoxY+deBoxH*0.72;
-    ctx.beginPath();ctx.moveTo(rx-10,ry);ctx.lineTo(rx+tw+10,ry);ctx.stroke();
-  }
-
-  // ── PREÇO POR (caixa maior amarela/vermelha) ──
-  const porBoxX=W*0.555, porBoxY=headH+precoH*0.30;
-  const porBoxW=W*0.42,  porBoxH=precoH*0.36;
-
-  // Tab POR
+  // ── VALOR POR ── (só o número, sem R$)
+  const porBaseY=headH+590;
   ctx.fillStyle='#FFD600';
-  ctx.beginPath();ctx.roundRect(porBoxX+porBoxW*0.1,porBoxY,porBoxW*0.8,porBoxH*0.22,[8,8,0,0]);ctx.fill();
-  ctx.fillStyle='#900';
-  ctx.font=`bold ${Math.round(porBoxW*0.22)}px Arial`;
-  ctx.textAlign='center';
-  ctx.fillText('POR',porBoxX+porBoxW/2,porBoxY+porBoxH*0.18);
+  ctx.font=`900 200px 'Arial Black',Arial,sans-serif`;
+  ctx.textAlign='left';
+  ctx.fillText(por||'0,00', 660, porBaseY);
 
-  // Corpo vermelho escuro
-  ctx.fillStyle='#8B0000';
-  ctx.strokeStyle='#FFD600';ctx.lineWidth=Math.round(W*0.012);
-  ctx.beginPath();ctx.roundRect(porBoxX,porBoxY+porBoxH*0.2,porBoxW,porBoxH*0.8,[0,0,10,10]);
-  ctx.fill();ctx.stroke();
-
-  if(por){
-    ctx.fillStyle='#FFD600';
-    ctx.font=`bold ${Math.round(porBoxW*0.14)}px Arial`;
-    ctx.textAlign='left';
-    ctx.fillText('R$',porBoxX+porBoxW*0.07,porBoxY+porBoxH*0.78);
-    const porVal=por.replace(/R\$\s*/i,'');
-    ctx.font=`bold ${Math.round(porBoxW*0.38)}px Arial`;
-    ctx.fillText(porVal,porBoxX+porBoxW*0.25,porBoxY+porBoxH*0.9);
-  }
-
-  // % desconto (círculo badge)
+  // ── % desconto sobre o círculo do asset ──
   if(pct){
-    const bx=W*0.92,by=headH+precoH*0.28,br=W*0.075;
-    ctx.fillStyle='#FFD600';
-    ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
-    ctx.fillStyle='#900';
-    const pctNum=pct.replace('%','').trim();
-    ctx.font=`bold ${Math.round(br*0.7)}px Arial`;
+    const pctNum=pct.replace(/[^0-9,.]/g,'');
+    ctx.fillStyle='#8B0000';
+    ctx.font=`900 52px 'Arial Black',Arial,sans-serif`;
     ctx.textAlign='center';
-    ctx.fillText(pctNum+'%',bx,by+br*0.25);
+    ctx.fillText(pctNum+'%', 938, headH+348);
   }
 
-  // Validade
+  // Validade discreta
   if(validade){
-    ctx.fillStyle='rgba(255,255,255,0.85)';
-    ctx.font=`${Math.round(W*0.022)}px Arial`;
-    ctx.textAlign='center';
-    ctx.fillText('Validade: '+validade,W*0.75,headH+precoH*0.97);
+    ctx.fillStyle='rgba(255,255,255,0.65)';
+    ctx.font='22px Arial'; ctx.textAlign='center';
+    ctx.fillText('Validade: '+validade, W*0.75, headH+precoH-18);
   }
 
   // ── RODAPÉ ──
@@ -957,6 +925,7 @@ function openEncarteModal(idx){
   }
   fotoImg=null;
   document.getElementById('eFoto').value='';
+  document.getElementById('eUnidade').value='CADA';
   document.getElementById('encarteModal').classList.add('open');
   setTimeout(drawEncarte,100);
 }
