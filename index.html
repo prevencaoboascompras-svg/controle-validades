@@ -239,14 +239,85 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         </div>
         <div class="form-row"><label>Foto do produto (opcional)</label><input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)"></div>
         <div class="form-row">
-          <label>Cor do texto do produto</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px">
-            <input type="color" id="eCorTexto" value="#000000" oninput="drawEncarte()" style="width:38px;height:34px;border:1px solid var(--bds);border-radius:6px;cursor:pointer;padding:2px">
-            <button class="btn btn-sm" onclick="setCor('#000000')" style="background:#000;color:#fff;border-color:#000">Preto</button>
-            <button class="btn btn-sm" onclick="setCor('#ffffff')" style="background:#fff;color:#000;border-color:#ccc">Branco</button>
-            <button class="btn btn-sm" onclick="setCor('#E8000D')" style="background:#E8000D;color:#fff;border-color:#E8000D">Vermelho</button>
-            <button class="btn btn-sm" onclick="setCor('#FFD600')" style="background:#FFD600;color:#000;border-color:#c9a800">Amarelo</button>
-            <button class="btn btn-sm" onclick="setCor('#8B0000')" style="background:#8B0000;color:#fff;border-color:#8B0000">Vinho</button>
+          <label>Cores dos elementos</label>
+          <div style="display:flex;flex-direction:column;gap:7px;margin-top:8px">
+            <!-- linha helper -->
+            <div style="display:flex;align-items:center;gap:6px;padding-bottom:6px;border-bottom:1px solid var(--bd)">
+              <span style="font-size:10px;color:var(--tx2);min-width:80px;text-transform:uppercase;letter-spacing:.03em">Elemento</span>
+              <div style="display:flex;gap:4px;margin-left:auto">
+                <div style="width:22px;height:22px;border-radius:4px;background:#FFD600;border:1px solid #c9a800"></div>
+                <div style="width:22px;height:22px;border-radius:4px;background:#E8000D;border:1px solid #a80009"></div>
+                <div style="width:22px;height:22px;border-radius:4px;background:#1a1a18;border:1px solid #000"></div>
+                <div style="width:22px;height:22px;border-radius:4px;background:#fff;border:1px solid #ccc"></div>
+                <div style="width:22px;height:22px;border-radius:4px;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);border:1px solid var(--bds)"></div>
+              </div>
+            </div>
+            <!-- Nome produto -->
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;min-width:80px;color:var(--tx)">Nome</span>
+              <div style="display:flex;gap:4px;margin-left:auto;align-items:center">
+                <button class="btn btn-sm" onclick="setCor('eCorTexto','#FFD600')" title="Amarelo" style="width:22px;height:22px;padding:0;background:#FFD600;border-color:#c9a800"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorTexto','#E8000D')" title="Vermelho" style="width:22px;height:22px;padding:0;background:#E8000D;border-color:#a80009"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorTexto','#000000')" title="Preto" style="width:22px;height:22px;padding:0;background:#1a1a18;border-color:#000"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorTexto','#ffffff')" title="Branco" style="width:22px;height:22px;padding:0;background:#fff;border-color:#ccc"></button>
+                <input type="color" id="eCorTexto" value="#000000" oninput="drawEncarte()" title="Cor personalizada" style="width:22px;height:22px;border:1px solid var(--bds);border-radius:4px;cursor:pointer;padding:1px;flex-shrink:0">
+              </div>
+            </div>
+            <!-- Valor DE -->
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;min-width:80px;color:var(--tx)">Valor DE</span>
+              <div style="display:flex;gap:4px;margin-left:auto;align-items:center">
+                <button class="btn btn-sm" onclick="setCor('eCorDe','#FFD600')" title="Amarelo" style="width:22px;height:22px;padding:0;background:#FFD600;border-color:#c9a800"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorDe','#E8000D')" title="Vermelho" style="width:22px;height:22px;padding:0;background:#E8000D;border-color:#a80009"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorDe','#000000')" title="Preto" style="width:22px;height:22px;padding:0;background:#1a1a18;border-color:#000"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorDe','#ffffff')" title="Branco" style="width:22px;height:22px;padding:0;background:#fff;border-color:#ccc"></button>
+                <input type="color" id="eCorDe" value="#ffffff" oninput="drawEncarte()" title="Cor personalizada" style="width:22px;height:22px;border:1px solid var(--bds);border-radius:4px;cursor:pointer;padding:1px;flex-shrink:0">
+              </div>
+            </div>
+            <!-- Valor POR -->
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;min-width:80px;color:var(--tx)">Valor POR</span>
+              <div style="display:flex;gap:4px;margin-left:auto;align-items:center">
+                <button class="btn btn-sm" onclick="setCor('eCorPor','#FFD600')" title="Amarelo" style="width:22px;height:22px;padding:0;background:#FFD600;border-color:#c9a800"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorPor','#E8000D')" title="Vermelho" style="width:22px;height:22px;padding:0;background:#E8000D;border-color:#a80009"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorPor','#000000')" title="Preto" style="width:22px;height:22px;padding:0;background:#1a1a18;border-color:#000"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorPor','#ffffff')" title="Branco" style="width:22px;height:22px;padding:0;background:#fff;border-color:#ccc"></button>
+                <input type="color" id="eCorPor" value="#FFD600" oninput="drawEncarte()" title="Cor personalizada" style="width:22px;height:22px;border:1px solid var(--bds);border-radius:4px;cursor:pointer;padding:1px;flex-shrink:0">
+              </div>
+            </div>
+            <!-- % Desconto -->
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;min-width:80px;color:var(--tx)">% Desconto</span>
+              <div style="display:flex;gap:4px;margin-left:auto;align-items:center">
+                <button class="btn btn-sm" onclick="setCor('eCorPct','#FFD600')" title="Amarelo" style="width:22px;height:22px;padding:0;background:#FFD600;border-color:#c9a800"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorPct','#E8000D')" title="Vermelho" style="width:22px;height:22px;padding:0;background:#E8000D;border-color:#a80009"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorPct','#000000')" title="Preto" style="width:22px;height:22px;padding:0;background:#1a1a18;border-color:#000"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorPct','#ffffff')" title="Branco" style="width:22px;height:22px;padding:0;background:#fff;border-color:#ccc"></button>
+                <input type="color" id="eCorPct" value="#8B0000" oninput="drawEncarte()" title="Cor personalizada" style="width:22px;height:22px;border:1px solid var(--bds);border-radius:4px;cursor:pointer;padding:1px;flex-shrink:0">
+              </div>
+            </div>
+            <!-- Unidade -->
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;min-width:80px;color:var(--tx)">Unidade</span>
+              <div style="display:flex;gap:4px;margin-left:auto;align-items:center">
+                <button class="btn btn-sm" onclick="setCor('eCorUnidade','#FFD600')" title="Amarelo" style="width:22px;height:22px;padding:0;background:#FFD600;border-color:#c9a800"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorUnidade','#E8000D')" title="Vermelho" style="width:22px;height:22px;padding:0;background:#E8000D;border-color:#a80009"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorUnidade','#000000')" title="Preto" style="width:22px;height:22px;padding:0;background:#1a1a18;border-color:#000"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorUnidade','#ffffff')" title="Branco" style="width:22px;height:22px;padding:0;background:#fff;border-color:#ccc"></button>
+                <input type="color" id="eCorUnidade" value="#8B0000" oninput="drawEncarte()" title="Cor personalizada" style="width:22px;height:22px;border:1px solid var(--bds);border-radius:4px;cursor:pointer;padding:1px;flex-shrink:0">
+              </div>
+            </div>
+            <!-- Validade -->
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;min-width:80px;color:var(--tx)">Validade</span>
+              <div style="display:flex;gap:4px;margin-left:auto;align-items:center">
+                <button class="btn btn-sm" onclick="setCor('eCorValidade','#FFD600')" title="Amarelo" style="width:22px;height:22px;padding:0;background:#FFD600;border-color:#c9a800"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorValidade','#E8000D')" title="Vermelho" style="width:22px;height:22px;padding:0;background:#E8000D;border-color:#a80009"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorValidade','#000000')" title="Preto" style="width:22px;height:22px;padding:0;background:#1a1a18;border-color:#000"></button>
+                <button class="btn btn-sm" onclick="setCor('eCorValidade','#ffffff')" title="Branco" style="width:22px;height:22px;padding:0;background:#fff;border-color:#ccc"></button>
+                <input type="color" id="eCorValidade" value="#500000" oninput="drawEncarte()" title="Cor personalizada" style="width:22px;height:22px;border:1px solid var(--bds);border-radius:4px;cursor:pointer;padding:1px;flex-shrink:0">
+              </div>
+            </div>
           </div>
         </div>
         <div style="background:var(--bg2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx2)">
@@ -486,7 +557,7 @@ function renderCharts(){
   charts.dc=new Chart(document.getElementById('cDesconto'),{type:'bar',data:{labels:top.map(function(p){return(p.nome||'').substring(0,25);}),datasets:[{label:'Valor desconto',data:top.map(function(p){return p.valorDesc;}),backgroundColor:'#BA7517',borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{font:{size:10},callback:function(v){return'R$'+v.toFixed(2);}}},y:{ticks:{font:{size:10}}}}}});
 }
 
-function setCor(c){document.getElementById('eCorTexto').value=c;drawEncarte();}
+function setCor(id,c){document.getElementById(id).value=c;drawEncarte();}
 function loadFoto(input){
   if(!input.files[0])return;
   var r=new FileReader();
@@ -507,6 +578,11 @@ async function drawEncarte(){
   var validade=document.getElementById('eValidade').value||'';
   var unidade=document.getElementById('eUnidade').value||'CADA';
   var corTexto=document.getElementById('eCorTexto').value||'#000000';
+  var corDe=document.getElementById('eCorDe').value||'#ffffff';
+  var corPor=document.getElementById('eCorPor').value||'#FFD600';
+  var corPct=document.getElementById('eCorPct').value||'#8B0000';
+  var corUnidade=document.getElementById('eCorUnidade').value||'#8B0000';
+  var corValidade=document.getElementById('eCorValidade').value||'#500000';
 
   var tmpl=await loadAsset(ASSET_TEMPLATE);
   ctx.drawImage(tmpl,0,0,W,H);
@@ -542,36 +618,37 @@ async function drawEncarte(){
     ctx.drawImage(fotoImg,fX+(fW-fw)/2,fY+(fH-fh)/2,fw,fh);
   }
 
-  // Valor DE — numero branco apos R$ do asset (R$ em ~x=655 y=858, numero em x=718 y=942)
-  ctx.textBaseline='alphabetic';ctx.textAlign='left';ctx.fillStyle='#ffffff';
-  var deFs=108;
+  // Valor DE — número na área vermelha DE, após o "R$" do template
+  // R$ fica em ~x=640 y=~855. Valor numérico começa após ele
+  ctx.textBaseline='alphabetic';ctx.textAlign='left';ctx.fillStyle=corDe;
+  var deFs=100;
   ctx.font='900 '+deFs+'px Arial Black,Arial,sans-serif';
-  while(ctx.measureText(de||'0,00').width>195&&deFs>44){deFs-=5;ctx.font='900 '+deFs+'px Arial Black,Arial,sans-serif';}
-  ctx.fillText(de||'0,00',718,942);
+  while(ctx.measureText(de||'0,00').width>210&&deFs>36){deFs-=5;ctx.font='900 '+deFs+'px Arial Black,Arial,sans-serif';}
+  ctx.fillText(de||'0,00',718,870);
 
-  // Unidade na aba amarela POR (centro x=730, y=967)
-  ctx.fillStyle='#8B0000';ctx.font='900 62px Arial Black,Arial,sans-serif';
+  // Unidade no canto direito da aba POR (~x=900, y=990) — fora do valor POR
+  ctx.fillStyle=corUnidade;ctx.font='900 52px Arial Black,Arial,sans-serif';
   ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(unidade,730,967);
+  ctx.fillText(unidade,900,990);
 
-  // Valor POR — amarelo apos R$ do asset (R$ em ~x=498 y=1175, numero em x=595 y=1200)
-  ctx.fillStyle='#FFD600';ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  // Valor POR — cor configuravel, após "R$" do template (~x=595, y=1175)
+  ctx.fillStyle=corPor;ctx.textAlign='left';ctx.textBaseline='alphabetic';
   var porFs=195;
   ctx.font='900 '+porFs+'px Arial Black,Arial,sans-serif';
-  while(ctx.measureText(por||'0,00').width>375&&porFs>60){porFs-=10;ctx.font='900 '+porFs+'px Arial Black,Arial,sans-serif';}
-  ctx.fillText(por||'0,00',595,1200);
+  while(ctx.measureText(por||'0,00').width>350&&porFs>60){porFs-=10;ctx.font='900 '+porFs+'px Arial Black,Arial,sans-serif';}
+  ctx.fillText(por||'0,00',595,1175);
 
   // % no circulo amarelo do asset (~x=917, y=912)
   if(pct){
     var pctNum=pct.replace(/[^0-9,.]/g,'');
-    ctx.fillStyle='#8B0000';ctx.font='900 54px Arial Black,Arial,sans-serif';
+    ctx.fillStyle=corPct;ctx.font='900 54px Arial Black,Arial,sans-serif';
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(pctNum+'%',917,912);
   }
 
   // Validade discreta abaixo da caixa POR
   if(validade){
-    ctx.fillStyle='rgba(80,0,0,0.65)';ctx.font='26px Arial';
+    ctx.fillStyle=corValidade;ctx.font='26px Arial';
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('Validade: '+validade,730,1245);
   }
@@ -603,6 +680,11 @@ function openEncarteModal(idx){
   }
   document.getElementById('eUnidade').value='CADA';
   document.getElementById('eCorTexto').value='#000000';
+  document.getElementById('eCorDe').value='#ffffff';
+  document.getElementById('eCorPor').value='#FFD600';
+  document.getElementById('eCorPct').value='#8B0000';
+  document.getElementById('eCorUnidade').value='#8B0000';
+  document.getElementById('eCorValidade').value='#500000';
   fotoImg=null;document.getElementById('eFoto').value='';
   document.getElementById('encarteModal').classList.add('open');
   setTimeout(drawEncarte,100);
