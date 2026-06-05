@@ -435,9 +435,25 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 // ── ASSET ENCARTE (template único) ──────────────────────────────────────────
-const ASSET_TEMPLATE = 'template-encarte.png'; 
-function loadAsset(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=src;})}
-
+const ASSET_TEMPLATE = 'template-encarte.png';
+function loadAsset(src) {
+  return new Promise((resolve) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = () => {
+      // Se a imagem de fundo oficial falhar ou não existir, cria uma tela de fundo provisória para não quebrar o código
+      const canvasDummy = document.createElement('canvas');
+      canvasDummy.width = 1054; canvasDummy.height = 1492;
+      const ctxD = canvasDummy.getContext('2d');
+      ctxD.fillStyle = '#E8000D'; ctxD.fillRect(0,0,1054,1492);
+      ctxD.fillStyle = '#FFF'; ctxD.fillRect(20,490,1014,760);
+      const imgDummy = new Image();
+      imgDummy.src = canvasDummy.toDataURL();
+      imgDummy.onload = () => resolve(imgDummy);
+    };
+    i.src = src;
+  });
+}
 // ── CONFIG ──────────────────────────────────────────────────────────────────
 const CFG_KEY = 'aura_cfg', PROD_KEY = 'aura_prod';
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
@@ -448,69 +464,140 @@ let products = JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
 function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}
 function saveProd(){localStorage.setItem(PROD_KEY,JSON.stringify(products))}
 
-function saveConfig(){
-  const cfg={
-    id: document.getElementById('cId').value.trim(),
-    aba: document.getElementById('cAba').value.trim()||'2025',
-    idBanco: document.getElementById('cIdBanco').value.trim(),
-    abaBanco: document.getElementById('cAbaBanco').value.trim()||'BANCO DE DADOS',
-    abaResp: document.getElementById('cAbaResp').value.trim()||'Respostas ao formulário 1',
-  };
-  if(!cfg.id){alert('Informe o ID da planilha.');return}
-  if(!cfg.idBanco) cfg.idBanco=cfg.id;
-  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
-  toggleCfg(); syncAll();
-}
-function toggleCfg(){
-  const b=document.getElementById('cfgBox');
-  const show=b.style.display==='none'||!b.style.display;
-  b.style.display=show?'block':'none';
-  if(show){const c=loadCfg();document.getElementById('cId').value=c.id||'';document.getElementById('cAba').value=c.aba||'2025';document.getElementById('cIdBanco').value=c.idBanco||'';document.getElementById('cAbaBanco').value=c.abaBanco||'BANCO DE DADOS';document.getElementById('cAbaResp').value=c.abaResp||'Respostas ao formulário 1';}
-}
+// ── FUNÇÕES DE CONTROLE DE MODAL E ABAS (CORREÇÃO DOS BOTÕES) ────────────────
 
-// ── SHEETS API ───────────────────────────────────────────────────────────────
-function sheetsURL(id,aba){return `https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(aba)}`}
-async function fetchSheet(id,aba){
-  const r=await fetch(sheetsURL(id,aba));
-  if(!r.ok) throw new Error('HTTP '+r.status);
-  const t=await r.text();
-  const j=JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
-  if(j.status==='error') throw new Error(j.errors?.[0]?.message||'Erro planilha');
-  return j.table;
-}
-function rawRows(table){return table.rows||[]}
-function cellVal(cell){if(!cell)return null;return cell.f||cell.v}
-function cellStr(cell){return String(cellVal(cell)||'').trim()}
-function cellNum(cell){
-  if(!cell)return 0;
-  let v=cell.f||cell.v;
-  if(typeof v==='string') v=v.replace(/[R$\s%]/g,'').replace(',','.');
-  return parseFloat(v)||0;
-}
-
-function findColIdx(headerCells, keywords){
-  for(const kw of keywords){
-    const i=headerCells.findIndex(c=>String(c?.f||c?.v||'').toLowerCase().includes(kw.toLowerCase()));
-    if(i>=0)return i;
+// Alterna entre as abas: Validades, Promoções, Relatório e Ajuda
+function goTab(tabId) {
+  // Remove a classe active de todas as abas e seções
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  
+  // Adiciona a classe active na aba clicada
+  const clickedTab = Array.from(document.querySelectorAll('.tab')).find(t => t.getAttribute('onclick').includes(tabId));
+  if (clickedTab) clickedTab.classList.add('active');
+  
+  // Mostra a seção correspondente
+  const targetSec = document.getElementById('sec-' + tabId);
+  if (targetSec) {
+    targetSec.classList.add('active');
+    // Se mudar para a aba de relatórios, renderiza os gráficos
+    if (tabId === 'relatorio' && typeof renderCharts === 'function') {
+      renderCharts();
+    }
   }
-  return -1;
 }
 
-function parseDate(v){
-  if(!v&&v!==0)return '';
-  const s=String(v);
-  // Date(y,m,d)
-  const dm=s.match(/Date\((\d+),(\d+),(\d+)\)/);
-  if(dm) return `${dm[1]}-${String(+dm[2]+1).padStart(2,'0')}-${String(dm[3]).padStart(2,'0')}`;
-  // DD/MM/YYYY
-  const dd=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(dd) return `${dd[3]}-${dd[2].padStart(2,'0')}-${dd[1].padStart(2,'0')}`;
-  // YYYY-MM-DD
-  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return s.substring(0,10);
-  // número (serial Excel)
-  if(!isNaN(v)&&Number(v)>1000){const d=new Date((Number(v)-25569)*86400000);return d.toISOString().substring(0,10);}
-  return s.substring(0,10);
+// Abre o modal de Registro Manual
+function openAddModal() {
+  const modal = document.getElementById('addModal');
+  if (modal) modal.classList.add('open');
 }
+
+// Abre o modal de Encarte e preenche automaticamente se um produto for enviado
+function openEncarteModal(index) {
+  const modal = document.getElementById('encarteModal');
+  if (!modal) return;
+  
+  modal.classList.add('open');
+  
+  // Se veio um index da tabela ou dos cards, preenche os campos do formulário
+  if (index !== null && products[index]) {
+    const p = products[index];
+    document.getElementById('eProduto').value = p.nome || '';
+    document.getElementById('eDe').value = p.precoNormal ? 'R$ ' + p.precoNormal.toFixed(2).replace('.', ',') : '';
+    document.getElementById('ePor').value = p.precoPromo ? 'R$ ' + p.precoPromo.toFixed(2).replace('.', ',') : '';
+    document.getElementById('ePct').value = p.pctDesc ? (p.pctDesc < 1 ? (p.pctDesc * 100).toFixed(0) : p.pctDesc.toFixed(0)) + '%' : '';
+    document.getElementById('eValidade').value = p.validade ? p.validade.split('-').reverse().join('/') : '';
+  }
+  
+  // Força o desenho inicial do Canvas
+  if (typeof drawEncarte === 'function') {
+    setTimeout(drawEncarte, 100);
+  }
+}
+
+// Fecha os modais removendo a classe 'open'
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.remove('open');
+}
+
+// Ação do botão salvar do Registro Manual
+function addManual() {
+  const cod = document.getElementById('fCod').value.trim();
+  const setor = document.getElementById('fSetorM').value;
+  const nome = document.getElementById('fNome').value.trim();
+  const validade = document.getElementById('fVal').value;
+  const qtde = parseInt(document.getElementById('fQtde').value) || 1;
+
+  if (!nome || !validade) {
+    alert('Por favor, preencha o nome do produto e a data de validade.');
+    return;
+  }
+
+  const newProd = {
+    cod,
+    nome,
+    setor,
+    validade,
+    qtde,
+    precoNormal: 0,
+    precoPromo: 0,
+    pctDesc: 0,
+    valorDesc: 0,
+    src: 'manual'
+  };
+
+  products.push(newProd);
+  saveProd();
+  closeModal('addModal');
+  
+  // Limpa o formulário manual
+  document.getElementById('fCod').value = '';
+  document.getElementById('fNome').value = '';
+  document.getElementById('fVal').value = '';
+  document.getElementById('fQtde').value = '1';
+
+  // Atualiza a tela se as funções de render existirem
+  if (typeof refresh === 'function') refresh();
+  else if (typeof renderTable === 'function') { renderTable(); renderMetrics(); }
+}
+
+// Remove produto inserido manualmente
+function rmProduct(index) {
+  if (confirm('Deseja realmente remover este registro manual?')) {
+    products.splice(index, 1);
+    saveProd();
+    if (typeof refresh === 'function') refresh();
+    else if (typeof renderTable === 'function') { renderTable(); renderMetrics(); }
+  }
+}
+
+// Inicializador das renderizações gerais da página
+function refresh() {
+  if (typeof renderTable === 'function') renderTable();
+  if (typeof renderPromos === 'function') renderPromos();
+  if (typeof renderMetrics === 'function') renderMetrics();
+}
+
+// Atalho para baixar o encarte do canvas como PNG
+function downloadEncarte() {
+  const cv = document.getElementById('encarteCanvas');
+  if (!cv) return;
+  const link = document.createElement('a');
+  link.download = (document.getElementById('eProduto').value || 'encarte') + '.png';
+  link.href = cv.toDataURL('image/png');
+  link.click();
+}
+
+// Executa ao carregar a página pela primeira vez
+window.addEventListener('DOMContentLoaded', () => {
+  refresh();
+  const cfg = loadCfg();
+  if (cfg.id) {
+    syncAll();
+  }
+});
 
 // ── BANCO DE DADOS ────────────────────────────────────────────────────────────
 let banco={};
