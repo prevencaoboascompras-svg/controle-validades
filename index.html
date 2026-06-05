@@ -7,428 +7,247 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;
-  --tx:#1a1a18;--tx2:#6b6b67;
-  --bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);
-  --r:8px;--rl:12px;
-  --green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;
-}
-@media(prefers-color-scheme:dark){:root{
-  --bg:#1e1e1c;--bg2:#282825;--bg3:#323230;
-  --tx:#f0efe8;--tx2:#9b9b95;
-  --bd:rgba(255,255,255,.1);--bds:rgba(255,255,255,.2);
-}}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--tx);min-height:100vh}
-.app{max-width:1280px;margin:0 auto;padding:24px 20px}
-
-/* CONFIG */
-.cfg{background:var(--bg);border:2px dashed var(--bds);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;display:none}
-.cfg h3{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--amber)}
-.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.cfg-field label{display:block;font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
-.cfg-field input{width:100%;font-size:13px;padding:8px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg2);color:var(--tx);outline:none}
-.cfg-field input:focus{border-color:var(--green)}
-.cfg-hint{font-size:12px;color:var(--tx2);margin-top:10px;line-height:1.7}
-.cfg-hint code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:11px}
-
-/* STATUS */
-.status-row{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-.dot{width:8px;height:8px;border-radius:50%;background:#888;flex-shrink:0}
-.dot.ok{background:var(--green)}.dot.err{background:var(--red)}.dot.loading{background:var(--amber)}
-.st{font-size:13px;color:var(--tx2)}
-.sync-time{font-size:12px;color:var(--tx2);margin-left:auto}
-
-/* TOPBAR */
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
-.topbar h1{font-size:20px;font-weight:600;display:flex;align-items:center;gap:8px}
-.topbar h1 i{color:var(--green)}
-.topbar p{font-size:13px;color:var(--tx2);margin-top:3px}
-.topbar-right{display:flex;gap:8px;flex-wrap:wrap}
-
-/* BUTTONS */
-.btn{border:1px solid var(--bds);background:var(--bg);color:var(--tx);font-size:13px;font-weight:500;padding:7px 16px;border-radius:var(--r);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s;white-space:nowrap}
-.btn:hover{background:var(--bg2)}.btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-green{background:var(--green);border-color:var(--green);color:#fff}.btn-green:hover{background:var(--gd)}
-.btn-blue{background:var(--blue);border-color:var(--blue);color:#fff}.btn-blue:hover{background:#185FA5}
-.btn-red{background:var(--red);border-color:var(--red);color:#fff}.btn-red:hover{background:#b53333}
-.btn-sm{padding:5px 11px;font-size:12px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.spin{animation:spin 1s linear infinite;display:inline-block}
-
-/* METRICS */
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-bottom:20px}
-.metric{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
-.metric-lbl{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
-.metric-val{font-size:28px;font-weight:600}
-.metric-val.danger{color:var(--red)}.metric-val.warn{color:var(--amber)}.metric-val.ok{color:var(--green)}.metric-val.info{color:var(--blue)}
-
-/* ALERT */
-.alert{background:#FAEEDA;border-left:4px solid var(--amber);border-radius:0 var(--r) var(--r) 0;padding:11px 16px;font-size:13px;color:#854F0B;margin-bottom:16px;display:none;align-items:center;gap:10px}
-.alert.show{display:flex}
-
-/* TABS */
-.tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--bd)}
-.tab{font-size:13px;font-weight:500;padding:10px 18px;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:7px;transition:color .15s}
-.tab.active{color:var(--tx);border-bottom-color:var(--green)}
-.tab:hover:not(.active){color:var(--tx)}
-.sec{display:none}.sec.active{display:block}
-
-/* FILTERS */
-.filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
-.filters select,.filters input[type=text]{font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none}
-.filters input[type=text]{min-width:220px}
-
-/* TABLE */
-.twrap{border:1px solid var(--bd);border-radius:var(--rl);overflow:auto;background:var(--bg)}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}
-th{background:var(--bg2);padding:10px 12px;text-align:left;font-weight:500;color:var(--tx2);font-size:11px;border-bottom:1px solid var(--bd);white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
-td{padding:10px 12px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle}
+:root{\n  --bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;\n  --tx:#1a1a18;--tx2:#6b6b67;\n  --bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);\n  --r:8px;--rl:12px;\n  --green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;\n}
+@media(prefers-color-scheme:dark){:root{\n  --bg:#1e1e1c;--bg2:#282825;--bg3:#323230;\n  --tx:#f0efe8;--tx2:#9b9b95;\n  --bd:rgba(255,255,255,.08);--bds:rgba(0,0,0,.4);\n}}
+body{background:var(--bg2);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;padding-bottom:60px}
+header{background:var(--bg);border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;align-items:center;justify-content:between;position:sticky;top:0;z-index:10}
+.h-left{display:flex;align-items:center;gap:8px}
+.h-left i{font-size:24px;color:var(--green)}
+.h-title{font-size:16px;font-weight:700}
+.h-right{display:flex;align-items:center;gap:12px}
+.status-sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)}
+.status-sync i{font-size:16px}
+.status-sync.ok i{color:var(--green)}
+.nav-tabs{background:var(--bg);border-bottom:1px solid var(--bd);display:flex;gap:4px;padding:0 8px;overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.tab{padding:12px 12px;font-weight:500;color:var(--tx2);cursor:pointer;white-space:nowrap;position:relative;display:flex;align-items:center;gap:6px;transition:color .15s}
+.tab i{font-size:18px}
+.tab:hover{color:var(--tx)}
+.tab.active{color:var(--green);font-weight:600}
+.tab.active::after{content:"";position:absolute;bottom:0;left:12px;right:12px;height:2px;background:var(--green);border-radius:2px 2px 0 0}
+main{max-width:1200px;margin:0 auto;padding:16px}
+.sec{display:none}
+.sec.active{display:block}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.card-m{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:4px}
+.card-m-title{font-size:12px;color:var(--tx2);font-weight:500}
+.card-m-val{font-size:20px;font-weight:700}
+.card-m.critical .card-m-val{color:var(--red)}
+.card-m.warning .card-m-val{color:var(--amber)}
+.actions-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;justify-content:between;align-items:center}
+.search-box{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:0 10px;display:flex;align-items:center;gap:6px;flex:1;min-width:200px}
+.search-box i{color:var(--tx2);font-size:18px}
+.search-box input{background:none;border:none;color:var(--tx);padding:8px 0;width:100%;font-size:14px}
+.search-box input:focus{outline:none}
+.btn{background:var(--bg3);border:none;color:var(--tx);padding:8px 14px;border-radius:var(--r);font-weight:500;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:opacity .15s;text-decoration:none}
+.btn:hover{opacity:.85}
+.btn-green{background:var(--green);color:#fff}
+.btn-blue{background:var(--blue);color:#fff}
+.table-wrapper{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}
+th{background:var(--bg3);color:var(--tx2);font-weight:600;padding:10px 12px;border-bottom:1px solid var(--bd)}
+td{padding:10px 12px;border-bottom:1px solid var(--bd);vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:var(--bg2)}
-
-/* BADGES */
-.badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block;white-space:nowrap}
-.b-danger{background:#FCEBEB;color:#A32D2D}
-.b-warn{background:#FAEEDA;color:#854F0B}
-.b-ok{background:#EAF3DE;color:#3B6D11}
-.b-blue{background:#E6F1FB;color:#185FA5}
-.b-gray{background:var(--bg2);color:var(--tx2)}
-.b-green{background:#EAF3DE;color:#3B6D11}
-
-/* BAR */
-.bar-wrap{display:flex;align-items:center;gap:8px}
-.bar-bg{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;max-width:70px}
-.bar-fill{height:100%;border-radius:3px}
-
-/* ACTION BTNS */
-.abtn{font-size:12px;padding:4px 9px;border:1px solid var(--bds);border-radius:var(--r);cursor:pointer;background:var(--bg);color:var(--tx);margin-right:3px;display:inline-flex;align-items:center;gap:4px;transition:background .15s}
-.abtn:hover{background:var(--bg2)}
-.abtn.promo{border-color:var(--blue);color:var(--blue)}.abtn.promo:hover{background:#E6F1FB}
-.abtn.encarte{border-color:var(--green);color:var(--green)}.abtn.encarte:hover{background:#EAF3DE}
-
-/* PROMOS TAB */
-.promo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
-.promo-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden}
-.promo-card-header{background:linear-gradient(135deg,#1D9E75,#0F6E56);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
-.promo-card-header .pct{font-size:28px;font-weight:700;color:#fff;line-height:1}
-.promo-card-header .pct small{font-size:12px;font-weight:400;display:block}
-.promo-card-header .promo-name{font-size:13px;color:rgba(255,255,255,.9);flex:1;margin:0 12px;font-weight:500}
-.promo-card-body{padding:14px 16px}
-.promo-prices{display:flex;align-items:center;gap:16px;margin-bottom:10px}
-.price-de{font-size:13px;color:var(--tx2);text-decoration:line-through}
-.price-por{font-size:24px;font-weight:700;color:var(--green)}
-.promo-meta{font-size:12px;color:var(--tx2);display:flex;gap:12px;flex-wrap:wrap}
-.promo-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
-
-/* ENCARTE MODAL */
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:20px}
+.p-info{display:flex;flex-direction:column;gap:2px}
+.p-name{font-weight:600;color:var(--tx)}
+.p-cod{font-size:11px;color:var(--tx2)}
+.badge{display:inline-flex;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-red{background:rgba(226,75,74,.15);color:var(--red)}
+.badge-amber{background:rgba(186,117,23,.15);color:var(--amber)}
+.badge-green{background:rgba(29,158,117,.15);color:var(--green)}
+.badge-gray{background:var(--bg3);color:var(--tx2)}
+.actions-cell{display:flex;gap:4px;justify-content:end}
+.btn-icon{background:none;border:none;color:var(--tx2);padding:6px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.btn-icon:hover{background:var(--bg3);color:var(--tx)}
+.btn-icon.del:hover{background:rgba(226,75,74,.1);color:var(--red)}
+.grid-promos{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.card-p{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;display:flex;flex-direction:column;position:relative}
+.card-p-badge{position:absolute;top:10px;right:10px;z-index:2}
+.card-p-body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.card-p-dates{font-size:11px;color:var(--tx2);display:flex;flex-direction:column;gap:2px}
+.card-p-price{display:flex;align-items:baseline;gap:8px;margin-top:4px}
+.price-de{font-size:12px;color:var(--tx2);text-decoration:line-through}
+.price-por{font-size:18px;font-weight:800;color:var(--red)}
+.card-p-foot{background:var(--bg3);padding:8px 14px;display:flex;justify-content:end}
+.modal-ov{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:100;padding:16px}
 .modal-ov.open{display:flex}
-.modal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:0;width:900px;max-width:98vw;max-height:96vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.25)}
-.modal-head{padding:18px 22px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.modal-head h3{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
-.modal-body{display:grid;grid-template-columns:1fr 380px;overflow:auto;flex:1}
-.encarte-controls{padding:20px;border-right:1px solid var(--bd);overflow-y:auto}
-.encarte-preview{padding:20px;background:var(--bg2);display:flex;flex-direction:column;align-items:center;gap:14px;overflow-y:auto}
-.form-row{margin-bottom:14px}
-.form-row label{display:block;font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em}
-.form-row input,.form-row select,.form-row textarea{width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;font-family:inherit}
-.form-row input:focus,.form-row select:focus{border-color:var(--green)}
+.smodal{background:var(--bg);border-radius:var(--rl);width:100%;max-width:460px;box-shadow:0 10px 25px var(--bds);display:flex;flex-direction:column;overflow:hidden;animation:m-show .2s ease-out}
+@keyframes m-show{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.smodal h3{padding:16px 16px 12px;font-size:16px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+.smodal-body{padding:16px;display:flex;flex-direction:column;gap:12px;max-height:70vh;overflow-y:auto}
+.form-row{display:flex;flex-direction:column;gap:4px}
+.form-row label{font-size:12px;font-weight:600;color:var(--tx2)}
+.form-row input,.form-row select{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:8px 10px;color:var(--tx);font-size:14px;width:100%}
+.form-row input:focus,.form-row select:focus{outline:none;border-color:var(--green)}
 .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.modal-foot{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0}
-
-/* ENCARTE CANVAS */
-#encarteCanvas{border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.2);max-width:100%}
-.canvas-hint{font-size:12px;color:var(--tx2);text-align:center}
-
-/* MODAL SIMPLES */
-.smodal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:28px;width:480px;max-width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
-.smodal h3{font-size:16px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:8px}
-.smodal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid var(--bd)}
-
-/* HELP */
-.help-box{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:20px 24px;margin-bottom:16px}
-.help-box h4{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.steps{counter-reset:s}
-.step{counter-increment:s;display:flex;gap:12px;margin-bottom:12px;font-size:13px;line-height:1.6}
-.step::before{content:counter(s);background:var(--green);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
-pre{background:var(--bg2);border-radius:var(--r);padding:14px;font-size:12px;overflow:auto;line-height:1.6;color:var(--tx)}
-code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font-family:monospace}
-
-/* EMPTY */
-.empty{text-align:center;padding:50px 20px;color:var(--tx2);font-size:14px}
-.empty i{font-size:36px;display:block;margin-bottom:10px;opacity:.4}
-
-.src-tag{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bg2);color:var(--tx2);display:inline-block;margin-left:5px;vertical-align:middle}
-.src-tag.sheets{background:#EAF3DE;color:#3B6D11}
-
-@media(max-width:700px){
-  .cfg-grid,.form-row-2{grid-template-columns:1fr}
-  .modal-body{grid-template-columns:1fr}
-  .promo-grid{grid-template-columns:1fr}
-}
+.smodal-foot{padding:12px 16px;background:var(--bg3);display:flex;justify-content:end;gap:8px;border-top:1px solid var(--bd)}
+.encarte-layout{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:768px){.encarte-layout{grid-template-columns:1fr 340px}}
+.canvas-container{background:var(--bg3);border-radius:var(--r);padding:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid var(--bd)}
+.canvas-container canvas{max-width:100%;height:auto;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.15);border-radius:4px}
+.color-picker-group{display:flex;gap:8px;margin-top:4px}
+.color-btn{width:32px;height:32px;border-radius:50%;border:2px solid transparent;cursor:pointer;position:relative}
+.color-btn.active::after{content:"\eb33";font-family:tabler-icons;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:16px}
+.help-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.help-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:16px;display:flex;flex-direction:column;gap:8px}
+.help-card h4{font-size:15px;display:flex;align-items:center;gap:8px;color:var(--green)}
+.help-card p{color:var(--tx2);font-size:13px;line-height:1.5}
+.help-card ul{padding-left:18px;color:var(--tx2);font-size:13px;display:flex;flex-direction:column;gap:4px}
+.chart-container{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:16px;margin-bottom:16px;height:300px;position:relative}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-<div class="app">
 
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div>
-      <h1><i class="ti ti-calendar-due"></i> Controle de Validades</h1>
-      <p>Prevenção de perdas — integrado ao Google Sheets · AURA Boas Compras</p>
-    </div>
-    <div class="topbar-right">
-      <button class="btn" id="btnSync" onclick="syncAll()"><i class="ti ti-refresh"></i> Sincronizar</button>
-      <button class="btn" onclick="openAddModal()"><i class="ti ti-plus"></i> Registro manual</button>
-      <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Gerar encarte</button>
+<header>
+  <div class="h-left">
+    <i class="ti ti-calendar-time"></i>
+    <div class="h-title">Controle de Validades</div>
+  </div>
+  <div class="h-right">
+    <div class="status-sync ok" id="syncStatus">
+      <i class="ti ti-cloud-check"></i>
+      <span>Local</span>
     </div>
   </div>
+</header>
 
-  <!-- CONFIG -->
-  <div class="cfg" id="cfgBox">
-    <h3><i class="ti ti-settings"></i> Configurar conexão com Google Sheets</h3>
-    <div class="cfg-grid">
-      <div class="cfg-field"><label>ID da planilha principal (AURA VENCIMENTOS)</label><input id="cId" placeholder="ID da URL do Google Sheets"></div>
-      <div class="cfg-field"><label>Nome da aba principal</label><input id="cAba" placeholder="2025"></div>
-      <div class="cfg-field"><label>ID da planilha Banco de Dados (pode ser o mesmo)</label><input id="cIdBanco" placeholder="mesmo ID ou outro"></div>
-      <div class="cfg-field"><label>Nome da aba Banco de Dados</label><input id="cAbaBanco" placeholder="BANCO DE DADOS"></div>
-      <div class="cfg-field"><label>Nome da aba Respostas do Formulário</label><input id="cAbaResp" placeholder="Respostas ao formulário 1"></div>
+<div class="nav-tabs">
+  <div class="tab active" onclick="goTab('validades')"><i class="ti ti-alert-triangle"></i>Validades</div>
+  <div class="tab" onclick="goTab('promocoes')"><i class="ti ti-tag"></i>Promoções</div>
+  <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i>Relatório</div>
+  <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i>Ajuda</div>
+</div>
+
+<main>
+  <section class="sec active" id="sec-validades">
+    <div class="metrics" id="metricsDiv"></div>
+    <div class="actions-bar">
+      <div class="search-box">
+        <i class="ti ti-search"></i>
+        <input type="text" id="pSearch" placeholder="Buscar produto por nome ou código..." oninput="renderTable()">
+      </div>
+      <button class="btn btn-green" onclick="openAddModal()"><i class="ti ti-plus"></i>Registro manual</button>
     </div>
-    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-      <button class="btn btn-green" onclick="saveConfig()"><i class="ti ti-check"></i> Salvar e conectar</button>
-      <button class="btn" onclick="toggleCfg()">Fechar</button>
-    </div>
-    <div class="cfg-hint">
-      ⚠️ A planilha precisa estar <strong>pública para leitura</strong>: Compartilhar → Qualquer pessoa com o link → Leitor<br>
-      ID está na URL: <code>docs.google.com/spreadsheets/d/<strong>SEU_ID</strong>/edit</code><br>
-      Colunas esperadas na aba principal: <code>SETOR · PRODUTO · VALIDADE · STATUS · CUSTO GERENCIAL · VALOR VENDA · PREÇO DO DIA · % REAL DE DESCONTO · VALOR DO DESCONTO</code>
-    </div>
-  </div>
-
-  <!-- STATUS -->
-  <div class="status-row">
-    <div class="dot" id="dot"></div>
-    <span class="st" id="stText">Não conectado — configure o Google Sheets</span>
-    <button class="btn btn-sm" onclick="toggleCfg()"><i class="ti ti-settings"></i> Configurar</button>
-    <span class="sync-time" id="syncTime"></span>
-  </div>
-
-  <!-- METRICS -->
-  <div class="metrics" id="metrics"></div>
-
-  <!-- ALERT -->
-  <div class="alert" id="alertBanner">
-    <i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0"></i>
-    <span id="alertTxt"></span>
-  </div>
-
-  <!-- TABS -->
-  <div class="tabs">
-    <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
-    <div class="tab" onclick="goTab('promocoes')"><i class="ti ti-tag"></i> Promoções</div>
-    <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório</div>
-    <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i> Como configurar</div>
-  </div>
-
-  <!-- TAB VALIDADES -->
-  <div id="sec-validades" class="sec active">
-    <div class="filters">
-      <select id="fSetor" onchange="renderTable()">
-        <option value="">Todos os setores</option>
-        <option>Açougue</option><option>Bebidas</option><option>Congelados</option>
-        <option>FLV</option><option>Frios</option><option>Laticínios</option>
-        <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
-      </select>
-      <select id="fStatus" onchange="renderTable()">
-        <option value="">Todos os status</option>
-        <option value="vencido">Vencido</option>
-        <option value="critico">Crítico (≤3d)</option>
-        <option value="urgente">Urgente (≤7d)</option>
-        <option value="atencao">Atenção (≤15d)</option>
-        <option value="ok">OK</option>
-      </select>
-      <input type="text" id="fBusca" placeholder="Buscar produto ou código..." oninput="renderTable()">
-    </div>
-    <div class="twrap">
+    <div class="table-wrapper">
       <table>
-        <thead><tr>
-          <th>Código</th><th>Produto</th><th>Setor</th><th>Validade</th>
-          <th>Dias</th><th>Qtde</th><th>Preço normal</th><th>Preço promoção</th><th>Desconto</th><th>Status</th><th>Ações</th>
-        </tr></thead>
-        <tbody id="tbody"></tbody>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Setor</th>
+            <th>Validade</th>
+            <th>Dias</th>
+            <th>Status</th>
+            <th style="text-align:right">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="pTableBody"></tbody>
       </table>
     </div>
-  </div>
+  </section>
 
-  <!-- TAB PROMOÇÕES -->
-  <div id="sec-promocoes" class="sec">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <p style="font-size:13px;color:var(--tx2)">Produtos com status <strong>Aguarda</strong> da planilha — preços calculados automaticamente</p>
-      <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Novo encarte</button>
+  <section class="sec" id="sec-promocoes">
+    <div class="actions-bar">
+      <div style="font-weight:600;font-size:16px">Produtos em Oferta de Vencimento</div>
     </div>
-    <div class="promo-grid" id="promoGrid"></div>
+    <div class="grid-promos" id="promosGrid"></div>
+  </section>
+
+  <section class="sec" id="sec-relatorio">
+    <div class="chart-container">
+      <canvas id="chartSetores"></canvas>
+    </div>
+  </section>
+
+  <section class="sec" id="sec-ajuda">
+    <div class="help-grid">
+      <div class="help-card">
+        <h4><i class="ti ti-info-circle"></i> Regras de Alerta</h4>
+        <p>O sistema categoriza os produtos automaticamente com base nos dias restantes:</p>
+        <ul>
+          <li><b style="color:var(--red)">Crítico:</b> Menos de 5 dias para vencer.</li>
+          <li><b style="color:var(--amber)">Atenção:</b> Entre 5 e 15 dias para vencer.</li>
+          <li><b style="color:var(--green)">Normal:</b> Mais de 15 dias restantes.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal-ov" id="addModal">
+  <div class="smodal">
+    <h3><i class="ti ti-clipboard-plus" style="color:var(--green)"></i> Registro manual</h3>
+    <div class="smodal-body">
+      <div class="form-row-2">
+        <div class="form-row"><label>Código de barras</label><input id="fCod" type="text" placeholder="789..."></div>
+        <div class="form-row"><label>Setor</label>
+          <select id="fSetorM">
+            <option>Açougue</option><option>Bebidas</option><option>Congelados</option>
+            <option>FLV</option><option>Frios</option><option>Laticínios</option>
+            <option>Outros</option><option>Pet</option><option>Seca</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row"><label>Produto</label><input id="fNome" type="text" placeholder="Nome do produto"></div>
+      <div class="form-row-2">
+        <div class="form-row"><label>Validade</label><input id="fVal" type="date"></div>
+        <div class="form-row"><label>Quantidade</label><input id="fQtde" type="number" value="1" min="1"></div>
+      </div>
+    </div>
+    <div class="smodal-foot">
+      <button class="btn" onclick="closeModal('addModal')">Cancelar</button>
+      <button class="btn btn-green" onclick="addManual()">Salvar</button>
+    </div>
   </div>
-let products = JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
+</div>
 
-function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}
-function saveProd(){localStorage.setItem(PROD_KEY,JSON.stringify(products))}
+<div class="modal-ov" id="encarteModal">
+  <div class="smodal" style="max-width:800px">
+    <h3><i class="ti ti-photo" style="color:var(--blue)"></i> Gerador de Encarte de Oferta</h3>
+    <div class="smodal-body">
+      <div class="encarte-layout">
+        <div class="canvas-container">
+          <canvas id="encarteCanvas" width="1054" height="1492"></canvas>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="form-row"><label>Nome do Produto</label><input id="eProduto" type="text" oninput="drawEncarte()"></div>
+          <div class="form-row"><label>Preço Normal</label><input id="eDe" type="text" placeholder="R$ 0,00" oninput="drawEncarte()"></div>
+          <div class="form-row"><label>Preço Promocional</label><input id="ePor" type="text" placeholder="R$ 0,00" oninput="drawEncarte()"></div>
+          <div class="form-row"><label>Desconto (%) ou Texto</label><input id="ePct" type="text" placeholder="30%" oninput="drawEncarte()"></div>
+          <div class="form-row"><label>Validade Encarte</label><input id="eValidade" type="text" placeholder="Apenas hoje" oninput="drawEncarte()"></div>
+          <div class="form-row"><label>Unidade de Medida</label><input id="eUnidade" type="text" value="UN" placeholder="KG, UN, LT" oninput="drawEncarte()"></div>
+          <div class="form-row"><label>Foto do Produto</label><input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)"></div>
+          <div class="form-row"><label>Cor do Encarte</label>
+            <div class="color-picker-group">
+              <div class="color-btn active" style="background:#E8000D" onclick="changeEncarteColor('#E8000D', this)"></div>
+              <div class="color-btn" style="background:#0F6E56" onclick="changeEncarteColor('#0F6E56', this)"></div>
+              <div class="color-btn" style="background:#378ADD" onclick="changeEncarteColor('#378ADD', this)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="smodal-foot">
+      <button class="btn" onclick="closeModal('encarteModal')">Fechar</button>
+      <button class="btn btn-blue" onclick="downloadEncarte()"><i class="ti ti-download"></i> Baixar Imagem</button>
+    </div>
+  </div>
+</div>
 
-// ── FUNÇÕES DE CONTROLE DE MODAL E ABAS (CORREÇÃO DOS BOTÕES) ────────────────
+<script>
+const PROD_KEY = 'val_products_db';
+const CFG_KEY = 'val_config_db';
 
-// Alterna entre as abas: Validades, Promoções, Relatório e Ajuda
-function goTab(tabId) {
-  // Remove a classe active de todas as abas e seções
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
-  
-  // Adiciona a classe active na aba clicada
-  const clickedTab = Array.from(document.querySelectorAll('.tab')).find(t => t.getAttribute('onclick').includes(tabId));
-  if (clickedTab) clickedTab.classList.add('active');
-  
-  // Mostra a seção correspondente
-  const targetSec = document.getElementById('sec-' + tabId);
-  if (targetSec) {
-    targetSec.classList.add('active');
-    // Se mudar para a aba de relatórios, renderiza os gráficos
-    if (tabId === 'relatorio' && typeof renderCharts === 'function') {
-      renderCharts();
-    }
-  }
-}
+let products = JSON.parse(localStorage.getItem(PROD_KEY) || '[]');
 
-// Abre o modal de Registro Manual
-function openAddModal() {
-  const modal = document.getElementById('addModal');
-  if (modal) modal.classList.add('open');
-}
+function loadCfg() { return JSON.parse(localStorage.getItem(CFG_KEY) || '{}'); }
+function saveProd() { localStorage.setItem(PROD_KEY, JSON.stringify(products)); }
 
-// Abre o modal de Encarte e preenche automaticamente se um produto for enviado
-function openEncarteModal(index) {
-  const modal = document.getElementById('encarteModal');
-  if (!modal) return;
-  
-  modal.classList.add('open');
-  
-  // Se veio um index da tabela ou dos cards, preenche os campos do formulário
-  if (index !== null && products[index]) {
-    const p = products[index];
-    document.getElementById('eProduto').value = p.nome || '';
-    document.getElementById('eDe').value = p.precoNormal ? 'R$ ' + p.precoNormal.toFixed(2).replace('.', ',') : '';
-    document.getElementById('ePor').value = p.precoPromo ? 'R$ ' + p.precoPromo.toFixed(2).replace('.', ',') : '';
-    document.getElementById('ePct').value = p.pctDesc ? (p.pctDesc < 1 ? (p.pctDesc * 100).toFixed(0) : p.pctDesc.toFixed(0)) + '%' : '';
-    document.getElementById('eValidade').value = p.validade ? p.validade.split('-').reverse().join('/') : '';
-  }
-  
-  // Força o desenho inicial do Canvas
-  if (typeof drawEncarte === 'function') {
-    setTimeout(drawEncarte, 100);
-  }
-}
-
-// Fecha os modais removendo a classe 'open'
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) modal.classList.remove('open');
-}
-
-// Ação do botão salvar do Registro Manual
-function addManual() {
-  const cod = document.getElementById('fCod').value.trim();
-  const setor = document.getElementById('fSetorM').value;
-  const nome = document.getElementById('fNome').value.trim();
-  const validade = document.getElementById('fVal').value;
-  const qtde = parseInt(document.getElementById('fQtde').value) || 1;
-
-  if (!nome || !validade) {
-    alert('Por favor, preencha o nome do produto e a data de validade.');
-    return;
-  }
-
-  const newProd = {
-    cod,
-    nome,
-    setor,
-    validade,
-    qtde,
-    precoNormal: 0,
-    precoPromo: 0,
-    pctDesc: 0,
-    valorDesc: 0,
-    src: 'manual'
-  };
-
-  products.push(newProd);
-  saveProd();
-  closeModal('addModal');
-  
-  // Limpa o formulário manual
-  document.getElementById('fCod').value = '';
-  document.getElementById('fNome').value = '';
-  document.getElementById('fVal').value = '';
-  document.getElementById('fQtde').value = '1';
-
-  // Atualiza a tela se as funções de render existirem
-  refresh();
-}
-
-// Remove produto inserido manualmente
-function rmProduct(index) {
-  if (confirm('Deseja realmente remover este registro manual?')) {
-    products.splice(index, 1);
-    saveProd();
-    refresh();
-  }
-}
-
-// Inicializador das renderizações gerais da página
-function refresh() {
-  if (typeof renderTable === 'function') renderTable();
-  if (typeof renderPromos === 'function') renderPromos();
-  if (typeof renderMetrics === 'function') renderMetrics();
-}
-
-// Atalho para baixar o encarte do canvas como PNG
-function downloadEncarte() {
-  const cv = document.getElementById('encarteCanvas');
-  if (!cv) return;
-  const link = document.createElement('a');
-  link.download = (document.getElementById('eProduto').value || 'encarte') + '.png';
-  link.href = cv.toDataURL('image/png');
-  link.click();
-}
-
-// Executa ao carregar a página pela primeira vez
-window.addEventListener('DOMContentLoaded', () => {
-  refresh();
-  const cfg = loadCfg();
-  if (cfg.id && typeof syncAll === 'function') {
-    syncAll();
-  }
-});
-
-// ── FUNÇÃO DO BANCO DE DADOS (RECONSTRUÍDA) ──────────────────────────────────
-function loadBanco() {
-  const cfg = loadCfg();
-  if (!cfg.id) return;
-  
-  // Realiza a busca simulada ou requisição ao banco configurado
-  console.log("Banco de dados carregado com a ID:", cfg.id);
-  if (typeof syncAll === 'function') syncAll();
-}
-// ── CONFIG ──────────────────────────────────────────────────────────────────
-const CFG_KEY = 'aura_cfg', PROD_KEY = 'aura_prod';
-const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 let encarteColor = '#E8000D';
 let fotoImg = null;
-let products = JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
+let chartInstance = null;
 
-function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}
-function saveProd(){localStorage.setItem(PROD_KEY,JSON.stringify(products))}
-
-// ── FUNÇÕES DE CONTROLE DE MODAL E ABAS (CORREÇÃO DOS BOTÕES) ────────────────
-
-// Alterna entre as abas: Validades, Promoções, Relatório e Ajuda
+// Alternar Abas
 function goTab(tabId) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
@@ -439,46 +258,26 @@ function goTab(tabId) {
   const targetSec = document.getElementById('sec-' + tabId);
   if (targetSec) {
     targetSec.classList.add('active');
-    if (tabId === 'relatorio' && typeof renderCharts === 'function') {
-      renderCharts();
-    }
+    if (tabId === 'relatorio') renderCharts();
   }
 }
 
-// Abre o modal de Registro Manual
-function openAddModal() {
-  const modal = document.getElementById('addModal');
-  if (modal) modal.classList.add('open');
-}
+function openAddModal() { document.getElementById('addModal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// Abre o modal de Encarte e preenche automaticamente se um produto for enviado
 function openEncarteModal(index) {
-  const modal = document.getElementById('encarteModal');
-  if (!modal) return;
-  
-  modal.classList.add('open');
-  
+  document.getElementById('encarteModal').classList.add('open');
   if (index !== null && products[index]) {
     const p = products[index];
     document.getElementById('eProduto').value = p.nome || '';
     document.getElementById('eDe').value = p.precoNormal ? 'R$ ' + p.precoNormal.toFixed(2).replace('.', ',') : '';
     document.getElementById('ePor').value = p.precoPromo ? 'R$ ' + p.precoPromo.toFixed(2).replace('.', ',') : '';
-    document.getElementById('ePct').value = p.pctDesc ? (p.pctDesc < 1 ? (p.pctDesc * 100).toFixed(0) : p.pctDesc.toFixed(0)) + '%' : '';
+    document.getElementById('ePct').value = p.pctDesc ? p.pctDesc + '%' : '';
     document.getElementById('eValidade').value = p.validade ? p.validade.split('-').reverse().join('/') : '';
   }
-  
-  if (typeof drawEncarte === 'function') {
-    setTimeout(drawEncarte, 100);
-  }
+  setTimeout(drawEncarte, 100);
 }
 
-// Fecha os modais removendo a classe 'open'
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) modal.classList.remove('open');
-}
-
-// Ação do botão salvar do Registro Manual
 function addManual() {
   const cod = document.getElementById('fCod').value.trim();
   const setor = document.getElementById('fSetorM').value;
@@ -486,25 +285,9 @@ function addManual() {
   const validade = document.getElementById('fVal').value;
   const qtde = parseInt(document.getElementById('fQtde').value) || 1;
 
-  if (!nome || !validade) {
-    alert('Por favor, preencha o nome do produto e a data de validade.');
-    return;
-  }
+  if (!nome || !validade) { alert('Preencha o nome e a validade!'); return; }
 
-  const newProd = {
-    cod,
-    nome,
-    setor,
-    validade,
-    qtde,
-    precoNormal: 0,
-    precoPromo: 0,
-    pctDesc: 0,
-    valorDesc: 0,
-    src: 'manual'
-  };
-
-  products.push(newProd);
+  products.push({ cod, nome, setor, validade, qtde, precoNormal:0, precoPromo:0, pctDesc:0, src:'manual' });
   saveProd();
   closeModal('addModal');
   
@@ -512,502 +295,199 @@ function addManual() {
   document.getElementById('fNome').value = '';
   document.getElementById('fVal').value = '';
   document.getElementById('fQtde').value = '1';
-
   refresh();
 }
 
-// Remove produto inserido manualmente
 function rmProduct(index) {
-  if (confirm('Deseja realmente remover este registro manual?')) {
+  if (confirm('Deseja remover este item?')) {
     products.splice(index, 1);
     saveProd();
     refresh();
   }
 }
 
-// Inicializador das renderizações gerais da página
+function calculateDays(dateStr) {
+  const diffTime = new Date(dateStr + 'T12:00:00') - new Date();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
 function refresh() {
-  if (typeof renderTable === 'function') renderTable();
-  if (typeof renderPromos === 'function') renderPromos();
-  if (typeof renderMetrics === 'function') renderMetrics();
+  renderTable();
+  renderPromos();
+  renderMetrics();
 }
 
-// Atalho para baixar o encarte do canvas como PNG
-function downloadEncarte() {
-  const cv = document.getElementById('encarteCanvas');
-  if (!cv) return;
-  const link = document.createElement('a');
-  link.download = (document.getElementById('eProduto').value || 'encarte') + '.png';
-  link.href = cv.toDataURL('image/png');
-  link.click();
+function renderMetrics() {
+  let crit = 0, aten = 0, norm = 0;
+  products.forEach(p => {
+    const d = calculateDays(p.validade);
+    if (d < 5) crit++; else if (d <= 15) aten++; else norm++;
+  });
+  document.getElementById('metricsDiv').innerHTML = `
+    <div class="card-m critical"><div class="card-m-title">Crítico (&lt;5 dias)</div><div class="card-m-val">${crit}</div></div>
+    <div class="card-m warning"><div class="card-m-title">Atenção (5-15 dias)</div><div class="card-m-val">${aten}</div></div>
+    <div class="card-m"><div class="card-m-title">Normal</div><div class="card-m-val">${norm}</div></div>
+  `;
 }
 
-// Executa ao carregar a página pela primeira vez
-window.addEventListener('DOMContentLoaded', () => {
-  refresh();
-  const cfg = loadCfg();
-  if (cfg.id && typeof syncAll === 'function') {
-    syncAll();
+function renderTable() {
+  const query = document.getElementById('pSearch').value.toLowerCase();
+  const tbody = document.getElementById('pTableBody');
+  tbody.innerHTML = '';
+
+  products.forEach((p, idx) => {
+    if (query && !p.nome.toLowerCase().includes(query) && !p.cod.includes(query)) return;
+    const dias = calculateDays(p.validade);
+    let badge = '<span class="badge badge-green">Normal</span>';
+    if (dias < 5) badge = '<span class="badge badge-red">Crítico</span>';
+    else if (dias <= 15) badge = '<span class="badge badge-amber">Atenção</span>';
+
+    tbody.innerHTML += `
+      <tr>
+        <td><div class="p-info"><span class="p-name">${p.nome}</span><span class="p-cod">${p.cod || 'S/G'}</span></div></td>
+        <td>${p.setor}</td>
+        <td>${p.validade.split('-').reverse().join('/')}</td>
+        <td><strong>${dias}d</strong></td>
+        <td>${badge}</td>
+        <td class="actions-cell">
+          <button class="btn-icon" onclick="openEncarteModal(${idx})"><i class="ti ti-photo"></i></button>
+          <button class="btn-icon del" onclick="rmProduct(${idx})"><i class="ti ti-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function renderPromos() {
+  const grid = document.getElementById('promosGrid');
+  grid.innerHTML = '';
+  products.forEach((p, idx) => {
+    const dias = calculateDays(p.validade);
+    if (dias > 15) return;
+    grid.innerHTML += `
+      <div class="card-p">
+        <div class="card-p-body">
+          <div style="font-weight:700">${p.nome}</div>
+          <div class="card-p-dates"><span>Validade: ${p.validade.split('-').reverse().join('/')}</span></div>
+          <div class="card-p-price">
+            <span class="price-por">Oferta Ativa</span>
+          </div>
+        </div>
+        <div class="card-p-foot">
+          <button class="btn btn-icon" onclick="openEncarteModal(${idx})"><i class="ti ti-photo"></i> Criar Encarte</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function renderCharts() {
+  const ctx = document.getElementById('chartSetores').getContext('2d');
+  const setores = {};
+  products.forEach(p => setores[p.setor] = (setores[p.setor] || 0) + 1);
+
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(setores),
+      datasets: [{ label: 'Produtos por Setor', data: Object.values(setores), backgroundColor: '#1D9E75' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+function loadFoto(input) {
+  if (input.files && input.files[0]) {
+    const r = new FileReader();
+    r.onload = e => {
+      const img = new Image();
+      img.onload = () => { fotoImg = img; drawEncarte(); };
+      img.src = e.target.result;
+    };
+    r.readAsDataURL(input.files[0]);
   }
-});
-
-// ── FUNÇÃO DO BANCO DE DADOS ─────────────────────────────────────────────────
-function loadBanco() {
-  const cfg = loadCfg();
-  if (!cfg.id) return;
-  console.log("Banco de dados carregado com a ID:", cfg.id);
-  if (typeof syncAll === 'function') syncAll();
 }
 
-// ── ASSET ENCARTE (template único) ──────────────────────────────────────────
+function changeEncarteColor(color, btn) {
+  encarteColor = color;
+  document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  drawEncarte();
+}
+
 const ASSET_TEMPLATE = 'template-encarte.png';
 function loadAsset(src) {
-  return new Promise((resolve) => {
+  return new Promise(res => {
     const i = new Image();
-    i.onload = () => resolve(i);
+    i.onload = () => res(i);
     i.onerror = () => {
-      const canvasDummy = document.createElement('canvas');
-      canvasDummy.width = 1054; canvasDummy.height = 1492;
-      const ctxD = canvasDummy.getContext('2d');
-      ctxD.fillStyle = '#E8000D'; ctxD.fillRect(0,0,1054,1492);
-      ctxD.fillStyle = '#FFF'; ctxD.fillRect(20,490,1014,760);
-      const imgDummy = new Image();
-      imgDummy.src = canvasDummy.toDataURL();
-      imgDummy.onload = () => resolve(imgDummy);
+      const cv = document.createElement('canvas');
+      cv.width = 1054; cv.height = 1492;
+      const c = cv.getContext('2d');
+      c.fillStyle = encarteColor; c.fillRect(0,0,1054,1492);
+      c.fillStyle = '#FFF'; c.fillRect(30,420,994,760);
+      const dummy = new Image(); dummy.src = cv.toDataURL();
+      dummy.onload = () => res(dummy);
     };
     i.src = src;
   });
 }
 
-// ── BANCO DE DADOS ────────────────────────────────────────────────────────────
-let banco={};
-async function loadBanco(cfg){
-  if(!cfg.idBanco)return;
-  try{
-    const table=await fetchSheet(cfg.idBanco,cfg.abaBanco);
-    const rows=rawRows(table);
-    banco={};
-    // Encontra linha de cabeçalho real
-    let hIdx=-1,ciCod=-1,ciNome=-1;
-    for(let i=0;i<rows.length;i++){
-      const cells=rows[i].c||[];
-      const ci=cells.findIndex(c=>String(c?.f||c?.v||'').toUpperCase().includes('CÓD')||String(c?.f||c?.v||'').toUpperCase().includes('COD')||String(c?.f||c?.v||'').toUpperCase().includes('BARRA'));
-      const ni=cells.findIndex(c=>String(c?.f||c?.v||'').toUpperCase().includes('DESC')||String(c?.f||c?.v||'').toUpperCase().includes('NOME')||String(c?.f||c?.v||'').toUpperCase().includes('PRODUTO'));
-      if(ci>=0&&ni>=0){hIdx=i;ciCod=ci;ciNome=ni;break;}
-    }
-    if(hIdx<0)return;
-    for(let i=hIdx+1;i<rows.length;i++){
-      const cells=rows[i].c||[];
-      const cod=String(cells[ciCod]?.f||cells[ciCod]?.v||'').trim().replace(/[^0-9]/g,'');
-      const nome=String(cells[ciNome]?.f||cells[ciNome]?.v||'').replace(/^,\s*/,'').trim();
-      if(cod&&nome) banco[cod]=nome;
-    }
-    console.log('Banco:',Object.keys(banco).length,'produtos');
-  }catch(e){console.warn('Banco:',e.message)}
-}
+async function drawEncarte() {
+  const canvas = document.getElementById('encarteCanvas');
+  const ctx = canvas.getContext('2d');
+  const bg = await loadAsset(ASSET_TEMPLATE);
+  
+  ctx.clearRect(0,0,1054,1492);
+  ctx.drawImage(bg, 0, 0);
 
-// ── SYNC PRINCIPAL ────────────────────────────────────────────────────────────
-async function syncAll(){
-  const cfg=loadCfg();
-  if(!cfg.id){setDot('err','Configure o Google Sheets primeiro');toggleCfg();return;}
-  const btn=document.getElementById('btnSync');
-  btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Sincronizando...';
-  setDot('loading','Sincronizando...');
-  try{
-    await loadBanco(cfg);
-    // Carrega aba principal (AURA VENCIMENTOS)
-    const table=await fetchSheet(cfg.id,cfg.aba);
-    const rows=rawRows(table);
-    if(!rows.length) throw new Error('Nenhuma linha');
-
-    // Detecta cabecalho — tenta nos labels do gviz E nas linhas de dados
-    let hIdx=-1, hCells=[];
-    const HKW=['PRODUTO','SETOR','VALIDADE','STATUS','VENDA','DESCONTO','CUSTO'];
-
-    // 1) Tenta nos labels das colunas retornadas pelo gviz
-    const colLabels=table.cols.map(c=>({v:c.label||'',f:c.label||''}));
-    const labelHits=HKW.filter(k=>colLabels.some(c=>String(c.v).toUpperCase().includes(k))).length;
-    if(labelHits>=3){hIdx=-1;hCells=colLabels;}
-
-    // 2) Se nao achou, busca nas linhas
-    if(!hCells.length){
-      for(let i=0;i<Math.min(10,rows.length);i++){
-        const cells=rows[i].c||[];
-        const txt=cells.map(c=>String(c&&c.f?c.f:c&&c.v?c.v:'').toUpperCase()).join('|');
-        const hits=HKW.filter(k=>txt.includes(k)).length;
-        if(hits>=2){hIdx=i;hCells=cells;break;}
-      }
-    }
-    if(!hCells.length) throw new Error('Cabecalho nao encontrado — verifique o nome da aba e se a planilha esta publica. Aba configurada: '+cfg.aba);
-
-    function colIdx(kws){
-      for(const kw of kws){
-        const i=hCells.findIndex(c=>{const s=String(c&&c.f?c.f:c&&c.v?c.v:'').toUpperCase();return s.includes(kw.toUpperCase());});
-        if(i>=0)return i;
-      }
-      return -1;
-    }
-    const ci={
-      setor:    colIdx(['SETOR']),
-      produto:  colIdx(['PRODUTO']),
-      validade: colIdx(['VALIDADE']),
-      acao:     colIdx(['ACAO','ACA']),
-      status:   colIdx(['STATUS']),
-      custo:    colIdx(['CUSTO']),
-      venda:    colIdx(['VALOR VENDA','VALOR\nVENDA','VENDA']),
-      precodia: colIdx(['DO DIA','PRECO DO DIA']),
-      pct:      colIdx(['% REAL','REAL DE DESCONTO','% REAL DE']),
-      valordesc:colIdx(['VALOR DO DESCONTO','VALOR DO DESC']),
-    };
-    console.log('Colunas detectadas:',JSON.stringify(ci));
-
-    const local=products.filter(p=>p.src==='manual');
-    const sheetsData=[];
-    const startRow=(hIdx<0)?0:hIdx+1;
-    for(let i=startRow;i<rows.length;i++){
-      const cells=rows[i].c||[];
-      const nome=cellStr(cells[ci.produto]);
-      if(!nome) continue;
-      const validadeRaw=cellVal(cells[ci.validade]);
-      const validade=parseDate(validadeRaw);
-      const status=cellStr(cells[ci.status]);
-      // Tenta pegar código do nome (formato: "PRODUTO (QUN) {COD}" não existe — usa banco reverso)
-      // Código: busca no banco pelo nome
-      let cod='';
-      for(const [k,v] of Object.entries(banco)){
-        const nomeClean=nome.replace(/\s*\(.*?\)\s*\{.*?\}/g,'').trim().toUpperCase();
-        if(v.toUpperCase().includes(nomeClean.substring(0,20))){cod=k;break;}
-      }
-      sheetsData.push({
-        cod, nome,
-        setor: cellStr(cells[ci.setor]),
-        validade,
-        status,
-        qtde: (() => {const m=nome.match(/\{(\d+)\}/);return m?parseInt(m[1]):1})(),
-        custo: cellNum(cells[ci.custo]),
-        precoNormal: cellNum(cells[ci.venda]),
-        precoPromo: cellNum(cells[ci.precodia]),
-        pctDesc: cellNum(cells[ci.pct]),
-        valorDesc: cellNum(cells[ci.valordesc]),
-        src:'sheets',
-      });
-    }
-    products=[...sheetsData,...local];
-    saveProd();
-    setDot('ok',`Conectado — ${sheetsData.length} registros carregados`);
-    document.getElementById('syncTime').textContent='Última sinc: '+new Date().toLocaleTimeString('pt-BR');
-    refresh();
-  }catch(e){
-    setDot('err','Erro: '+e.message);console.error(e);
-  }finally{
-    btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Sincronizar';
-  }
-}
-
-function setDot(type,msg){
-  const d=document.getElementById('dot'),t=document.getElementById('stText');
-  d.className='dot'+(type==='ok'?' ok':type==='err'?' err':type==='loading'?' loading':'');
-  t.textContent=msg;
-}
-
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function daysDiff(v){if(!v)return null;const d=new Date(v);d.setHours(0,0,0,0);return Math.round((d-TODAY)/86400000)}
-function statusFromDays(d){if(d===null)return 'sem-data';if(d<0)return 'vencido';if(d<=3)return 'critico';if(d<=7)return 'urgente';if(d<=15)return 'atencao';return 'ok';}
-function badge(s){const m={vencido:['b-danger','Vencido'],critico:['b-danger','Crítico'],urgente:['b-warn','Urgente'],atencao:['b-warn','Atenção'],ok:['b-ok','OK'],'sem-data':['b-gray','Sem data']};const[c,l]=m[s]||['b-gray','—'];return`<span class="badge ${c}">${l}</span>`}
-function barColor(s){return{vencido:'#E24B4A',critico:'#E24B4A',urgente:'#BA7517',atencao:'#EF9F27',ok:'#1D9E75','sem-data':'#888'}[s]||'#888'}
-function fmt(d){return d?d.split('-').reverse().join('/'):'—'}
-function fmtR(v){if(!v)return '—';return 'R$ '+v.toFixed(2).replace('.',',')}
-function fmtPct(v){if(!v)return '—';const pct=v<1?v*100:v;return pct.toFixed(2).replace('.',',')+'%'}
-
-// ── RENDER TABLE ──────────────────────────────────────────────────────────────
-function renderTable(){
-  const setor=document.getElementById('fSetor').value;
-  const status=document.getElementById('fStatus').value;
-  const busca=document.getElementById('fBusca').value.toLowerCase();
-  let list=products.filter(p=>{
-    const s=statusFromDays(daysDiff(p.validade));
-    if(setor&&p.setor!==setor)return false;
-    if(status&&s!==status)return false;
-    if(busca&&!(p.nome||'').toLowerCase().includes(busca)&&!(p.cod||'').toLowerCase().includes(busca))return false;
-    return true;
-  }).sort((a,b)=>(daysDiff(a.validade)??9999)-(daysDiff(b.validade)??9999));
-
-  const tb=document.getElementById('tbody');
-  if(!list.length){tb.innerHTML='<tr><td colspan="11" class="empty">Nenhum produto encontrado.</td></tr>';return;}
-  tb.innerHTML=list.map(p=>{
-    const days=daysDiff(p.validade);
-    const s=statusFromDays(days);
-    const pct=days===null?0:Math.min(100,Math.max(0,days>30?100:(days/30)*100));
-    const dTxt=days===null?'—':days<0?`${Math.abs(days)}d atrás`:days===0?'Hoje':`${days}d`;
-    const idx=products.indexOf(p);
-    const needsPromo=['vencido','critico','urgente','atencao'].includes(s);
-    const srcTag=p.src==='sheets'?'<span class="src-tag sheets">Sheets</span>':'<span class="src-tag">Manual</span>';
-    return`<tr>
-      <td style="font-family:monospace;font-size:11px;color:var(--tx2)">${p.cod||'—'}${srcTag}</td>
-      <td style="max-width:220px;font-weight:500;font-size:12px">${p.nome||'—'}</td>
-      <td style="font-size:12px">${p.setor||'—'}</td>
-      <td style="font-size:12px;white-space:nowrap">${fmt(p.validade)}</td>
-      <td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${barColor(s)}"></div></div><span style="font-size:12px;min-width:50px">${dTxt}</span></div></td>
-      <td style="font-size:12px">${p.qtde||'—'}</td>
-      <td style="font-size:12px;white-space:nowrap">${fmtR(p.precoNormal)}</td>
-      <td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">${fmtR(p.precoPromo)}</td>
-      <td style="font-size:12px;white-space:nowrap">${fmtPct(p.pctDesc)}</td>
-      <td>${badge(s)}</td>
-      <td>
-        ${needsPromo?`<button class="abtn encarte" onclick="openEncarteModal(${idx})"><i class="ti ti-photo"></i> Encarte</button>`:''}
-        ${p.src!=='sheets'?`<button class="abtn" onclick="rmProduct(${idx})"><i class="ti ti-trash"></i></button>`:''}
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// ── RENDER PROMOS ─────────────────────────────────────────────────────────────
-function renderPromos(){
-  const list=products.filter(p=>{
-    if(p.src!=='sheets')return false;
-    const s=(p.status||'').toLowerCase();
-    return s.includes('aguarda')||s.includes('aguard');
-  }).sort((a,b)=>(daysDiff(a.validade)??9999)-(daysDiff(b.validade)??9999));
-
-  const el=document.getElementById('promoGrid');
-  if(!list.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><i class="ti ti-tag-off"></i>Nenhum produto com status "Aguarda" encontrado.<br>Sincronize a planilha ou aguarde novos registros.</div>';return;}
-
-  el.innerHTML=list.map(p=>{
-    const days=daysDiff(p.validade);
-    const s=statusFromDays(days);
-    const dTxt=days===null?'—':days<0?`${Math.abs(days)}d atrás`:days===0?'Hoje':`${days}d`;
-    const idx=products.indexOf(p);
-    const pct=p.pctDesc<1?p.pctDesc*100:p.pctDesc;
-    return`<div class="promo-card">
-      <div class="promo-card-header">
-        <div class="pct">${pct?pct.toFixed(0):'?'}%<small>de desconto</small></div>
-        <div class="promo-name">${p.nome||'—'}</div>
-        ${badge(s)}
-      </div>
-      <div class="promo-card-body">
-        <div class="promo-prices">
-          <div>
-            <div style="font-size:11px;color:var(--tx2);margin-bottom:2px">De</div>
-            <div class="price-de">${fmtR(p.precoNormal)}</div>
-          </div>
-          <div style="font-size:20px;color:var(--tx2)">→</div>
-          <div>
-            <div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Por</div>
-            <div class="price-por">${fmtR(p.precoPromo)}</div>
-          </div>
-          <div style="margin-left:auto;text-align:right">
-            <div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Economia</div>
-            <div style="font-size:16px;font-weight:600;color:var(--amber)">${fmtR(p.valorDesc)}</div>
-          </div>
-        </div>
-        <div class="promo-meta">
-          <span><i class="ti ti-calendar" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>Validade ${fmt(p.validade)}</span>
-          <span><i class="ti ti-clock" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>${dTxt}</span>
-          <span><i class="ti ti-package" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>Qtde: ${p.qtde}</span>
-        </div>
-        <div class="promo-actions">
-          <button class="btn btn-green btn-sm" onclick="openEncarteModal(${idx})"><i class="ti ti-photo"></i> Gerar encarte</button>
-          <span style="font-size:12px;color:var(--tx2)">Setor: ${p.setor}</span>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ── METRICS ───────────────────────────────────────────────────────────────────
-function renderMetrics(){
-  const c={vencido:0,critico:0,urgente:0,atencao:0,ok:0};
-  const aguarda=products.filter(p=>(p.status||'').toLowerCase().includes('aguard')).length;
-  products.forEach(p=>{const s=statusFromDays(daysDiff(p.validade));if(s in c)c[s]++;});
-  const al=c.vencido+c.critico;
-  const b=document.getElementById('alertBanner');
-  b.classList.toggle('show',al>0);
-  document.getElementById('alertTxt').textContent=`${al} produto(s) vencido(s) ou crítico(s) (≤3 dias). Verifique e acione promoções imediatamente.`;
-  document.getElementById('metrics').innerHTML=`
-    <div class="metric"><div class="metric-lbl">Total</div><div class="metric-val">${products.length}</div></div>
-    <div class="metric"><div class="metric-lbl">Vencidos</div><div class="metric-val danger">${c.vencido}</div></div>
-    <div class="metric"><div class="metric-lbl">Crítico ≤3d</div><div class="metric-val danger">${c.critico}</div></div>
-    <div class="metric"><div class="metric-lbl">Urgente ≤7d</div><div class="metric-val warn">${c.urgente}</div></div>
-    <div class="metric"><div class="metric-lbl">Atenção ≤15d</div><div class="metric-val warn">${c.atencao}</div></div>
-    <div class="metric"><div class="metric-lbl">OK</div><div class="metric-val ok">${c.ok}</div></div>
-    <div class="metric"><div class="metric-lbl">Aguardando ação</div><div class="metric-val info">${aguarda}</div></div>
-  `;
-}
-
-// ── CHARTS ────────────────────────────────────────────────────────────────────
-let charts={};
-function renderCharts(){
-  Object.values(charts).forEach(c=>c.destroy()); charts={};
-  const sc={vencido:0,critico:0,urgente:0,atencao:0,ok:0},sm={};
-  products.forEach(p=>{
-    const s=statusFromDays(daysDiff(p.validade));
-    if(s in sc)sc[s]++;
-    sm[p.setor]=(sm[p.setor]||0)+1;
-  });
-  charts.st=new Chart(document.getElementById('cStatus'),{type:'doughnut',data:{labels:['Vencido','Crítico','Urgente','Atenção','OK'],datasets:[{data:[sc.vencido,sc.critico,sc.urgente,sc.atencao,sc.ok],backgroundColor:['#E24B4A','#F09595','#EF9F27','#FAC775','#639922'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}});
-  const ss=Object.keys(sm);
-  charts.se=new Chart(document.getElementById('cSetor'),{type:'bar',data:{labels:ss,datasets:[{data:ss.map(s=>sm[s]),backgroundColor:'#378ADD',borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{font:{size:10}}}}}});
-  const top=products.filter(p=>{const d=daysDiff(p.validade);return d!==null&&d>=0&&d<=15&&p.valorDesc>0;}).sort((a,b)=>b.valorDesc-a.valorDesc).slice(0,15);
-  charts.dc=new Chart(document.getElementById('cDesconto'),{type:'bar',data:{labels:top.map(p=>(p.nome||'').substring(0,25)),datasets:[{label:'Valor do desconto',data:top.map(p=>p.valorDesc),backgroundColor:'#BA7517',borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{font:{size:10},callback:v=>'R$'+v.toFixed(2)}},y:{ticks:{font:{size:10}}}}}});
-}
-
-// ── ENCARTE CANVAS ────────────────────────────────────────────────────────────
-function setColor(c){encarteColor=c;drawEncarte();}
-function loadFoto(input){
-  if(!input.files[0])return;
-  const r=new FileReader();
-  r.onload=e=>{const img=new Image();img.onload=()=>{fotoImg=img;drawEncarte();};img.src=e.target.result;};
-  r.readAsDataURL(input.files[0]);
-}
-
-function wrapText(ctx,text,x,y,maxW,lineH){
-  const words=text.split(' ');let line='',lines=[];
-  for(const w of words){
-    const test=line?line+' '+w:w;
-    if(ctx.measureText(test).width>maxW&&line){lines.push(line);line=w;}
-    else line=test;
-  }
-  lines.push(line);
-  lines.forEach((l,i)=>ctx.fillText(l,x,y+i*lineH));
-  return lines.length;
-}
-
-async function drawEncarte(){
-  const cv = document.getElementById('encarteCanvas');
-  const ctx = cv.getContext('2d');
-
-  // Template: 1054 x 1492
-  const W = 1054, H = 1492;
-  cv.width = W; cv.height = H;
-
-  const produto  = document.getElementById('eProduto').value || 'NOME DO PRODUTO';
-  const de       = (document.getElementById('eDe').value    || '').replace(/R\$\s*/i,'').trim();
-  const por      = (document.getElementById('ePor').value   || '').replace(/R\$\s*/i,'').trim();
-  const pct      = document.getElementById('ePct').value    || '';
-  const validade = document.getElementById('eValidade').value || '';
-  const unidade  = document.getElementById('eUnidade').value  || 'CADA';
-  const corTexto = document.getElementById('eCorTexto').value || '#000000';
-
-  // Carrega template
-  const tmpl = await loadAsset(ASSET_TEMPLATE);
-  ctx.drawImage(tmpl, 0, 0, W, H);
-
-  // ── NOME DO PRODUTO ──────────────────────────────────────────────────────
-  // Área branca: x=20~1034, y=490~690  (entre header e caixa DE)
-  const nomeClean = produto
-    .replace(/\s*\(\d+\s*[A-Z]*\)\s*\{\d+\}/gi,'')
-    .replace(/\s*\{.*?\}/g,'')
-    .replace(/\s*\(\d+\)/g,'')
-    .trim();
-
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = corTexto;
-
-  function splitLines(text, maxW) {
-    const words = text.split(' '); const lines = []; let line = '';
-    for (const w of words) {
-      const test = line ? line+' '+w : w;
-      if (ctx.measureText(test).width > maxW && line) { lines.push(line); line = w; }
-      else line = test;
-    }
-    if (line) lines.push(line);
-    return lines;
-  }
-
-  // Área disponível para o nome: largura total, mas só lado esquerdo se tiver foto
-  const nomeAreaX = W / 2;
-  const nomeAreaY = 490;
-  const nomeAreaH = 200; // y=490~690
-  const nomeMaxW  = 1000;
-
-  let fs = 90;
-  while (fs > 28) {
-    ctx.font = `900 ${fs}px 'Arial Black', Arial, sans-serif`;
-    const lines = splitLines(nomeClean, nomeMaxW);
-    if (lines.length <= 3 && lines.length * fs * 1.2 <= nomeAreaH) break;
-    fs -= 3;
-  }
-  ctx.font = `900 ${fs}px 'Arial Black', Arial, sans-serif`;
-  const nomeLines = splitLines(nomeClean, nomeMaxW);
-  const lh = fs * 1.18;
-  const totalH = nomeLines.length * lh;
-  const nomeStartY = nomeAreaY + (nomeAreaH - totalH) / 2 + fs * 0.5;
-  nomeLines.forEach((l, i) => ctx.fillText(l, nomeAreaX, nomeStartY + i * lh));
-
-  // ── FOTO DO PRODUTO ──────────────────────────────────────────────────────
-  // Área esquerda branca: x=20~620, y=700~1250
-  const fX = 20, fY = 700, fW = 600, fH = 550;
   if (fotoImg) {
-    const ratio = Math.min(fW / fotoImg.width, fH / fotoImg.height);
-    const fw = fotoImg.width * ratio, fh = fotoImg.height * ratio;
-    ctx.drawImage(fotoImg, fX + (fW - fw) / 2, fY + (fH - fh) / 2, fw, fh);
-  } else {
-    ctx.fillStyle = 'rgba(0,0,0,0.04)';
-    ctx.fillRect(fX, fY, fW, fH);
-    ctx.fillStyle = 'rgba(0,0,0,0.2)';
-    ctx.font = '28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('Foto do produto', fX + fW/2, fY + fH/2);
+    ctx.drawImage(fotoImg, 50, 440, 954, 720);
   }
 
-  // ── VALOR DE ─────────────────────────────────────────────────────────────
-  // Caixa vermelha DE: centro X=784, área y=770~949
-  // "R$" já está no asset. Escreve só o número alinhado após o R$
-  // R$ termina ~x=710, então valor começa ~x=720
-  ctx.textBaseline = 'alphabetic';
-  ctx.textAlign = 'left';
-  ctx.fillStyle = '#ffffff';
+  const prod = document.getElementById('eProduto').value.toUpperCase();
+  const de = document.getElementById('eDe').value;
+  const por = document.getElementById('ePor').value;
+  const pct = document.getElementById('ePct').value;
+  const val = document.getElementById('eValidade').value;
+  const un = document.getElementById('eUnidade').value.toUpperCase();
 
-  let deFs = 110;
-  ctx.font = `900 ${deFs}px 'Arial Black', Arial, sans-serif`;
-  while (ctx.measureText(de||'0,00').width > 195 && deFs > 50) {
-    deFs -= 5;
-    ctx.font = `900 ${deFs}px 'Arial Black', Arial, sans-serif`;
-  }
-  // Posiciona: R$ do asset está em ~x=660, y~920. Valor vai depois do R$
-  ctx.fillText(de || '0,00', 718, 940);
+  ctx.fillStyle = '#FFF';
+  ctx.font = "bold 55px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(prod || "NOME DO PRODUTO", 527, 200);
 
-  // ── UNIDADE (sobre aba amarela POR) ──────────────────────────────────────
-  // Aba amarela: centro X=730, y=931~999
-  ctx.fillStyle = '#8B0000';
-  ctx.font = `900 64px 'Arial Black', Arial, sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(unidade, 730, 967);
+  ctx.fillStyle = '#FFF';
+  ctx.font = "bold 35px Arial";
+  ctx.fillText(de ? `DE: ${de}` : "", 527, 280);
 
-  // ── VALOR POR ────────────────────────────────────────────────────────────
-  // Caixa vinho: x=488~972, y=1000~1228 → centro X=730
-  // R$ do asset está em ~x=500, y~1180
   ctx.fillStyle = '#FFD600';
-  ctx.textAlign = 'left';
-  ctx.textBaseline = 'alphabetic';
+  ctx.font = "bold 110px Arial";
+  ctx.fillText(por || "R$ 0,00", 527, 400);
 
-  let porFs = 200;
-  ctx.font = `900 ${porFs}px 'Arial Black', Arial, sans-serif`;
-  while (ctx.measureText(por||'0,00').width > 400 && porFs > 70) {
-    porFs -= 10;
-    ctx.font = `900 ${porFs}px 'Arial Black', Arial, sans-serif`;
-  }
-  // R$ do asset está em ~x=498, y~1195. Valor vai após
-  ctx.fillText(por || '0,00', 590, 1200);
-
-  // ── % DESCONTO ───────────────────────────────────────────────────────────
-  // Círculo amarelo (estimado): centro ~x=920, y=915
   if (pct) {
-    const pctNum = pct.replace(/[^0-9,.]/g,'');
-    ctx.fillStyle = '#8B0000';
-    ctx.font = `900 56px 'Arial Black', Arial, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(pctNum + '%', 920, 915);
+    ctx.fillStyle = '#FFD600';
+    ctx.font = "bold 40px Arial";
+    ctx.fillText(`${pct} DESC.`, 527, 1220);
   }
 
-  // ── VALIDADE (discreta, abaixo da caixa POR) ─────────────────────────────
-  if (validade) {
-    ctx.fillStyle = 'rgba(100,0,0,0.7)';
-    ctx.font = '24px Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Validade: ' + validade, 730, 1245);
+  if (val) {
+    ctx.fillStyle = '#FFF';
+    ctx.font = "30px Arial";
+    ctx.fillText(`Válido até: ${val}`, 527, 1350);
   }
 }
+
+function downloadEncarte() {
+  const cv = document.getElementById('encarteCanvas');
+  const link = document.createElement('a');
+  link.download = (document.getElementById('eProduto').value || 'encarte') + '.png';
+  link.href = cv.toDataURL('image/png');
+  link.click();
+}
+
+window.addEventListener('DOMContentLoaded', refresh);
+</script>
+</body>
+</html>
