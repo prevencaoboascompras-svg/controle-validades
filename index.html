@@ -269,196 +269,6 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
     </div>
     <div class="promo-grid" id="promoGrid"></div>
   </div>
-
-  <!-- TAB RELATÓRIO -->
-  <div id="sec-relatorio" class="sec">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-      <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
-        <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Produtos por status</h4>
-        <canvas id="cStatus" role="img" aria-label="Status" height="200"></canvas>
-      </div>
-      <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
-        <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Por setor</h4>
-        <canvas id="cSetor" role="img" aria-label="Setor" height="200"></canvas>
-      </div>
-    </div>
-    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
-      <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Valor do desconto por produto (top 15 — ≤15 dias)</h4>
-      <canvas id="cDesconto" role="img" aria-label="Desconto" height="220"></canvas>
-    </div>
-  </div>
-
-  <!-- TAB AJUDA -->
-  <div id="sec-ajuda" class="sec">
-    <div class="help-box">
-      <h4><i class="ti ti-brand-google" style="color:#4285F4"></i> Como conectar ao Google Sheets</h4>
-      <div class="steps">
-        <div class="step">Abra a planilha AURA VENCIMENTOS no Google Sheets → <strong>Compartilhar → Qualquer pessoa com o link → Leitor</strong></div>
-        <div class="step">Copie o ID da URL: <code>docs.google.com/spreadsheets/d/<strong>[ID]</strong>/edit</code></div>
-        <div class="step">Clique em <strong>Configurar</strong> no topo, cole o ID e informe os nomes das abas (<code>2025</code>, <code>BANCO DE DADOS</code>, <code>Respostas ao formulário 1</code>)</div>
-        <div class="step">Clique <strong>Salvar e conectar</strong> — os dados carregam automaticamente com preços e descontos</div>
-        <div class="step">A aba <strong>Promoções</strong> mostra automaticamente todos os itens com status <em>Aguarda</em> com preço DE/POR e botão para gerar encarte</div>
-      </div>
-    </div>
-    <div class="help-box">
-      <h4><i class="ti ti-table" style="color:var(--green)"></i> Colunas esperadas na aba principal (2025)</h4>
-      <div class="twrap"><table>
-        <thead><tr><th>Coluna</th><th>Descrição</th><th>Exemplo</th></tr></thead>
-        <tbody>
-          <tr><td><code>SETOR</code></td><td>Setor do produto</td><td>Laticínios, Frios, Seca...</td></tr>
-          <tr><td><code>PRODUTO</code></td><td>Nome completo</td><td>IOGURTE BATAVO CEREAL 1,150KG (2UN)</td></tr>
-          <tr><td><code>VALIDADE</code></td><td>Data de vencimento</td><td>04/06/2026</td></tr>
-          <tr><td><code>AÇÃO</code></td><td>Data de início da ação</td><td>25/05/2026</td></tr>
-          <tr><td><code>STATUS</code></td><td>Status atual</td><td>Aguarda, Concluída, Troca</td></tr>
-          <tr><td><code>CUSTO GERENCIAL</code></td><td>Custo do produto</td><td>R$ 11,00</td></tr>
-          <tr><td><code>VALOR VENDA</code></td><td>Preço normal de venda</td><td>R$ 18,99</td></tr>
-          <tr><td><code>PREÇO DO DIA</code></td><td>Preço com desconto calculado</td><td>R$ 12,10</td></tr>
-          <tr><td><code>% REAL DE DESCONTO</code></td><td>Percentual de desconto</td><td>36,28%</td></tr>
-          <tr><td><code>VALOR DO DESCONTO</code></td><td>Valor economizado</td><td>R$ 6,89</td></tr>
-        </tbody>
-      </table></div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: ENCARTE -->
-<div class="modal-ov" id="encarteModal">
-  <div class="modal">
-    <div class="modal-head">
-      <h3><i class="ti ti-photo" style="color:var(--green)"></i> Gerar encarte de promoção</h3>
-      <button class="btn btn-sm" onclick="closeModal('encarteModal')"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="encarte-controls">
-        <div class="form-row">
-          <label>Produto</label>
-          <input type="text" id="eProduto" placeholder="Nome do produto" oninput="drawEncarte()">
-        </div>
-        <div class="form-row-2">
-          <div class="form-row">
-            <label>Preço normal (DE)</label>
-            <input type="text" id="eDe" placeholder="R$ 18,99" oninput="drawEncarte()">
-          </div>
-          <div class="form-row">
-            <label>Preço promoção (POR)</label>
-            <input type="text" id="ePor" placeholder="R$ 12,10" oninput="drawEncarte()">
-          </div>
-        </div>
-        <div class="form-row-2">
-          <div class="form-row">
-            <label>% de desconto</label>
-            <input type="text" id="ePct" placeholder="36,28%" oninput="drawEncarte()">
-          </div>
-          <div class="form-row">
-            <label>Validade</label>
-            <input type="text" id="eValidade" placeholder="04/06/2026" oninput="drawEncarte()">
-          </div>
-        </div>
-        <div class="form-row">
-          <label>Unidade / medida</label>
-          <select id="eUnidade" onchange="drawEncarte()" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx)">
-            <option value="CADA">CADA</option>
-            <option value="UN">UN</option>
-            <option value="KG">KG</option>
-            <option value="PCT">PCT</option>
-            <option value="CX">CX</option>
-            <option value="FD">FD</option>
-            <option value="LT">LT</option>
-            <option value="DZ">DZ</option>
-            <option value="ML">ML</option>
-            <option value="G">G</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label>Observação</label>
-          <input type="text" id="eObs" value="PRODUTO COM VALIDADE PRÓXIMA AO VENCIMENTO. VÁLIDO ENQUANTO DURAR O ESTOQUE." oninput="drawEncarte()">
-        </div>
-        <div class="form-row">
-          <label>Foto do produto (opcional)</label>
-          <input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)">
-        </div>
-        <div class="form-row">
-          <label>Cor do texto do produto</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <input type="color" id="eCorTexto" value="#000000" oninput="drawEncarte()" style="width:40px;height:36px;border:1px solid var(--bds);border-radius:6px;cursor:pointer;padding:2px">
-            <button class="btn btn-sm" onclick="document.getElementById('eCorTexto').value='#000000';drawEncarte()" style="background:#000;color:#fff;border-color:#000">Preto</button>
-            <button class="btn btn-sm" onclick="document.getElementById('eCorTexto').value='#ffffff';drawEncarte()" style="background:#fff;color:#000;border-color:#ccc">Branco</button>
-            <button class="btn btn-sm" onclick="document.getElementById('eCorTexto').value='#E8000D';drawEncarte()" style="background:#E8000D;color:#fff;border-color:#E8000D">Vermelho</button>
-            <button class="btn btn-sm" onclick="document.getElementById('eCorTexto').value='#FFD600';drawEncarte()" style="background:#FFD600;color:#000;border-color:#c9a800">Amarelo</button>
-            <button class="btn btn-sm" onclick="document.getElementById('eCorTexto').value='#8B0000';drawEncarte()" style="background:#8B0000;color:#fff;border-color:#8B0000">Vinho</button>
-          </div>
-        </div>
-        <div class="form-row" style="background:var(--bg2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--tx2)">
-          <i class="ti ti-info-circle" style="margin-right:5px"></i>
-          O cabeçalho, rodapé e layout de preços usam os assets oficiais do Supermercado Boas Compras.
-        </div>
-      </div>
-      <div class="encarte-preview">
-        <canvas id="encarteCanvas" width="500" height="600"></canvas>
-        <p class="canvas-hint">Clique em "Baixar" para salvar o encarte como imagem</p>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('encarteModal')">Fechar</button>
-      <button class="btn btn-green" onclick="downloadEncarte()"><i class="ti ti-download"></i> Baixar PNG</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: ADD MANUAL -->
-<div class="modal-ov" id="addModal">
-  <div class="modal-ov-inner" style="display:flex;align-items:center;justify-content:center;width:100%">
-  <div class="smodal">
-    <h3><i class="ti ti-clipboard-plus" style="color:var(--green)"></i> Registro manual</h3>
-    <div class="form-row-2">
-      <div class="form-row"><label>Código de barras</label><input id="fCod" type="text" placeholder="7896200052986"></div>
-      <div class="form-row"><label>Setor</label>
-        <select id="fSetorM">
-          <option>Açougue</option><option>Bebidas</option><option>Congelados</option>
-          <option>FLV</option><option>Frios</option><option>Laticínios</option>
-          <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row"><label>Produto</label><input id="fNome" type="text" placeholder="Nome do produto"></div>
-    <div class="form-row-2">
-      <div class="form-row"><label>Validade</label><input id="fVal" type="date"></div>
-      <div class="form-row"><label>Quantidade</label><input id="fQtde" type="number" value="1" min="1"></div>
-    </div>
- <div class="smodal-foot">
-      <button class="btn" onclick="closeModal('addModal')">Cancelar</button>
-      <button class="btn btn-green" onclick="addManual()">Salvar</button>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script>
-// ── ASSET ENCARTE (template único) ──────────────────────────────────────────
-const ASSET_TEMPLATE = 'template-encarte.png';
-function loadAsset(src) {
-  return new Promise((resolve) => {
-    const i = new Image();
-    i.onload = () => resolve(i);
-    i.onerror = () => {
-      // Se a imagem de fundo oficial falhar ou não existir, cria uma tela de fundo provisória para não quebrar o código
-      const canvasDummy = document.createElement('canvas');
-      canvasDummy.width = 1054; canvasDummy.height = 1492;
-      const ctxD = canvasDummy.getContext('2d');
-      ctxD.fillStyle = '#E8000D'; ctxD.fillRect(0,0,1054,1492);
-      ctxD.fillStyle = '#FFF'; ctxD.fillRect(20,490,1014,760);
-      const imgDummy = new Image();
-      imgDummy.src = canvasDummy.toDataURL();
-      imgDummy.onload = () => resolve(imgDummy);
-    };
-    i.src = src;
-  });
-}
-// ── CONFIG ──────────────────────────────────────────────────────────────────
-const CFG_KEY = 'aura_cfg', PROD_KEY = 'aura_prod';
-const TODAY = new Date(); TODAY.setHours(0,0,0,0);
-let encarteColor = '#E8000D';
-let fotoImg = null;
 let products = JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
 
 function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}
@@ -559,8 +369,7 @@ function addManual() {
   document.getElementById('fQtde').value = '1';
 
   // Atualiza a tela se as funções de render existirem
-  if (typeof refresh === 'function') refresh();
-  else if (typeof renderTable === 'function') { renderTable(); renderMetrics(); }
+  refresh();
 }
 
 // Remove produto inserido manualmente
@@ -568,8 +377,7 @@ function rmProduct(index) {
   if (confirm('Deseja realmente remover este registro manual?')) {
     products.splice(index, 1);
     saveProd();
-    if (typeof refresh === 'function') refresh();
-    else if (typeof renderTable === 'function') { renderTable(); renderMetrics(); }
+    refresh();
   }
 }
 
@@ -594,10 +402,182 @@ function downloadEncarte() {
 window.addEventListener('DOMContentLoaded', () => {
   refresh();
   const cfg = loadCfg();
-  if (cfg.id) {
+  if (cfg.id && typeof syncAll === 'function') {
     syncAll();
   }
 });
+
+// ── FUNÇÃO DO BANCO DE DADOS (RECONSTRUÍDA) ──────────────────────────────────
+function loadBanco() {
+  const cfg = loadCfg();
+  if (!cfg.id) return;
+  
+  // Realiza a busca simulada ou requisição ao banco configurado
+  console.log("Banco de dados carregado com a ID:", cfg.id);
+  if (typeof syncAll === 'function') syncAll();
+}
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const CFG_KEY = 'aura_cfg', PROD_KEY = 'aura_prod';
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+let encarteColor = '#E8000D';
+let fotoImg = null;
+let products = JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
+
+function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}
+function saveProd(){localStorage.setItem(PROD_KEY,JSON.stringify(products))}
+
+// ── FUNÇÕES DE CONTROLE DE MODAL E ABAS (CORREÇÃO DOS BOTÕES) ────────────────
+
+// Alterna entre as abas: Validades, Promoções, Relatório e Ajuda
+function goTab(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
+  
+  const clickedTab = Array.from(document.querySelectorAll('.tab')).find(t => t.getAttribute('onclick').includes(tabId));
+  if (clickedTab) clickedTab.classList.add('active');
+  
+  const targetSec = document.getElementById('sec-' + tabId);
+  if (targetSec) {
+    targetSec.classList.add('active');
+    if (tabId === 'relatorio' && typeof renderCharts === 'function') {
+      renderCharts();
+    }
+  }
+}
+
+// Abre o modal de Registro Manual
+function openAddModal() {
+  const modal = document.getElementById('addModal');
+  if (modal) modal.classList.add('open');
+}
+
+// Abre o modal de Encarte e preenche automaticamente se um produto for enviado
+function openEncarteModal(index) {
+  const modal = document.getElementById('encarteModal');
+  if (!modal) return;
+  
+  modal.classList.add('open');
+  
+  if (index !== null && products[index]) {
+    const p = products[index];
+    document.getElementById('eProduto').value = p.nome || '';
+    document.getElementById('eDe').value = p.precoNormal ? 'R$ ' + p.precoNormal.toFixed(2).replace('.', ',') : '';
+    document.getElementById('ePor').value = p.precoPromo ? 'R$ ' + p.precoPromo.toFixed(2).replace('.', ',') : '';
+    document.getElementById('ePct').value = p.pctDesc ? (p.pctDesc < 1 ? (p.pctDesc * 100).toFixed(0) : p.pctDesc.toFixed(0)) + '%' : '';
+    document.getElementById('eValidade').value = p.validade ? p.validade.split('-').reverse().join('/') : '';
+  }
+  
+  if (typeof drawEncarte === 'function') {
+    setTimeout(drawEncarte, 100);
+  }
+}
+
+// Fecha os modais removendo a classe 'open'
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) modal.classList.remove('open');
+}
+
+// Ação do botão salvar do Registro Manual
+function addManual() {
+  const cod = document.getElementById('fCod').value.trim();
+  const setor = document.getElementById('fSetorM').value;
+  const nome = document.getElementById('fNome').value.trim();
+  const validade = document.getElementById('fVal').value;
+  const qtde = parseInt(document.getElementById('fQtde').value) || 1;
+
+  if (!nome || !validade) {
+    alert('Por favor, preencha o nome do produto e a data de validade.');
+    return;
+  }
+
+  const newProd = {
+    cod,
+    nome,
+    setor,
+    validade,
+    qtde,
+    precoNormal: 0,
+    precoPromo: 0,
+    pctDesc: 0,
+    valorDesc: 0,
+    src: 'manual'
+  };
+
+  products.push(newProd);
+  saveProd();
+  closeModal('addModal');
+  
+  document.getElementById('fCod').value = '';
+  document.getElementById('fNome').value = '';
+  document.getElementById('fVal').value = '';
+  document.getElementById('fQtde').value = '1';
+
+  refresh();
+}
+
+// Remove produto inserido manualmente
+function rmProduct(index) {
+  if (confirm('Deseja realmente remover este registro manual?')) {
+    products.splice(index, 1);
+    saveProd();
+    refresh();
+  }
+}
+
+// Inicializador das renderizações gerais da página
+function refresh() {
+  if (typeof renderTable === 'function') renderTable();
+  if (typeof renderPromos === 'function') renderPromos();
+  if (typeof renderMetrics === 'function') renderMetrics();
+}
+
+// Atalho para baixar o encarte do canvas como PNG
+function downloadEncarte() {
+  const cv = document.getElementById('encarteCanvas');
+  if (!cv) return;
+  const link = document.createElement('a');
+  link.download = (document.getElementById('eProduto').value || 'encarte') + '.png';
+  link.href = cv.toDataURL('image/png');
+  link.click();
+}
+
+// Executa ao carregar a página pela primeira vez
+window.addEventListener('DOMContentLoaded', () => {
+  refresh();
+  const cfg = loadCfg();
+  if (cfg.id && typeof syncAll === 'function') {
+    syncAll();
+  }
+});
+
+// ── FUNÇÃO DO BANCO DE DADOS ─────────────────────────────────────────────────
+function loadBanco() {
+  const cfg = loadCfg();
+  if (!cfg.id) return;
+  console.log("Banco de dados carregado com a ID:", cfg.id);
+  if (typeof syncAll === 'function') syncAll();
+}
+
+// ── ASSET ENCARTE (template único) ──────────────────────────────────────────
+const ASSET_TEMPLATE = 'template-encarte.png';
+function loadAsset(src) {
+  return new Promise((resolve) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = () => {
+      const canvasDummy = document.createElement('canvas');
+      canvasDummy.width = 1054; canvasDummy.height = 1492;
+      const ctxD = canvasDummy.getContext('2d');
+      ctxD.fillStyle = '#E8000D'; ctxD.fillRect(0,0,1054,1492);
+      ctxD.fillStyle = '#FFF'; ctxD.fillRect(20,490,1014,760);
+      const imgDummy = new Image();
+      imgDummy.src = canvasDummy.toDataURL();
+      imgDummy.onload = () => resolve(imgDummy);
+    };
+    i.src = src;
+  });
+}
 
 // ── BANCO DE DADOS ────────────────────────────────────────────────────────────
 let banco={};
