@@ -7,10 +7,19 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{\n  --bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;\n  --tx:#1a1a18;--tx2:#6b6b67;\n  --bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);\n  --r:8px;--rl:12px;\n  --green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;\n}
-@media(prefers-color-scheme:dark){:root{\n  --bg:#1e1e1c;--bg2:#282825;--bg3:#323230;\n  --tx:#f0efe8;--tx2:#9b9b95;\n  --bd:rgba(255,255,255,.08);--bds:rgba(0,0,0,.4);\n}}
+:root{
+  --bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;
+  --tx:#1a1a18;--tx2:#6b6b67;
+  --bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);
+  --r:8px;--rl:12px;
+  --green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;
+}
+@media(prefers-color-scheme:dark){:root{\n  --bg:#1e1e1c;--bg2:#282825;--bg3:#323230;
+  --tx:#f0efe8;--tx2:#9b9b95;
+  --bd:rgba(255,255,255,.08);--bds:rgba(0,0,0,.4);
+}}
 body{background:var(--bg2);color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.4;-webkit-font-smoothing:antialiased;padding-bottom:60px}
-header{background:var(--bg);border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;align-items:center;justify-content:between;position:sticky;top:0;z-index:10}
+header{background:var(--bg);border-bottom:1px solid var(--bd);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
 .h-left{display:flex;align-items:center;gap:8px}
 .h-left i{font-size:24px;color:var(--green)}
 .h-title{font-size:16px;font-weight:700}
@@ -34,7 +43,7 @@ main{max-width:1200px;margin:0 auto;padding:16px}
 .card-m-val{font-size:20px;font-weight:700}
 .card-m.critical .card-m-val{color:var(--red)}
 .card-m.warning .card-m-val{color:var(--amber)}
-.actions-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;justify-content:between;align-items:center}
+.actions-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;justify-content:space-between;align-items:center}
 .search-box{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:0 10px;display:flex;align-items:center;gap:6px;flex:1;min-width:200px}
 .search-box i{color:var(--tx2);font-size:18px}
 .search-box input{background:none;border:none;color:var(--tx);padding:8px 0;width:100%;font-size:14px}
@@ -62,7 +71,6 @@ tr:last-child td{border-bottom:none}
 .btn-icon.del:hover{background:rgba(226,75,74,.1);color:var(--red)}
 .grid-promos{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
 .card-p{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;display:flex;flex-direction:column;position:relative}
-.card-p-badge{position:absolute;top:10px;right:10px;z-index:2}
 .card-p-body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
 .card-p-dates{font-size:11px;color:var(--tx2);display:flex;flex-direction:column;gap:2px}
 .card-p-price{display:flex;align-items:baseline;gap:8px;margin-top:4px}
@@ -184,7 +192,7 @@ tr:last-child td{border-bottom:none}
           <select id="fSetorM">
             <option>Açougue</option><option>Bebidas</option><option>Congelados</option>
             <option>FLV</option><option>Frios</option><option>Laticínios</option>
-            <option>Outros</option><option>Pet</option><option>Seca</option>
+            <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
           </select>
         </div>
       </div>
@@ -202,7 +210,7 @@ tr:last-child td{border-bottom:none}
 </div>
 
 <div class="modal-ov" id="encarteModal">
-  <div class="smodal" style="max-width:800px">
+  <div class="smodal" style="max-width:850px;">
     <h3><i class="ti ti-photo" style="color:var(--blue)"></i> Gerador de Encarte de Oferta</h3>
     <div class="smodal-body">
       <div class="encarte-layout">
@@ -210,18 +218,23 @@ tr:last-child td{border-bottom:none}
           <canvas id="encarteCanvas" width="1054" height="1492"></canvas>
         </div>
         <div style="display:flex;flex-direction:column;gap:12px">
-          <div class="form-row"><label>Nome do Produto</label><input id="eProduto" type="text" oninput="drawEncarte()"></div>
-          <div class="form-row"><label>Preço Normal</label><input id="eDe" type="text" placeholder="R$ 0,00" oninput="drawEncarte()"></div>
-          <div class="form-row"><label>Preço Promocional</label><input id="ePor" type="text" placeholder="R$ 0,00" oninput="drawEncarte()"></div>
-          <div class="form-row"><label>Desconto (%) ou Texto</label><input id="ePct" type="text" placeholder="30%" oninput="drawEncarte()"></div>
-          <div class="form-row"><label>Validade Encarte</label><input id="eValidade" type="text" placeholder="Apenas hoje" oninput="drawEncarte()"></div>
-          <div class="form-row"><label>Unidade de Medida</label><input id="eUnidade" type="text" value="UN" placeholder="KG, UN, LT" oninput="drawEncarte()"></div>
+          <div class="form-row"><label>Nome do Produto (Encarte)</label><input id="eProduto" type="text" oninput="drawEncarte()"></div>
+          <div class="form-row-2">
+            <div class="form-row"><label>Preço Anterior (De)</label><input id="eDe" type="text" placeholder="0,00" oninput="drawEncarte()"></div>
+            <div class="form-row"><label>Preço Promo (Por)</label><input id="ePor" type="text" placeholder="0,00" oninput="drawEncarte()"></div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-row"><label>% Desconto</label><input id="ePct" type="text" placeholder="Ex: 30" oninput="drawEncarte()"></div>
+            <div class="form-row"><label>Unidade Medida</label><input id="eUnidade" type="text" value="UN" oninput="drawEncarte()"></div>
+          </div>
+          <div class="form-row"><label>Texto de Validade Encarte</label><input id="eValidade" type="text" placeholder="Oferta válida até..." oninput="drawEncarte()"></div>
           <div class="form-row"><label>Foto do Produto</label><input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)"></div>
-          <div class="form-row"><label>Cor do Encarte</label>
+          <div class="form-row">
+            <label>Cor Temática do Encarte</label>
             <div class="color-picker-group">
-              <div class="color-btn active" style="background:#E8000D" onclick="changeEncarteColor('#E8000D', this)"></div>
-              <div class="color-btn" style="background:#0F6E56" onclick="changeEncarteColor('#0F6E56', this)"></div>
-              <div class="color-btn" style="background:#378ADD" onclick="changeEncarteColor('#378ADD', this)"></div>
+              <div class="color-btn active" style="background:#E8000D;" onclick="changeEncarteColor('#E8000D', this)"></div>
+              <div class="color-btn" style="background:#0F6E56;" onclick="changeEncarteColor('#0F6E56', this)"></div>
+              <div class="color-btn" style="background:#378ADD;" onclick="changeEncarteColor('#378ADD', this)"></div>
             </div>
           </div>
         </div>
@@ -229,7 +242,7 @@ tr:last-child td{border-bottom:none}
     </div>
     <div class="smodal-foot">
       <button class="btn" onclick="closeModal('encarteModal')">Fechar</button>
-      <button class="btn btn-blue" onclick="downloadEncarte()"><i class="ti ti-download"></i> Baixar Imagem</button>
+      <button class="btn btn-blue" onclick="downloadEncarte()"><i class="ti ti-download"></i> Baixar Encarte</button>
     </div>
   </div>
 </div>
@@ -247,7 +260,8 @@ let encarteColor = '#E8000D';
 let fotoImg = null;
 let chartInstance = null;
 
-// Alternar Abas
+// ── FUNÇÕES DE INTERAÇÃO (BOTOES CORRIGIDOS) ─────────────────────────────────
+
 function goTab(tabId) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.sec').forEach(s => s.classList.remove('active'));
@@ -270,12 +284,12 @@ function openEncarteModal(index) {
   if (index !== null && products[index]) {
     const p = products[index];
     document.getElementById('eProduto').value = p.nome || '';
-    document.getElementById('eDe').value = p.precoNormal ? 'R$ ' + p.precoNormal.toFixed(2).replace('.', ',') : '';
-    document.getElementById('ePor').value = p.precoPromo ? 'R$ ' + p.precoPromo.toFixed(2).replace('.', ',') : '';
-    document.getElementById('ePct').value = p.pctDesc ? p.pctDesc + '%' : '';
-    document.getElementById('eValidade').value = p.validade ? p.validade.split('-').reverse().join('/') : '';
+    document.getElementById('eDe').value = p.precoNormal ? p.precoNormal.toFixed(2).replace('.', ',') : '';
+    document.getElementById('ePor').value = p.precoPromo ? p.precoPromo.toFixed(2).replace('.', ',') : '';
+    document.getElementById('ePct').value = p.pctDesc ? p.pctDesc : '';
+    document.getElementById('eValidade').value = p.validade ? 'VÁLIDO ATÉ ' + p.validade.split('-').reverse().join('/') : '';
   }
-  setTimeout(drawEncarte, 100);
+  setTimeout(drawEncarte, 120);
 }
 
 function addManual() {
@@ -285,7 +299,7 @@ function addManual() {
   const validade = document.getElementById('fVal').value;
   const qtde = parseInt(document.getElementById('fQtde').value) || 1;
 
-  if (!nome || !validade) { alert('Preencha o nome e a validade!'); return; }
+  if (!nome || !validade) { alert('Por favor, digite o nome e a validade!'); return; }
 
   products.push({ cod, nome, setor, validade, qtde, precoNormal:0, precoPromo:0, pctDesc:0, src:'manual' });
   saveProd();
@@ -299,102 +313,11 @@ function addManual() {
 }
 
 function rmProduct(index) {
-  if (confirm('Deseja remover este item?')) {
+  if (confirm('Deseja realmente remover este item?')) {
     products.splice(index, 1);
     saveProd();
     refresh();
   }
-}
-
-function calculateDays(dateStr) {
-  const diffTime = new Date(dateStr + 'T12:00:00') - new Date();
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
-
-function refresh() {
-  renderTable();
-  renderPromos();
-  renderMetrics();
-}
-
-function renderMetrics() {
-  let crit = 0, aten = 0, norm = 0;
-  products.forEach(p => {
-    const d = calculateDays(p.validade);
-    if (d < 5) crit++; else if (d <= 15) aten++; else norm++;
-  });
-  document.getElementById('metricsDiv').innerHTML = `
-    <div class="card-m critical"><div class="card-m-title">Crítico (&lt;5 dias)</div><div class="card-m-val">${crit}</div></div>
-    <div class="card-m warning"><div class="card-m-title">Atenção (5-15 dias)</div><div class="card-m-val">${aten}</div></div>
-    <div class="card-m"><div class="card-m-title">Normal</div><div class="card-m-val">${norm}</div></div>
-  `;
-}
-
-function renderTable() {
-  const query = document.getElementById('pSearch').value.toLowerCase();
-  const tbody = document.getElementById('pTableBody');
-  tbody.innerHTML = '';
-
-  products.forEach((p, idx) => {
-    if (query && !p.nome.toLowerCase().includes(query) && !p.cod.includes(query)) return;
-    const dias = calculateDays(p.validade);
-    let badge = '<span class="badge badge-green">Normal</span>';
-    if (dias < 5) badge = '<span class="badge badge-red">Crítico</span>';
-    else if (dias <= 15) badge = '<span class="badge badge-amber">Atenção</span>';
-
-    tbody.innerHTML += `
-      <tr>
-        <td><div class="p-info"><span class="p-name">${p.nome}</span><span class="p-cod">${p.cod || 'S/G'}</span></div></td>
-        <td>${p.setor}</td>
-        <td>${p.validade.split('-').reverse().join('/')}</td>
-        <td><strong>${dias}d</strong></td>
-        <td>${badge}</td>
-        <td class="actions-cell">
-          <button class="btn-icon" onclick="openEncarteModal(${idx})"><i class="ti ti-photo"></i></button>
-          <button class="btn-icon del" onclick="rmProduct(${idx})"><i class="ti ti-trash"></i></button>
-        </td>
-      </tr>
-    `;
-  });
-}
-
-function renderPromos() {
-  const grid = document.getElementById('promosGrid');
-  grid.innerHTML = '';
-  products.forEach((p, idx) => {
-    const dias = calculateDays(p.validade);
-    if (dias > 15) return;
-    grid.innerHTML += `
-      <div class="card-p">
-        <div class="card-p-body">
-          <div style="font-weight:700">${p.nome}</div>
-          <div class="card-p-dates"><span>Validade: ${p.validade.split('-').reverse().join('/')}</span></div>
-          <div class="card-p-price">
-            <span class="price-por">Oferta Ativa</span>
-          </div>
-        </div>
-        <div class="card-p-foot">
-          <button class="btn btn-icon" onclick="openEncarteModal(${idx})"><i class="ti ti-photo"></i> Criar Encarte</button>
-        </div>
-      </div>
-    `;
-  });
-}
-
-function renderCharts() {
-  const ctx = document.getElementById('chartSetores').getContext('2d');
-  const setores = {};
-  products.forEach(p => setores[p.setor] = (setores[p.setor] || 0) + 1);
-
-  if (chartInstance) chartInstance.destroy();
-  chartInstance = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: Object.keys(setores),
-      datasets: [{ label: 'Produtos por Setor', data: Object.values(setores), backgroundColor: '#1D9E75' }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
 }
 
 function loadFoto(input) {
@@ -416,6 +339,108 @@ function changeEncarteColor(color, btn) {
   drawEncarte();
 }
 
+// ── SISTEMA DE CÁLCULOS E RENDERIZAÇÃO DA TELA ORIGINAL ──────────────────────
+
+function calculateDays(dateStr) {
+  const diffTime = new Date(dateStr + 'T12:00:00') - new Date();
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+}
+
+function refresh() {
+  renderTable();
+  renderPromos();
+  renderMetrics();
+}
+
+function renderMetrics() {
+  let crit = 0, aten = 0, norm = 0;
+  products.forEach(p => {
+    const d = calculateDays(p.validade);
+    if (d < 5) crit++; else if (d <= 15) aten++; else norm++;
+  });
+  const div = document.getElementById('metricsDiv');
+  if (div) {
+    div.innerHTML = `
+      <div class="card-m critical"><div class="card-m-title">Crítico (&lt;5 dias)</div><div class="card-m-val">${crit}</div></div>
+      <div class="card-m warning"><div class="card-m-title">Atenção (5-15 dias)</div><div class="card-m-val">${aten}</div></div>
+      <div class="card-m"><div class="card-m-title">Normal</div><div class="card-m-val">${norm}</div></div>
+    `;
+  }
+}
+
+function renderTable() {
+  const query = document.getElementById('pSearch').value.toLowerCase();
+  const tbody = document.getElementById('pTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  products.forEach((p, idx) => {
+    if (query && !p.nome.toLowerCase().includes(query) && !p.cod.includes(query)) return;
+    const dias = calculateDays(p.validade);
+    let badge = '<span class="badge badge-green">Normal</span>';
+    if (dias < 5) badge = '<span class="badge badge-red">Crítico</span>';
+    else if (dias <= 15) badge = '<span class="badge badge-amber">Atenção</span>';
+
+    tbody.innerHTML += `
+      <tr>
+        <td><div class="p-info"><span class="p-name">${p.nome}</span><span class="p-cod">${p.cod || 'SEM CÓDIGO'}</span></div></td>
+        <td>${p.setor}</td>
+        <td>${p.validade.split('-').reverse().join('/')}</td>
+        <td><strong>${dias}d</strong></td>
+        <td>${badge}</td>
+        <td class="actions-cell">
+          <button class="btn-icon" onclick="openEncarteModal(${idx})"><i class="ti ti-photo"></i></button>
+          <button class="btn-icon del" onclick="rmProduct(${idx})"><i class="ti ti-trash"></i></button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function renderPromos() {
+  const grid = document.getElementById('promosGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  products.forEach((p, idx) => {
+    const dias = calculateDays(p.validade);
+    if (dias > 15) return;
+    grid.innerHTML += `
+      <div class="card-p">
+        <div class="card-p-body">
+          <div style="font-weight:700; font-size:15px; margin-bottom:4px;">${p.nome}</div>
+          <div class="card-p-dates"><span>Validade: ${p.validade.split('-').reverse().join('/')} (${dias}d rest.)</span></div>
+          <div class="card-p-price">
+            <span class="price-por">Oferta Ativa</span>
+          </div>
+        </div>
+        <div class="card-p-foot">
+          <button class="btn btn-blue" onclick="openEncarteModal(${idx})"><i class="ti ti-photo"></i> Criar Encarte</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function renderCharts() {
+  const canvasChart = document.getElementById('chartSetores');
+  if (!canvasChart) return;
+  const ctx = canvasChart.getContext('2d');
+  const setores = {};
+  products.forEach(p => setores[p.setor] = (setores[p.setor] || 0) + 1);
+
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(setores),
+      datasets: [{ label: 'Produtos por Setor', data: Object.values(setores), backgroundColor: '#1D9E75' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+// ── SISTEMA AVANÇADO DE DESENHO DO CANVAS (SEU MODELO ORIGINAL COORDENADO) ──
+
 const ASSET_TEMPLATE = 'template-encarte.png';
 function loadAsset(src) {
   return new Promise(res => {
@@ -436,58 +461,107 @@ function loadAsset(src) {
 
 async function drawEncarte() {
   const canvas = document.getElementById('encarteCanvas');
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const bg = await loadAsset(ASSET_TEMPLATE);
   
-  ctx.clearRect(0,0,1054,1492);
+  ctx.clearRect(0, 0, 1054, 1492);
   ctx.drawImage(bg, 0, 0);
 
+  // Renderiza a imagem do produto carregada
   if (fotoImg) {
     ctx.drawImage(fotoImg, 50, 440, 954, 720);
   }
 
-  const prod = document.getElementById('eProduto').value.toUpperCase();
+  // Captura as strings informadas nos inputs
+  const produto = document.getElementById('eProduto').value.toUpperCase();
   const de = document.getElementById('eDe').value;
   const por = document.getElementById('ePor').value;
   const pct = document.getElementById('ePct').value;
-  const val = document.getElementById('eValidade').value;
-  const un = document.getElementById('eUnidade').value.toUpperCase();
+  const validade = document.getElementById('eValidade').value.toUpperCase();
+  const unidade = document.getElementById('eUnidade').value.toUpperCase();
 
+  // ── DESENHO DO PRODUTO (Caixa Superior) ────────────────────────────────────
   ctx.fillStyle = '#FFF';
-  ctx.font = "bold 55px Arial";
-  ctx.textAlign = "center";
-  ctx.fillText(prod || "NOME DO PRODUTO", 527, 200);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  let prodFs = 60;
+  ctx.font = `900 ${prodFs}px 'Arial Black', Arial, sans-serif`;
+  while(ctx.measureText(produto || 'NOME DO PRODUTO').width > 900 && prodFs > 30) {
+    prodFs -= 4;
+    ctx.font = `900 ${prodFs}px 'Arial Black', Arial, sans-serif`;
+  }
+  ctx.fillText(produto || 'NOME DO PRODUTO', 527, 230);
 
-  ctx.fillStyle = '#FFF';
-  ctx.font = "bold 35px Arial";
-  ctx.fillText(de ? `DE: ${de}` : "", 527, 280);
-
-  ctx.fillStyle = '#FFD600';
-  ctx.font = "bold 110px Arial";
-  ctx.fillText(por || "R$ 0,00", 527, 400);
-
-  if (pct) {
-    ctx.fillStyle = '#FFD600';
-    ctx.font = "bold 40px Arial";
-    ctx.fillText(`${pct} DESC.`, 527, 1220);
+  // ── VALOR DE ───────────────────────────────────────────────────────────────
+  if (de) {
+    ctx.fillStyle = '#FFF';
+    ctx.font = "bold 38px Arial";
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(`DE: R$ ${de}`, 527, 340);
   }
 
-  if (val) {
+  // ── UNIDADE DE MEDIDA ──────────────────────────────────────────────────────
+  ctx.fillStyle = '#8B0000';
+  ctx.font = `900 64px 'Arial Black', Arial, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(unidade, 730, 967);
+
+  // ── VALOR POR ──────────────────────────────────────────────────────────────
+  ctx.fillStyle = '#FFD600';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  let porFs = 200;
+  ctx.font = `900 ${porFs}px 'Arial Black', Arial, sans-serif`;
+  while (ctx.measureText(por || '0,00').width > 400 && porFs > 70) {
+    porFs -= 10;
+    ctx.font = `900 ${porFs}px 'Arial Black', Arial, sans-serif`;
+  }
+  ctx.fillText(por || '0,00', 590, 1200);
+
+  // ── % DESCONTO ─────────────────────────────────────────────────────────────
+  if (pct) {
+    ctx.fillStyle = '#E8000D';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = "900 75px 'Arial Black', Arial, sans-serif";
+    ctx.fillText(`${pct}%`, 255, 995);
     ctx.fillStyle = '#FFF';
-    ctx.font = "30px Arial";
-    ctx.fillText(`Válido até: ${val}`, 527, 1350);
+    ctx.font = "bold 26px Arial";
+    ctx.fillText("DESC.", 255, 1055);
+  }
+
+  // ── VALIDADE TEXTO INFERIOR ────────────────────────────────────────────────
+  if (validade) {
+    ctx.fillStyle = '#FFF';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = "900 36px 'Arial Black', Arial, sans-serif";
+    ctx.fillText(validade, 527, 1370);
   }
 }
 
 function downloadEncarte() {
   const cv = document.getElementById('encarteCanvas');
+  if (!cv) return;
   const link = document.createElement('a');
   link.download = (document.getElementById('eProduto').value || 'encarte') + '.png';
   link.href = cv.toDataURL('image/png');
   link.click();
 }
 
-window.addEventListener('DOMContentLoaded', refresh);
+function loadBanco() {
+  const cfg = loadCfg();
+  if (!cfg.id) return;
+  console.log("Banco sincronizado localmente sob a ID:", cfg.id);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  refresh();
+  loadBanco();
+});
 </script>
 </body>
 </html>
