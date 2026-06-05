@@ -425,17 +425,15 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       <div class="form-row"><label>Validade</label><input id="fVal" type="date"></div>
       <div class="form-row"><label>Quantidade</label><input id="fQtde" type="number" value="1" min="1"></div>
     </div>
-    <div class="smodal-foot">
+ <div class="smodal-foot">
       <button class="btn" onclick="closeModal('addModal')">Cancelar</button>
       <button class="btn btn-green" onclick="addManual()">Salvar</button>
     </div>
-  </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-  
 // ── ASSET ENCARTE (template único) ──────────────────────────────────────────
 const ASSET_TEMPLATE = 'template-encarte.png'; 
 function loadAsset(src){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=src;})}
