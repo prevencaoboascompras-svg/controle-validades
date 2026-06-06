@@ -223,13 +223,33 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       <div class="encarte-controls">
         <div class="form-row"><label>Produto</label><input type="text" id="eProduto" placeholder="Nome do produto" oninput="drawEncarte()"></div>
         <div class="form-row-2">
-          <div class="form-row"><label>Preco normal (DE)</label><input type="text" id="eDe" placeholder="R$ 18,99" oninput="drawEncarte()"></div>
-          <div class="form-row"><label>Preco promocao (POR)</label><input type="text" id="ePor" placeholder="R$ 12,10" oninput="drawEncarte()"></div>
+          <div class="form-row"><label>Preco normal (DE)</label><input type="text" id="eDe" placeholder="R$ 18,99" oninput="onDeChange()"></div>
+          <div class="form-row"><label>Preco promocao (POR)</label><input type="text" id="ePor" placeholder="R$ 12,10" oninput="onPorChange()"></div>
+        </div>
+        <div id="custoPainel" style="display:none;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;margin-bottom:13px">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:8px;display:flex;align-items:center;gap:5px">
+            <i class="ti ti-lock" style="font-size:12px"></i> Informações gerenciais (não aparecem no encarte)
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:8px">
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--tx2);margin-bottom:2px">Custo</div>
+              <div id="infoCusto" style="font-size:15px;font-weight:700;color:var(--tx)">--</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--tx2);margin-bottom:2px">Markup s/ custo</div>
+              <div id="infoMarkup" style="font-size:15px;font-weight:700;color:var(--tx)">--</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:10px;color:var(--tx2);margin-bottom:2px">Margem bruta</div>
+              <div id="infoMargem" style="font-size:15px;font-weight:700;color:var(--tx)">--</div>
+            </div>
+          </div>
+          <div id="infoAlerta" style="font-size:11px;font-weight:600;padding:6px 10px;border-radius:6px;text-align:center;display:none"></div>
         </div>
         <div class="form-row-2">
           <div class="form-row">
             <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="eShowPct" checked onchange="drawEncarte()" style="width:15px;height:15px;cursor:pointer;accent-color:var(--green)"> % de desconto</label>
-            <input type="text" id="ePct" placeholder="36%" oninput="drawEncarte()">
+            <input type="text" id="ePct" placeholder="36%" oninput="onPctChange()">
           </div>
           <div class="form-row"><label>Validade</label><input type="text" id="eValidade" placeholder="04/06/2026" oninput="drawEncarte()"></div>
         </div>
@@ -535,6 +555,121 @@ function setFonte(f,idx){
   if(sel){sel.style.borderColor='var(--green)';sel.style.color='var(--green)';}
   drawEncarte();
 }
+function parsePreco(v){
+  if(!v)return null;
+  var n=parseFloat(v.replace(/R\$\s*/i,'').replace(',','.'));
+  return isNaN(n)?null:n;
+}
+function fmtPreco(n){
+  return n.toFixed(2).replace('.',',');
+}
+
+// Evita loop de recalculo
+var _recalcLock=false;
+var _custoProduto=null;
+
+function atualizarPainelCusto(){
+  var custo=_custoProduto;
+  var painel=document.getElementById('custoPainel');
+  if(!custo||custo<=0){if(painel)painel.style.display='none';return;}
+  if(painel)painel.style.display='block';
+
+  var por=parsePreco(document.getElementById('ePor').value);
+  var de=parsePreco(document.getElementById('eDe').value);
+
+  // Custo
+  document.getElementById('infoCusto').textContent='R$ '+custo.toFixed(2).replace('.',',');
+
+  // Markup sobre custo (usando preço DE como base de venda normal)
+  if(de&&de>0){
+    var markup=((de-custo)/custo*100);
+    document.getElementById('infoMarkup').textContent=markup.toFixed(1)+'%';
+  } else {
+    document.getElementById('infoMarkup').textContent='--';
+  }
+
+  // Margem e alerta baseados no POR atual
+  var alerta=document.getElementById('infoAlerta');
+  if(por&&por>0){
+    var margem=((por-custo)/por*100);
+    var margemEl=document.getElementById('infoMargem');
+    margemEl.textContent=margem.toFixed(1)+'%';
+
+    if(por<custo){
+      // Abaixo do custo
+      var prejuizo=custo-por;
+      margemEl.style.color='#E24B4A';
+      alerta.style.display='block';
+      alerta.style.background='#FCEBEB';
+      alerta.style.color='#A32D2D';
+      alerta.innerHTML='<i class="ti ti-alert-triangle"></i> Abaixo do custo! Prejuízo de R$ '+prejuizo.toFixed(2).replace('.',',')+'  por unidade';
+    } else if(margem<10){
+      // Margem muito baixa
+      margemEl.style.color='#BA7517';
+      alerta.style.display='block';
+      alerta.style.background='#FAEEDA';
+      alerta.style.color='#854F0B';
+      alerta.innerHTML='<i class="ti ti-alert-circle"></i> Margem baixa — cobrindo custo mas com pouca folga';
+    } else {
+      // OK
+      margemEl.style.color='#1D9E75';
+      alerta.style.display='none';
+    }
+  } else {
+    document.getElementById('infoMargem').textContent='--';
+    alerta.style.display='none';
+  }
+}
+
+function onDeChange(){
+  if(_recalcLock)return;
+  _recalcLock=true;
+  // Se tiver POR, recalcula PCT. Se tiver PCT, recalcula POR.
+  var de=parsePreco(document.getElementById('eDe').value);
+  var por=parsePreco(document.getElementById('ePor').value);
+  var pctEl=document.getElementById('ePct');
+  var pct=parseFloat((pctEl.value||'').replace('%','').replace(',','.'));
+  if(de&&por&&de>0){
+    var calc=((de-por)/de*100);
+    pctEl.value=calc.toFixed(0)+'%';
+  } else if(de&&!isNaN(pct)&&pct>0){
+    var novoPor=de*(1-pct/100);
+    document.getElementById('ePor').value='R$ '+fmtPreco(novoPor);
+  }
+  _recalcLock=false;
+  atualizarPainelCusto();
+  drawEncarte();
+}
+
+function onPorChange(){
+  if(_recalcLock)return;
+  _recalcLock=true;
+  var de=parsePreco(document.getElementById('eDe').value);
+  var por=parsePreco(document.getElementById('ePor').value);
+  var pctEl=document.getElementById('ePct');
+  if(de&&por&&de>0){
+    var calc=((de-por)/de*100);
+    pctEl.value=calc.toFixed(0)+'%';
+  }
+  _recalcLock=false;
+  atualizarPainelCusto();
+  drawEncarte();
+}
+
+function onPctChange(){
+  if(_recalcLock)return;
+  _recalcLock=true;
+  var de=parsePreco(document.getElementById('eDe').value);
+  var pctEl=document.getElementById('ePct');
+  var pct=parseFloat((pctEl.value||'').replace('%','').replace(',','.'));
+  if(de&&!isNaN(pct)&&pct>=0&&pct<=100){
+    var novoPor=de*(1-pct/100);
+    document.getElementById('ePor').value='R$ '+fmtPreco(novoPor);
+  }
+  _recalcLock=false;
+  drawEncarte();
+}
+
 function setCor(c){document.getElementById('eCorTexto').value=c;drawEncarte();}
 function setCorValor(c){document.getElementById('eCorValor').value=c;drawEncarte();}
 function setCorUnidade(c){document.getElementById('eCorUnidade').value=c;drawEncarte();}
@@ -805,8 +940,10 @@ function openEncarteModal(idx){
     var pct=p.pctDesc<1?p.pctDesc*100:p.pctDesc;
     document.getElementById('ePct').value=p.pctDesc?pct.toFixed(0)+'%':'';
     document.getElementById('eValidade').value=fmt(p.validade);
+    _custoProduto=p.custo||null;
   }else{
     ['eProduto','eDe','ePor','ePct','eValidade'].forEach(function(id){document.getElementById(id).value='';});
+    _custoProduto=null;
   }
   document.getElementById('eUnidade').value='CADA';
   document.getElementById('eCorTexto').value='#000000';
@@ -824,6 +961,7 @@ function openEncarteModal(idx){
   document.getElementById('eFotoBusca').value='';
   document.getElementById('encarteModal').classList.add('open');
   setTimeout(function(){
+    atualizarPainelCusto();
     drawEncarte();
     if(_cod||_nome) buscarFotoOpenFoodFacts(_cod,_nome);
   },150);
