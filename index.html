@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Validades</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;--tx:#1a1a18;--tx2:#6b6b67;--bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);--r:8px;--rl:12px;--green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;}
@@ -226,17 +227,36 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
           <div class="form-row"><label>Preco promocao (POR)</label><input type="text" id="ePor" placeholder="R$ 12,10" oninput="drawEncarte()"></div>
         </div>
         <div class="form-row-2">
-          <div class="form-row"><label>% de desconto</label><input type="text" id="ePct" placeholder="36%" oninput="drawEncarte()"></div>
+          <div class="form-row">
+            <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="eShowPct" checked onchange="drawEncarte()" style="width:15px;height:15px;cursor:pointer;accent-color:var(--green)"> % de desconto</label>
+            <input type="text" id="ePct" placeholder="36%" oninput="drawEncarte()">
+          </div>
           <div class="form-row"><label>Validade</label><input type="text" id="eValidade" placeholder="04/06/2026" oninput="drawEncarte()"></div>
         </div>
         <div class="form-row">
-          <label>Unidade / medida</label>
+          <label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="eShowUnidade" checked onchange="drawEncarte()" style="width:15px;height:15px;cursor:pointer;accent-color:var(--green)"> Unidade / medida</label>
           <select id="eUnidade" onchange="drawEncarte()">
             <option>CADA</option><option>UN</option><option>KG</option><option>PCT</option>
             <option>CX</option><option>FD</option><option>LT</option><option>DZ</option><option>ML</option><option>G</option>
           </select>
         </div>
-        <div class="form-row"><label>Foto do produto (opcional)</label><input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)"></div>
+        <div class="form-row">
+          <label>Fonte dos textos</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+            <button class="btn btn-sm" id="fBtn0" onclick="setFonte('Arial Black',0)" style="font-family:'Arial Black',Arial,sans-serif;font-weight:900">Arial Black</button>
+            <button class="btn btn-sm" id="fBtn1" onclick="setFonte('Impact',1)" style="font-family:Impact,sans-serif">Impact</button>
+            <button class="btn btn-sm" id="fBtn2" onclick="setFonte('Montserrat',2)" style="font-family:'Montserrat',sans-serif;font-weight:900;border-color:var(--green);color:var(--green)">Montserrat</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Foto do produto</label>
+          <div style="display:flex;gap:6px;margin-bottom:6px">
+            <input type="text" id="eFotoBusca" placeholder="Buscar por nome..." style="flex:1;font-size:12px;padding:6px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none" onkeydown="if(event.key==='Enter')buscarFotoNome()">
+            <button class="btn btn-sm" onclick="buscarFotoNome()" style="white-space:nowrap"><i class="ti ti-search"></i> Buscar</button>
+          </div>
+          <div id="fotoStatus" style="font-size:11px;color:var(--tx2);margin-bottom:6px;min-height:16px"></div>
+          <input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)" style="font-size:12px">
+        </div>
         <div class="form-row">
           <label>Cor do texto do produto</label>
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px">
@@ -507,9 +527,96 @@ function renderCharts(){
   charts.dc=new Chart(document.getElementById('cDesconto'),{type:'bar',data:{labels:top.map(function(p){return(p.nome||'').substring(0,25);}),datasets:[{label:'Valor desconto',data:top.map(function(p){return p.valorDesc;}),backgroundColor:'#BA7517',borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{font:{size:10},callback:function(v){return'R$'+v.toFixed(2);}}},y:{ticks:{font:{size:10}}}}}});
 }
 
+var fonteAtual='"Montserrat",sans-serif';
+function setFonte(f,idx){
+  fonteAtual='"'+f+'",sans-serif';
+  for(var i=0;i<3;i++){var b=document.getElementById('fBtn'+i);if(b){b.style.borderColor='';b.style.color='';}}
+  var sel=document.getElementById('fBtn'+idx);
+  if(sel){sel.style.borderColor='var(--green)';sel.style.color='var(--green)';}
+  drawEncarte();
+}
 function setCor(c){document.getElementById('eCorTexto').value=c;drawEncarte();}
 function setCorValor(c){document.getElementById('eCorValor').value=c;drawEncarte();}
 function setCorUnidade(c){document.getElementById('eCorUnidade').value=c;drawEncarte();}
+function setFotoStatus(msg, cor){
+  var el=document.getElementById('fotoStatus');
+  if(el){el.textContent=msg;el.style.color=cor||'var(--tx2)';}
+}
+
+async function buscarFotoOpenFoodFacts(ean, nomeProduto){
+  // Tenta pelo EAN primeiro
+  if(ean){
+    try{
+      setFotoStatus('Buscando foto pelo código de barras...','var(--amber)');
+      var res=await fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json?fields=image_url,image_front_url,product_name');
+      var data=await res.json();
+      if(data.status===1&&data.product){
+        var imgUrl=data.product.image_front_url||data.product.image_url;
+        if(imgUrl){
+          await carregarImagemUrl(imgUrl);
+          setFotoStatus('✓ Foto encontrada pelo código de barras','var(--green)');
+          return true;
+        }
+      }
+    }catch(e){}
+  }
+  // Tenta pelo nome
+  if(nomeProduto){
+    return await buscarFotoPorNome(nomeProduto);
+  }
+  setFotoStatus('Foto não encontrada. Envie manualmente.','var(--red)');
+  return false;
+}
+
+async function buscarFotoPorNome(nome){
+  try{
+    setFotoStatus('Buscando foto pelo nome...','var(--amber)');
+    var query=nome.replace(/\s*\(\d+.*$/,'').replace(/\s*\{.*$/,'').trim();
+    var res=await fetch('https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(query)+'&search_simple=1&action=process&json=1&page_size=5&fields=image_front_url,image_url,product_name');
+    var data=await res.json();
+    if(data.products&&data.products.length>0){
+      for(var i=0;i<data.products.length;i++){
+        var imgUrl=data.products[i].image_front_url||data.products[i].image_url;
+        if(imgUrl){
+          await carregarImagemUrl(imgUrl);
+          setFotoStatus('✓ Foto encontrada: "'+( data.products[i].product_name||query)+'"','var(--green)');
+          return true;
+        }
+      }
+    }
+    setFotoStatus('Foto não encontrada. Envie manualmente.','var(--red)');
+    return false;
+  }catch(e){
+    setFotoStatus('Erro na busca. Envie manualmente.','var(--red)');
+    return false;
+  }
+}
+
+async function buscarFotoNome(){
+  var q=document.getElementById('eFotoBusca').value.trim()||document.getElementById('eProduto').value.trim();
+  if(!q){setFotoStatus('Digite um nome para buscar.','var(--red)');return;}
+  await buscarFotoPorNome(q);
+}
+
+function carregarImagemUrl(url){
+  return new Promise(function(resolve){
+    // Usa proxy CORS via allorigins
+    var proxyUrl='https://api.allorigins.win/raw?url='+encodeURIComponent(url);
+    var img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){fotoImg=img;drawEncarte();resolve();};
+    img.onerror=function(){
+      // Tenta direto sem proxy
+      var img2=new Image();
+      img2.crossOrigin='anonymous';
+      img2.onload=function(){fotoImg=img2;drawEncarte();resolve();};
+      img2.onerror=function(){resolve();};
+      img2.src=url;
+    };
+    img.src=proxyUrl;
+  });
+}
+
 function loadFoto(input){
   if(!input.files[0])return;
   var r=new FileReader();
@@ -517,7 +624,13 @@ function loadFoto(input){
   r.readAsDataURL(input.files[0]);
 }
 
+async function ensureFonts(){
+  if(typeof FontFace!=='undefined'){
+    try{await document.fonts.load('900 40px "Montserrat"');}catch(e){}
+  }
+}
 async function drawEncarte(){
+  await ensureFonts();
   var cv=document.getElementById('encarteCanvas');
   var ctx=cv.getContext('2d');
   var W=1054,H=1492;
@@ -526,12 +639,13 @@ async function drawEncarte(){
   var produto   = document.getElementById('eProduto').value||'NOME DO PRODUTO';
   var de        = (document.getElementById('eDe').value||'').replace(/R\$\s*/i,'').trim();
   var por       = (document.getElementById('ePor').value||'').replace(/R\$\s*/i,'').trim();
-  var pct       = document.getElementById('ePct').value||'';
+  var pct       = document.getElementById('eShowPct').checked ? (document.getElementById('ePct').value||'') : '';
   var validade  = document.getElementById('eValidade').value||'';
-  var unidade   = document.getElementById('eUnidade').value||'CADA';
+  var unidade   = document.getElementById('eShowUnidade').checked ? (document.getElementById('eUnidade').value||'CADA') : '';
   var corTexto  = document.getElementById('eCorTexto').value||'#000000';
   var corValor  = document.getElementById('eCorValor').value||'#ffffff';
   var corUnidade= document.getElementById('eCorUnidade').value||'#FFD600';
+  var fonte     = fonteAtual||'"Arial Black",Arial,sans-serif';
 
   var tmpl=await loadAsset(ASSET_TEMPLATE);
   ctx.drawImage(tmpl,0,0,W,H);
@@ -555,12 +669,12 @@ async function drawEncarte(){
   ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=corTexto;
   var fs=90;
   while(fs>26){
-    ctx.font='900 '+fs+'px "Arial Black",Arial,sans-serif';
+    ctx.font='900 '+fs+'px '+fonte;
     var lines=splitLines(nomeClean,980);
     if(lines.length<=3&&lines.length*fs*1.15<=175)break;
     fs-=3;
   }
-  ctx.font='900 '+fs+'px "Arial Black",Arial,sans-serif';
+  ctx.font='900 '+fs+'px '+fonte;
   var nLines=splitLines(nomeClean,980);
   var lh=fs*1.15;
   var nomeCY=483+(670-483)/2;
@@ -586,20 +700,20 @@ async function drawEncarte(){
     // Circulo externo amarelo
     ctx.fillStyle='#FFD600';
     ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
-    // Circulo interno vinho
-    ctx.fillStyle='#8B0000';
+    // Circulo interno vermelho
+    ctx.fillStyle='#E8000D';
     ctx.beginPath();ctx.arc(cx,cy,r-8,0,Math.PI*2);ctx.fill();
     ctx.shadowBlur=0;ctx.shadowColor='transparent';
     // Numero grande
     ctx.fillStyle='#FFD600';
     ctx.textAlign='center';ctx.textBaseline='middle';
     var pctFs=58;
-    ctx.font='900 '+pctFs+'px "Arial Black",Arial,sans-serif';
-    while(ctx.measureText(pctNum+'%').width>130&&pctFs>24){pctFs-=3;ctx.font='900 '+pctFs+'px "Arial Black",Arial,sans-serif';}
+    ctx.font='900 '+pctFs+'px '+fonte;
+    while(ctx.measureText(pctNum+'%').width>130&&pctFs>24){pctFs-=3;ctx.font='900 '+pctFs+'px '+fonte;}
     ctx.fillText(pctNum+'%',cx,cy-12);
     // Label OFF
     ctx.fillStyle='#ffffff';
-    ctx.font='900 28px "Arial Black",Arial,sans-serif';
+    ctx.font='900 28px '+fonte;
     ctx.fillText('OFF',cx,cy+30);
   }
 
@@ -610,7 +724,7 @@ async function drawEncarte(){
     var rsDeFs=Math.round(deFs*0.42);
     ctx.font='bold '+rsDeFs+'px Arial,sans-serif';
     var rsW=ctx.measureText('R$').width;
-    ctx.font='900 '+deFs+'px "Arial Black",Arial,sans-serif';
+    ctx.font='900 '+deFs+'px '+fonte;
     var valW=ctx.measureText(de||'0,00').width;
     if(rsW+6+valW<=300)break;
     deFs-=3;
@@ -618,19 +732,19 @@ async function drawEncarte(){
   var rsDeFs=Math.round(deFs*0.42);
   ctx.font='bold '+rsDeFs+'px Arial,sans-serif';
   var rsDeW=ctx.measureText('R$').width+6;
-  ctx.font='900 '+deFs+'px "Arial Black",Arial,sans-serif';
+  ctx.font='900 '+deFs+'px '+fonte;
   var deValW=ctx.measureText(de||'0,00').width;
   var deX=792-(rsDeW+deValW)/2;
   var deBaseY=826+deFs*0.38;
   ctx.textBaseline='alphabetic';ctx.textAlign='left';
   ctx.font='bold '+rsDeFs+'px Arial,sans-serif';
   ctx.fillText('R$',deX,deBaseY-deFs*0.08);
-  ctx.font='900 '+deFs+'px "Arial Black",Arial,sans-serif';
+  ctx.font='900 '+deFs+'px '+fonte;
   ctx.fillText(de||'0,00',deX+rsDeW,deBaseY);
 
   // ── UNIDADE — canto superior direito da caixa vermelha POR ──
   ctx.fillStyle=corUnidade;
-  ctx.font='900 46px "Arial Black",Arial,sans-serif';
+  ctx.font='900 46px '+fonte;
   ctx.textAlign='right';ctx.textBaseline='top';
   ctx.fillText(unidade,1008,1010);
 
@@ -641,7 +755,7 @@ async function drawEncarte(){
     var rsPorFs=Math.round(porFs*0.38);
     ctx.font='bold '+rsPorFs+'px Arial,sans-serif';
     var rsPW=ctx.measureText('R$').width;
-    ctx.font='900 '+porFs+'px "Arial Black",Arial,sans-serif';
+    ctx.font='900 '+porFs+'px '+fonte;
     var porVW=ctx.measureText(por||'0,00').width;
     if(rsPW+8+porVW<=430)break;
     porFs-=6;
@@ -649,14 +763,14 @@ async function drawEncarte(){
   var rsPorFs=Math.round(porFs*0.38);
   ctx.font='bold '+rsPorFs+'px Arial,sans-serif';
   var rsPorW=ctx.measureText('R$').width+8;
-  ctx.font='900 '+porFs+'px "Arial Black",Arial,sans-serif';
+  ctx.font='900 '+porFs+'px '+fonte;
   var porValW=ctx.measureText(por||'0,00').width;
   var porX=790-(rsPorW+porValW)/2;
   var porBaseY=1149+porFs*0.38;
   ctx.textBaseline='alphabetic';ctx.textAlign='left';
   ctx.font='bold '+rsPorFs+'px Arial,sans-serif';
   ctx.fillText('R$',porX,porBaseY-porFs*0.08);
-  ctx.font='900 '+porFs+'px "Arial Black",Arial,sans-serif';
+  ctx.font='900 '+porFs+'px '+fonte;
   ctx.fillText(por||'0,00',porX+rsPorW,porBaseY);
 
   // ── VALIDADE — centralizada dentro da area branca, logo acima do rodape ──
@@ -664,9 +778,9 @@ async function drawEncarte(){
   // Validade fica em y=1225 (dentro da branca, com folga)
   if(validade){
     ctx.fillStyle='#000000';
-    ctx.font='900 26px "Arial Black",Arial,sans-serif';
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('Validade: '+validade, W/2, 1225);
+    ctx.font='normal 20px '+fonte;
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText('Validade: '+validade, 30, 1245);
   }
 }
 
@@ -698,9 +812,21 @@ function openEncarteModal(idx){
   document.getElementById('eCorTexto').value='#000000';
   document.getElementById('eCorValor').value='#ffffff';
   document.getElementById('eCorUnidade').value='#FFD600';
+  document.getElementById('eShowPct').checked=true;
+  document.getElementById('eShowUnidade').checked=true;
+  fonteAtual='"Montserrat",sans-serif';
+  for(var i=0;i<3;i++){var b=document.getElementById('fBtn'+i);if(b){b.style.borderColor='';b.style.color='';}}
+  var b2=document.getElementById('fBtn2');if(b2){b2.style.borderColor='var(--green)';b2.style.color='var(--green)';}
   fotoImg=null;document.getElementById('eFoto').value='';
+  document.getElementById('fotoStatus').textContent='';
+  var _cod=(idx!==null&&idx!==undefined)?products[idx].cod:'';
+  var _nome=(idx!==null&&idx!==undefined)?products[idx].nome:'';
+  document.getElementById('eFotoBusca').value='';
   document.getElementById('encarteModal').classList.add('open');
-  setTimeout(drawEncarte,100);
+  setTimeout(function(){
+    drawEncarte();
+    if(_cod||_nome) buscarFotoOpenFoodFacts(_cod,_nome);
+  },150);
 }
 function openAddModal(){document.getElementById('addModal').classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
