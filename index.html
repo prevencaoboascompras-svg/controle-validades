@@ -60,7 +60,13 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .abtn{font-size:12px;padding:4px 9px;border:1px solid var(--bds);border-radius:var(--r);cursor:pointer;background:var(--bg);color:var(--tx);margin-right:3px;display:inline-flex;align-items:center;gap:4px;transition:background .15s}
 .abtn:hover{background:var(--bg2)}.abtn.encarte{border-color:var(--green);color:var(--green)}.abtn.encarte:hover{background:#EAF3DE}
 .promo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
-.promo-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden}
+.promo-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.promo-filter-btn{border:1px solid var(--bds);background:var(--bg);color:var(--tx2);font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.promo-filter-btn.active{background:var(--green);border-color:var(--green);color:#fff}
+.promo-filter-btn.enc-active{background:var(--tx2);border-color:var(--tx2);color:#fff}
+.promo-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin:18px 0 10px;display:flex;align-items:center;gap:6px}
+.promo-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;transition:opacity .2s}
+.promo-card.encerrada{opacity:.55;border-style:dashed}
 .promo-card-header{background:linear-gradient(135deg,#1D9E75,#0F6E56);padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
 .pct{font-size:28px;font-weight:700;color:#fff;line-height:1}.pct small{font-size:12px;font-weight:400;display:block}
 .promo-name{font-size:13px;color:rgba(255,255,255,.9);flex:1;margin:0 12px;font-weight:500}
@@ -176,11 +182,29 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
     </div>
   </div>
   <div id="sec-promocoes" class="sec">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <p style="font-size:13px;color:var(--tx2)">Produtos com status <strong>Aguarda</strong></p>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:2px">Promoções ativas</div>
+        <p style="font-size:12px;color:var(--tx2)">Produtos com status Aguarda. Encerre quando a promoção terminar.</p>
+      </div>
       <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Novo encarte</button>
     </div>
+    <div class="promo-filter-bar">
+      <span style="font-size:12px;color:var(--tx2);font-weight:500">Urgência:</span>
+      <button class="promo-filter-btn active" id="pfTodas"    onclick="setPromoFiltro('todas')">Todas</button>
+      <button class="promo-filter-btn"        id="pfHoje"     onclick="setPromoFiltro('hoje')">Hoje</button>
+      <button class="promo-filter-btn"        id="pfSemana"   onclick="setPromoFiltro('semana')">Esta semana</button>
+      <button class="promo-filter-btn"        id="pfFuturas"  onclick="setPromoFiltro('futuras')">Futuras (+7d)</button>
+      <div style="flex:1"></div>
+      <button class="promo-filter-btn enc-active" id="pfEncerradas" onclick="toggleEncerradas()" style="display:none" id="btnVerEncerradas">
+        <i class="ti ti-eye"></i> Ver encerradas (<span id="countEncerradas">0</span>)
+      </button>
+    </div>
     <div class="promo-grid" id="promoGrid"></div>
+    <div id="promoEncerradasSection" style="display:none">
+      <div class="promo-section-title"><i class="ti ti-circle-check"></i> Encerradas</div>
+      <div class="promo-grid" id="promoGridEncerradas"></div>
+    </div>
   </div>
   <div id="sec-relatorio" class="sec">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
@@ -491,38 +515,141 @@ function renderTable(){
   var setor=document.getElementById('fSetor').value;
   var status=document.getElementById('fStatus').value;
   var busca=document.getElementById('fBusca').value.toLowerCase();
-  var list=products.filter(function(p){
+  var all=products.filter(function(p){
     var s=statusFromDays(daysDiff(p.validade));
     if(setor&&p.setor!==setor)return false;
     if(status&&s!==status)return false;
     if(busca&&!(p.nome||'').toLowerCase().includes(busca)&&!(p.cod||'').toLowerCase().includes(busca))return false;
     return true;
-  }).sort(function(a,b){return(daysDiff(a.validade)||9999)-(daysDiff(b.validade)||9999);});
+  });
+  var ativos=all.filter(function(p){var d=daysDiff(p.validade);return d===null||d>=0;})
+    .sort(function(a,b){return(daysDiff(a.validade)||9999)-(daysDiff(b.validade)||9999);});
+  var vencidos=all.filter(function(p){var d=daysDiff(p.validade);return d!==null&&d<0;})
+    .sort(function(a,b){return(daysDiff(b.validade)||0)-(daysDiff(a.validade)||0);});
   var tb=document.getElementById('tbody');
-  if(!list.length){tb.innerHTML='<tr><td colspan="11" class="empty">Nenhum produto encontrado.</td></tr>';return;}
-  tb.innerHTML=list.map(function(p){
+  if(!all.length){tb.innerHTML='<tr><td colspan="11" class="empty">Nenhum produto encontrado.</td></tr>';return;}
+  function rowHtml(p,fade){
     var days=daysDiff(p.validade);
     var s=statusFromDays(days);
     var pct=days===null?0:Math.min(100,Math.max(0,days>30?100:(days/30)*100));
     var dTxt=days===null?'--':days<0?(Math.abs(days)+'d atras'):days===0?'Hoje':(days+'d');
     var idx=products.indexOf(p);
     var needsPromo=['vencido','critico','urgente','atencao'].includes(s);
-    return'<tr><td style="font-family:monospace;font-size:11px;color:var(--tx2)">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;max-width:200px">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:50px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td>'+badge(s)+'</td><td>'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+'</td></tr>';
-  }).join('');
+    var rs=fade?'opacity:.5;':'';
+    return'<tr style="'+rs+'"><td style="font-family:monospace;font-size:11px;color:var(--tx2)">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;max-width:200px">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:50px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td>'+badge(s)+'</td><td>'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+'</td></tr>';
+  }
+  var rows=ativos.map(function(p){return rowHtml(p,false);});
+  if(vencidos.length){
+    rows.push('<tr><td colspan="11" style="padding:6px 12px;background:var(--bg2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);border-top:2px dashed var(--bd)"><i class="ti ti-calendar-x" style="margin-right:5px"></i>Vencidos — remover da planilha ('+vencidos.length+')</td></tr>');
+    rows=rows.concat(vencidos.map(function(p){return rowHtml(p,true);}));
+  }
+  tb.innerHTML=rows.join('');
+}
+
+// ── Promoções: estado ──────────────────────────────────────────────────
+var PROMO_ENC_KEY='boascompras_encerradas';
+var promoFiltro='todas';
+var mostrarEncerradas=false;
+
+function getEncerradas(){try{return JSON.parse(localStorage.getItem(PROMO_ENC_KEY)||'[]');}catch(e){return[];}}
+function saveEncerradas(arr){localStorage.setItem(PROMO_ENC_KEY,JSON.stringify(arr));}
+
+function setPromoFiltro(f){
+  promoFiltro=f;
+  ['Todas','Hoje','Semana','Futuras'].forEach(function(n){
+    var el=document.getElementById('pf'+n);if(el)el.classList.remove('active');
+  });
+  var map={todas:'Todas',hoje:'Hoje',semana:'Semana',futuras:'Futuras'};
+  var el=document.getElementById('pf'+map[f]);if(el)el.classList.add('active');
+  renderPromos();
+}
+
+function toggleEncerradas(){
+  mostrarEncerradas=!mostrarEncerradas;
+  renderPromos();
+}
+
+function encerrarPromo(cod,nome){
+  if(!confirm('Encerrar promoção de:\n'+nome+'?\n\nO produto será removido da lista de promoções ativas.'))return;
+  var enc=getEncerradas();
+  var jaExiste=enc.find(function(e){return e.cod===cod;});
+  if(!jaExiste){
+    enc.push({cod:cod,nome:nome,encerradaEm:new Date().toISOString().substring(0,10)});
+    saveEncerradas(enc);
+  }
+  renderPromos();
+}
+
+function reativarPromo(cod){
+  var enc=getEncerradas().filter(function(e){return e.cod!==cod;});
+  saveEncerradas(enc);
+  renderPromos();
+}
+
+function promoCardHtml(p,idx,encerrada){
+  var days=daysDiff(p.validade);
+  var s=statusFromDays(days);
+  var dTxt=days===null?'--':days<0?(Math.abs(days)+'d atras'):days===0?'Hoje':(days+'d');
+  var pct=p.pctDesc<1?p.pctDesc*100:p.pctDesc;
+  var encClass=encerrada?' encerrada':'';
+  var acoes=encerrada
+    ?'<button class="btn btn-sm" onclick="reativarPromo(\''+p.cod+'\')"><i class="ti ti-rotate"></i> Reativar</button>'
+    :'<button class="btn btn-green btn-sm" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>'
+     +'<button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="encerrarPromo(\''+p.cod+'\',\''+p.nome.replace(/'/g,"\\'")+'\')" title="Encerrar promoção"><i class="ti ti-circle-x"></i> Encerrar</button>';
+  return'<div class="promo-card'+encClass+'"><div class="promo-card-header"><div class="pct">'+(pct?pct.toFixed(0):'?')+'%<small>desconto</small></div><div class="promo-name">'+(p.nome||'--')+'</div>'+badge(s)+'</div><div class="promo-card-body"><div class="promo-prices"><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">De</div><div class="price-de">'+fmtR(p.precoNormal)+'</div></div><div style="font-size:18px;color:var(--tx2)">&rarr;</div><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Por</div><div class="price-por">'+fmtR(p.precoPromo)+'</div></div><div style="margin-left:auto;text-align:right"><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Economia</div><div style="font-size:16px;font-weight:600;color:var(--amber)">'+fmtR(p.valorDesc)+'</div></div></div><div class="promo-meta"><span>'+fmt(p.validade)+'</span><span>'+dTxt+'</span><span>'+p.setor+'</span></div><div class="promo-actions">'+acoes+'</div></div></div>';
 }
 
 function renderPromos(){
-  var list=products.filter(function(p){return p.src==='sheets'&&(p.status||'').toLowerCase().includes('aguard');}).sort(function(a,b){return(daysDiff(a.validade)||9999)-(daysDiff(b.validade)||9999);});
+  var encCods=getEncerradas().map(function(e){return e.cod;});
+  var enc=getEncerradas();
+  var today=new Date();today.setHours(0,0,0,0);
+
+  // Todos os candidatos: sheets com Aguarda
+  var base=products.filter(function(p){return p.src==='sheets'&&(p.status||'').toLowerCase().includes('aguard');});
+
+  // Ativos = não encerrados
+  var ativos=base.filter(function(p){return!encCods.includes(p.cod);});
+
+  // Filtro urgência
+  ativos=ativos.filter(function(p){
+    var d=daysDiff(p.validade);
+    if(promoFiltro==='hoje')return d!==null&&d<=0;
+    if(promoFiltro==='semana')return d!==null&&d>=0&&d<=7;
+    if(promoFiltro==='futuras')return d===null||d>7;
+    return true;
+  }).sort(function(a,b){return(daysDiff(a.validade)||9999)-(daysDiff(b.validade)||9999);});
+
+  // Encerradas: cruzar cod com products
+  var encProds=enc.map(function(e){
+    var p=products.find(function(p){return p.cod===e.cod;});
+    return p?{p:p,encerradaEm:e.encerradaEm}:null;
+  }).filter(Boolean);
+
+  // Atualizar botão encerradas
+  var btnEnc=document.getElementById('pfEncerradas');
+  var countEl=document.getElementById('countEncerradas');
+  if(btnEnc){btnEnc.style.display=encProds.length?'':'none';}
+  if(countEl)countEl.textContent=encProds.length;
+  if(!mostrarEncerradas&&btnEnc)btnEnc.innerHTML='<i class="ti ti-eye"></i> Ver encerradas ('+encProds.length+')';
+  if(mostrarEncerradas&&btnEnc)btnEnc.innerHTML='<i class="ti ti-eye-off"></i> Ocultar encerradas ('+encProds.length+')';
+
+  // Render ativos
   var el=document.getElementById('promoGrid');
-  if(!list.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><i class="ti ti-tag-off"></i>Nenhum item com status Aguarda.<br>Sincronize a planilha.</div>';return;}
-  el.innerHTML=list.map(function(p){
-    var days=daysDiff(p.validade);
-    var s=statusFromDays(days);
-    var dTxt=days===null?'--':days<0?(Math.abs(days)+'d atras'):days===0?'Hoje':(days+'d');
-    var idx=products.indexOf(p);
-    var pct=p.pctDesc<1?p.pctDesc*100:p.pctDesc;
-    return'<div class="promo-card"><div class="promo-card-header"><div class="pct">'+(pct?pct.toFixed(0):'?')+'%<small>desconto</small></div><div class="promo-name">'+(p.nome||'--')+'</div>'+badge(s)+'</div><div class="promo-card-body"><div class="promo-prices"><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">De</div><div class="price-de">'+fmtR(p.precoNormal)+'</div></div><div style="font-size:18px;color:var(--tx2)">&rarr;</div><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Por</div><div class="price-por">'+fmtR(p.precoPromo)+'</div></div><div style="margin-left:auto;text-align:right"><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Economia</div><div style="font-size:16px;font-weight:600;color:var(--amber)">'+fmtR(p.valorDesc)+'</div></div></div><div class="promo-meta"><span>'+fmt(p.validade)+'</span><span>'+dTxt+'</span><span>Qtde: '+p.qtde+'</span></div><div class="promo-actions"><button class="btn btn-green btn-sm" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Gerar encarte</button><span style="font-size:12px;color:var(--tx2)">'+p.setor+'</span></div></div></div>';
-  }).join('');
+  if(!ativos.length){
+    el.innerHTML='<div class="empty" style="grid-column:1/-1"><i class="ti ti-tag-off"></i>Nenhuma promoção ativa'+(promoFiltro!=='todas'?' neste filtro':'. Sincronize a planilha.')+'.</div>';
+  } else {
+    el.innerHTML=ativos.map(function(p){return promoCardHtml(p,products.indexOf(p),false);}).join('');
+  }
+
+  // Render encerradas
+  var secEnc=document.getElementById('promoEncerradasSection');
+  var gridEnc=document.getElementById('promoGridEncerradas');
+  if(secEnc){secEnc.style.display=(mostrarEncerradas&&encProds.length)?'block':'none';}
+  if(gridEnc&&mostrarEncerradas){
+    gridEnc.innerHTML=encProds.map(function(e){
+      return promoCardHtml(e.p,products.indexOf(e.p),true);
+    }).join('');
+  }
 }
 
 function renderMetrics(){
