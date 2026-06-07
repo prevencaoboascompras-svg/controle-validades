@@ -105,7 +105,46 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
 .empty i{font-size:36px;display:block;margin-bottom:10px;opacity:.4}
 .src-tag{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bg2);color:var(--tx2);display:inline-block;margin-left:5px;vertical-align:middle}
 .src-tag.sheets{background:#EAF3DE;color:#3B6D11}
-@media(max-width:700px){.cfg-grid,.form-row-2,.modal-body{grid-template-columns:1fr}.promo-grid{grid-template-columns:1fr}}
+
+/* ── Encartes Ativos ── */
+.enc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-top:16px}
+.enc-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;transition:box-shadow .15s;position:relative}
+.enc-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.12)}
+.enc-card.selected{border:2px solid var(--green);box-shadow:0 0 0 3px rgba(29,158,117,.18)}
+.enc-card img{width:100%;display:block;background:#f5f5f3;object-fit:cover;aspect-ratio:3/4}
+.enc-card-body{padding:10px 12px}
+.enc-card-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.enc-card-date{font-size:11px;color:var(--tx2)}
+.enc-card-actions{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
+.enc-check{position:absolute;top:8px;left:8px;width:22px;height:22px;border-radius:6px;background:var(--bg);border:2px solid var(--bds);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .15s;z-index:2}
+.enc-card.selected .enc-check{background:var(--green);border-color:var(--green);color:#fff}
+.print-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;padding:12px 16px;background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl)}
+.print-bar-count{font-size:13px;font-weight:600;color:var(--green)}
+.layout-btn{border:1px solid var(--bds);background:var(--bg);color:var(--tx2);font-size:12px;font-weight:600;padding:6px 12px;border-radius:var(--r);cursor:pointer;transition:all .15s}
+.layout-btn.active{background:var(--green);border-color:var(--green);color:#fff}
+
+/* ── Impressão ── */
+@media print{
+  body>*{display:none!important}
+  #printArea{display:grid!important;position:fixed!important;inset:0!important;padding:8mm!important;background:#fff!important;box-sizing:border-box!important}
+  #printArea.lay2{grid-template-columns:1fr 1fr;gap:6mm}
+  #printArea.lay4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:5mm}
+  #printArea.lay6{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:4mm}
+  #printArea.lay9{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:3mm}
+  #printArea img{width:100%;height:100%;object-fit:contain;display:block}
+}
+
+/* ── Preview modal ── */
+.preview-modal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);width:720px;max-width:98vw;max-height:94vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.preview-grid{display:grid;gap:6px;padding:16px;background:#e0e0de;flex:1;overflow:auto}
+.preview-grid.lay2{grid-template-columns:1fr 1fr}
+.preview-grid.lay4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.preview-grid.lay6{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr}
+.preview-grid.lay9{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr}
+.preview-grid img{width:100%;display:block;object-fit:contain;background:#fff;border-radius:2px}
+.preview-grid .preview-empty{background:#fff;border-radius:2px;opacity:.3}
+
+@media(max-width:700px){.cfg-grid,.form-row-2,.modal-body{grid-template-columns:1fr}.promo-grid{grid-template-columns:1fr}.enc-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -150,6 +189,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
   <div class="tabs">
     <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
     <div class="tab" onclick="goTab('promocoes')"><i class="ti ti-tag"></i> Promocoes</div>
+    <div class="tab" onclick="goTab('encartes')"><i class="ti ti-photo-check"></i> Encartes <span id="encBadge" style="display:none;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatorio</div>
     <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i> Como configurar</div>
   </div>
@@ -206,7 +246,36 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       <div class="promo-grid" id="promoGridEncerradas"></div>
     </div>
   </div>
-  <div id="sec-relatorio" class="sec">
+  <div id="sec-encartes" class="sec">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:2px">Encartes ativos</div>
+        <p style="font-size:12px;color:var(--tx2)">Encartes gerados ficam salvos aqui. Selecione varios para imprimir juntos.</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="limparEncartesAtivos()" title="Remover todos os encartes"><i class="ti ti-trash"></i> Limpar tudo</button>
+        <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Novo encarte</button>
+      </div>
+    </div>
+
+    <!-- barra de impressao -->
+    <div class="print-bar" id="printBar" style="display:none">
+      <i class="ti ti-printer" style="color:var(--green);font-size:18px"></i>
+      <span class="print-bar-count" id="printCount">0 selecionado(s)</span>
+      <span style="font-size:12px;color:var(--tx2)">Layout por pagina A4:</span>
+      <button class="layout-btn active" id="lay2btn" onclick="setLayout(2)">2 encartes</button>
+      <button class="layout-btn" id="lay4btn" onclick="setLayout(4)">4 encartes</button>
+      <button class="layout-btn" id="lay6btn" onclick="setLayout(6)">6 encartes</button>
+      <button class="layout-btn" id="lay9btn" onclick="setLayout(9)">9 encartes</button>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="deselectAll()"><i class="ti ti-x"></i> Limpar selecao</button>
+      <button class="btn btn-green" onclick="abrirPreview()"><i class="ti ti-eye"></i> Pre-visualizar</button>
+    </div>
+
+    <div id="encGrid" class="enc-grid">
+      <div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Gerar encarte" em qualquer produto.</div>
+    </div>
+  </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
         <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Por status</h4>
@@ -371,6 +440,24 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       <button class="btn btn-green" onclick="addManual()">Salvar</button>
     </div>
   </div>
+  </div>
+</div>
+
+<!-- area de impressao (invisivel na tela, visivel ao imprimir) -->
+<div id="printArea" style="display:none"></div>
+
+<!-- modal de pre-visualizacao -->
+<div class="modal-ov" id="previewModal">
+  <div class="preview-modal">
+    <div class="modal-head">
+      <h3><i class="ti ti-printer" style="color:var(--green)"></i> Pre-visualizacao de impressao</h3>
+      <button class="btn btn-sm" onclick="closeModal('previewModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="previewGrid" class="preview-grid lay2" style="max-height:70vh"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('previewModal')">Fechar</button>
+      <button class="btn btn-green" onclick="executarImpressao()"><i class="ti ti-printer"></i> Imprimir</button>
+    </div>
   </div>
 </div>
 
@@ -1051,10 +1138,17 @@ async function downloadEncarte(){
   var cv=document.getElementById('encarteCanvas');
   var prod=(document.getElementById('eProduto').value||'encarte').substring(0,25);
   cv.toBlob(function(blob){
+    // download normal
     var a=document.createElement('a');
     a.download='encarte-'+prod.replace(/\s+/g,'-').toLowerCase()+'.png';
     a.href=URL.createObjectURL(blob);a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+    // salvar nos encartes ativos
+    var reader=new FileReader();
+    reader.onloadend=function(){
+      salvarEncarteAtivo(prod, reader.result);
+    };
+    reader.readAsDataURL(blob);
   },'image/png');
 }
 
@@ -1104,13 +1198,178 @@ function addManual(){
 }
 
 function goTab(name){
-  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',['validades','promocoes','relatorio','ajuda'][i]===name);});
+  var tabNames=['validades','promocoes','encartes','relatorio','ajuda'];
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('active');
   if(name==='relatorio')setTimeout(renderCharts,50);
   if(name==='promocoes')renderPromos();
+  if(name==='encartes')renderEncartesAtivos();
 }
 function refresh(){renderMetrics();renderTable();}
+
+// ── Encartes Ativos ──────────────────────────────────────────────────────────
+var ENC_KEY='boascompras_encartes_ativos';
+var encLayout=2;
+var encSelecionados=[];
+
+function getEncartesAtivos(){try{return JSON.parse(localStorage.getItem(ENC_KEY)||'[]');}catch(e){return[];}}
+function saveEncartesAtivos(arr){localStorage.setItem(ENC_KEY,JSON.stringify(arr));}
+
+function salvarEncarteAtivo(nome,dataUrl){
+  var arr=getEncartesAtivos();
+  arr.unshift({id:Date.now(),nome:nome,img:dataUrl,criadoEm:new Date().toLocaleDateString('pt-BR')});
+  // limitar a 50 encartes para nao estourar localStorage
+  if(arr.length>50)arr=arr.slice(0,50);
+  saveEncartesAtivos(arr);
+  atualizarBadge();
+  // notificacao leve
+  var msg=document.createElement('div');
+  msg.style.cssText='position:fixed;bottom:20px;right:20px;background:var(--green);color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:8px;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,.2)';
+  msg.textContent='Encarte salvo em "Encartes Ativos"!';
+  document.body.appendChild(msg);
+  setTimeout(function(){msg.remove();},2500);
+}
+
+function atualizarBadge(){
+  var arr=getEncartesAtivos();
+  var badge=document.getElementById('encBadge');
+  if(arr.length){badge.textContent=arr.length;badge.style.display='';}
+  else{badge.style.display='none';}
+}
+
+function renderEncartesAtivos(){
+  var arr=getEncartesAtivos();
+  var grid=document.getElementById('encGrid');
+  encSelecionados=[];
+  document.getElementById('printBar').style.display='none';
+  if(!arr.length){
+    grid.innerHTML='<div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Gerar encarte" em qualquer produto e depois em "Baixar PNG".</div>';
+    return;
+  }
+  grid.innerHTML=arr.map(function(e){
+    return '<div class="enc-card" id="ecard-'+e.id+'" onclick="toggleEncarteSelecao('+e.id+')">'
+      +'<div class="enc-check" id="echk-'+e.id+'"><i class="ti ti-check" style="display:none"></i></div>'
+      +'<img src="'+e.img+'" alt="'+e.nome+'" loading="lazy">'
+      +'<div class="enc-card-body">'
+        +'<div class="enc-card-name" title="'+e.nome+'">'+e.nome+'</div>'
+        +'<div class="enc-card-date">Gerado em '+e.criadoEm+'</div>'
+        +'<div class="enc-card-actions">'
+          +'<button class="btn btn-sm btn-green" onclick="event.stopPropagation();downloadEncarteAtivo('+e.id+')" title="Baixar"><i class="ti ti-download"></i></button>'
+          +'<button class="btn btn-sm" onclick="event.stopPropagation();removerEncarteAtivo('+e.id+')" title="Remover" style="color:var(--red);border-color:var(--red)"><i class="ti ti-trash"></i></button>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('');
+}
+
+function toggleEncarteSelecao(id){
+  var idx=encSelecionados.indexOf(id);
+  var card=document.getElementById('ecard-'+id);
+  var chk=document.getElementById('echk-'+id);
+  if(idx===-1){
+    encSelecionados.push(id);
+    card.classList.add('selected');
+    chk.querySelector('i').style.display='';
+  }else{
+    encSelecionados.splice(idx,1);
+    card.classList.remove('selected');
+    chk.querySelector('i').style.display='none';
+  }
+  atualizarPrintBar();
+}
+
+function atualizarPrintBar(){
+  var bar=document.getElementById('printBar');
+  var cnt=document.getElementById('printCount');
+  if(encSelecionados.length){
+    bar.style.display='flex';
+    cnt.textContent=encSelecionados.length+' selecionado'+(encSelecionados.length>1?'s':'');
+  }else{
+    bar.style.display='none';
+  }
+}
+
+function setLayout(n){
+  encLayout=n;
+  [2,4,6,9].forEach(function(x){
+    var b=document.getElementById('lay'+x+'btn');
+    if(b)b.classList.toggle('active',x===n);
+  });
+}
+
+function deselectAll(){
+  encSelecionados=[];
+  document.querySelectorAll('.enc-card').forEach(function(c){
+    c.classList.remove('selected');
+    var i=c.querySelector('.enc-check i');
+    if(i)i.style.display='none';
+  });
+  document.getElementById('printBar').style.display='none';
+}
+
+function downloadEncarteAtivo(id){
+  var arr=getEncartesAtivos();
+  var enc=arr.find(function(e){return e.id===id;});
+  if(!enc)return;
+  var a=document.createElement('a');
+  a.download='encarte-'+enc.nome.replace(/\s+/g,'-').toLowerCase()+'.png';
+  a.href=enc.img;a.click();
+}
+
+function removerEncarteAtivo(id){
+  var arr=getEncartesAtivos().filter(function(e){return e.id!==id;});
+  saveEncartesAtivos(arr);
+  encSelecionados=encSelecionados.filter(function(x){return x!==id;});
+  atualizarBadge();
+  renderEncartesAtivos();
+}
+
+function limparEncartesAtivos(){
+  if(!confirm('Remover todos os encartes salvos?'))return;
+  saveEncartesAtivos([]);
+  encSelecionados=[];
+  atualizarBadge();
+  renderEncartesAtivos();
+}
+
+function abrirPreview(){
+  if(!encSelecionados.length){alert('Selecione ao menos um encarte.');return;}
+  var arr=getEncartesAtivos();
+  var selecionados=encSelecionados.map(function(id){return arr.find(function(e){return e.id===id;});}).filter(Boolean);
+  var grid=document.getElementById('previewGrid');
+  grid.className='preview-grid lay'+encLayout;
+  var slots=encLayout;
+  var html='';
+  for(var i=0;i<slots;i++){
+    if(selecionados[i]){
+      html+='<img src="'+selecionados[i].img+'" alt="'+selecionados[i].nome+'">';
+    }else{
+      html+='<div class="preview-empty"></div>';
+    }
+  }
+  grid.innerHTML=html;
+  document.getElementById('previewModal').classList.add('open');
+}
+
+function executarImpressao(){
+  var arr=getEncartesAtivos();
+  var selecionados=encSelecionados.map(function(id){return arr.find(function(e){return e.id===id;});}).filter(Boolean);
+  var pa=document.getElementById('printArea');
+  pa.className='lay'+encLayout;
+  var slots=encLayout;
+  var html='';
+  for(var i=0;i<slots;i++){
+    if(selecionados[i]){html+='<img src="'+selecionados[i].img+'" alt="'+selecionados[i].nome+'">';}
+    else{html+='<div></div>';}
+  }
+  pa.innerHTML=html;
+  closeModal('previewModal');
+  setTimeout(function(){window.print();},200);
+}
+
+// inicializar badge
+atualizarBadge();
 
 document.getElementById('cfgBox').style.display='none';
 var _cfg=loadCfg();
