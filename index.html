@@ -144,7 +144,20 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
 .preview-grid img{width:100%;display:block;object-fit:contain;background:#fff;border-radius:2px}
 .preview-grid .preview-empty{background:#fff;border-radius:2px;opacity:.3}
 
-@media(max-width:700px){.cfg-grid,.form-row-2,.modal-body{grid-template-columns:1fr}.promo-grid{grid-template-columns:1fr}.enc-grid{grid-template-columns:1fr 1fr}}
+/* ── Resolvido modal ── */
+.resolvido-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.resolvido-opt{border:2px solid var(--bd);border-radius:var(--rl);padding:14px;cursor:pointer;text-align:center;transition:all .15s;background:var(--bg)}
+.resolvido-opt:hover{border-color:var(--green);background:var(--bg2)}
+.resolvido-opt.selected{border-color:var(--green);background:#EAF3DE}
+.resolvido-opt i{font-size:24px;display:block;margin-bottom:6px}
+.resolvido-opt .opt-label{font-size:13px;font-weight:600;margin-bottom:2px}
+.resolvido-opt .opt-desc{font-size:11px;color:var(--tx2)}
+.neg-badge-sellout{background:#E6F1FB;color:#185FA5}
+.neg-badge-sellin{background:#EAF3DE;color:#3B6D11}
+.neg-badge-descarte{background:#FCEBEB;color:#A32D2D}
+.neg-badge-vendido{background:var(--bg2);color:var(--tx2)}
+
+@media(max-width:700px){.cfg-grid,.form-row-2,.modal-body{grid-template-columns:1fr}.promo-grid{grid-template-columns:1fr}.enc-grid{grid-template-columns:1fr 1fr}.resolvido-opts{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -190,7 +203,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
     <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
     <div class="tab" onclick="goTab('promocoes')"><i class="ti ti-tag"></i> Promocoes</div>
     <div class="tab" onclick="goTab('encartes')"><i class="ti ti-photo-check"></i> Encartes <span id="encBadge" style="display:none;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
-    <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatorio</div>
+    <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório <span id="negBadge" style="display:none;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i> Como configurar</div>
   </div>
   <div id="sec-validades" class="sec active">
@@ -209,7 +222,11 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         <option value="atencao">Atencao (15d)</option>
         <option value="ok">OK</option>
       </select>
-      <input type="text" id="fBusca" placeholder="Buscar produto ou codigo..." oninput="renderTable()">
+      <input type="text" id="fBusca" placeholder="Buscar produto ou código..." oninput="renderTable()">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);cursor:pointer;white-space:nowrap">
+        <input type="checkbox" id="chkMostrarResolvidos" onchange="renderTable()" style="accent-color:var(--green)">
+        Mostrar resolvidos
+      </label>
     </div>
     <div class="twrap">
       <table>
@@ -276,18 +293,54 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       <div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Gerar encarte" em qualquer produto.</div>
     </div>
   </div>
+  <div id="sec-relatorio" class="sec">
+    <!-- Cards de resumo negociação fornecedor -->
+    <div id="negociacaoResumo" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px"></div>
+
+    <!-- Tabela de negociações registradas -->
+    <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <h4 style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px"><i class="ti ti-building-store" style="color:var(--green)"></i> Negociações com Fornecedores</h4>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="exportarCSV()"><i class="ti ti-download"></i> Exportar CSV</button>
+          <button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="limparNegociacoes()"><i class="ti ti-trash"></i> Limpar histórico</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <select id="filtroNegTipo" onchange="renderRelatorio()" style="font-size:12px;padding:5px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx)">
+          <option value="">Todos os tipos</option>
+          <option value="sell_out">Sell-out (vendido c/ desconto)</option>
+          <option value="sell_in">Sell-in (troca/bonificação fornecedor)</option>
+          <option value="descarte">Descarte / Perda</option>
+          <option value="vendido">Vendido normalmente</option>
+        </select>
+        <input type="text" id="filtroNegBusca" placeholder="Buscar produto..." oninput="renderRelatorio()" style="font-size:12px;padding:5px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);min-width:180px">
+      </div>
+      <div class="twrap">
+        <table style="min-width:700px">
+          <thead><tr>
+            <th>Data</th><th>Produto</th><th>Setor</th><th>Qtde</th>
+            <th>Preço DE</th><th>Preço POR</th><th>Desconto</th><th>Valor Total</th>
+            <th>Tipo</th><th>Fornecedor</th><th>Obs</th>
+          </tr></thead>
+          <tbody id="tbNegociacoes"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
-        <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Por status</h4>
+        <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Produtos por status</h4>
         <canvas id="cStatus" height="200"></canvas>
       </div>
       <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
-        <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Por setor</h4>
+        <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Produtos por setor</h4>
         <canvas id="cSetor" height="200"></canvas>
       </div>
     </div>
     <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
-      <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Valor desconto top 15 (15 dias)</h4>
+      <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Valor desconto top 15 (próximos 15 dias)</h4>
       <canvas id="cDesconto" height="220"></canvas>
     </div>
   </div>
@@ -305,7 +358,60 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
   </div>
 </div>
 
-<!-- MODAL ENCARTE -->
+<!-- MODAL RESOLVIDO -->
+<div class="modal-ov" id="resolvidoModal">
+  <div class="smodal" style="width:520px">
+    <h3><i class="ti ti-circle-check" style="color:var(--green)"></i> Marcar como Resolvido</h3>
+    <div style="font-size:13px;font-weight:600;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--r)" id="resolvidoProdNome">—</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:14px">Como este produto foi tratado?</div>
+    <div class="resolvido-opts">
+      <div class="resolvido-opt" onclick="selectResolucao('sell_out')" id="opt_sell_out">
+        <i class="ti ti-tag" style="color:var(--blue)"></i>
+        <div class="opt-label">Sell-out</div>
+        <div class="opt-desc">Vendido com desconto para girar antes do vencimento</div>
+      </div>
+      <div class="resolvido-opt" onclick="selectResolucao('sell_in')" id="opt_sell_in">
+        <i class="ti ti-building-store" style="color:var(--green)"></i>
+        <div class="opt-label">Sell-in / Troca</div>
+        <div class="opt-desc">Fornecedor trocou, bonificou ou creditou a diferença</div>
+      </div>
+      <div class="resolvido-opt" onclick="selectResolucao('vendido')" id="opt_vendido">
+        <i class="ti ti-circle-check" style="color:var(--green)"></i>
+        <div class="opt-label">Vendido normalmente</div>
+        <div class="opt-desc">Produto vendido sem desconto especial</div>
+      </div>
+      <div class="resolvido-opt" onclick="selectResolucao('descarte')" id="opt_descarte">
+        <i class="ti ti-trash" style="color:var(--red)"></i>
+        <div class="opt-label">Descarte / Perda</div>
+        <div class="opt-desc">Produto descartado — perda registrada</div>
+      </div>
+    </div>
+    <div id="resolvidoExtras" style="display:none">
+      <div class="form-row" style="margin-bottom:10px">
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Fornecedor</label>
+        <input type="text" id="rFornecedor" placeholder="Nome do fornecedor (opcional)" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <div class="form-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Qtde resolvida</label>
+          <input type="number" id="rQtde" min="1" placeholder="1" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Preço praticado</label>
+          <input type="text" id="rPreco" placeholder="R$ 0,00" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Observação</label>
+        <input type="text" id="rObs" placeholder="Ex: NF troca 12345, bonificação aprovada..." style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+    </div>
+    <div class="smodal-foot">
+      <button class="btn" onclick="closeModal('resolvidoModal')">Cancelar</button>
+      <button class="btn btn-green" id="btnConfirmarResolvido" onclick="confirmarResolvido()" disabled><i class="ti ti-check"></i> Confirmar</button>
+    </div>
+  </div>
+</div>
 <div class="modal-ov" id="encarteModal">
   <div class="modal">
     <div class="modal-head">
@@ -602,11 +708,14 @@ function renderTable(){
   var setor=document.getElementById('fSetor').value;
   var status=document.getElementById('fStatus').value;
   var busca=document.getElementById('fBusca').value.toLowerCase();
+  var resolvidos=getResolvidos();
+  var mostrarResolvidos=document.getElementById('chkMostrarResolvidos')&&document.getElementById('chkMostrarResolvidos').checked;
   var all=products.filter(function(p){
     var s=statusFromDays(daysDiff(p.validade));
     if(setor&&p.setor!==setor)return false;
     if(status&&s!==status)return false;
     if(busca&&!(p.nome||'').toLowerCase().includes(busca)&&!(p.cod||'').toLowerCase().includes(busca))return false;
+    if(!mostrarResolvidos&&resolvidos.includes(produtoChave(p)))return false;
     return true;
   });
   var ativos=all.filter(function(p){var d=daysDiff(p.validade);return d===null||d>=0;})
@@ -623,7 +732,7 @@ function renderTable(){
     var idx=products.indexOf(p);
     var needsPromo=['vencido','critico','urgente','atencao'].includes(s);
     var rs=fade?'opacity:.5;':'';
-    return'<tr style="'+rs+'"><td style="font-family:monospace;font-size:11px;color:var(--tx2)">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;max-width:200px">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:50px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td>'+badge(s)+'</td><td>'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+'</td></tr>';
+    return'<tr style="'+rs+'"><td style="font-family:monospace;font-size:11px;color:var(--tx2)">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;max-width:200px">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:50px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td>'+badge(s)+'</td><td style="white-space:nowrap">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)" title="Marcar como resolvido"><i class="ti ti-circle-check"></i> Resolvido</button></td></tr>';
   }
   var rows=ativos.map(function(p){return rowHtml(p,false);});
   if(vencidos.length){
@@ -1202,11 +1311,11 @@ function goTab(name){
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('active');
-  if(name==='relatorio')setTimeout(renderCharts,50);
+  if(name==='relatorio'){setTimeout(renderRelatorio,50);}
   if(name==='promocoes')renderPromos();
   if(name==='encartes')renderEncartesAtivos();
 }
-function refresh(){renderMetrics();renderTable();}
+function refresh(){renderMetrics();renderTable();atualizarNegBadge();}
 
 // ── Encartes Ativos ──────────────────────────────────────────────────────────
 var ENC_KEY='boascompras_encartes_ativos';
@@ -1368,8 +1477,169 @@ function executarImpressao(){
   setTimeout(function(){window.print();},200);
 }
 
-// inicializar badge
+// ── Resolvido / Negociações ──────────────────────────────────────────────
+var NEG_KEY='boascompras_negociacoes';
+var RESOLVIDOS_KEY='boascompras_resolvidos';
+var _resolvidoIdx=null;
+var _resolucaoSelecionada=null;
+
+function getNegociacoes(){try{return JSON.parse(localStorage.getItem(NEG_KEY)||'[]');}catch(e){return[];}}
+function saveNegociacoes(arr){localStorage.setItem(NEG_KEY,JSON.stringify(arr));}
+function getResolvidos(){try{return JSON.parse(localStorage.getItem(RESOLVIDOS_KEY)||'[]');}catch(e){return[];}}
+function saveResolvidos(arr){localStorage.setItem(RESOLVIDOS_KEY,JSON.stringify(arr));}
+
+function openResolvidoModal(idx){
+  _resolvidoIdx=idx;
+  _resolucaoSelecionada=null;
+  var p=products[idx];
+  if(!p)return;
+  document.getElementById('resolvidoProdNome').textContent=(p.nome||'Produto')+(p.qtde?' — '+p.qtde+' un.':'');
+  document.getElementById('rQtde').value=p.qtde||1;
+  document.getElementById('rPreco').value=p.precoPromo?'R$ '+p.precoPromo.toFixed(2).replace('.',','):'';
+  document.getElementById('rFornecedor').value='';
+  document.getElementById('rObs').value='';
+  ['sell_out','sell_in','vendido','descarte'].forEach(function(o){document.getElementById('opt_'+o).classList.remove('selected');});
+  document.getElementById('resolvidoExtras').style.display='none';
+  document.getElementById('btnConfirmarResolvido').disabled=true;
+  document.getElementById('resolvidoModal').classList.add('open');
+}
+
+function selectResolucao(tipo){
+  _resolucaoSelecionada=tipo;
+  ['sell_out','sell_in','vendido','descarte'].forEach(function(o){document.getElementById('opt_'+o).classList.toggle('selected',o===tipo);});
+  document.getElementById('resolvidoExtras').style.display='block';
+  document.getElementById('btnConfirmarResolvido').disabled=false;
+}
+
+function confirmarResolvido(){
+  if(!_resolucaoSelecionada||_resolvidoIdx===null)return;
+  var p=products[_resolvidoIdx];
+  if(!p)return;
+  var qtde=parseInt(document.getElementById('rQtde').value)||p.qtde||1;
+  var precoStr=document.getElementById('rPreco').value;
+  var precoVal=precoStr?parseFloat(precoStr.replace(/R\$\s*/i,'').replace(',','.'))||0:0;
+  var fornecedor=document.getElementById('rFornecedor').value.trim();
+  var obs=document.getElementById('rObs').value.trim();
+
+  // Registrar negociação
+  var negs=getNegociacoes();
+  var valorTotal=(precoVal||p.precoPromo||0)*qtde;
+  var valorDescTotal=(p.precoNormal&&precoVal?((p.precoNormal-precoVal)*qtde):p.valorDesc?p.valorDesc*qtde:0);
+  negs.unshift({
+    id:Date.now(),
+    data:new Date().toISOString().substring(0,10),
+    cod:p.cod,nome:p.nome,setor:p.setor,
+    qtde:qtde,
+    precoNormal:p.precoNormal||0,
+    precoPraticado:precoVal||p.precoPromo||0,
+    desconto:p.pctDesc||0,
+    valorTotal:valorTotal,
+    valorDesc:valorDescTotal,
+    tipo:_resolucaoSelecionada,
+    fornecedor:fornecedor,
+    obs:obs
+  });
+  saveNegociacoes(negs);
+
+  // Marcar produto como resolvido (ocultar da tela)
+  var resolvidos=getResolvidos();
+  var chave=(p.cod||p.nome||'')+'-'+(p.validade||'');
+  if(!resolvidos.includes(chave))resolvidos.push(chave);
+  saveResolvidos(resolvidos);
+
+  closeModal('resolvidoModal');
+  atualizarNegBadge();
+  renderTable();
+  renderRelatorio();
+
+  // Toast feedback
+  mostrarToast(_resolucaoSelecionada==='descarte'?'Perda registrada':'Produto resolvido e registrado!', _resolucaoSelecionada==='descarte'?'warn':'ok');
+}
+
+function produtoChave(p){return(p.cod||p.nome||'')+'-'+(p.validade||'');}
+
+function mostrarToast(msg, tipo){
+  var t=document.getElementById('toastMsg');
+  if(!t){t=document.createElement('div');t.id='toastMsg';t.style.cssText='position:fixed;bottom:24px;right:24px;z-index:9999;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .4s;pointer-events:none';document.body.appendChild(t);}
+  t.textContent=msg;
+  t.style.background=tipo==='ok'?'var(--green)':tipo==='warn'?'var(--amber)':'var(--red)';
+  t.style.color='#fff';t.style.opacity='1';
+  clearTimeout(t._to);t._to=setTimeout(function(){t.style.opacity='0';},2800);
+}
+
+function atualizarNegBadge(){
+  var n=getNegociacoes().length;
+  var b=document.getElementById('negBadge');
+  if(b){b.style.display=n>0?'':'none';b.textContent=n;}
+}
+
+function renderRelatorio(){
+  renderCharts();
+  var negs=getNegociacoes();
+  // Filtros
+  var tipo=document.getElementById('filtroNegTipo')?document.getElementById('filtroNegTipo').value:'';
+  var busca=document.getElementById('filtroNegBusca')?document.getElementById('filtroNegBusca').value.toLowerCase():'';
+  var filtrados=negs.filter(function(n){
+    if(tipo&&n.tipo!==tipo)return false;
+    if(busca&&!(n.nome||'').toLowerCase().includes(busca)&&!(n.fornecedor||'').toLowerCase().includes(busca))return false;
+    return true;
+  });
+
+  // Cards de resumo
+  var totalSellout=negs.filter(function(n){return n.tipo==='sell_out';});
+  var totalSellin=negs.filter(function(n){return n.tipo==='sell_in';});
+  var totalDescarte=negs.filter(function(n){return n.tipo==='descarte';});
+  var valorSellout=totalSellout.reduce(function(s,n){return s+(n.valorDesc||0);},0);
+  var valorSellin=totalSellin.reduce(function(s,n){return s+(n.valorTotal||0);},0);
+  var valorDescarte=totalDescarte.reduce(function(s,n){return s+(n.valorTotal||0);},0);
+  var totalPerdaEvitada=valorSellout+valorSellin;
+
+  var resumoEl=document.getElementById('negociacaoResumo');
+  if(resumoEl){
+    resumoEl.innerHTML=
+      '<div class="metric"><div class="metric-lbl">Sell-out registrados</div><div class="metric-val info">'+totalSellout.length+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Bonificação / Troca</div><div class="metric-val ok">'+totalSellin.length+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Perda evitada (sell-out)</div><div class="metric-val ok" style="font-size:18px">R$ '+valorSellout.toFixed(2).replace('.',',')+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Valor recuperado (troca/bonif.)</div><div class="metric-val ok" style="font-size:18px">R$ '+valorSellin.toFixed(2).replace('.',',')+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Total descartes</div><div class="metric-val danger">'+totalDescarte.length+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Valor descartado</div><div class="metric-val danger" style="font-size:18px">R$ '+valorDescarte.toFixed(2).replace('.',',')+'</div></div>';
+  }
+
+  // Tabela
+  var tb=document.getElementById('tbNegociacoes');
+  if(!tb)return;
+  if(!filtrados.length){tb.innerHTML='<tr><td colspan="11" class="empty">Nenhuma negociação registrada ainda. Use o botão <strong>Resolvido</strong> na aba Validades.</td></tr>';return;}
+  var tipoLabels={sell_out:'Sell-out',sell_in:'Sell-in / Troca',vendido:'Vendido',descarte:'Descarte'};
+  var tipoClass={sell_out:'neg-badge-sellout',sell_in:'neg-badge-sellin',vendido:'neg-badge-vendido',descarte:'b-danger'};
+  tb.innerHTML=filtrados.map(function(n){
+    var fmt2=function(v){return v?'R$ '+v.toFixed(2).replace('.',','):'--';};
+    var pct=n.precoNormal&&n.precoPraticado?((n.precoNormal-n.precoPraticado)/n.precoNormal*100):0;
+    return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+( n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+(n.qtde||1)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td><td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(n.fornecedor||'--')+'</td><td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td></tr>';
+  }).join('');
+}
+
+function limparNegociacoes(){
+  if(!confirm('Limpar todo o histórico de negociações?'))return;
+  saveNegociacoes([]);
+  atualizarNegBadge();
+  renderRelatorio();
+}
+
+function exportarCSV(){
+  var negs=getNegociacoes();
+  if(!negs.length){alert('Nenhuma negociação registrada.');return;}
+  var header='Data,Produto,Setor,Qtde,Preco Normal,Preco Praticado,Desconto%,Valor Total,Tipo,Fornecedor,Observacao\n';
+  var rows=negs.map(function(n){
+    var pct=n.precoNormal&&n.precoPraticado?((n.precoNormal-n.precoPraticado)/n.precoNormal*100).toFixed(1):0;
+    return[n.data,'"'+(n.nome||'')+'"',n.setor||'',n.qtde||1,(n.precoNormal||0).toFixed(2),(n.precoPraticado||0).toFixed(2),pct,(n.valorTotal||0).toFixed(2),n.tipo||'','"'+(n.fornecedor||'')+'"','"'+(n.obs||'')+'"'].join(',');
+  }).join('\n');
+  var blob=new Blob([header+rows],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');a.download='negociacoes-boas-compras-'+new Date().toISOString().substring(0,10)+'.csv';a.href=URL.createObjectURL(blob);a.click();
+}
+
+// inicializar badges
 atualizarBadge();
+atualizarNegBadge();
 
 document.getElementById('cfgBox').style.display='none';
 var _cfg=loadCfg();
