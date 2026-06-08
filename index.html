@@ -11,7 +11,7 @@
 :root{--bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;--tx:#1a1a18;--tx2:#6b6b67;--bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);--r:8px;--rl:12px;--green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;}
 @media(prefers-color-scheme:dark){:root{--bg:#1e1e1c;--bg2:#282825;--bg3:#323230;--tx:#f0efe8;--tx2:#9b9b95;--bd:rgba(255,255,255,.1);--bds:rgba(255,255,255,.2);}}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg3);color:var(--tx);min-height:100vh}
-.app{max-width:1280px;margin:0 auto;padding:24px 20px}
+.app{max-width:1560px;margin:0 auto;padding:24px 20px}
 .cfg{background:var(--bg);border:2px dashed var(--bds);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;display:none}
 .cfg h3{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--amber)}
 .cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -46,10 +46,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .filters select,.filters input[type=text]{font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none}
 .filters input[type=text]{min-width:220px}
-.twrap{border:1px solid var(--bd);border-radius:var(--rl);overflow:auto;background:var(--bg)}
-table{width:100%;border-collapse:collapse;font-size:13px;min-width:800px}
-th{background:var(--bg2);padding:10px 12px;text-align:left;font-weight:500;color:var(--tx2);font-size:11px;border-bottom:1px solid var(--bd);white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
-td{padding:10px 12px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle}
+.twrap{border:1px solid var(--bd);border-radius:var(--rl);overflow-x:auto;overflow-y:visible;background:var(--bg)}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:1100px;table-layout:fixed}
+th{background:var(--bg2);padding:9px 10px;text-align:left;font-weight:500;color:var(--tx2);font-size:11px;border-bottom:1px solid var(--bd);white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
+td{padding:9px 10px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
 tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block;white-space:nowrap}
 .b-danger{background:#FCEBEB;color:#A32D2D}.b-warn{background:#FAEEDA;color:#854F0B}
@@ -231,9 +231,24 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
     </div>
     <div class="twrap">
       <table>
+        <colgroup>
+          <col style="width:90px"><!-- Codigo -->
+          <col style="width:180px"><!-- Produto -->
+          <col style="width:100px"><!-- Setor -->
+          <col style="width:90px"><!-- Validade -->
+          <col style="width:90px"><!-- Dias -->
+          <col style="width:55px"><!-- Qtde -->
+          <col style="width:105px"><!-- Preco normal -->
+          <col style="width:110px"><!-- Preco promocao -->
+          <col style="width:80px"><!-- Desconto -->
+          <col style="width:75px"><!-- Custo -->
+          <col style="width:140px"><!-- Fornecedor -->
+          <col style="width:75px"><!-- Status -->
+          <col style="width:175px"><!-- Acoes -->
+        </colgroup>
         <thead><tr>
-          <th>Codigo</th><th>Produto</th><th>Setor</th><th>Validade</th>
-          <th>Dias</th><th>Qtde</th><th>Preco normal</th><th>Preco promocao</th><th>Desconto</th><th>Custo</th><th>Fornecedor</th><th>Status</th><th>Acoes</th>
+          <th>Código</th><th>Produto</th><th>Setor</th><th>Validade</th>
+          <th>Dias</th><th>Qtde</th><th>Preço normal</th><th>Preço promoção</th><th>Desconto</th><th>Custo</th><th>Fornecedor</th><th>Status</th><th>Ações</th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -782,7 +797,7 @@ function renderTable(){
     var barrasBusca=(p.cod||'').replace(/[^0-9]/g,'');
     var custoProd=bancoCusto[barrasBusca]||0;
     var fornProd=bancoFornecedor[barrasBusca]||'--';
-    return'<tr style="'+rs+'"><td style="font-family:monospace;font-size:11px;color:var(--tx2)">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;max-width:200px">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:50px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--amber);font-weight:600">'+(custoProd?fmtR(custoProd):'--')+'</td><td style="font-size:11px;color:var(--tx2);max-width:180px;white-space:normal;line-height:1.3">'+fornProd+'</td><td>'+badge(s)+'</td><td style="white-space:nowrap">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)" title="Marcar como resolvido"><i class="ti ti-circle-check"></i> Resolvido</button></td></tr>';
+    return'<tr style="'+rs+'"><td style="font-family:monospace;font-size:11px;color:var(--tx2)">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;max-width:170px">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:40px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--amber);font-weight:600">'+(custoProd?fmtR(custoProd):'--')+'</td><td style="font-size:11px;color:var(--tx2);max-width:130px;white-space:normal;line-height:1.3">'+fornProd+'</td><td>'+badge(s)+'</td><td style="white-space:nowrap">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)" title="Marcar como resolvido"><i class="ti ti-circle-check"></i> Resolvido</button></td></tr>';
   }
   var rows=ativos.map(function(p){return rowHtml(p,false);});
   if(vencidos.length){
