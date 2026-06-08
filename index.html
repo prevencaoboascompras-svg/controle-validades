@@ -233,7 +233,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       <table>
         <thead><tr>
           <th>Codigo</th><th>Produto</th><th>Setor</th><th>Validade</th>
-          <th>Dias</th><th>Qtde</th><th>Preco normal</th><th>Preco promocao</th><th>Desconto</th><th>Status</th><th>Acoes</th>
+          <th>Dias</th><th>Qtde</th><th>Preco normal</th><th>Preco promocao</th><th>Desconto</th><th>Custo</th><th>Fornecedor</th><th>Status</th><th>Acoes</th>
         </tr></thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -659,26 +659,37 @@ function parseDate(v){
 }
 
 var banco={};
+var bancoCusto={};
+var bancoFornecedor={};
 async function loadBanco(cfg){
   if(!cfg.idBanco)return;
   try{
     var table=await fetchSheet(cfg.idBanco,cfg.abaBanco);
-    var rows=rawRows(table);banco={};
-    var hIdx=-1,ciCod=-1,ciNome=-1;
+    var rows=rawRows(table);banco={};bancoCusto={};bancoFornecedor={};
+    var hIdx=-1,ciCod=-1,ciNome=-1,ciCusto=-1,ciForn=-1;
     for(var i=0;i<rows.length;i++){
       var cells=rows[i].c||[];
       var ci=cells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().match(/C[OO]D|BARRA/);});
       var ni=cells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().match(/DESC|NOME|PRODUTO/);});
-      if(ci>=0&&ni>=0){hIdx=i;ciCod=ci;ciNome=ni;break;}
+      if(ci>=0&&ni>=0){
+        hIdx=i;ciCod=ci;ciNome=ni;
+        ciCusto=cells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().match(/CUSTO/);});
+        ciForn=cells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().match(/FORNEC/);});
+        break;
+      }
     }
     if(hIdx<0)return;
     for(var i=hIdx+1;i<rows.length;i++){
       var cells=rows[i].c||[];
       var cod=String((cells[ciCod]&&cells[ciCod].f)||(cells[ciCod]&&cells[ciCod].v)||'').trim().replace(/[^0-9]/g,'');
       var nome=String((cells[ciNome]&&cells[ciNome].f)||(cells[ciNome]&&cells[ciNome].v)||'').replace(/^,\s*/,'').trim();
-      if(cod&&nome)banco[cod]=nome;
+      if(cod&&nome){
+        banco[cod]=nome;
+        if(ciCusto>=0){var cv=cellNum(cells[ciCusto]);if(cv)bancoCusto[cod]=cv;}
+        if(ciForn>=0){var fv=String((cells[ciForn]&&cells[ciForn].f)||(cells[ciForn]&&cells[ciForn].v)||'').trim();if(fv)bancoFornecedor[cod]=fv;}
+      }
     }
-    console.log('Banco:',Object.keys(banco).length,'produtos');
+    console.log('Banco:',Object.keys(banco).length,'produtos | custo:',Object.keys(bancoCusto).length,'| fornecedor:',Object.keys(bancoFornecedor).length);
   }catch(e){console.warn('Banco:',e.message);}
 }
 
@@ -759,7 +770,7 @@ function renderTable(){
   var vencidos=all.filter(function(p){var d=daysDiff(p.validade);return d!==null&&d<0;})
     .sort(function(a,b){return(daysDiff(b.validade)||0)-(daysDiff(a.validade)||0);});
   var tb=document.getElementById('tbody');
-  if(!all.length){tb.innerHTML='<tr><td colspan="11" class="empty">Nenhum produto encontrado.</td></tr>';return;}
+  if(!all.length){tb.innerHTML='<tr><td colspan="13" class="empty">Nenhum produto encontrado.</td></tr>';return;}
   function rowHtml(p,fade){
     var days=daysDiff(p.validade);
     var s=statusFromDays(days);
@@ -768,11 +779,14 @@ function renderTable(){
     var idx=products.indexOf(p);
     var needsPromo=['vencido','critico','urgente','atencao'].includes(s);
     var rs=fade?'opacity:.5;':'';
-    return'<tr style="'+rs+'"><td style="font-family:monospace;font-size:11px;color:var(--tx2)">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;max-width:200px">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:50px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td>'+badge(s)+'</td><td style="white-space:nowrap">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)" title="Marcar como resolvido"><i class="ti ti-circle-check"></i> Resolvido</button></td></tr>';
+    var barrasBusca=(p.cod||'').replace(/[^0-9]/g,'');
+    var custoProd=bancoCusto[barrasBusca]||0;
+    var fornProd=bancoFornecedor[barrasBusca]||'--';
+    return'<tr style="'+rs+'"><td style="font-family:monospace;font-size:11px;color:var(--tx2)">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;max-width:200px">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:50px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--amber);font-weight:600">'+(custoProd?fmtR(custoProd):'--')+'</td><td style="font-size:11px;color:var(--tx2);max-width:180px;white-space:normal;line-height:1.3">'+fornProd+'</td><td>'+badge(s)+'</td><td style="white-space:nowrap">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)" title="Marcar como resolvido"><i class="ti ti-circle-check"></i> Resolvido</button></td></tr>';
   }
   var rows=ativos.map(function(p){return rowHtml(p,false);});
   if(vencidos.length){
-    rows.push('<tr><td colspan="11" style="padding:6px 12px;background:var(--bg2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);border-top:2px dashed var(--bd)"><i class="ti ti-calendar-x" style="margin-right:5px"></i>Vencidos — remover da planilha ('+vencidos.length+')</td></tr>');
+    rows.push('<tr><td colspan="13" style="padding:6px 12px;background:var(--bg2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);border-top:2px dashed var(--bd)"><i class="ti ti-calendar-x" style="margin-right:5px"></i>Vencidos — remover da planilha ('+vencidos.length+')</td></tr>');
     rows=rows.concat(vencidos.map(function(p){return rowHtml(p,true);}));
   }
   tb.innerHTML=rows.join('');
