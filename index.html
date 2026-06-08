@@ -416,9 +416,12 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Observação</label>
       <input type="text" id="eNegObs" placeholder="Ex: produto encontrado retornado por cliente..." style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
     </div>
-    <div class="smodal-foot">
-      <button class="btn" onclick="closeModal('editarNegModal')">Cancelar</button>
-      <button class="btn btn-green" onclick="salvarEditarNeg()"><i class="ti ti-check"></i> Salvar alterações</button>
+    <div class="smodal-foot" style="justify-content:space-between">
+      <button class="btn" onclick="excluirNegDoModal()" style="color:var(--red);border-color:var(--red)"><i class="ti ti-trash"></i> Excluir registro</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn" onclick="closeModal('editarNegModal')">Cancelar</button>
+        <button class="btn btn-green" onclick="salvarEditarNeg()"><i class="ti ti-check"></i> Salvar alterações</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1865,7 +1868,13 @@ function abrirEditarNeg(idx) {
   document.getElementById('eNegQtde').value = n.qtde || 1;
   document.getElementById('eNegPrecoNormal').value = n.precoNormal ? 'R$ ' + n.precoNormal.toFixed(2).replace('.', ',') : '';
   document.getElementById('eNegPrecoPrat').value = n.precoPraticado ? 'R$ ' + n.precoPraticado.toFixed(2).replace('.', ',') : '';
-  document.getElementById('eNegFornecedor').value = n.fornecedor || '';
+  // Puxar fornecedor do banco de dados se não estiver salvo no registro
+  var fornSalvo = n.fornecedor || '';
+  if (!fornSalvo && n.cod) {
+    var barras = String(n.cod).replace(/[^0-9]/g, '');
+    fornSalvo = bancoFornecedor[barras] || '';
+  }
+  document.getElementById('eNegFornecedor').value = fornSalvo;
   document.getElementById('eNegObs').value = n.obs || '';
   document.getElementById('eNegData').value = n.data || '';
   document.getElementById('editarNegModal').classList.add('open');
@@ -1875,7 +1884,7 @@ function salvarEditarNeg() {
   if (_editarNegIdx < 0) return;
   var negs = getNegociacoes();
   var n = negs[_editarNegIdx];
-  var parseR = function(v) { if (!v) return null; var x = parseFloat(v.replace(/R\\$\s*/i, '').replace(',', '.')); return isNaN(x) ? null : x; };
+  var parseR = function(v) { if (!v) return null; var x = parseFloat(v.replace(/R\$\s*/i, '').replace(',', '.')); return isNaN(x) ? null : x; };
   n.tipo = document.getElementById('eNegTipo').value;
   n.qtde = parseInt(document.getElementById('eNegQtde').value) || 1;
   n.precoNormal = parseR(document.getElementById('eNegPrecoNormal').value);
@@ -1886,11 +1895,28 @@ function salvarEditarNeg() {
   if (n.precoNormal && n.precoPraticado) {
     n.valorDesc = (n.precoNormal - n.precoPraticado);
     n.valorTotal = n.precoPraticado * n.qtde;
+  } else if (n.precoPraticado) {
+    n.valorTotal = n.precoPraticado * n.qtde;
   }
   saveNegociacoes(negs);
   closeModal('editarNegModal');
   renderRelatorio();
   mostrarToast('Negociação atualizada!', 'ok');
+}
+
+function excluirNegDoModal() {
+  if (_editarNegIdx < 0) return;
+  var negs = getNegociacoes();
+  var n = negs[_editarNegIdx];
+  if (!n) return;
+  if (!confirm('Excluir o registro de "' + (n.nome || 'produto') + '"?\n\nEssa ação não pode ser desfeita.')) return;
+  negs.splice(_editarNegIdx, 1);
+  saveNegociacoes(negs);
+  _editarNegIdx = -1;
+  closeModal('editarNegModal');
+  atualizarNegBadge();
+  renderRelatorio();
+  mostrarToast('Registro excluído.', 'warn');
 }
 
 function excluirNeg(idx) {
