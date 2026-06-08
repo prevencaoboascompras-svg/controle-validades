@@ -684,16 +684,19 @@ async function loadBanco(cfg){
     var hIdx=-1,ciCod=-1,ciNome=-1,ciCusto=-1,ciForn=-1;
     for(var i=0;i<rows.length;i++){
       var cells=rows[i].c||[];
-      var ci=cells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().match(/C[OO]D|BARRA/);});
-      var ni=cells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().match(/DESC|NOME|PRODUTO/);});
+      var rowTexts=cells.map(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase();});
+      var ci=rowTexts.findIndex(function(t){return/C[OO]D|BARRA/.test(t);});
+      var ni=rowTexts.findIndex(function(t){return/DESC|NOME|PRODUTO/.test(t);});
+      var fi=rowTexts.findIndex(function(t){return/FORNEC/.test(t);});
       if(ci>=0&&ni>=0){
         hIdx=i;ciCod=ci;ciNome=ni;
-        ciCusto=cells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().match(/CUSTO/);});
-        ciForn=cells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().match(/FORNEC/);});
+        ciCusto=rowTexts.findIndex(function(t){return/CUSTO/.test(t);});
+        ciForn=fi;
+        console.log('Banco cabecalho linha',i,'cod:',ci,'nome:',ni,'custo:',ciCusto,'fornec:',ciForn);
         break;
       }
     }
-    if(hIdx<0)return;
+    if(hIdx<0){console.warn('Banco: cabecalho nao encontrado');return;}
     for(var i=hIdx+1;i<rows.length;i++){
       var cells=rows[i].c||[];
       var cod=String((cells[ciCod]&&cells[ciCod].f)||(cells[ciCod]&&cells[ciCod].v)||'').trim().replace(/[^0-9]/g,'');
@@ -704,7 +707,7 @@ async function loadBanco(cfg){
         if(ciForn>=0){var fv=String((cells[ciForn]&&cells[ciForn].f)||(cells[ciForn]&&cells[ciForn].v)||'').trim();if(fv)bancoFornecedor[cod]=fv;}
       }
     }
-    console.log('Banco:',Object.keys(banco).length,'produtos | custo:',Object.keys(bancoCusto).length,'| fornecedor:',Object.keys(bancoFornecedor).length);
+    console.log('Banco:',Object.keys(banco).length,'produtos | custo:',Object.keys(bancoCusto).length,'| fornecedor:',Object.keys(bancoFornecedor).length,'| ciForn:',ciForn); if(ciForn<0)console.warn('BANCO: coluna FORNECEDOR nao detectada no cabecalho — verifique o nome da coluna na planilha');
   }catch(e){console.warn('Banco:',e.message);}
 }
 
