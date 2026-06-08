@@ -334,16 +334,16 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
         <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Produtos por status</h4>
-        <canvas id="cStatus" height="200"></canvas>
+        <div style="position:relative;height:200px"><canvas id="cStatus"></canvas></div>
       </div>
       <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
         <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Produtos por setor</h4>
-        <canvas id="cSetor" height="200"></canvas>
+        <div style="position:relative;height:200px"><canvas id="cSetor"></canvas></div>
       </div>
     </div>
     <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
       <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Valor desconto top 15 (próximos 15 dias)</h4>
-      <canvas id="cDesconto" height="220"></canvas>
+      <div style="position:relative;height:260px"><canvas id="cDesconto"></canvas></div>
     </div>
   </div>
   <div id="sec-ajuda" class="sec">
@@ -894,16 +894,23 @@ function renderMetrics(){
   document.getElementById('metrics').innerHTML='<div class="metric"><div class="metric-lbl">Total</div><div class="metric-val">'+products.length+'</div></div><div class="metric"><div class="metric-lbl">Vencidos</div><div class="metric-val danger">'+c.vencido+'</div></div><div class="metric"><div class="metric-lbl">Critico 3d</div><div class="metric-val danger">'+c.critico+'</div></div><div class="metric"><div class="metric-lbl">Urgente 7d</div><div class="metric-val warn">'+c.urgente+'</div></div><div class="metric"><div class="metric-lbl">Atencao 15d</div><div class="metric-val warn">'+c.atencao+'</div></div><div class="metric"><div class="metric-lbl">OK</div><div class="metric-val ok">'+c.ok+'</div></div><div class="metric"><div class="metric-lbl">Aguardando</div><div class="metric-val info">'+aguarda+'</div></div>';
 }
 
-var charts={};
 function renderCharts(){
-  Object.values(charts).forEach(function(c){c.destroy();});charts={};
+  Object.values(charts).forEach(function(c){try{c.destroy();}catch(e){}});charts={};
   var sc={vencido:0,critico:0,urgente:0,atencao:0,ok:0},sm={};
   products.forEach(function(p){var s=statusFromDays(daysDiff(p.validade));if(s in sc)sc[s]++;sm[p.setor]=(sm[p.setor]||0)+1;});
-  charts.st=new Chart(document.getElementById('cStatus'),{type:'doughnut',data:{labels:['Vencido','Critico','Urgente','Atencao','OK'],datasets:[{data:[sc.vencido,sc.critico,sc.urgente,sc.atencao,sc.ok],backgroundColor:['#E24B4A','#F09595','#EF9F27','#FAC775','#639922'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}});
+
+  var ctxSt=document.getElementById('cStatus');
+  var ctxSe=document.getElementById('cSetor');
+  var ctxDc=document.getElementById('cDesconto');
+  if(!ctxSt||!ctxSe||!ctxDc)return;
+
+  charts.st=new Chart(ctxSt,{type:'doughnut',data:{labels:['Vencido','Crítico','Urgente','Atenção','OK'],datasets:[{data:[sc.vencido,sc.critico,sc.urgente,sc.atencao,sc.ok],backgroundColor:['#E24B4A','#F09595','#EF9F27','#FAC775','#639922'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11},boxWidth:12}}}}});
+
   var ss=Object.keys(sm);
-  charts.se=new Chart(document.getElementById('cSetor'),{type:'bar',data:{labels:ss,datasets:[{data:ss.map(function(s){return sm[s];}),backgroundColor:'#378ADD',borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{font:{size:10}}}}}});
+  charts.se=new Chart(ctxSe,{type:'bar',data:{labels:ss,datasets:[{data:ss.map(function(s){return sm[s];}),backgroundColor:'#378ADD',borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10}}},y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10}}}}}});
+
   var top=products.filter(function(p){var d=daysDiff(p.validade);return d!==null&&d>=0&&d<=15&&p.valorDesc>0;}).sort(function(a,b){return b.valorDesc-a.valorDesc;}).slice(0,15);
-  charts.dc=new Chart(document.getElementById('cDesconto'),{type:'bar',data:{labels:top.map(function(p){return(p.nome||'').substring(0,25);}),datasets:[{label:'Valor desconto',data:top.map(function(p){return p.valorDesc;}),backgroundColor:'#BA7517',borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{font:{size:10},callback:function(v){return'R$'+v.toFixed(2);}}},y:{ticks:{font:{size:10}}}}}});
+  charts.dc=new Chart(ctxDc,{type:'bar',data:{labels:top.map(function(p){return(p.nome||'').substring(0,28);}),datasets:[{label:'Valor desconto',data:top.map(function(p){return p.valorDesc;}),backgroundColor:'#BA7517',borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{font:{size:10},callback:function(v){return'R$'+v.toFixed(2);}}},y:{ticks:{font:{size:10}}}}}});
 }
 
 var fonteAtual='"Montserrat",sans-serif';
