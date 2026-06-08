@@ -152,6 +152,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
 .resolvido-opt i{font-size:24px;display:block;margin-bottom:6px}
 .resolvido-opt .opt-label{font-size:13px;font-weight:600;margin-bottom:2px}
 .resolvido-opt .opt-desc{font-size:11px;color:var(--tx2)}
+.neg-badge-vendarapida{background:#FDF3DC;color:#854F0B}
 .neg-badge-sellout{background:#E6F1FB;color:#185FA5}
 .neg-badge-sellin{background:#EAF3DE;color:#3B6D11}
 .neg-badge-descarte{background:#FCEBEB;color:#A32D2D}
@@ -309,6 +310,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
         <select id="filtroNegTipo" onchange="renderRelatorio()" style="font-size:12px;padding:5px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx)">
           <option value="">Todos os tipos</option>
+          <option value="venda_rapida">Venda Rápida (desconto interno)</option>
           <option value="sell_out">Sell-out (vendido c/ desconto)</option>
           <option value="sell_in">Sell-in (troca/bonificação fornecedor)</option>
           <option value="descarte">Descarte / Perda</option>
@@ -364,11 +366,16 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
     <h3><i class="ti ti-circle-check" style="color:var(--green)"></i> Marcar como Resolvido</h3>
     <div style="font-size:13px;font-weight:600;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--r)" id="resolvidoProdNome">—</div>
     <div style="font-size:12px;color:var(--tx2);margin-bottom:14px">Como este produto foi tratado?</div>
-    <div class="resolvido-opts">
+    <div class="resolvido-opts" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="resolvido-opt" onclick="selectResolucao('venda_rapida')" id="opt_venda_rapida">
+        <i class="ti ti-bolt" style="color:#BA7517"></i>
+        <div class="opt-label">Venda Rápida</div>
+        <div class="opt-desc">Desconto interno pra girar — sem acordo com fornecedor</div>
+      </div>
       <div class="resolvido-opt" onclick="selectResolucao('sell_out')" id="opt_sell_out">
         <i class="ti ti-tag" style="color:var(--blue)"></i>
         <div class="opt-label">Sell-out</div>
-        <div class="opt-desc">Vendido com desconto para girar antes do vencimento</div>
+        <div class="opt-desc">Vendido com desconto combinado com fornecedor</div>
       </div>
       <div class="resolvido-opt" onclick="selectResolucao('sell_in')" id="opt_sell_in">
         <i class="ti ti-building-store" style="color:var(--green)"></i>
@@ -387,18 +394,47 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       </div>
     </div>
     <div id="resolvidoExtras" style="display:none">
-      <div class="form-row" style="margin-bottom:10px">
-        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Fornecedor</label>
-        <input type="text" id="rFornecedor" placeholder="Nome do fornecedor (opcional)" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
-      </div>
-      <div class="form-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-        <div>
-          <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Qtde resolvida</label>
-          <input type="number" id="rQtde" min="1" placeholder="1" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      <!-- Painel de quantidade dividida (vendido + sobra) -->
+      <div id="painelQtdeSplit" style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-sort-ascending-numbers" style="font-size:13px"></i> Quantidade do lote
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--tx2);display:block;margin-bottom:4px">Total do lote</label>
+            <input type="number" id="rQtdeTotal" min="1" placeholder="0" oninput="recalcSobra()" style="width:100%;font-size:14px;font-weight:700;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--green);display:block;margin-bottom:4px">✓ Vendido c/ desconto</label>
+            <input type="number" id="rQtdeVendida" min="0" placeholder="0" oninput="recalcSobra()" style="width:100%;font-size:14px;font-weight:700;padding:7px 10px;border:2px solid var(--green);border-radius:var(--r);background:var(--bg);color:var(--green);outline:none">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--red);display:block;margin-bottom:4px">✗ Sobrou (descarte)</label>
+            <input type="number" id="rQtdeSobra" min="0" placeholder="0" oninput="recalcVendida()" style="width:100%;font-size:14px;font-weight:700;padding:7px 10px;border:2px solid var(--red);border-radius:var(--r);background:var(--bg);color:var(--red);outline:none">
+          </div>
+        </div>
+        <!-- Resumo financeiro -->
+        <div id="painelResumoFinanceiro" style="display:none;border-top:1px solid var(--bd);padding-top:10px;margin-top:4px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:var(--bg);border-radius:6px;padding:8px 10px;border-left:3px solid var(--green)">
+              <div style="font-size:10px;color:var(--tx2);margin-bottom:2px">Receita (vendas c/ desconto)</div>
+              <div id="resumoReceita" style="font-size:15px;font-weight:700;color:var(--green)">—</div>
+            </div>
+            <div style="background:var(--bg);border-radius:6px;padding:8px 10px;border-left:3px solid var(--red)">
+              <div style="font-size:10px;color:var(--tx2);margin-bottom:2px">Perda no descarte (custo)</div>
+              <div id="resumoPerda" style="font-size:15px;font-weight:700;color:var(--red)">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
         <div>
-          <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Preço praticado</label>
-          <input type="text" id="rPreco" placeholder="R$ 0,00" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+          <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Preço praticado (venda)</label>
+          <input type="text" id="rPreco" placeholder="R$ 0,00" oninput="recalcResumo()" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+        </div>
+        <div id="wrapFornecedor">
+          <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Fornecedor</label>
+          <input type="text" id="rFornecedor" placeholder="Nome do fornecedor (opcional)" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
         </div>
       </div>
       <div>
@@ -1493,57 +1529,135 @@ function openResolvidoModal(idx){
   _resolucaoSelecionada=null;
   var p=products[idx];
   if(!p)return;
-  document.getElementById('resolvidoProdNome').textContent=(p.nome||'Produto')+(p.qtde?' — '+p.qtde+' un.':'');
-  document.getElementById('rQtde').value=p.qtde||1;
+  var qtdeLote=p.qtde||1;
+  document.getElementById('resolvidoProdNome').textContent=(p.nome||'Produto')+' — '+qtdeLote+' un. no lote';
+  // Pré-preencher campos
+  document.getElementById('rQtdeTotal').value=qtdeLote;
+  document.getElementById('rQtdeVendida').value=qtdeLote;
+  document.getElementById('rQtdeSobra').value=0;
   document.getElementById('rPreco').value=p.precoPromo?'R$ '+p.precoPromo.toFixed(2).replace('.',','):'';
   document.getElementById('rFornecedor').value='';
   document.getElementById('rObs').value='';
-  ['sell_out','sell_in','vendido','descarte'].forEach(function(o){document.getElementById('opt_'+o).classList.remove('selected');});
+  document.getElementById('painelResumoFinanceiro').style.display='none';
+  ['sell_out','sell_in','vendido','descarte','venda_rapida'].forEach(function(o){document.getElementById('opt_'+o).classList.remove('selected');});
   document.getElementById('resolvidoExtras').style.display='none';
   document.getElementById('btnConfirmarResolvido').disabled=true;
   document.getElementById('resolvidoModal').classList.add('open');
 }
 
+function recalcSobra(){
+  var total=parseInt(document.getElementById('rQtdeTotal').value)||0;
+  var vendida=parseInt(document.getElementById('rQtdeVendida').value)||0;
+  var sobra=Math.max(0,total-vendida);
+  document.getElementById('rQtdeSobra').value=sobra;
+  recalcResumo();
+}
+
+function recalcVendida(){
+  var total=parseInt(document.getElementById('rQtdeTotal').value)||0;
+  var sobra=parseInt(document.getElementById('rQtdeSobra').value)||0;
+  var vendida=Math.max(0,total-sobra);
+  document.getElementById('rQtdeVendida').value=vendida;
+  recalcResumo();
+}
+
+function recalcResumo(){
+  var p=_resolvidoIdx!==null?products[_resolvidoIdx]:null;
+  if(!p)return;
+  var vendida=parseInt(document.getElementById('rQtdeVendida').value)||0;
+  var sobra=parseInt(document.getElementById('rQtdeSobra').value)||0;
+  var precoStr=document.getElementById('rPreco').value;
+  var precoVenda=precoStr?parseFloat(precoStr.replace(/R\$\s*/i,'').replace(',','.'))||0:0;
+  var custo=p.custo||0;
+  if(vendida<=0&&sobra<=0){document.getElementById('painelResumoFinanceiro').style.display='none';return;}
+  document.getElementById('painelResumoFinanceiro').style.display='block';
+  var receita=precoVenda*vendida;
+  var perda=custo>0?custo*sobra:0;
+  var fmtR2=function(v){return'R$ '+v.toFixed(2).replace('.',',');};
+  document.getElementById('resumoReceita').textContent=fmtR2(receita)+(vendida?' ('+vendida+' un.)':'');
+  document.getElementById('resumoPerda').textContent=perda>0?fmtR2(perda)+' ('+sobra+' un.)':sobra>0?sobra+' un. — custo não informado':'—';
+}
+
 function selectResolucao(tipo){
   _resolucaoSelecionada=tipo;
-  ['sell_out','sell_in','vendido','descarte'].forEach(function(o){document.getElementById('opt_'+o).classList.toggle('selected',o===tipo);});
+  ['sell_out','sell_in','vendido','descarte','venda_rapida'].forEach(function(o){document.getElementById('opt_'+o).classList.toggle('selected',o===tipo);});
   document.getElementById('resolvidoExtras').style.display='block';
   document.getElementById('btnConfirmarResolvido').disabled=false;
+  // Para descarte puro: zera vendida, preenche sobra com total
+  var p=_resolvidoIdx!==null?products[_resolvidoIdx]:null;
+  var qtdeLote=p?p.qtde||1:1;
+  if(tipo==='descarte'){
+    document.getElementById('rQtdeVendida').value=0;
+    document.getElementById('rQtdeSobra').value=qtdeLote;
+    // Preço praticado = custo (base para cálculo de perda)
+    if(p&&p.custo>0)document.getElementById('rPreco').value='R$ '+p.custo.toFixed(2).replace('.',',');
+    document.getElementById('wrapFornecedor').style.display='none';
+  } else {
+    document.getElementById('rQtdeVendida').value=qtdeLote;
+    document.getElementById('rQtdeSobra').value=0;
+    // Preço praticado = preço promocional
+    if(p&&p.precoPromo>0)document.getElementById('rPreco').value='R$ '+p.precoPromo.toFixed(2).replace('.',',');
+    document.getElementById('wrapFornecedor').style.display=(tipo==='sell_in'||tipo==='sell_out')?'':'none';
+  }
+  recalcResumo();
 }
 
 function confirmarResolvido(){
   if(!_resolucaoSelecionada||_resolvidoIdx===null)return;
   var p=products[_resolvidoIdx];
   if(!p)return;
-  var qtde=parseInt(document.getElementById('rQtde').value)||p.qtde||1;
+  var qtdeTotal=parseInt(document.getElementById('rQtdeTotal').value)||p.qtde||1;
+  var qtdeVendida=parseInt(document.getElementById('rQtdeVendida').value)||0;
+  var qtdeSobra=parseInt(document.getElementById('rQtdeSobra').value)||0;
   var precoStr=document.getElementById('rPreco').value;
-  var precoVal=precoStr?parseFloat(precoStr.replace(/R\$\s*/i,'').replace(',','.'))||0:0;
+  var precoVenda=precoStr?parseFloat(precoStr.replace(/R\$\s*/i,'').replace(',','.'))||0:0;
   var fornecedor=document.getElementById('rFornecedor').value.trim();
   var obs=document.getElementById('rObs').value.trim();
-
-  // Registrar negociação
   var negs=getNegociacoes();
-  var valorTotal=(precoVal||p.precoPromo||0)*qtde;
-  var valorDescTotal=(p.precoNormal&&precoVal?((p.precoNormal-precoVal)*qtde):p.valorDesc?p.valorDesc*qtde:0);
-  negs.unshift({
-    id:Date.now(),
-    data:new Date().toISOString().substring(0,10),
-    cod:p.cod,nome:p.nome,setor:p.setor,
-    qtde:qtde,
-    precoNormal:p.precoNormal||0,
-    precoPraticado:precoVal||p.precoPromo||0,
-    desconto:p.pctDesc||0,
-    valorTotal:valorTotal,
-    valorDesc:valorDescTotal,
-    tipo:_resolucaoSelecionada,
-    fornecedor:fornecedor,
-    obs:obs
-  });
+  var now=new Date().toISOString().substring(0,10);
+  var base={id:Date.now(),data:now,cod:p.cod,nome:p.nome,setor:p.setor,precoNormal:p.precoNormal||0,fornecedor:fornecedor,obs:obs};
+
+  // Registro da venda (se vendeu alguma)
+  if(qtdeVendida>0&&_resolucaoSelecionada!=='descarte'){
+    var valorVenda=precoVenda*qtdeVendida;
+    var valorDescVenda=p.precoNormal?(p.precoNormal-precoVenda)*qtdeVendida:0;
+    negs.unshift(Object.assign({},base,{
+      id:Date.now(),
+      qtde:qtdeVendida,
+      precoPraticado:precoVenda,
+      valorTotal:valorVenda,
+      valorDesc:valorDescVenda,
+      tipo:_resolucaoSelecionada
+    }));
+  }
+
+  // Registro do descarte/sobra (se sobrou alguma)
+  if(qtdeSobra>0){
+    var custo=p.custo||0;
+    var valorPerda=custo>0?custo*qtdeSobra:precoVenda*qtdeSobra;
+    negs.unshift(Object.assign({},base,{
+      id:Date.now()+1,
+      qtde:qtdeSobra,
+      precoPraticado:custo||precoVenda,
+      valorTotal:valorPerda,
+      valorDesc:0,
+      tipo:'descarte',
+      obs:(obs?obs+' | ':'')+'Sobra do lote de '+qtdeTotal+' un.'
+    }));
+  }
+
+  // Caso seja descarte puro (100% perdido)
+  if(_resolucaoSelecionada==='descarte'&&qtdeVendida===0){
+    var custo2=p.custo||0;
+    var valorPerda2=custo2>0?custo2*qtdeSobra:precoVenda*qtdeSobra;
+    // já foi adicionado acima pelo bloco qtdeSobra>0
+  }
+
   saveNegociacoes(negs);
 
-  // Marcar produto como resolvido (ocultar da tela)
+  // Marcar como resolvido
   var resolvidos=getResolvidos();
-  var chave=(p.cod||p.nome||'')+'-'+(p.validade||'');
+  var chave=produtoChave(p);
   if(!resolvidos.includes(chave))resolvidos.push(chave);
   saveResolvidos(resolvidos);
 
@@ -1552,8 +1666,10 @@ function confirmarResolvido(){
   renderTable();
   renderRelatorio();
 
-  // Toast feedback
-  mostrarToast(_resolucaoSelecionada==='descarte'?'Perda registrada':'Produto resolvido e registrado!', _resolucaoSelecionada==='descarte'?'warn':'ok');
+  var temSobra=qtdeSobra>0&&_resolucaoSelecionada!=='descarte';
+  var msg=_resolucaoSelecionada==='descarte'?'Descarte registrado — '+qtdeSobra+' un. perdidas':
+    temSobra?'Registrado: '+qtdeVendida+' vendidas + '+qtdeSobra+' descartadas':'Produto resolvido e registrado!';
+  mostrarToast(msg, _resolucaoSelecionada==='descarte'||temSobra?'warn':'ok');
 }
 
 function produtoChave(p){return(p.cod||p.nome||'')+'-'+(p.validade||'');}
@@ -1589,19 +1705,22 @@ function renderRelatorio(){
   var totalSellout=negs.filter(function(n){return n.tipo==='sell_out';});
   var totalSellin=negs.filter(function(n){return n.tipo==='sell_in';});
   var totalDescarte=negs.filter(function(n){return n.tipo==='descarte';});
+  var totalVendaRapida=negs.filter(function(n){return n.tipo==='venda_rapida';});
   var valorSellout=totalSellout.reduce(function(s,n){return s+(n.valorDesc||0);},0);
   var valorSellin=totalSellin.reduce(function(s,n){return s+(n.valorTotal||0);},0);
   var valorDescarte=totalDescarte.reduce(function(s,n){return s+(n.valorTotal||0);},0);
-  var totalPerdaEvitada=valorSellout+valorSellin;
+  var valorVendaRapida=totalVendaRapida.reduce(function(s,n){return s+(n.valorDesc||0);},0);
 
   var resumoEl=document.getElementById('negociacaoResumo');
   if(resumoEl){
     resumoEl.innerHTML=
-      '<div class="metric"><div class="metric-lbl">Sell-out registrados</div><div class="metric-val info">'+totalSellout.length+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Bonificação / Troca</div><div class="metric-val ok">'+totalSellin.length+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Perda evitada (sell-out)</div><div class="metric-val ok" style="font-size:18px">R$ '+valorSellout.toFixed(2).replace('.',',')+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Valor recuperado (troca/bonif.)</div><div class="metric-val ok" style="font-size:18px">R$ '+valorSellin.toFixed(2).replace('.',',')+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Total descartes</div><div class="metric-val danger">'+totalDescarte.length+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl" style="color:#BA7517">⚡ Venda Rápida</div><div class="metric-val" style="color:#BA7517">'+totalVendaRapida.length+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Perda evitada (V. Rápida)</div><div class="metric-val ok" style="font-size:18px">R$ '+valorVendaRapida.toFixed(2).replace('.',',')+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Sell-out c/ fornecedor</div><div class="metric-val info">'+totalSellout.length+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Perda evitada (Sell-out)</div><div class="metric-val ok" style="font-size:18px">R$ '+valorSellout.toFixed(2).replace('.',',')+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Troca / Bonificação</div><div class="metric-val ok">'+totalSellin.length+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Valor recuperado</div><div class="metric-val ok" style="font-size:18px">R$ '+valorSellin.toFixed(2).replace('.',',')+'</div></div>'+
+      '<div class="metric"><div class="metric-lbl">Descartes</div><div class="metric-val danger">'+totalDescarte.length+'</div></div>'+
       '<div class="metric"><div class="metric-lbl">Valor descartado</div><div class="metric-val danger" style="font-size:18px">R$ '+valorDescarte.toFixed(2).replace('.',',')+'</div></div>';
   }
 
@@ -1609,8 +1728,8 @@ function renderRelatorio(){
   var tb=document.getElementById('tbNegociacoes');
   if(!tb)return;
   if(!filtrados.length){tb.innerHTML='<tr><td colspan="11" class="empty">Nenhuma negociação registrada ainda. Use o botão <strong>Resolvido</strong> na aba Validades.</td></tr>';return;}
-  var tipoLabels={sell_out:'Sell-out',sell_in:'Sell-in / Troca',vendido:'Vendido',descarte:'Descarte'};
-  var tipoClass={sell_out:'neg-badge-sellout',sell_in:'neg-badge-sellin',vendido:'neg-badge-vendido',descarte:'b-danger'};
+  var tipoLabels={sell_out:'Sell-out',sell_in:'Sell-in / Troca',vendido:'Vendido',descarte:'Descarte',venda_rapida:'Venda Rápida'};
+  var tipoClass={sell_out:'neg-badge-sellout',sell_in:'neg-badge-sellin',vendido:'neg-badge-vendido',descarte:'b-danger',venda_rapida:'neg-badge-vendarapida'};
   tb.innerHTML=filtrados.map(function(n){
     var fmt2=function(v){return v?'R$ '+v.toFixed(2).replace('.',','):'--';};
     var pct=n.precoNormal&&n.precoPraticado?((n.precoNormal-n.precoPraticado)/n.precoNormal*100):0;
