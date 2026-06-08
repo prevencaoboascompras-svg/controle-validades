@@ -338,7 +338,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
           <thead><tr>
             <th>Data</th><th>Produto</th><th>Setor</th><th>Qtde</th>
             <th>Preço DE</th><th>Preço POR</th><th>Desconto</th><th>Valor Total</th>
-            <th>Tipo</th><th>Fornecedor</th><th>Obs</th>
+            <th>Tipo</th><th>Fornecedor</th><th>Obs</th><th style="width:70px"></th>
           </tr></thead>
           <tbody id="tbNegociacoes"></tbody>
         </table>
@@ -371,6 +371,54 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         <div class="step">Clique <strong>Salvar e conectar</strong></div>
         <div class="step">Aba <strong>Promocoes</strong> mostra itens com status Aguarda com botao para gerar encarte</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR NEGOCIAÇÃO -->
+<div class="modal-ov" id="editarNegModal">
+  <div class="smodal" style="width:560px">
+    <h3><i class="ti ti-pencil" style="color:var(--blue)"></i> Editar Negociação</h3>
+    <div style="font-size:13px;font-weight:600;margin-bottom:14px;padding:10px 12px;background:var(--bg2);border-radius:var(--r)" id="editarNegNome">—</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Tipo</label>
+        <select id="eNegTipo" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+          <option value="venda_rapida">⚡ Venda Rápida</option>
+          <option value="sell_out">🏷️ Sell-out</option>
+          <option value="sell_in">🏪 Sell-in / Troca</option>
+          <option value="descarte">🗑️ Descarte / Perda</option>
+          <option value="vendido">✓ Vendido normalmente</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Qtde</label>
+        <input type="number" id="eNegQtde" min="1" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Preço normal (DE)</label>
+        <input type="text" id="eNegPrecoNormal" placeholder="R$ 0,00" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--green);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Preço praticado (POR)</label>
+        <input type="text" id="eNegPrecoPrat" placeholder="R$ 0,00" style="width:100%;font-size:13px;padding:7px 10px;border:2px solid var(--green);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Fornecedor</label>
+        <input type="text" id="eNegFornecedor" placeholder="Opcional" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Data</label>
+        <input type="date" id="eNegData" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Observação</label>
+      <input type="text" id="eNegObs" placeholder="Ex: produto encontrado retornado por cliente..." style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+    </div>
+    <div class="smodal-foot">
+      <button class="btn" onclick="closeModal('editarNegModal')">Cancelar</button>
+      <button class="btn btn-green" onclick="salvarEditarNeg()"><i class="ti ti-check"></i> Salvar alterações</button>
     </div>
   </div>
 </div>
@@ -1772,13 +1820,14 @@ function renderRelatorio(){
   // Tabela
   var tb=document.getElementById('tbNegociacoes');
   if(!tb)return;
-  if(!filtrados.length){tb.innerHTML='<tr><td colspan="11" class="empty">Nenhuma negociação registrada ainda. Use o botão <strong>Resolvido</strong> na aba Validades.</td></tr>';return;}
+  if(!filtrados.length){tb.innerHTML='<tr><td colspan="12" class="empty">Nenhuma negociação registrada ainda. Use o botão <strong>Resolvido</strong> na aba Validades.</td></tr>';return;}
   var tipoLabels={sell_out:'Sell-out',sell_in:'Sell-in / Troca',vendido:'Vendido',descarte:'Descarte',venda_rapida:'Venda Rápida'};
   var tipoClass={sell_out:'neg-badge-sellout',sell_in:'neg-badge-sellin',vendido:'neg-badge-vendido',descarte:'b-danger',venda_rapida:'neg-badge-vendarapida'};
   tb.innerHTML=filtrados.map(function(n){
     var fmt2=function(v){return v?'R$ '+v.toFixed(2).replace('.',','):'--';};
     var pct=n.precoNormal&&n.precoPraticado?((n.precoNormal-n.precoPraticado)/n.precoNormal*100):0;
-    return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+( n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+(n.qtde||1)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td><td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(n.fornecedor||'--')+'</td><td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td></tr>';
+    var realIdx=getNegociacoes().indexOf(n);
+    return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+(n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+(n.qtde||1)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td><td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(n.fornecedor||'--')+'</td><td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td><td style="white-space:nowrap"><button class="abtn" onclick="abrirEditarNeg('+realIdx+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> <button class="abtn" onclick="excluirNeg('+realIdx+')" title="Excluir" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td></tr>';
   }).join('');
 }
 
@@ -1799,6 +1848,59 @@ function exportarCSV(){
   }).join('\n');
   var blob=new Blob([header+rows],{type:'text/csv;charset=utf-8;'});
   var a=document.createElement('a');a.download='negociacoes-boas-compras-'+new Date().toISOString().substring(0,10)+'.csv';a.href=URL.createObjectURL(blob);a.click();
+}
+
+
+var _editarNegIdx = -1;
+
+function abrirEditarNeg(idx) {
+  var negs = getNegociacoes();
+  if (idx < 0 || idx >= negs.length) return;
+  var n = negs[idx];
+  _editarNegIdx = idx;
+  document.getElementById('editarNegNome').textContent = n.nome || '—';
+  document.getElementById('eNegTipo').value = n.tipo || 'venda_rapida';
+  document.getElementById('eNegQtde').value = n.qtde || 1;
+  document.getElementById('eNegPrecoNormal').value = n.precoNormal ? 'R$ ' + n.precoNormal.toFixed(2).replace('.', ',') : '';
+  document.getElementById('eNegPrecoPrat').value = n.precoPraticado ? 'R$ ' + n.precoPraticado.toFixed(2).replace('.', ',') : '';
+  document.getElementById('eNegFornecedor').value = n.fornecedor || '';
+  document.getElementById('eNegObs').value = n.obs || '';
+  document.getElementById('eNegData').value = n.data || '';
+  document.getElementById('editarNegModal').classList.add('open');
+}
+
+function salvarEditarNeg() {
+  if (_editarNegIdx < 0) return;
+  var negs = getNegociacoes();
+  var n = negs[_editarNegIdx];
+  var parseR = function(v) { if (!v) return null; var x = parseFloat(v.replace(/R\\$\s*/i, '').replace(',', '.')); return isNaN(x) ? null : x; };
+  n.tipo = document.getElementById('eNegTipo').value;
+  n.qtde = parseInt(document.getElementById('eNegQtde').value) || 1;
+  n.precoNormal = parseR(document.getElementById('eNegPrecoNormal').value);
+  n.precoPraticado = parseR(document.getElementById('eNegPrecoPrat').value);
+  n.fornecedor = document.getElementById('eNegFornecedor').value.trim();
+  n.obs = document.getElementById('eNegObs').value.trim();
+  n.data = document.getElementById('eNegData').value;
+  if (n.precoNormal && n.precoPraticado) {
+    n.valorDesc = (n.precoNormal - n.precoPraticado);
+    n.valorTotal = n.precoPraticado * n.qtde;
+  }
+  saveNegociacoes(negs);
+  closeModal('editarNegModal');
+  renderRelatorio();
+  mostrarToast('Negociação atualizada!', 'ok');
+}
+
+function excluirNeg(idx) {
+  var negs = getNegociacoes();
+  if (idx < 0 || idx >= negs.length) return;
+  var n = negs[idx];
+  if (!confirm('Excluir o registro de "' + (n.nome || 'produto') + '"?\n\nEssa ação não pode ser desfeita.')) return;
+  negs.splice(idx, 1);
+  saveNegociacoes(negs);
+  atualizarNegBadge();
+  renderRelatorio();
+  mostrarToast('Registro excluído.', 'warn');
 }
 
 // inicializar badges
