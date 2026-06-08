@@ -735,7 +735,7 @@ async function loadBanco(cfg){
       var rowTexts=cells.map(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase();});
       var ci=rowTexts.findIndex(function(t){return/C[OO]D|BARRA/.test(t);});
       var ni=rowTexts.findIndex(function(t){return/DESC|NOME|PRODUTO/.test(t);});
-      var fi=rowTexts.findIndex(function(t){return/FORNEC/.test(t);});
+      var fi=rowTexts.findIndex(function(t){return/FORNEC|FORN|SUPPLIER|FABRICANTE/.test(t);});
       if(ci>=0&&ni>=0){
         hIdx=i;ciCod=ci;ciNome=ni;
         ciCusto=rowTexts.findIndex(function(t){return/CUSTO/.test(t);});
@@ -1629,7 +1629,9 @@ function openResolvidoModal(idx){
   document.getElementById('rQtdeVendida').value=qtdeLote;
   document.getElementById('rQtdeSobra').value=0;
   document.getElementById('rPreco').value=p.precoPromo?'R$ '+p.precoPromo.toFixed(2).replace('.',','):'';
-  document.getElementById('rFornecedor').value='';
+  // Auto-preencher fornecedor do banco de dados
+  var barrasBuscaForn=(p.cod||'').replace(/[^0-9]/g,'');
+  document.getElementById('rFornecedor').value=bancoFornecedor[barrasBuscaForn]||'';
   document.getElementById('rObs').value='';
   document.getElementById('painelResumoFinanceiro').style.display='none';
   ['sell_out','sell_in','vendido','descarte','venda_rapida'].forEach(function(o){document.getElementById('opt_'+o).classList.remove('selected');});
@@ -1826,7 +1828,7 @@ function renderRelatorio(){
   tb.innerHTML=filtrados.map(function(n){
     var fmt2=function(v){return v?'R$ '+v.toFixed(2).replace('.',','):'--';};
     var pct=n.precoNormal&&n.precoPraticado?((n.precoNormal-n.precoPraticado)/n.precoNormal*100):0;
-    var realIdx=getNegociacoes().indexOf(n);
+    var realIdx=getNegociacoes().findIndex(function(x){return x.id===n.id;});
     return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+(n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+(n.qtde||1)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td><td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(n.fornecedor||'--')+'</td><td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td><td style="white-space:nowrap"><button class="abtn" onclick="abrirEditarNeg('+realIdx+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> <button class="abtn" onclick="excluirNeg('+realIdx+')" title="Excluir" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td></tr>';
   }).join('');
 }
