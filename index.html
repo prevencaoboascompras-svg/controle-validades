@@ -894,7 +894,9 @@ function renderMetrics(){
   document.getElementById('metrics').innerHTML='<div class="metric"><div class="metric-lbl">Total</div><div class="metric-val">'+products.length+'</div></div><div class="metric"><div class="metric-lbl">Vencidos</div><div class="metric-val danger">'+c.vencido+'</div></div><div class="metric"><div class="metric-lbl">Critico 3d</div><div class="metric-val danger">'+c.critico+'</div></div><div class="metric"><div class="metric-lbl">Urgente 7d</div><div class="metric-val warn">'+c.urgente+'</div></div><div class="metric"><div class="metric-lbl">Atencao 15d</div><div class="metric-val warn">'+c.atencao+'</div></div><div class="metric"><div class="metric-lbl">OK</div><div class="metric-val ok">'+c.ok+'</div></div><div class="metric"><div class="metric-lbl">Aguardando</div><div class="metric-val info">'+aguarda+'</div></div>';
 }
 
+var charts={};
 function renderCharts(){
+  if(typeof Chart==='undefined'){setTimeout(renderCharts,200);return;}
   Object.values(charts).forEach(function(c){try{c.destroy();}catch(e){}});charts={};
   var sc={vencido:0,critico:0,urgente:0,atencao:0,ok:0},sm={};
   products.forEach(function(p){var s=statusFromDays(daysDiff(p.validade));if(s in sc)sc[s]++;sm[p.setor]=(sm[p.setor]||0)+1;});
@@ -1354,7 +1356,7 @@ function goTab(name){
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('active');
-  if(name==='relatorio'){setTimeout(renderRelatorio,50);}
+  if(name==='relatorio'){setTimeout(renderRelatorio,120);}
   if(name==='promocoes')renderPromos();
   if(name==='encartes')renderEncartesAtivos();
 }
