@@ -33,7 +33,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .btn-sm{padding:5px 11px;font-size:12px}
 @keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin 1s linear infinite;display:inline-block}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-bottom:20px}
-.metric{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px}
+.metric{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;transition:border-color .15s,transform .1s;user-select:none}.metric:hover{transform:translateY(-1px)}
 .metric-lbl{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
 .metric-val{font-size:28px;font-weight:600}
 .metric-val.danger{color:var(--red)}.metric-val.warn{color:var(--amber)}.metric-val.ok{color:var(--green)}.metric-val.info{color:var(--blue)}
@@ -222,6 +222,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         <option value="urgente">Urgente (7d)</option>
         <option value="atencao">Atencao (15d)</option>
         <option value="ok">OK</option>
+        <option value="aguardando">Aguardando</option>
       </select>
       <input type="text" id="fBusca" placeholder="Buscar produto ou código..." oninput="renderTable()">
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);cursor:pointer;white-space:nowrap">
@@ -868,7 +869,13 @@ function renderTable(){
   var all=products.filter(function(p){
     var s=statusFromDays(daysDiff(p.validade));
     if(setor&&p.setor!==setor)return false;
-    if(status&&s!==status)return false;
+    if(status){
+      if(status==='aguardando'){
+        if(!(p.status||'').toLowerCase().includes('aguard'))return false;
+      } else {
+        if(s!==status)return false;
+      }
+    }
     if(busca&&!(p.nome||'').toLowerCase().includes(busca)&&!(p.cod||'').toLowerCase().includes(busca))return false;
     if(!mostrarResolvidos&&resolvidos.includes(produtoChave(p)))return false;
     return true;
@@ -1017,7 +1024,36 @@ function renderMetrics(){
   var al=c.vencido+c.critico;
   document.getElementById('alertBanner').classList.toggle('show',al>0);
   document.getElementById('alertTxt').textContent=al+' produto(s) vencido(s) ou critico(s). Verifique e acione promocoes.';
-  document.getElementById('metrics').innerHTML='<div class="metric"><div class="metric-lbl">Total</div><div class="metric-val">'+products.length+'</div></div><div class="metric"><div class="metric-lbl">Vencidos</div><div class="metric-val danger">'+c.vencido+'</div></div><div class="metric"><div class="metric-lbl">Critico 3d</div><div class="metric-val danger">'+c.critico+'</div></div><div class="metric"><div class="metric-lbl">Urgente 7d</div><div class="metric-val warn">'+c.urgente+'</div></div><div class="metric"><div class="metric-lbl">Atencao 15d</div><div class="metric-val warn">'+c.atencao+'</div></div><div class="metric"><div class="metric-lbl">OK</div><div class="metric-val ok">'+c.ok+'</div></div><div class="metric"><div class="metric-lbl">Aguardando</div><div class="metric-val info">'+aguarda+'</div></div>';
+  function mc(lbl,val,cls,filt){
+    var color=cls==='danger'?'var(--red)':cls==='warn'?'var(--amber)':cls==='ok'?'var(--green)':cls==='info'?'var(--blue)':'var(--tx)';
+    var style=filt?'cursor:pointer;transition:border-color .15s;':'';
+    var click=filt?'onclick="filtrarMetrica(\''+filt+'\')"':'';
+    var hover=filt?'onmouseenter="this.style.borderColor=\''+color+'\'" onmouseleave="this.style.borderColor=\'\'"':'';
+    return '<div class="metric" style="'+style+'" '+click+' '+hover+' title="'+(filt?'Filtrar: '+lbl:'')+'">'
+      +'<div class="metric-lbl">'+lbl+'</div>'
+      +'<div class="metric-val'+(cls?' '+cls:'')+'">'+val+'</div>'
+      +'</div>';
+  }
+  document.getElementById('metrics').innerHTML=
+    mc('Total',products.length,'','')+
+    mc('Vencidos',c.vencido,'danger','vencido')+
+    mc('Critico 3d',c.critico,'danger','critico')+
+    mc('Urgente 7d',c.urgente,'warn','urgente')+
+    mc('Atencao 15d',c.atencao,'warn','atencao')+
+    mc('OK',c.ok,'ok','ok')+
+    mc('Aguardando',aguarda,'info','aguardando');
+}
+
+function filtrarMetrica(filt){
+  goTab('validades');
+  var sel=document.getElementById('fStatus');
+  if(!sel)return;
+  document.getElementById('fBusca').value='';
+  document.getElementById('fSetor').value='';
+  sel.value=filt;
+  renderTable();
+  var sec=document.getElementById('sec-validades');
+  if(sec)setTimeout(function(){var tbl=sec.querySelector('table');if(tbl)tbl.scrollIntoView({behavior:'smooth',block:'start'});},150);
 }
 
 var charts={};
