@@ -33,7 +33,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .btn-sm{padding:5px 11px;font-size:12px}
 @keyframes spin{to{transform:rotate(360deg)}}.spin{animation:spin 1s linear infinite;display:inline-block}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-bottom:20px}
-.metric{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;transition:border-color .15s,transform .1s;user-select:none}.metric:hover{transform:translateY(-1px)}
+.metric{background:var(--bg);border:1px solid var(--bd);border-radius:var(--r);padding:14px 16px;transition:border-color .15s,transform .1s,box-shadow .15s;user-select:none}.metric:hover{transform:translateY(-1px)}
+.metric.clickable{cursor:pointer}.metric.clickable:hover{border-color:var(--bds);box-shadow:0 4px 12px rgba(0,0,0,.1)}.metric.clickable.active-filter{border-color:var(--green);box-shadow:0 0 0 3px rgba(29,158,117,.18);transform:translateY(-1px)}
 .metric-lbl{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
 .metric-val{font-size:28px;font-weight:600}
 .metric-val.danger{color:var(--red)}.metric-val.warn{color:var(--amber)}.metric-val.ok{color:var(--green)}.metric-val.info{color:var(--blue)}
@@ -1733,9 +1734,10 @@ function openResolvidoModal(idx){
   document.getElementById('rQtdeVendida').value=qtdeLote;
   document.getElementById('rQtdeSobra').value=0;
   document.getElementById('rPreco').value=p.precoPromo?'R$ '+p.precoPromo.toFixed(2).replace('.',','):'';
-  // Auto-preencher fornecedor do banco de dados
+  // Auto-preencher fornecedor do banco de dados (por código de barras ou nome)
   var barrasBuscaForn=(p.cod||'').replace(/[^0-9]/g,'');
-  document.getElementById('rFornecedor').value=p.fornecedor||bancoFornecedor[barrasBuscaForn]||'';
+  var fornAuto=p.fornecedor||bancoFornecedor[barrasBuscaForn]||bancoFornecedorNome[normNome(p.nome||'')]||'';
+  document.getElementById('rFornecedor').value=fornAuto;
   document.getElementById('rObs').value='';
   document.getElementById('painelResumoFinanceiro').style.display='none';
   ['sell_out','sell_in','vendido','descarte','venda_rapida'].forEach(function(o){document.getElementById('opt_'+o).classList.remove('selected');});
@@ -1888,6 +1890,21 @@ function atualizarNegBadge(){
   if(b){b.style.display=n>0?'':'none';b.textContent=n;}
 }
 
+function filtrarPorTipoCard(tipo){
+  var sel=document.getElementById('filtroNegTipo');
+  if(!sel)return;
+  // Toggle: se já está filtrado por esse tipo, limpa o filtro
+  if(sel.value===tipo){
+    sel.value='';
+  } else {
+    sel.value=tipo;
+  }
+  renderRelatorio();
+  // Rola suavemente até a tabela
+  var tb=document.querySelector('#sec-relatorio .twrap');
+  if(tb)setTimeout(function(){tb.scrollIntoView({behavior:'smooth',block:'nearest'});},150);
+}
+
 function renderRelatorio(){
   renderCharts();
   var negs=getNegociacoes();
@@ -1911,16 +1928,28 @@ function renderRelatorio(){
   var valorVendaRapida=totalVendaRapida.reduce(function(s,n){return s+(n.valorDesc||0);},0);
 
   var resumoEl=document.getElementById('negociacaoResumo');
+  var tipoAtivo=document.getElementById('filtroNegTipo')?document.getElementById('filtroNegTipo').value:'';
   if(resumoEl){
+    function metricCard(tipoFiltro, label, val, valClass, valStyle, isCount){
+      var isActive=tipoAtivo===tipoFiltro?'active-filter':'';
+      var onclick=tipoFiltro?'onclick="filtrarPorTipoCard(\''+tipoFiltro+'\')"':'';
+      var clickClass=tipoFiltro?'clickable':'';
+      var titleAttr=tipoFiltro?'title="Clique para filtrar por '+label+'"':'';
+      return'<div class="metric '+clickClass+' '+isActive+'" '+onclick+' '+titleAttr+'>'
+        +'<div class="metric-lbl">'+label+'</div>'
+        +'<div class="metric-val '+valClass+'" style="'+valStyle+'">'+val+'</div>'
+        +(tipoFiltro?'<div style="font-size:10px;color:var(--tx2);margin-top:4px;display:flex;align-items:center;gap:3px"><i class="ti ti-filter" style="font-size:10px"></i> Clique para filtrar</div>':'')
+        +'</div>';
+    }
     resumoEl.innerHTML=
-      '<div class="metric"><div class="metric-lbl" style="color:#BA7517">⚡ Venda Rápida</div><div class="metric-val" style="color:#BA7517">'+totalVendaRapida.length+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Perda evitada (V. Rápida)</div><div class="metric-val ok" style="font-size:18px">R$ '+valorVendaRapida.toFixed(2).replace('.',',')+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Sell-out c/ fornecedor</div><div class="metric-val info">'+totalSellout.length+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Perda evitada (Sell-out)</div><div class="metric-val ok" style="font-size:18px">R$ '+valorSellout.toFixed(2).replace('.',',')+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Troca / Bonificação</div><div class="metric-val ok">'+totalSellin.length+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Valor recuperado</div><div class="metric-val ok" style="font-size:18px">R$ '+valorSellin.toFixed(2).replace('.',',')+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Descartes</div><div class="metric-val danger">'+totalDescarte.length+'</div></div>'+
-      '<div class="metric"><div class="metric-lbl">Valor descartado</div><div class="metric-val danger" style="font-size:18px">R$ '+valorDescarte.toFixed(2).replace('.',',')+'</div></div>';
+      metricCard('venda_rapida','⚡ VENDA RÁPIDA','<span style="color:#BA7517">'+totalVendaRapida.length+'</span>','','',true)+
+      metricCard('venda_rapida','PERDA EVITADA (V. RÁPIDA)','R$ '+valorVendaRapida.toFixed(2).replace('.',','),'ok','font-size:18px',false)+
+      metricCard('sell_out','SELL-OUT C/ FORNECEDOR',totalSellout.length,'info','',true)+
+      metricCard('sell_out','PERDA EVITADA (SELL-OUT)','R$ '+valorSellout.toFixed(2).replace('.',','),'ok','font-size:18px',false)+
+      metricCard('sell_in','TROCA / BONIFICAÇÃO',totalSellin.length,'ok','',true)+
+      metricCard('sell_in','VALOR RECUPERADO','R$ '+valorSellin.toFixed(2).replace('.',','),'ok','font-size:18px',false)+
+      metricCard('descarte','DESCARTES',totalDescarte.length,'danger','',true)+
+      metricCard('descarte','VALOR DESCARTADO','R$ '+valorDescarte.toFixed(2).replace('.',','),'danger','font-size:18px',false);
   }
 
   // Tabela
@@ -1933,7 +1962,11 @@ function renderRelatorio(){
     var fmt2=function(v){return v?'R$ '+v.toFixed(2).replace('.',','):'--';};
     var pct=n.precoNormal&&n.precoPraticado?((n.precoNormal-n.precoPraticado)/n.precoNormal*100):0;
     var realIdx=getNegociacoes().findIndex(function(x){return x.id===n.id;});
-    return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+(n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+(n.qtde||1)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td><td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(n.fornecedor||'--')+'</td><td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td><td style="white-space:nowrap"><button class="abtn" onclick="abrirEditarNeg('+realIdx+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> <button class="abtn" onclick="excluirNeg('+realIdx+')" title="Excluir" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td></tr>';
+    // Busca fornecedor: salvo → banco por código → banco por nome
+    var fornDisplay=n.fornecedor||'';
+    if(!fornDisplay&&n.cod){var barrasN=String(n.cod).replace(/[^0-9]/g,'');fornDisplay=bancoFornecedor[barrasN]||'';}
+    if(!fornDisplay&&n.nome){fornDisplay=bancoFornecedorNome[normNome(n.nome)]||'';}
+    return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+(n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+(n.qtde||1)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td><td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(fornDisplay||'--')+'</td><td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td><td style="white-space:nowrap"><button class="abtn" onclick="abrirEditarNeg('+realIdx+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> <button class="abtn" onclick="excluirNeg('+realIdx+')" title="Excluir" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td></tr>';
   }).join('');
 }
 
@@ -1974,6 +2007,10 @@ function abrirEditarNeg(idx) {
   if (!fornSalvo && n.cod) {
     var barras = String(n.cod).replace(/[^0-9]/g, '');
     fornSalvo = bancoFornecedor[barras] || '';
+  }
+  // Fallback por nome do produto se ainda não encontrou
+  if (!fornSalvo && n.nome) {
+    fornSalvo = bancoFornecedorNome[normNome(n.nome)] || '';
   }
   document.getElementById('eNegFornecedor').value = fornSalvo;
   document.getElementById('eNegObs').value = n.obs || '';
