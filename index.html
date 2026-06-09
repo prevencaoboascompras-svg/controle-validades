@@ -728,6 +728,7 @@ var banco={};
 var bancoCusto={};
 var bancoFornecedor={};
 async function loadBanco(cfg){
+  if(!cfg.idBanco)cfg.idBanco=cfg.id;
   if(!cfg.idBanco)return;
   try{
     var table=await fetchSheet(cfg.idBanco,cfg.abaBanco);
