@@ -728,24 +728,31 @@ function parseDate(v){
 var banco={};
 var bancoCusto={};
 var bancoFornecedor={};
+var bancoFornecedorNome={}; // índice: nome normalizado → fornecedor (fallback sem código de barras)
+
+// Normaliza nome de produto removendo quantidades "(NUN)", "{N}" e espaços extras
+function normNome(n){return n.replace(/\s*\(.*?\)\s*/g,'').replace(/\s*\{.*?\}/g,'').replace(/\s+/g,' ').trim().toUpperCase();}
+
 async function loadBanco(cfg){
   if(!cfg.idBanco)cfg.idBanco=cfg.id;
   if(!cfg.idBanco)return;
   try{
     var table=await fetchSheet(cfg.idBanco,cfg.abaBanco);
-    var rows=rawRows(table);banco={};bancoCusto={};bancoFornecedor={};
+    var rows=rawRows(table);banco={};bancoCusto={};bancoFornecedor={};bancoFornecedorNome={};
     var hIdx=-1,ciCod=-1,ciNome=-1,ciCusto=-1,ciForn=-1;
     for(var i=0;i<rows.length;i++){
       var cells=rows[i].c||[];
       var rowTexts=cells.map(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase();});
-      var ci=rowTexts.findIndex(function(t){return/C[OO]D|BARRA/.test(t);});
+      // detecta barcode: EAN, GTIN, PLU, CODIGO, COD.BARRAS, BARRAS
+      var ci=rowTexts.findIndex(function(t){return/\bEAN\b|\bGTIN\b|\bPLU\b|C[OO]D|BARRA/.test(t);});
       var ni=rowTexts.findIndex(function(t){return/DESC|NOME|PRODUTO/.test(t);});
-      var fi=rowTexts.findIndex(function(t){return/FORNEC|FORN|SUPPLIER|FABRICANTE/.test(t);});
+      // detecta fornecedor: FORNECEDOR, FORN, FABRICANTE, RAZAO SOCIAL, REPRESENTANTE, DISTRIBUIDOR, SUPPLIER
+      var fi=rowTexts.findIndex(function(t){return/FORNEC|\bFORN\b|SUPPLIER|FABRICANTE|RAZAO|RAZÃO|REPRESENT|DISTRIBU/.test(t);});
       if(ci>=0&&ni>=0){
         hIdx=i;ciCod=ci;ciNome=ni;
         ciCusto=rowTexts.findIndex(function(t){return/CUSTO/.test(t);});
         ciForn=fi;
-        console.log('Banco cabecalho linha',i,'cod:',ci,'nome:',ni,'custo:',ciCusto,'fornec:',ciForn);
+        console.log('Banco cabecalho linha',i,'| cod:',ci,'| nome:',ni,'| custo:',ciCusto,'| fornec:',ciForn,'| headers:',rowTexts.filter(Boolean));
         break;
       }
     }
@@ -759,8 +766,14 @@ async function loadBanco(cfg){
         if(ciCusto>=0){var cv=cellNum(cells[ciCusto]);if(cv)bancoCusto[cod]=cv;}
         if(ciForn>=0){var fv=String((cells[ciForn]&&cells[ciForn].f)||(cells[ciForn]&&cells[ciForn].v)||'').trim();if(fv)bancoFornecedor[cod]=fv;}
       }
+      // ▸ Índice nome→fornecedor: funciona mesmo sem código de barras
+      if(nome&&ciForn>=0){
+        var fvn=String((cells[ciForn]&&cells[ciForn].f)||(cells[ciForn]&&cells[ciForn].v)||'').trim();
+        if(fvn)bancoFornecedorNome[normNome(nome)]=fvn;
+      }
     }
-    console.log('Banco:',Object.keys(banco).length,'produtos | custo:',Object.keys(bancoCusto).length,'| fornecedor:',Object.keys(bancoFornecedor).length,'| ciForn:',ciForn); if(ciForn<0)console.warn('BANCO: coluna FORNECEDOR nao detectada no cabecalho — verifique o nome da coluna na planilha');
+    console.log('Banco: produtos='+Object.keys(banco).length+' | fornec(cod)='+Object.keys(bancoFornecedor).length+' | fornec(nome)='+Object.keys(bancoFornecedorNome).length+' | ciForn='+ciForn);
+    if(ciForn<0)console.warn('BANCO: coluna FORNECEDOR nao detectada — cabeçalhos encontrados: '+(hIdx>=0?(rawRows(table)[hIdx]&&rawRows(table)[hIdx].c||[]).map(function(c){return String((c&&c.f)||(c&&c.v)||'');}).filter(Boolean).join(', '):'nenhum'));
   }catch(e){console.warn('Banco:',e.message);}
 }
 
@@ -797,7 +810,7 @@ async function syncAll(){
       var nk=banco[k].toUpperCase().replace(/\s+/g,' ').trim();
       bancoNomeIdx[nk]=k;
     }
-    function normNome(n){return n.replace(/\s*\(.*?\)\s*/g,'').replace(/\s*\{.*?\}/g,'').replace(/\s+/g,' ').trim().toUpperCase();}
+    // normNome: definido globalmente acima de loadBanco
     function buscarCodPorNome(nome){
       var n=normNome(nome);
       // 1) correspondência exata
@@ -837,6 +850,19 @@ async function syncAll(){
       if(!cod)cod=buscarCodPorNome(nome);
       // Buscar fornecedor e custo do banco pelo cod encontrado
       var fornBanco=cod?bancoFornecedor[cod]||'':'';
+      // ▸ Fallback 1: busca pelo nome normalizado no índice nome→fornecedor
+      if(!fornBanco){fornBanco=bancoFornecedorNome[normNome(nome)]||'';}
+      // ▸ Fallback 2: busca parcial pelos primeiros 25 chars do nome normalizado
+      if(!fornBanco){
+        var nPfx=normNome(nome).substring(0,25);
+        if(nPfx.length>5){
+          for(var bk in bancoFornecedorNome){
+            if(bk.indexOf(nPfx)>=0||(nPfx.length>8&&bk.substring(0,25).indexOf(nPfx.substring(0,20))>=0)){
+              fornBanco=bancoFornecedorNome[bk];break;
+            }
+          }
+        }
+      }
       var custoBanco=cod?bancoCusto[cod]||0:0;
       // Custo: preferir o da planilha principal se existir, senão usar o do banco
       var custoFinal=cellNum(cells[ci.custo])||custoBanco;
@@ -897,7 +923,7 @@ function renderTable(){
     var rs=fade?'opacity:.5;':(jaResolvido?'opacity:.65;':'');
     var barrasBusca=(p.cod||'').replace(/[^0-9]/g,'');
     var custoProd=p.custo||bancoCusto[barrasBusca]||0;
-    var fornProd=p.fornecedor||bancoFornecedor[barrasBusca]||'--';
+    var fornProd=p.fornecedor||bancoFornecedor[barrasBusca]||bancoFornecedorNome[normNome(p.nome||'')]||'--';
     var btnResolvido=jaResolvido
       ?'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--tx2);color:var(--tx2);background:var(--bg2)" title="Já resolvido — clique para registrar novamente"><i class="ti ti-circle-check"></i> OK</button>'
       :'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)" title="Marcar como resolvido"><i class="ti ti-circle-check"></i> Resolvido</button>';
