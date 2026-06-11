@@ -385,8 +385,8 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         <table style="min-width:700px">
           <thead><tr>
             <th>Data</th><th>Produto</th><th>Setor</th><th>Qtde</th>
-            <th>Preço DE</th><th>Preço POR</th><th>Desconto</th><th>Valor Total</th>
-            <th>Tipo</th><th>Fornecedor</th><th title="Valor que o fornecedor deve ressarcir (sell-out)" style="color:var(--amber)">💰 A Receber</th><th>Obs</th><th style="width:70px"></th>
+            <th>Preço DE</th><th>Preço POR</th><th>Custo</th><th>Desconto</th><th>Valor Total</th>
+            <th>Tipo</th><th>Fornecedor</th><th title="Sell-out: diferença de margem | Descarte: custo × qtde (nota devolução)" style="color:var(--amber)">💰 A Receber</th><th>Obs</th><th style="width:70px"></th>
           </tr></thead>
           <tbody id="tbNegociacoes"></tbody>
         </table>
@@ -1920,11 +1920,14 @@ function confirmarResolvido(){
   var obs=document.getElementById('rObs').value.trim();
   var negs=getNegociacoes();
   var now=new Date().toISOString().substring(0,10);
-  var base={id:Date.now(),data:now,cod:p.cod,nome:p.nome,setor:p.setor,precoNormal:p.precoNormal||0,fornecedor:fornecedor,obs:obs};
+  var custo=p.custo||0;
+  var loteId='lote-'+Date.now();
+  var base={id:Date.now(),data:now,cod:p.cod,nome:p.nome,setor:p.setor,precoNormal:p.precoNormal||0,custo:custo,fornecedor:fornecedor,obs:obs,loteId:loteId,qtdeTotal:qtdeTotal};
 
   // Registro da venda (se vendeu alguma)
   if(qtdeVendida>0&&_resolucaoSelecionada!=='descarte'){
     var valorVenda=precoVenda*qtdeVendida;
+    // A receber sell-out: diferença de margem (preço normal - preço praticado) × qtde
     var valorDescVenda=p.precoNormal?(p.precoNormal-precoVenda)*qtdeVendida:0;
     negs.unshift(Object.assign({},base,{
       id:Date.now(),
@@ -1938,24 +1941,18 @@ function confirmarResolvido(){
 
   // Registro do descarte/sobra (se sobrou alguma)
   if(qtdeSobra>0){
-    var custo=p.custo||0;
     var valorPerda=custo>0?custo*qtdeSobra:precoVenda*qtdeSobra;
+    // A receber descarte: custo × qtde (fornecedor recolhe via nota devolução)
+    var aReceberDescarte=custo>0?custo*qtdeSobra:0;
     negs.unshift(Object.assign({},base,{
       id:Date.now()+1,
       qtde:qtdeSobra,
       precoPraticado:custo||precoVenda,
       valorTotal:valorPerda,
-      valorDesc:0,
+      valorDesc:aReceberDescarte,
       tipo:'descarte',
       obs:(obs?obs+' | ':'')+'Sobra do lote de '+qtdeTotal+' un.'
     }));
-  }
-
-  // Caso seja descarte puro (100% perdido)
-  if(_resolucaoSelecionada==='descarte'&&qtdeVendida===0){
-    var custo2=p.custo||0;
-    var valorPerda2=custo2>0?custo2*qtdeSobra:precoVenda*qtdeSobra;
-    // já foi adicionado acima pelo bloco qtdeSobra>0
   }
 
   saveNegociacoes(negs);
@@ -2061,7 +2058,7 @@ function renderRelatorio(){
   // Tabela
   var tb=document.getElementById('tbNegociacoes');
   if(!tb)return;
-  if(!filtrados.length){tb.innerHTML='<tr><td colspan="12" class="empty">Nenhuma negociação registrada ainda. Use o botão <strong>Resolvido</strong> na aba Validades.</td></tr>';return;}
+  if(!filtrados.length){tb.innerHTML='<tr><td colspan="13" class="empty">Nenhuma negociação registrada ainda. Use o botão <strong>Resolvido</strong> na aba Validades.</td></tr>';return;}
   var tipoLabels={sell_out:'Sell-out',sell_in:'Sell-in / Troca',vendido:'Vendido',descarte:'Descarte',venda_rapida:'Venda Rápida'};
   var tipoClass={sell_out:'neg-badge-sellout',sell_in:'neg-badge-sellin',vendido:'neg-badge-vendido',descarte:'b-danger',venda_rapida:'neg-badge-vendarapida'};
   tb.innerHTML=filtrados.map(function(n){
@@ -2072,12 +2069,15 @@ function renderRelatorio(){
     var fornDisplay=n.fornecedor||'';
     if(!fornDisplay&&n.cod){var barrasN=String(n.cod).replace(/[^0-9]/g,'');fornDisplay=bancoFornecedor[barrasN]||'';}
     if(!fornDisplay&&n.nome){fornDisplay=bancoFornecedorNome[normNome(n.nome)]||'';}
-    // Valor a receber do fornecedor (apenas sell-out)
-    var aReceber=n.tipo==='sell_out'?(n.valorDesc||0):null;
+    // Custo gerencial
+    var custoHtml=n.custo>0?'<td style="font-size:12px;white-space:nowrap;color:var(--tx2)">'+fmt2(n.custo)+'</td>':'<td style="font-size:12px;color:var(--tx2)">--</td>';
+    // A Receber: sell-out = diferença de margem; descarte = custo x qtde (nota devolução)
+    var aReceber=(n.tipo==='sell_out'||n.tipo==='descarte')?(n.valorDesc||0):null;
+    var aReceberLabel=n.tipo==='descarte'?'Nota dev.':'';
     var aReceberHtml=aReceber!==null&&aReceber>0
-      ?'<td style="font-size:12px;font-weight:700;white-space:nowrap;color:var(--amber);background:rgba(186,117,23,.08)">'+fmt2(aReceber)+'</td>'
+      ?'<td style="font-size:12px;font-weight:700;white-space:nowrap;color:var(--amber);background:rgba(186,117,23,.08)" title="'+aReceberLabel+'">'+fmt2(aReceber)+(aReceberLabel?'<br><span style=\'font-size:10px;font-weight:400;color:var(--amber)\'>'+aReceberLabel+'</span>':'')+'</td>'
       :'<td style="font-size:12px;color:var(--tx2)">--</td>';
-    return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+(n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+(n.qtde||1)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td><td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(fornDisplay||'--')+'</td>'+aReceberHtml+'<td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td><td style="white-space:nowrap"><button class="abtn" onclick="abrirEditarNeg('+realIdx+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> <button class="abtn" onclick="excluirNeg('+realIdx+')" title="Excluir" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td></tr>';
+    return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+(n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+(n.qtde||1)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td>'+custoHtml+'<td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(fornDisplay||'--')+'</td>'+aReceberHtml+'<td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td><td style="white-space:nowrap"><button class="abtn" onclick="abrirEditarNeg('+realIdx+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> <button class="abtn" onclick="excluirNeg('+realIdx+')" title="Excluir" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td></tr>';
   }).join('');
 }
 
