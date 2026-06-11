@@ -523,7 +523,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
             <input type="number" id="rQtdeVendida" min="0" placeholder="0" oninput="recalcSobra()" style="width:100%;font-size:14px;font-weight:700;padding:7px 10px;border:2px solid var(--green);border-radius:var(--r);background:var(--bg);color:var(--green);outline:none">
           </div>
           <div>
-            <label style="font-size:11px;font-weight:600;color:var(--red);display:block;margin-bottom:4px">✗ Sobrou (descarte)</label>
+            <label style="font-size:11px;font-weight:600;color:var(--red);display:block;margin-bottom:4px">✗ Sobrou (venceu)</label>
             <input type="number" id="rQtdeSobra" min="0" placeholder="0" oninput="recalcVendida()" style="width:100%;font-size:14px;font-weight:700;padding:7px 10px;border:2px solid var(--red);border-radius:var(--r);background:var(--bg);color:var(--red);outline:none">
           </div>
         </div>
@@ -538,6 +538,52 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
               <div style="font-size:10px;color:var(--tx2);margin-bottom:2px">Perda no descarte (custo)</div>
               <div id="resumoPerda" style="font-size:15px;font-weight:700;color:var(--red)">—</div>
             </div>
+          </div>
+        </div>
+      </div>
+      <!-- Tratamento da sobra: visível só quando há qtde sobrando -->
+      <div id="wrapTratamentoSobra" style="display:none;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-package" style="font-size:13px"></i> O que fazer com a sobra?
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div class="tratamento-opt selected" id="topt_nota_devolucao" onclick="selectTratamento('nota_devolucao')" style="border:2px solid var(--green);border-radius:8px;padding:10px;cursor:pointer;text-align:center;background:var(--bg);transition:all .15s">
+            <i class="ti ti-receipt" style="font-size:20px;color:var(--green);display:block;margin-bottom:4px"></i>
+            <div style="font-size:12px;font-weight:700;color:var(--green)">Nota devolução</div>
+            <div style="font-size:10px;color:var(--tx2);margin-top:2px">Fornecedor recolhe</div>
+          </div>
+          <div class="tratamento-opt" id="topt_descarte_autorizado" onclick="selectTratamento('descarte_autorizado')" style="border:2px solid var(--bd);border-radius:8px;padding:10px;cursor:pointer;text-align:center;background:var(--bg);transition:all .15s">
+            <i class="ti ti-trash" style="font-size:20px;color:var(--amber);display:block;margin-bottom:4px"></i>
+            <div style="font-size:12px;font-weight:700">Descarte autorizado</div>
+            <div style="font-size:10px;color:var(--tx2);margin-top:2px">Joga fora + ressarcimento</div>
+          </div>
+          <div class="tratamento-opt" id="topt_descarte_perda" onclick="selectTratamento('descarte_perda')" style="border:2px solid var(--bd);border-radius:8px;padding:10px;cursor:pointer;text-align:center;background:var(--bg);transition:all .15s">
+            <i class="ti ti-trash-x" style="font-size:20px;color:var(--red);display:block;margin-bottom:4px"></i>
+            <div style="font-size:12px;font-weight:700">Descarte / Perda</div>
+            <div style="font-size:10px;color:var(--tx2);margin-top:2px">Sem ressarcimento</div>
+          </div>
+        </div>
+      </div>
+      <!-- Tratamento da sobra: aparece só no sell-out quando há qtde sobrando -->
+      <div id="wrapTratamentoSobra" style="display:none;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:8px;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-package" style="font-size:13px"></i> O que fazer com a sobra?
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div id="topt_nota_devolucao" onclick="selectTratamento('nota_devolucao')" style="border:2px solid var(--green);border-radius:8px;padding:10px;cursor:pointer;text-align:center;background:rgba(29,158,117,.08);transition:all .15s">
+            <i class="ti ti-receipt" style="font-size:20px;color:var(--green);display:block;margin-bottom:4px"></i>
+            <div style="font-size:12px;font-weight:700;color:var(--green)">Nota devolução</div>
+            <div style="font-size:10px;color:var(--tx2);margin-top:2px">Fornecedor recolhe</div>
+          </div>
+          <div id="topt_descarte_autorizado" onclick="selectTratamento('descarte_autorizado')" style="border:2px solid var(--bd);border-radius:8px;padding:10px;cursor:pointer;text-align:center;background:var(--bg);transition:all .15s">
+            <i class="ti ti-trash" style="font-size:20px;color:var(--amber);display:block;margin-bottom:4px"></i>
+            <div style="font-size:12px;font-weight:700">Descarte autorizado</div>
+            <div style="font-size:10px;color:var(--tx2);margin-top:2px">Joga fora + ressarcimento</div>
+          </div>
+          <div id="topt_descarte_perda" onclick="selectTratamento('descarte_perda')" style="border:2px solid var(--bd);border-radius:8px;padding:10px;cursor:pointer;text-align:center;background:var(--bg);transition:all .15s">
+            <i class="ti ti-trash-x" style="font-size:20px;color:var(--red);display:block;margin-bottom:4px"></i>
+            <div style="font-size:12px;font-weight:700">Descarte / Perda</div>
+            <div style="font-size:10px;color:var(--tx2);margin-top:2px">Sem ressarcimento</div>
           </div>
         </div>
       </div>
@@ -1846,6 +1892,9 @@ function openResolvidoModal(idx){
   document.getElementById('painelResumoFinanceiro').style.display='none';
   ['sell_out','sell_in','vendido','descarte','venda_rapida'].forEach(function(o){document.getElementById('opt_'+o).classList.remove('selected');});
   document.getElementById('resolvidoExtras').style.display='none';
+  _tratamentoSobra='nota_devolucao';
+  if(document.getElementById('wrapTratamentoSobra')) document.getElementById('wrapTratamentoSobra').style.display='none';
+  selectTratamento('nota_devolucao');
   document.getElementById('btnConfirmarResolvido').disabled=true;
   document.getElementById('resolvidoModal').classList.add('open');
 }
@@ -1866,6 +1915,24 @@ function recalcVendida(){
   recalcResumo();
 }
 
+var _tratamentoSobra='nota_devolucao';
+
+function selectTratamento(tipo){
+  _tratamentoSobra=tipo;
+  ['nota_devolucao','descarte_autorizado','descarte_perda'].forEach(function(t){
+    var el=document.getElementById('topt_'+t);
+    if(!el)return;
+    if(t===tipo){
+      el.style.borderColor=t==='descarte_perda'?'var(--red)':t==='descarte_autorizado'?'var(--amber)':'var(--green)';
+      el.style.background=t==='descarte_perda'?'rgba(226,75,74,.08)':t==='descarte_autorizado'?'rgba(186,117,23,.08)':'rgba(29,158,117,.08)';
+    }else{
+      el.style.borderColor='var(--bd)';
+      el.style.background='var(--bg)';
+    }
+  });
+  recalcResumo();
+}
+
 function recalcResumo(){
   var p=_resolvidoIdx!==null?products[_resolvidoIdx]:null;
   if(!p)return;
@@ -1874,13 +1941,26 @@ function recalcResumo(){
   var precoStr=document.getElementById('rPreco').value;
   var precoVenda=precoStr?parseFloat(precoStr.replace(/R\$\s*/i,'').replace(',','.'))||0:0;
   var custo=p.custo||0;
+  // Mostrar/ocultar painel de tratamento da sobra
+  var wrapTrat=document.getElementById('wrapTratamentoSobra');
+  if(wrapTrat) wrapTrat.style.display=(sobra>0&&_resolucaoSelecionada==='sell_out')?'block':'none';
   if(vendida<=0&&sobra<=0){document.getElementById('painelResumoFinanceiro').style.display='none';return;}
   document.getElementById('painelResumoFinanceiro').style.display='block';
   var receita=precoVenda*vendida;
   var perda=custo>0?custo*sobra:0;
   var fmtR2=function(v){return'R$ '+v.toFixed(2).replace('.',',');};
   document.getElementById('resumoReceita').textContent=fmtR2(receita)+(vendida?' ('+vendida+' un.)':'');
-  document.getElementById('resumoPerda').textContent=perda>0?fmtR2(perda)+' ('+sobra+' un.)':sobra>0?sobra+' un. — custo não informado':'—';
+  // Label da perda varia conforme tratamento
+  var perdaLabel=_tratamentoSobra==='descarte_perda'?'Perda sem ressarcimento':
+    _tratamentoSobra==='descarte_autorizado'?'Descarte autorizado (ressarcido)':'Nota devolução ao fornecedor';
+  var perdaColor=_tratamentoSobra==='descarte_perda'?'var(--red)':'var(--amber)';
+  var perdaEl=document.getElementById('resumoPerda');
+  if(perdaEl){
+    perdaEl.style.color=perdaColor;
+    perdaEl.parentElement.style.borderLeftColor=perdaColor;
+    perdaEl.previousElementSibling.textContent=perdaLabel;
+    perdaEl.textContent=perda>0?fmtR2(perda)+' ('+sobra+' un.)':sobra>0?sobra+' un. — custo não informado':'—';
+  }
 }
 
 function selectResolucao(tipo){
@@ -2021,7 +2101,7 @@ function renderRelatorio(){
   // Cards de resumo
   var totalSellout=negs.filter(function(n){return n.tipo==='sell_out';});
   var totalSellin=negs.filter(function(n){return n.tipo==='sell_in';});
-  var totalDescarte=negs.filter(function(n){return n.tipo==='descarte';});
+  var totalDescarte=negs.filter(function(n){return n.tipo==='descarte'||n.tipo==='nota_devolucao'||n.tipo==='descarte_autorizado';});
   var totalVendaRapida=negs.filter(function(n){return n.tipo==='venda_rapida';});
   var valorSelloutAReceber=totalSellout.reduce(function(s,n){return s+(n.valorDesc||0);},0);
   var valorSellout=valorSelloutAReceber;
@@ -2029,38 +2109,51 @@ function renderRelatorio(){
   var valorDescarte=totalDescarte.reduce(function(s,n){return s+(n.valorTotal||0);},0);
   var valorVendaRapida=totalVendaRapida.reduce(function(s,n){return s+(n.valorDesc||0);},0);
 
+  // A Receber total = sell-out (diferença de margem) + sobra com ressarcimento (nota dev. ou descarte aut.)
+  var valorDescarteAReceber=totalDescarte.reduce(function(s,n){return s+(n.valorDesc||0);},0);
+  var totalAReceber=valorSelloutAReceber+valorDescarteAReceber;
+  var perdaLiquida=valorDescarte-valorDescarteAReceber;
+
   var resumoEl=document.getElementById('negociacaoResumo');
   var tipoAtivo=document.getElementById('filtroNegTipo')?document.getElementById('filtroNegTipo').value:'';
   if(resumoEl){
-    function metricCard(tipoFiltro, label, val, valClass, valStyle, isCount){
+    function metricCard(tipoFiltro, label, val, valClass, valStyle, tooltip){
       var isActive=tipoAtivo===tipoFiltro?'active-filter':'';
-      var onclick=tipoFiltro?'onclick="filtrarPorTipoCard(\''+tipoFiltro+'\')"':'';
+      var onclick=tipoFiltro?'onclick="filtrarPorTipoCard(''+tipoFiltro+'')"':'';
       var clickClass=tipoFiltro?'clickable':'';
-      var titleAttr=tipoFiltro?'title="Clique para filtrar por '+label+'"':'';
+      var titleAttr=tooltip?'title="'+tooltip+'"':(tipoFiltro?'title="Clique para filtrar por '+label+'"':'');
       return'<div class="metric '+clickClass+' '+isActive+'" '+onclick+' '+titleAttr+'>'
         +'<div class="metric-lbl">'+label+'</div>'
         +'<div class="metric-val '+valClass+'" style="'+valStyle+'">'+val+'</div>'
         +(tipoFiltro?'<div style="font-size:10px;color:var(--tx2);margin-top:4px;display:flex;align-items:center;gap:3px"><i class="ti ti-filter" style="font-size:10px"></i> Clique para filtrar</div>':'')
         +'</div>';
     }
+    var destaque='<div class="metric" style="border:2px solid var(--amber);background:rgba(186,117,23,.07);grid-column:span 2" title="Sell-out (diferença de margem) + Nota devolução + Descarte autorizado">'
+      +'<div class="metric-lbl" style="color:var(--amber)">💰 TOTAL A RECEBER DO FORNECEDOR</div>'
+      +'<div class="metric-val" style="font-size:22px;color:var(--amber)">R$ '+totalAReceber.toFixed(2).replace('.',',')+'</div>'
+      +'<div style="font-size:11px;color:var(--tx2);margin-top:5px;line-height:1.7">'
+        +'Sell-out: <strong style="color:var(--amber)">R$ '+valorSelloutAReceber.toFixed(2).replace('.',',')+'</strong>'
+        +' &nbsp;|&nbsp; Sobra (nota/desc.aut.): <strong style="color:var(--amber)">R$ '+valorDescarteAReceber.toFixed(2).replace('.',',')+'</strong>'
+      +'</div>'
+    +'</div>';
     resumoEl.innerHTML=
-      metricCard('venda_rapida','⚡ VENDA RÁPIDA','<span style="color:#BA7517">'+totalVendaRapida.length+'</span>','','',true)+
-      metricCard('venda_rapida','PERDA EVITADA (V. RÁPIDA)','R$ '+valorVendaRapida.toFixed(2).replace('.',','),'ok','font-size:18px',false)+
-      metricCard('sell_out','SELL-OUT C/ FORNECEDOR',totalSellout.length,'info','',true)+
-      metricCard('sell_out','PERDA EVITADA (SELL-OUT)','R$ '+valorSellout.toFixed(2).replace('.',','),'ok','font-size:18px',false)+
-      metricCard('sell_out','💰 A RECEBER (SELL-OUT)','R$ '+valorSelloutAReceber.toFixed(2).replace('.',','),'warn','font-size:18px;color:var(--amber)',false)+
-      metricCard('sell_in','TROCA / BONIFICAÇÃO',totalSellin.length,'ok','',true)+
-      metricCard('sell_in','VALOR RECUPERADO','R$ '+valorSellin.toFixed(2).replace('.',','),'ok','font-size:18px',false)+
-      metricCard('descarte','DESCARTES',totalDescarte.length,'danger','',true)+
-      metricCard('descarte','VALOR DESCARTADO','R$ '+valorDescarte.toFixed(2).replace('.',','),'danger','font-size:18px',false);
+      destaque+
+      metricCard('venda_rapida','⚡ VENDA RÁPIDA (qtde)','<span style="color:#BA7517">'+totalVendaRapida.length+'</span>','','','Desconto interno — sem reembolso de fornecedor')+
+      metricCard('venda_rapida','MARGEM SALVA (V. RÁPIDA)','R$ '+valorVendaRapida.toFixed(2).replace('.',','),'ok','font-size:18px','Diferença entre preço normal e preço praticado')+
+      metricCard('sell_out','SELL-OUT (qtde)',totalSellout.length,'info','','')+
+      metricCard('sell_out','A RECEBER — SELL-OUT','R$ '+valorSelloutAReceber.toFixed(2).replace('.',','),'warn','font-size:18px;color:var(--amber)','(Preço normal − Preço praticado) × qtde vendida')+
+      metricCard('sell_in','TROCA / BONIFICAÇÃO (qtde)',totalSellin.length,'ok','','')+
+      metricCard('sell_in','VALOR RECUPERADO','R$ '+valorSellin.toFixed(2).replace('.',','),'ok','font-size:18px','')+
+      metricCard('descarte','DESCARTES/SOBRAS (qtde)',totalDescarte.length,'danger','','')+
+      metricCard('descarte','A RECEBER — SOBRA','R$ '+valorDescarteAReceber.toFixed(2).replace('.',','),'warn','font-size:18px;color:var(--amber)','Nota devolução + Descarte autorizado: custo × qtde')+
+      metricCard('descarte','PERDA SEM REEMBOLSO','R$ '+perdaLiquida.toFixed(2).replace('.',','),'danger','font-size:18px','Descartes sem ressarcimento ou sem custo informado');
   }
-
   // Tabela
   var tb=document.getElementById('tbNegociacoes');
   if(!tb)return;
   if(!filtrados.length){tb.innerHTML='<tr><td colspan="13" class="empty">Nenhuma negociação registrada ainda. Use o botão <strong>Resolvido</strong> na aba Validades.</td></tr>';return;}
-  var tipoLabels={sell_out:'Sell-out',sell_in:'Sell-in / Troca',vendido:'Vendido',descarte:'Descarte',venda_rapida:'Venda Rápida'};
-  var tipoClass={sell_out:'neg-badge-sellout',sell_in:'neg-badge-sellin',vendido:'neg-badge-vendido',descarte:'b-danger',venda_rapida:'neg-badge-vendarapida'};
+  var tipoLabels={sell_out:'Sell-out',sell_in:'Sell-in / Troca',vendido:'Vendido',descarte:'Descarte',nota_devolucao:'Nota devolução',descarte_autorizado:'Descarte aut.',venda_rapida:'Venda Rápida'};
+  var tipoClass={sell_out:'neg-badge-sellout',sell_in:'neg-badge-sellin',vendido:'neg-badge-vendido',descarte:'b-danger',nota_devolucao:'neg-badge-sellin',descarte_autorizado:'neg-badge-vendarapida',venda_rapida:'neg-badge-vendarapida'};
   tb.innerHTML=filtrados.map(function(n){
     var fmt2=function(v){return v?'R$ '+v.toFixed(2).replace('.',','):'--';};
     var pct=n.precoNormal&&n.precoPraticado?((n.precoNormal-n.precoPraticado)/n.precoNormal*100):0;
@@ -2071,11 +2164,12 @@ function renderRelatorio(){
     if(!fornDisplay&&n.nome){fornDisplay=bancoFornecedorNome[normNome(n.nome)]||'';}
     // Custo gerencial
     var custoHtml=n.custo>0?'<td style="font-size:12px;white-space:nowrap;color:var(--tx2)">'+fmt2(n.custo)+'</td>':'<td style="font-size:12px;color:var(--tx2)">--</td>';
-    // A Receber: sell-out = diferença de margem; descarte = custo x qtde (nota devolução)
-    var aReceber=(n.tipo==='sell_out'||n.tipo==='descarte')?(n.valorDesc||0):null;
-    var aReceberLabel=n.tipo==='descarte'?'Nota dev.':'';
+    // A Receber: sell-out = diferença de margem; nota_devolucao e descarte_autorizado = custo × qtde
+    var tiposComReceber=['sell_out','nota_devolucao','descarte_autorizado'];
+    var aReceber=tiposComReceber.indexOf(n.tipo)>=0?(n.valorDesc||0):null;
+    var aReceberLabel=n.tipo==='nota_devolucao'?'Nota dev.':n.tipo==='descarte_autorizado'?'Desc. aut.':'';
     var aReceberHtml=aReceber!==null&&aReceber>0
-      ?'<td style="font-size:12px;font-weight:700;white-space:nowrap;color:var(--amber);background:rgba(186,117,23,.08)" title="'+aReceberLabel+'">'+fmt2(aReceber)+(aReceberLabel?'<br><span style=\'font-size:10px;font-weight:400;color:var(--amber)\'>'+aReceberLabel+'</span>':'')+'</td>'
+      ?'<td style="font-size:12px;font-weight:700;white-space:nowrap;color:var(--amber);background:rgba(186,117,23,.08)">'+fmt2(aReceber)+(aReceberLabel?'<br><span style="font-size:10px;font-weight:400;color:var(--amber)">'+aReceberLabel+'</span>':'')+'</td>'
       :'<td style="font-size:12px;color:var(--tx2)">--</td>';
     return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+(n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+(n.qtde||1)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td>'+custoHtml+'<td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(fornDisplay||'--')+'</td>'+aReceberHtml+'<td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td><td style="white-space:nowrap"><button class="abtn" onclick="abrirEditarNeg('+realIdx+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> <button class="abtn" onclick="excluirNeg('+realIdx+')" title="Excluir" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td></tr>';
   }).join('');
