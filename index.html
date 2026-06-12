@@ -423,14 +423,14 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         </div>
       </div>
       <div class="twrap">
-        <table>
+        <table style="min-width:1100px">
           <thead><tr>
-            <th style="width:170px">Fornecedor</th>
-            <th style="width:210px">Procedimento</th>
-            <th>Mix de marcas</th>
-            <th style="width:160px">Contato</th>
-            <th>Observação</th>
-            <th style="width:50px"></th>
+            <th style="width:180px;padding:12px 14px">Fornecedor</th>
+            <th style="width:220px;padding:12px 14px">Procedimento</th>
+            <th style="padding:12px 14px;min-width:260px">Mix de marcas</th>
+            <th style="width:180px;padding:12px 14px">Contato</th>
+            <th style="padding:12px 14px;min-width:220px">Observação</th>
+            <th style="width:90px;padding:12px 14px"></th>
           </tr></thead>
           <tbody></tbody>
         </table>
@@ -1905,6 +1905,8 @@ function getModalidadeFornecedor(nome){
 
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
 
+var _modEditIdx=null;
+
 function renderModalidades(){
   var list=getModalidades();
   var busca=(document.getElementById('modBusca')||{}).value||'';
@@ -1918,40 +1920,77 @@ function renderModalidades(){
   if(!filtered.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nenhum fornecedor encontrado.</td></tr>';return;}
   tb.innerHTML=filtered.map(function(o){
     var m=o.m,i=o.i;
-    var procOptions=PROCEDIMENTOS_PADRAO.map(function(p){return'<option value="'+esc(p)+'" '+(p===m.procedimento?'selected':'')+'>'+esc(p)+'</option>';}).join('');
-    if(m.procedimento&&PROCEDIMENTOS_PADRAO.indexOf(m.procedimento)<0){
-      procOptions='<option value="'+esc(m.procedimento)+'" selected>'+esc(m.procedimento)+'</option>'+procOptions;
-    }
-    return'<tr>'
-      +'<td><input value="'+esc(m.fornecedor)+'" oninput="updModalidade('+i+',\'fornecedor\',this.value)" style="width:100%;background:transparent;border:none;color:var(--tx);font-weight:600;font-size:12px;outline:none"></td>'
-      +'<td><select onchange="updModalidade('+i+',\'procedimento\',this.value)" style="width:100%;background:var(--bg);border:1px solid var(--bds);border-radius:6px;color:var(--tx);font-size:12px;padding:5px">'+procOptions+'</select></td>'
-      +'<td><input value="'+esc(m.mix)+'" oninput="updModalidade('+i+',\'mix\',this.value)" style="width:100%;background:transparent;border:none;color:var(--tx2);font-size:11px;outline:none"></td>'
-      +'<td><input value="'+esc(m.contato)+'" oninput="updModalidade('+i+',\'contato\',this.value)" style="width:100%;background:transparent;border:none;color:var(--tx2);font-size:11px;outline:none"></td>'
-      +'<td><input value="'+esc(m.obs)+'" oninput="updModalidade('+i+',\'obs\',this.value)" style="width:100%;background:transparent;border:none;color:var(--tx2);font-size:11px;outline:none"></td>'
-      +'<td><button class="abtn" onclick="removerModalidade('+i+')" title="Remover" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td>'
-    +'</tr>';
+    if(_modEditIdx===i)return modalidadeRowEdit(m,i);
+    return modalidadeRowView(m,i);
   }).join('');
 }
 
-function updModalidade(i,campo,val){
+function modalidadeRowView(m,i){
+  return'<tr style="height:48px">'
+    +'<td style="font-size:13px;font-weight:700;padding:12px 14px">'+esc(m.fornecedor||'--')+'</td>'
+    +'<td style="padding:12px 14px"><span class="badge b-gray" style="font-size:11px;font-weight:600">'+esc(m.procedimento||'--')+'</span></td>'
+    +'<td style="font-size:12px;color:var(--tx2);padding:12px 14px;line-height:1.5">'+esc(m.mix||'--')+'</td>'
+    +'<td style="font-size:12px;color:var(--tx2);padding:12px 14px;white-space:nowrap">'+esc(m.contato||'--')+'</td>'
+    +'<td style="font-size:12px;color:var(--tx2);padding:12px 14px;line-height:1.5">'+esc(m.obs||'--')+'</td>'
+    +'<td style="white-space:nowrap;padding:12px 14px">'
+      +'<button class="abtn" onclick="editarModalidade('+i+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> '
+      +'<button class="abtn" onclick="removerModalidade('+i+')" title="Remover" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button>'
+    +'</td>'
+  +'</tr>';
+}
+
+function modalidadeRowEdit(m,i){
+  var procOptions=PROCEDIMENTOS_PADRAO.map(function(p){return'<option value="'+esc(p)+'" '+(p===m.procedimento?'selected':'')+'>'+esc(p)+'</option>';}).join('');
+  if(m.procedimento&&PROCEDIMENTOS_PADRAO.indexOf(m.procedimento)<0){
+    procOptions='<option value="'+esc(m.procedimento)+'" selected>'+esc(m.procedimento)+'</option>'+procOptions;
+  }
+  var inpStyle='width:100%;font-size:12px;padding:8px 10px;border:1px solid var(--bds);border-radius:6px;background:var(--bg);color:var(--tx);outline:none';
+  return'<tr style="background:rgba(74,144,226,.06)">'
+    +'<td style="padding:10px 14px"><input id="modEdit_fornecedor" value="'+esc(m.fornecedor)+'" style="'+inpStyle+';font-weight:700"></td>'
+    +'<td style="padding:10px 14px"><select id="modEdit_procedimento" style="'+inpStyle+'">'+procOptions+'</select></td>'
+    +'<td style="padding:10px 14px"><input id="modEdit_mix" value="'+esc(m.mix)+'" style="'+inpStyle+'"></td>'
+    +'<td style="padding:10px 14px"><input id="modEdit_contato" value="'+esc(m.contato)+'" style="'+inpStyle+'"></td>'
+    +'<td style="padding:10px 14px"><input id="modEdit_obs" value="'+esc(m.obs)+'" style="'+inpStyle+'"></td>'
+    +'<td style="white-space:nowrap;padding:10px 14px">'
+      +'<button class="abtn" onclick="salvarModalidade('+i+')" title="Salvar" style="border-color:var(--green);color:var(--green)"><i class="ti ti-check"></i></button> '
+      +'<button class="abtn" onclick="cancelarEdicaoModalidade()" title="Cancelar"><i class="ti ti-x"></i></button>'
+    +'</td>'
+  +'</tr>';
+}
+
+function editarModalidade(i){_modEditIdx=i;renderModalidades();}
+function cancelarEdicaoModalidade(){_modEditIdx=null;renderModalidades();}
+
+function salvarModalidade(i){
   var list=getModalidades();
   if(!list[i])return;
-  list[i][campo]=val;
+  list[i]={
+    fornecedor:document.getElementById('modEdit_fornecedor').value,
+    procedimento:document.getElementById('modEdit_procedimento').value,
+    mix:document.getElementById('modEdit_mix').value,
+    contato:document.getElementById('modEdit_contato').value,
+    obs:document.getElementById('modEdit_obs').value
+  };
   saveModalidades(list);
+  _modEditIdx=null;
+  renderModalidades();
 }
 function removerModalidade(i){
   if(!confirm('Remover este fornecedor da lista de modalidades?'))return;
   var list=getModalidades();
   list.splice(i,1);
   saveModalidades(list);
+  if(_modEditIdx===i)_modEditIdx=null;
+  else if(_modEditIdx!==null&&_modEditIdx>i)_modEditIdx--;
   renderModalidades();
 }
 function adicionarModalidade(){
   var list=getModalidades();
   list.unshift({fornecedor:'',procedimento:'CONTATO',mix:'',contato:'',obs:''});
   saveModalidades(list);
+  _modEditIdx=0;
   renderModalidades();
-  var inp=document.querySelector('#sec-modalidades tbody tr:first-child input');
+  var inp=document.getElementById('modEdit_fornecedor');
   if(inp)inp.focus();
 }
 
