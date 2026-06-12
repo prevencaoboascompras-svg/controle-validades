@@ -374,10 +374,13 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
         <select id="filtroNegTipo" onchange="renderRelatorio()" style="font-size:12px;padding:5px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx)">
           <option value="">Todos os tipos</option>
+          <option value="sobras">Sobras / não vendidos (descarte, nota dev., desc. aut.)</option>
           <option value="venda_rapida">Venda Rápida (desconto interno)</option>
           <option value="sell_out">Sell-out (vendido c/ desconto)</option>
           <option value="sell_in">Sell-in (troca/bonificação fornecedor)</option>
           <option value="descarte">Descarte / Perda</option>
+          <option value="nota_devolucao">Nota devolução</option>
+          <option value="descarte_autorizado">Descarte autorizado</option>
           <option value="vendido">Vendido normalmente</option>
         </select>
         <input type="text" id="filtroNegBusca" placeholder="Buscar produto..." oninput="renderRelatorio()" style="font-size:12px;padding:5px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);min-width:180px">
@@ -1725,7 +1728,11 @@ function goTab(name){
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('active');
-  if(name==='relatorio'){setTimeout(renderRelatorio,120);}
+  if(name==='relatorio'){
+    var selFiltro=document.getElementById('filtroNegTipo');
+    if(selFiltro)selFiltro.value='sobras';
+    setTimeout(renderRelatorio,120);
+  }
   if(name==='promocoes')renderPromos();
   if(name==='encartes')renderEncartesAtivos();
   if(name==='modalidades')renderModalidades();
@@ -2280,8 +2287,10 @@ function renderRelatorio(){
   // Filtros
   var tipo=document.getElementById('filtroNegTipo')?document.getElementById('filtroNegTipo').value:'';
   var busca=document.getElementById('filtroNegBusca')?document.getElementById('filtroNegBusca').value.toLowerCase():'';
+  var SOBRA_TIPOS=['descarte','nota_devolucao','descarte_autorizado'];
   var filtrados=negs.filter(function(n){
-    if(tipo&&n.tipo!==tipo)return false;
+    if(tipo==='sobras'){if(SOBRA_TIPOS.indexOf(n.tipo)<0)return false;}
+    else if(tipo&&n.tipo!==tipo)return false;
     if(busca&&!(n.nome||'').toLowerCase().includes(busca)&&!(n.fornecedor||'').toLowerCase().includes(busca))return false;
     return true;
   });
@@ -2332,9 +2341,9 @@ function renderRelatorio(){
       metricCard('sell_out','A RECEBER — SELL-OUT','R$ '+valorSelloutAReceber.toFixed(2).replace('.',','),'warn','font-size:18px;color:var(--amber)','(Preço normal − Preço praticado) × qtde vendida')+
       metricCard('sell_in','TROCA / BONIFICAÇÃO (qtde)',totalSellin.length,'ok','','')+
       metricCard('sell_in','VALOR RECUPERADO','R$ '+valorSellin.toFixed(2).replace('.',','),'ok','font-size:18px','')+
-      metricCard('descarte','DESCARTES/SOBRAS (qtde)',totalDescarte.length,'danger','','')+
-      metricCard('descarte','A RECEBER — SOBRA','R$ '+valorDescarteAReceber.toFixed(2).replace('.',','),'warn','font-size:18px;color:var(--amber)','Nota devolução + Descarte autorizado: custo × qtde')+
-      metricCard('descarte','PERDA SEM REEMBOLSO','R$ '+perdaLiquida.toFixed(2).replace('.',','),'danger','font-size:18px','Descartes sem ressarcimento ou sem custo informado');
+      metricCard('sobras','DESCARTES/SOBRAS (qtde)',totalDescarte.length,'danger','','')+
+      metricCard('sobras','A RECEBER — SOBRA','R$ '+valorDescarteAReceber.toFixed(2).replace('.',','),'warn','font-size:18px;color:var(--amber)','Nota devolução + Descarte autorizado: custo × qtde')+
+      metricCard('sobras','PERDA SEM REEMBOLSO','R$ '+perdaLiquida.toFixed(2).replace('.',','),'danger','font-size:18px','Descartes sem ressarcimento ou sem custo informado');
   }
   // Tabela
   var tb=document.getElementById('tbNegociacoes');
