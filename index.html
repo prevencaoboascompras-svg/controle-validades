@@ -226,6 +226,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
     <div class="tab" onclick="goTab('promocoes')"><i class="ti ti-tag"></i> Promocoes</div>
     <div class="tab" onclick="goTab('encartes')"><i class="ti ti-photo-check"></i> Encartes <span id="encBadge" style="display:none;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório <span id="negBadge" style="display:none;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
+    <div class="tab" onclick="goTab('modalidades')"><i class="ti ti-truck-delivery"></i> Modalidades</div>
     <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i> Como configurar</div>
   </div>
   <div id="sec-validades" class="sec active">
@@ -409,6 +410,33 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
       <div style="position:relative;height:260px"><canvas id="cDesconto"></canvas></div>
     </div>
   </div>
+  <div id="sec-modalidades" class="sec">
+    <div class="card" style="padding:18px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <div>
+          <h3 style="font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px"><i class="ti ti-truck-delivery" style="color:var(--green)"></i> Modalidades por Fornecedor</h3>
+          <div style="font-size:12px;color:var(--tx2);margin-top:2px">Como cada fornecedor resolve vencidos/avariados — usado para sugerir o procedimento ao marcar "Nota devolução" ou "Descarte autorizado".</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="modBusca" placeholder="Buscar fornecedor ou marca..." oninput="renderModalidades()" style="font-size:13px;padding:7px 12px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;min-width:220px">
+          <button class="btn btn-green" onclick="adicionarModalidade()"><i class="ti ti-plus"></i> Adicionar fornecedor</button>
+        </div>
+      </div>
+      <div class="twrap">
+        <table>
+          <thead><tr>
+            <th style="width:170px">Fornecedor</th>
+            <th style="width:210px">Procedimento</th>
+            <th>Mix de marcas</th>
+            <th style="width:160px">Contato</th>
+            <th>Observação</th>
+            <th style="width:50px"></th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
   <div id="sec-ajuda" class="sec">
     <div class="help-box">
       <h4><i class="ti ti-brand-google" style="color:#4285F4"></i> Como conectar ao Google Sheets</h4>
@@ -435,6 +463,8 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
           <option value="venda_rapida">⚡ Venda Rápida</option>
           <option value="sell_out">🏷️ Sell-out</option>
           <option value="sell_in">🏪 Sell-in / Troca</option>
+          <option value="nota_devolucao">📋 Nota devolução</option>
+          <option value="descarte_autorizado">🗑️ Descarte autorizado</option>
           <option value="descarte">🗑️ Descarte / Perda</option>
           <option value="vendido">✓ Vendido normalmente</option>
         </select>
@@ -541,29 +571,6 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
           </div>
         </div>
       </div>
-      <!-- Tratamento da sobra: visível só quando há qtde sobrando -->
-      <div id="wrapTratamentoSobra" style="display:none;margin-bottom:12px">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:8px;display:flex;align-items:center;gap:6px">
-          <i class="ti ti-package" style="font-size:13px"></i> O que fazer com a sobra?
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <div class="tratamento-opt selected" id="topt_nota_devolucao" onclick="selectTratamento('nota_devolucao')" style="border:2px solid var(--green);border-radius:8px;padding:10px;cursor:pointer;text-align:center;background:var(--bg);transition:all .15s">
-            <i class="ti ti-receipt" style="font-size:20px;color:var(--green);display:block;margin-bottom:4px"></i>
-            <div style="font-size:12px;font-weight:700;color:var(--green)">Nota devolução</div>
-            <div style="font-size:10px;color:var(--tx2);margin-top:2px">Fornecedor recolhe</div>
-          </div>
-          <div class="tratamento-opt" id="topt_descarte_autorizado" onclick="selectTratamento('descarte_autorizado')" style="border:2px solid var(--bd);border-radius:8px;padding:10px;cursor:pointer;text-align:center;background:var(--bg);transition:all .15s">
-            <i class="ti ti-trash" style="font-size:20px;color:var(--amber);display:block;margin-bottom:4px"></i>
-            <div style="font-size:12px;font-weight:700">Descarte autorizado</div>
-            <div style="font-size:10px;color:var(--tx2);margin-top:2px">Joga fora + ressarcimento</div>
-          </div>
-          <div class="tratamento-opt" id="topt_descarte_perda" onclick="selectTratamento('descarte_perda')" style="border:2px solid var(--bd);border-radius:8px;padding:10px;cursor:pointer;text-align:center;background:var(--bg);transition:all .15s">
-            <i class="ti ti-trash-x" style="font-size:20px;color:var(--red);display:block;margin-bottom:4px"></i>
-            <div style="font-size:12px;font-weight:700">Descarte / Perda</div>
-            <div style="font-size:10px;color:var(--tx2);margin-top:2px">Sem ressarcimento</div>
-          </div>
-        </div>
-      </div>
       <!-- Tratamento da sobra: aparece só no sell-out quando há qtde sobrando -->
       <div id="wrapTratamentoSobra" style="display:none;margin-bottom:12px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:8px;display:flex;align-items:center;gap:6px">
@@ -594,9 +601,10 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         </div>
         <div id="wrapFornecedor">
           <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Fornecedor</label>
-          <input type="text" id="rFornecedor" placeholder="Nome do fornecedor (opcional)" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+          <input type="text" id="rFornecedor" placeholder="Nome do fornecedor (opcional)" oninput="updateModalidadeInfo()" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
         </div>
       </div>
+      <div id="modalidadeInfo" style="display:none;background:rgba(29,158,117,.08);border:1px solid var(--green);border-radius:var(--r);padding:8px 10px;margin-bottom:10px;font-size:12px;color:var(--tx)"></div>
       <div>
         <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Observação</label>
         <input type="text" id="rObs" placeholder="Ex: NF troca 12345, bonificação aprovada..." style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
@@ -1691,13 +1699,14 @@ function addManual(){
 }
 
 function goTab(name){
-  var tabNames=['validades','promocoes','encartes','relatorio','ajuda'];
+  var tabNames=['validades','promocoes','encartes','relatorio','modalidades','ajuda'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('active');
   if(name==='relatorio'){setTimeout(renderRelatorio,120);}
   if(name==='promocoes')renderPromos();
   if(name==='encartes')renderEncartesAtivos();
+  if(name==='modalidades')renderModalidades();
 }
 function refresh(){renderMetrics();renderTable();atualizarNegBadge();}
 
@@ -1861,6 +1870,91 @@ function executarImpressao(){
   setTimeout(function(){window.print();},200);
 }
 
+// ── Modalidades por Fornecedor ───────────────────────────────────────────
+var MODALIDADES_KEY='boascompras_modalidades';
+var PROCEDIMENTOS_PADRAO=['CONTATO','DESCARTE','LOTE + QTD','NF DEVOLUÇÃO','REGISTRO E DESCARTE','TROCA - (AVARIADOS)','TROCA / DESCONTO','TROCA P/ TROCA','RELATORIO + FOTO','NF DEVOLUÇÃO + BOLETO OU PIX','FOTO LOTE + QTD + DESCRIÇÃO'];
+var MODALIDADES_SEED = [{"fornecedor": "AMBEV (CDD)", "procedimento": "TROCA P/ TROCA", "mix": "PESI , GUARANÁ , ANTARTICA , BUDWEISER", "contato": "51 9 9268-4831 - GERMANO", "obs": ""}, {"fornecedor": "BARÃO", "procedimento": "CONTATO", "mix": "ERVA MATE , CHÁ , PUDIM", "contato": "51 9 9402-7927 - VINÍCIUS", "obs": ""}, {"fornecedor": "BEM GAÚCHO", "procedimento": "CONTATO", "mix": "ARROZ , SAL", "contato": "", "obs": ""}, {"fornecedor": "BOM PRINCÍPIO", "procedimento": "CONTATO", "mix": "GELEIA, CONSERVAS", "contato": "", "obs": ""}, {"fornecedor": "BROKER ZAFFALON", "procedimento": "CONTATO", "mix": "MERCEARIA NESTLE", "contato": "", "obs": ""}, {"fornecedor": "FABIANO ZAFFALON", "procedimento": "CONTATO", "mix": "YOKI, ISABELA, YPE", "contato": "", "obs": ""}, {"fornecedor": "ZAFFALON E CIA LTDA", "procedimento": "RELATORIO + FOTO", "mix": "ARROZINA, KNORR, CREMOGEMA, HELLMANNS, ARISCO, SURF", "contato": "51 9 85234384 -FRANCIELI", "obs": ""}, {"fornecedor": "BÚFALO", "procedimento": "CONTATO", "mix": "VODKA , COCKTAIL , DESTILADOS, ENERGETICO", "contato": "", "obs": ""}, {"fornecedor": "CAMAQUÃ", "procedimento": "REGISTRO E DESCARTE", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "CAMIL", "procedimento": "CONTATO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "CELARE", "procedimento": "CONTATO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "DIPAM", "procedimento": "TROCA P/ TROCA", "mix": "", "contato": "51 9 8961-4987 - JASON", "obs": ""}, {"fornecedor": "DISTRIBUIDORA 95", "procedimento": "CONTATO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "ELMA CHIPS", "procedimento": "TROCA / DESCONTO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "FARIAS", "procedimento": "TROCA P/ TROCA", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "FRITZ E FRIDA", "procedimento": "REGISTRO E DESCARTE", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "SUPER SCHWALM", "procedimento": "REGISTRO E DESCARTE", "mix": "FRUKI, AGUA DA PEDRA, BELLA VISTA, ELEV, SUCO COM TEM", "contato": "51 9 8059-6552 ALEXANDRE  (BAIXINHO)", "obs": ""}, {"fornecedor": "NESTLÉ", "procedimento": "NF DEVOLUÇÃO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "PIA", "procedimento": "DESCARTE", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "PONCHE VERDE", "procedimento": "CONTATO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "SARANDI", "procedimento": "REGISTRO E DESCARTE", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "SPALD (COCA)", "procedimento": "TROCA - (AVARIADOS)", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "STA CLARA", "procedimento": "DESCARTE", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "STO ANTONIO", "procedimento": "NF DEVOLUÇÃO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "TAURA", "procedimento": "CONTATO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "ZAGONEL", "procedimento": "TROCA P/ TROCA", "mix": "ROSQUINHA  ZAGONEL, POLVILHO 80G", "contato": "51 9691-4794 - MARLON", "obs": ""}, {"fornecedor": "WS (PULLMAN)", "procedimento": "TROCA P/ TROCA", "mix": "", "contato": "51 9609-1155 - DEIVID", "obs": ""}, {"fornecedor": "UNIDASUL", "procedimento": "FOTO LOTE + QTD + DESCRIÇÃO", "mix": "", "contato": "51 9 9760-2188 - QUEIROZ", "obs": ""}, {"fornecedor": "SENAR", "procedimento": "REGISTRO E DESCARTE", "mix": "", "contato": "51 9 9742-2287 - VALDINEI", "obs": ""}, {"fornecedor": "MDA", "procedimento": "TROCA P/ TROCA", "mix": "BATATA PALHA DEUTCHIPS", "contato": "", "obs": ""}, {"fornecedor": "PRONTO DOCE", "procedimento": "TROCA P/ TROCA", "mix": "", "contato": "51 9953-0948 - LUCIANO", "obs": "51 9 9953-0948 - JAIRO"}, {"fornecedor": "MORBENE", "procedimento": "TROCA P/ TROCA", "mix": "VELA REGINA AZUL 07", "contato": "51 981029297 - MILENE", "obs": ""}, {"fornecedor": "KEM", "procedimento": "TROCA P/ TROCA", "mix": "PAO DE ALHO", "contato": "51 9 8945-3572 - TAIS", "obs": ""}, {"fornecedor": "LACTALIS", "procedimento": "REGISTRO E DESCARTE", "mix": "ELEGÊ", "contato": "51 9 9956-0970 - NILSON", "obs": ""}, {"fornecedor": "R A FIGUEIREDO", "procedimento": "REGISTRO E DESCARTE", "mix": "IOGURTE NESTLÉ", "contato": "51 9 9234-8733 - ODAIR", "obs": ""}, {"fornecedor": "AGROINDUSTRIAL PRADENSE", "procedimento": "TROCA P/ TROCA", "mix": "VINHO PRIMO FIOR, VINHO ORIGINI, BRILHA SUL, GAITEIRO, TAURA, FERMENTO GOOD INSTANT", "contato": "51 9 9739-9259 - MARCIO", "obs": ""}, {"fornecedor": "PARATI", "procedimento": "NF DEVOLUÇÃO", "mix": "LAMEN, BISCOITOS", "contato": "51 9 9788-9707", "obs": "(OU DESCONTO EM NOTA)"}, {"fornecedor": "ERVATEIRA FRAZON LTDA", "procedimento": "TROCA P/ TROCA", "mix": "ERVA MATE AMIZADE", "contato": "51 9 8022-6407 - EDSON", "obs": ""}, {"fornecedor": "CREIMPOL", "procedimento": "NF DEVOLUÇÃO", "mix": "NUTELLA, FERRERO, CHA LEAO", "contato": "51 9 9694-9233 - JONI ALEXANDRE", "obs": "CONCLUÍDO - EM HAVER (NUTELLA)"}, {"fornecedor": "MEGAX", "procedimento": "TROCA P/ TROCA", "mix": "LACTA, HALLS", "contato": "51 9 9221-3837 - MATEUS", "obs": "NO PRÓXIMO PEDIDO | NOTA DE DEV. RECOLHE  NO PROXIMO PEDIDO"}, {"fornecedor": "DELICIAS DA VOVO", "procedimento": "NF DEVOLUÇÃO", "mix": "LINHA DELICIAS DA VOVO", "contato": "51 9 80208389 - HENRIQUE", "obs": "RESOLVIDO (VAO RECOLHER)"}, {"fornecedor": "SCATOLIN", "procedimento": "TROCA P/ TROCA", "mix": "LINHA SCATOLIN, MASSA DE PASTEL, NHOQUE,", "contato": "", "obs": ""}, {"fornecedor": "ERVATEIRA FRAZON LTD", "procedimento": "NF DEVOLUÇÃO + BOLETO OU PIX", "mix": "DOMELY", "contato": "51 9 994238776 - Deivid", "obs": "PODE DESCARTAR"}, {"fornecedor": "PETRY", "procedimento": "NF DEVOLUÇÃO + BOLETO OU PIX", "mix": "PEPINO, AZEITONA", "contato": "", "obs": "RECOLHE NA ENTREGA DO PEDIDO"}, {"fornecedor": "MOINHO - MATRIZ", "procedimento": "NF DEVOLUÇÃO + BOLETO OU PIX", "mix": "PANFACIL", "contato": "", "obs": ""}];
+
+function getModalidades(){
+  try{
+    var raw=localStorage.getItem(MODALIDADES_KEY);
+    if(raw)return JSON.parse(raw);
+    saveModalidades(MODALIDADES_SEED);
+    return JSON.parse(JSON.stringify(MODALIDADES_SEED));
+  }catch(e){return JSON.parse(JSON.stringify(MODALIDADES_SEED));}
+}
+function saveModalidades(arr){localStorage.setItem(MODALIDADES_KEY,JSON.stringify(arr));}
+
+function normForn(s){
+  return String(s||'').toUpperCase().replace(/[^A-Z0-9À-Ú]/g,' ').replace(/\s+/g,' ').trim();
+}
+
+// Busca a modalidade do fornecedor (match exato ou por aproximação do nome)
+function getModalidadeFornecedor(nome){
+  var list=getModalidades();
+  var n=normForn(nome);
+  if(!n)return null;
+  for(var i=0;i<list.length;i++){if(normForn(list[i].fornecedor)===n)return list[i];}
+  for(var i=0;i<list.length;i++){
+    var ln=normForn(list[i].fornecedor);
+    if(!ln)continue;
+    if(n.indexOf(ln)>=0||ln.indexOf(n)>=0)return list[i];
+  }
+  return null;
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+function renderModalidades(){
+  var list=getModalidades();
+  var busca=(document.getElementById('modBusca')||{}).value||'';
+  busca=busca.toLowerCase();
+  var tb=document.querySelector('#sec-modalidades tbody');
+  if(!tb)return;
+  var filtered=list.map(function(m,i){return{m:m,i:i};}).filter(function(o){
+    if(!busca)return true;
+    return(o.m.fornecedor||'').toLowerCase().includes(busca)||(o.m.mix||'').toLowerCase().includes(busca);
+  });
+  if(!filtered.length){tb.innerHTML='<tr><td colspan="6" class="empty">Nenhum fornecedor encontrado.</td></tr>';return;}
+  tb.innerHTML=filtered.map(function(o){
+    var m=o.m,i=o.i;
+    var procOptions=PROCEDIMENTOS_PADRAO.map(function(p){return'<option value="'+esc(p)+'" '+(p===m.procedimento?'selected':'')+'>'+esc(p)+'</option>';}).join('');
+    if(m.procedimento&&PROCEDIMENTOS_PADRAO.indexOf(m.procedimento)<0){
+      procOptions='<option value="'+esc(m.procedimento)+'" selected>'+esc(m.procedimento)+'</option>'+procOptions;
+    }
+    return'<tr>'
+      +'<td><input value="'+esc(m.fornecedor)+'" oninput="updModalidade('+i+',\'fornecedor\',this.value)" style="width:100%;background:transparent;border:none;color:var(--tx);font-weight:600;font-size:12px;outline:none"></td>'
+      +'<td><select onchange="updModalidade('+i+',\'procedimento\',this.value)" style="width:100%;background:var(--bg);border:1px solid var(--bds);border-radius:6px;color:var(--tx);font-size:12px;padding:5px">'+procOptions+'</select></td>'
+      +'<td><input value="'+esc(m.mix)+'" oninput="updModalidade('+i+',\'mix\',this.value)" style="width:100%;background:transparent;border:none;color:var(--tx2);font-size:11px;outline:none"></td>'
+      +'<td><input value="'+esc(m.contato)+'" oninput="updModalidade('+i+',\'contato\',this.value)" style="width:100%;background:transparent;border:none;color:var(--tx2);font-size:11px;outline:none"></td>'
+      +'<td><input value="'+esc(m.obs)+'" oninput="updModalidade('+i+',\'obs\',this.value)" style="width:100%;background:transparent;border:none;color:var(--tx2);font-size:11px;outline:none"></td>'
+      +'<td><button class="abtn" onclick="removerModalidade('+i+')" title="Remover" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td>'
+    +'</tr>';
+  }).join('');
+}
+
+function updModalidade(i,campo,val){
+  var list=getModalidades();
+  if(!list[i])return;
+  list[i][campo]=val;
+  saveModalidades(list);
+}
+function removerModalidade(i){
+  if(!confirm('Remover este fornecedor da lista de modalidades?'))return;
+  var list=getModalidades();
+  list.splice(i,1);
+  saveModalidades(list);
+  renderModalidades();
+}
+function adicionarModalidade(){
+  var list=getModalidades();
+  list.unshift({fornecedor:'',procedimento:'CONTATO',mix:'',contato:'',obs:''});
+  saveModalidades(list);
+  renderModalidades();
+  var inp=document.querySelector('#sec-modalidades tbody tr:first-child input');
+  if(inp)inp.focus();
+}
+
 // ── Resolvido / Negociações ──────────────────────────────────────────────
 var NEG_KEY='boascompras_negociacoes';
 var RESOLVIDOS_KEY='boascompras_resolvidos';
@@ -1888,11 +1982,13 @@ function openResolvidoModal(idx){
   var barrasBuscaForn=(p.cod||'').replace(/[^0-9]/g,'');
   var fornAuto=p.fornecedor||bancoFornecedor[barrasBuscaForn]||bancoFornecedorNome[normNome(p.nome||'')]||'';
   document.getElementById('rFornecedor').value=fornAuto;
+  updateModalidadeInfo();
   document.getElementById('rObs').value='';
   document.getElementById('painelResumoFinanceiro').style.display='none';
   ['sell_out','sell_in','vendido','descarte','venda_rapida'].forEach(function(o){document.getElementById('opt_'+o).classList.remove('selected');});
   document.getElementById('resolvidoExtras').style.display='none';
   _tratamentoSobra='nota_devolucao';
+  _sugestaoFeita=false;
   if(document.getElementById('wrapTratamentoSobra')) document.getElementById('wrapTratamentoSobra').style.display='none';
   selectTratamento('nota_devolucao');
   document.getElementById('btnConfirmarResolvido').disabled=true;
@@ -1916,6 +2012,22 @@ function recalcVendida(){
 }
 
 var _tratamentoSobra='nota_devolucao';
+var _sugestaoFeita=false;
+
+// Mostra a modalidade do fornecedor e sugere o tratamento da sobra com base na planilha
+function updateModalidadeInfo(){
+  var box=document.getElementById('modalidadeInfo');
+  if(!box)return;
+  var forn=(document.getElementById('rFornecedor')||{}).value||'';
+  var mod=forn?getModalidadeFornecedor(forn):null;
+  if(!mod){box.style.display='none';return;}
+  box.style.display='block';
+  var partes=['<i class="ti ti-info-circle"></i> <strong>'+esc(mod.fornecedor)+':</strong> '+esc(mod.procedimento||'--')];
+  if(mod.contato)partes.push('📞 '+esc(mod.contato));
+  if(mod.obs)partes.push(esc(mod.obs));
+  box.innerHTML=partes.join(' &nbsp;·&nbsp; ');
+  return mod;
+}
 
 function selectTratamento(tipo){
   _tratamentoSobra=tipo;
@@ -1943,7 +2055,22 @@ function recalcResumo(){
   var custo=p.custo||0;
   // Mostrar/ocultar painel de tratamento da sobra
   var wrapTrat=document.getElementById('wrapTratamentoSobra');
-  if(wrapTrat) wrapTrat.style.display=(sobra>0&&_resolucaoSelecionada==='sell_out')?'block':'none';
+  var mostrarTrat=(sobra>0&&_resolucaoSelecionada==='sell_out');
+  if(wrapTrat){
+    if(mostrarTrat&&wrapTrat.style.display!=='block'&&!_sugestaoFeita){
+      // Sugere o tratamento com base na modalidade do fornecedor (planilha de fornecedores)
+      var modSug=getModalidadeFornecedor((document.getElementById('rFornecedor')||{}).value||'');
+      if(modSug){
+        var proc=(modSug.procedimento||'').toUpperCase();
+        if(proc.indexOf('NF DEVOLU')>=0)selectTratamento('nota_devolucao');
+        else if(proc==='DESCARTE')selectTratamento('descarte_perda');
+        else if(proc&&proc!=='CONTATO')selectTratamento('descarte_autorizado');
+      }
+      _sugestaoFeita=true;
+    }
+    wrapTrat.style.display=mostrarTrat?'block':'none';
+    if(!mostrarTrat)_sugestaoFeita=false;
+  }
   if(vendida<=0&&sobra<=0){document.getElementById('painelResumoFinanceiro').style.display='none';return;}
   document.getElementById('painelResumoFinanceiro').style.display='block';
   var receita=precoVenda*vendida;
