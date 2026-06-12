@@ -11,7 +11,7 @@
 :root{--bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;--tx:#1a1a18;--tx2:#6b6b67;--bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);--r:8px;--rl:12px;--green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;}
 @media(prefers-color-scheme:dark){:root{--bg:#1e1e1c;--bg2:#282825;--bg3:#323230;--tx:#f0efe8;--tx2:#9b9b95;--bd:rgba(255,255,255,.1);--bds:rgba(255,255,255,.2);}}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg3);color:var(--tx);min-height:100vh}
-.app{max-width:1560px;margin:0 auto;padding:24px 20px}
+.app{max-width:100%;margin:0 auto;padding:24px 28px}
 .cfg{background:var(--bg);border:2px dashed var(--bds);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;display:none}
 .cfg h3{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--amber)}
 .cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -423,14 +423,14 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         </div>
       </div>
       <div class="twrap">
-        <table style="min-width:1100px">
+        <table style="width:100%">
           <thead><tr>
-            <th style="width:180px;padding:12px 14px">Fornecedor</th>
-            <th style="width:220px;padding:12px 14px">Procedimento</th>
-            <th style="padding:12px 14px;min-width:260px">Mix de marcas</th>
-            <th style="width:180px;padding:12px 14px">Contato</th>
-            <th style="padding:12px 14px;min-width:220px">Observação</th>
-            <th style="width:90px;padding:12px 14px"></th>
+            <th style="width:14%;padding:12px 14px">Fornecedor</th>
+            <th style="width:14%;padding:12px 14px">Procedimento</th>
+            <th style="width:28%;padding:12px 14px">Mix de marcas</th>
+            <th style="width:16%;padding:12px 14px">Contato</th>
+            <th style="width:22%;padding:12px 14px">Observação</th>
+            <th style="width:6%;padding:12px 14px"></th>
           </tr></thead>
           <tbody></tbody>
         </table>
