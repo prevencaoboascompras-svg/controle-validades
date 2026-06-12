@@ -2119,7 +2119,7 @@ function renderRelatorio(){
   if(resumoEl){
     function metricCard(tipoFiltro, label, val, valClass, valStyle, tooltip){
       var isActive=tipoAtivo===tipoFiltro?'active-filter':'';
-      var onclick=tipoFiltro?'onclick="filtrarPorTipoCard(''+tipoFiltro+'')"':'';
+      var onclick=tipoFiltro?'onclick="filtrarPorTipoCard(\'' + tipoFiltro + '\')"':'';
       var clickClass=tipoFiltro?'clickable':'';
       var titleAttr=tooltip?'title="'+tooltip+'"':(tipoFiltro?'title="Clique para filtrar por '+label+'"':'');
       return'<div class="metric '+clickClass+' '+isActive+'" '+onclick+' '+titleAttr+'>'
