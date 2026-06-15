@@ -1256,13 +1256,13 @@ function renderMetrics(){
       +'</div>';
   }
   document.getElementById('metrics').innerHTML=
-    mc('Total',products.length,'','')+
-    mc('Vencidos',c.vencido,'danger','vencido')+
-    mc('Critico 3d',c.critico,'danger','critico')+
-    mc('Urgente 7d',c.urgente,'warn','urgente')+
-    mc('Atencao 15d',c.atencao,'warn','atencao')+
-    mc('OK',c.ok,'ok','ok')+
-    mc('Aguardando',aguarda,'info','aguardando');
+    mc('Total cadastrado',products.length,'','')+
+    mc('Já vencidos — retirar',c.vencido,'danger','vencido')+
+    mc('Vencem em 3 dias',c.critico,'danger','critico')+
+    mc('Vencem em 7 dias',c.urgente,'warn','urgente')+
+    mc('Vencem em 15 dias',c.atencao,'warn','atencao')+
+    mc('Prazo normal — OK',c.ok,'ok','ok')+
+    mc('Sem data cadastrada',aguarda,'info','aguardando');
 }
 
 function filtrarMetrica(filt){
@@ -2333,36 +2333,85 @@ function renderRelatorio(){
   var resumoEl=document.getElementById('negociacaoResumo');
   var tipoAtivo=document.getElementById('filtroNegTipo')?document.getElementById('filtroNegTipo').value:'';
   if(resumoEl){
-    function metricCard(tipoFiltro, label, val, valClass, valStyle, tooltip){
+    function metricCard(tipoFiltro, icone, label, desc, val, valColor, badgeLabel, badgeColor){
       var isActive=tipoAtivo===tipoFiltro?'active-filter':'';
       var onclick=tipoFiltro?'onclick="filtrarPorTipoCard(\'' + tipoFiltro + '\')"':'';
       var clickClass=tipoFiltro?'clickable':'';
-      var titleAttr=tooltip?'title="'+tooltip+'"':(tipoFiltro?'title="Clique para filtrar por '+label+'"':'');
-      return'<div class="metric '+clickClass+' '+isActive+'" '+onclick+' '+titleAttr+'>'
-        +'<div class="metric-lbl">'+label+'</div>'
-        +'<div class="metric-val '+valClass+'" style="'+valStyle+'">'+val+'</div>'
-        +(tipoFiltro?'<div style="font-size:10px;color:var(--tx2);margin-top:4px;display:flex;align-items:center;gap:3px"><i class="ti ti-filter" style="font-size:10px"></i> Clique para filtrar</div>':'')
-        +'</div>';
+      return'<div class="metric '+clickClass+' '+isActive+'" '+onclick+' style="display:flex;flex-direction:column;gap:4px">'
+        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'
+          +'<i class="ti '+icone+'" style="font-size:15px;color:'+valColor+'"></i>'
+          +'<span class="metric-lbl" style="margin:0">'+label+'</span>'
+          +(badgeLabel?'<span style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:'+badgeColor+'22;color:'+badgeColor+'">'+badgeLabel+'</span>':'')
+        +'</div>'
+        +'<div class="metric-val" style="font-size:22px;color:'+valColor+'">'+val+'</div>'
+        +'<div style="font-size:11px;color:var(--tx2);line-height:1.5;margin-top:2px">'+desc+'</div>'
+        +(tipoFiltro?'<div style="font-size:10px;color:var(--tx2);margin-top:4px;display:flex;align-items:center;gap:3px"><i class="ti ti-filter" style="font-size:10px"></i> Clique para filtrar a tabela</div>':'')
+      +'</div>';
     }
-    var destaque='<div class="metric" style="border:2px solid var(--amber);background:rgba(186,117,23,.07);grid-column:span 2" title="Sell-out (diferença de margem) + Nota devolução + Descarte autorizado">'
-      +'<div class="metric-lbl" style="color:var(--amber)">💰 TOTAL A RECEBER DO FORNECEDOR</div>'
-      +'<div class="metric-val" style="font-size:22px;color:var(--amber)">R$ '+totalAReceber.toFixed(2).replace('.',',')+'</div>'
-      +'<div style="font-size:11px;color:var(--tx2);margin-top:5px;line-height:1.7">'
-        +'Sell-out: <strong style="color:var(--amber)">R$ '+valorSelloutAReceber.toFixed(2).replace('.',',')+'</strong>'
-        +' &nbsp;|&nbsp; Sobra (nota/desc.aut.): <strong style="color:var(--amber)">R$ '+valorDescarteAReceber.toFixed(2).replace('.',',')+'</strong>'
+
+    var destaque=''
+      +'<div class="metric" style="border:2px solid var(--amber);background:rgba(186,117,23,.06);grid-column:span 2">'
+        +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">'
+          +'<i class="ti ti-coin" style="font-size:18px;color:var(--amber)"></i>'
+          +'<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--amber)">Total a cobrar do fornecedor</span>'
+        +'</div>'
+        +'<div style="font-size:26px;font-weight:600;color:var(--amber)">R$ '+totalAReceber.toFixed(2).replace('.',',')+'</div>'
+        +'<div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.7">'
+          +'Tudo que o fornecedor deve ressarcir: sell-out + descartes autorizados'
+          +'<div style="margin-top:5px;display:flex;gap:14px;flex-wrap:wrap">'
+            +'<span>Sell-out: <strong style="color:var(--amber)">R$ '+valorSelloutAReceber.toFixed(2).replace('.',',')+'</strong></span>'
+            +'<span>Descarte c/ nota: <strong style="color:var(--amber)">R$ '+valorDescarteAReceber.toFixed(2).replace('.',',')+'</strong></span>'
+          +'</div>'
+        +'</div>'
       +'</div>'
-    +'</div>';
-    resumoEl.innerHTML=
-      destaque+
-      metricCard('venda_rapida','⚡ VENDA RÁPIDA (qtde)','<span style="color:#BA7517">'+totalVendaRapida.length+'</span>','','','Desconto interno — sem reembolso de fornecedor')+
-      metricCard('venda_rapida','MARGEM SALVA (V. RÁPIDA)','R$ '+valorVendaRapida.toFixed(2).replace('.',','),'ok','font-size:18px','Diferença entre preço normal e preço praticado')+
-      metricCard('sell_out','SELL-OUT (qtde)',totalSellout.length,'info','','')+
-      metricCard('sell_out','A RECEBER — SELL-OUT','R$ '+valorSelloutAReceber.toFixed(2).replace('.',','),'warn','font-size:18px;color:var(--amber)','(Preço normal − Preço praticado) × qtde vendida')+
-      metricCard('sell_in','TROCA / BONIFICAÇÃO (qtde)',totalSellin.length,'ok','','')+
-      metricCard('sell_in','VALOR RECUPERADO','R$ '+valorSellin.toFixed(2).replace('.',','),'ok','font-size:18px','')+
-      metricCard('sobras','DESCARTES/SOBRAS (qtde)',totalDescarte.length,'danger','','')+
-      metricCard('sobras','A RECEBER — SOBRA','R$ '+valorDescarteAReceber.toFixed(2).replace('.',','),'warn','font-size:18px;color:var(--amber)','Nota devolução + Descarte autorizado: custo × qtde')+
-      metricCard('sobras','PERDA SEM REEMBOLSO','R$ '+perdaLiquida.toFixed(2).replace('.',','),'danger','font-size:18px','Descartes sem ressarcimento ou sem custo informado');
+      +'<div class="metric" style="border:2px solid var(--red);background:rgba(226,75,74,.05)">'
+        +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">'
+          +'<i class="ti ti-alert-circle" style="font-size:18px;color:var(--red)"></i>'
+          +'<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--red)">Perda sem recuperação</span>'
+        +'</div>'
+        +'<div style="font-size:26px;font-weight:600;color:var(--red)">R$ '+perdaLiquida.toFixed(2).replace('.',',')+'</div>'
+        +'<div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.5">'
+          +'Produtos descartados sem direito a ressarcimento — dinheiro que não volta'
+        +'</div>'
+      +'</div>';
+
+    var secaoVenda=''
+      +'<div style="grid-column:1/-1;margin-top:8px;margin-bottom:2px">'
+        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);display:flex;align-items:center;gap:6px">'
+          +'<i class="ti ti-bolt" style="color:#BA7517"></i> Vendas com desconto interno (sem envolver fornecedor)'
+        +'</div>'
+      +'</div>'
+      +metricCard('venda_rapida','ti-bolt','Venda rápida — itens resolvidos','Vendemos com desconto nossa decisão, sem acordo com fornecedor','<span style="color:#BA7517">'+totalVendaRapida.length+' '+( totalVendaRapida.length===1?'item':'itens')+'</span>','#BA7517','','')
+      +metricCard('venda_rapida','ti-receipt','Margem preservada (venda rápida)','Diferença entre o preço normal e o preço praticado nessas vendas','R$ '+valorVendaRapida.toFixed(2).replace('.',','),'var(--green)','','');
+
+    var secaoSellout=''
+      +'<div style="grid-column:1/-1;margin-top:8px;margin-bottom:2px">'
+        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);display:flex;align-items:center;gap:6px">'
+          +'<i class="ti ti-tag" style="color:var(--blue)"></i> Sell-out — vendas combinadas com o fornecedor'
+        +'</div>'
+      +'</div>'
+      +metricCard('sell_out','ti-tag','Sell-out — itens resolvidos','Produtos vendidos com desconto acordado com o fornecedor','<span style="color:var(--blue)">'+totalSellout.length+' '+(totalSellout.length===1?'item':'itens')+'</span>','var(--blue)','','')
+      +metricCard('sell_out','ti-coin','A cobrar do fornecedor (sell-out)','Diferença entre o preço normal e o preço praticado — o fornecedor paga essa diferença','R$ '+valorSelloutAReceber.toFixed(2).replace('.',','),'var(--amber)','','');
+
+    var secaoTroca=''
+      +'<div style="grid-column:1/-1;margin-top:8px;margin-bottom:2px">'
+        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);display:flex;align-items:center;gap:6px">'
+          +'<i class="ti ti-building-store" style="color:var(--green)"></i> Sell-in / Troca — fornecedor trocou ou creditou'
+        +'</div>'
+      +'</div>'
+      +metricCard('sell_in','ti-building-store','Trocas e bonificações — itens','Casos em que o fornecedor trocou o produto ou deu crédito/bonificação','<span style="color:var(--green)">'+totalSellin.length+' '+(totalSellin.length===1?'item':'itens')+'</span>','var(--green)','','')
+      +metricCard('sell_in','ti-cash','Valor recuperado via troca','Total que foi compensado em forma de troca, crédito ou bonificação','R$ '+valorSellin.toFixed(2).replace('.',','),'var(--green)','','');
+
+    var secaoDescarte=''
+      +'<div style="grid-column:1/-1;margin-top:8px;margin-bottom:2px">'
+        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);display:flex;align-items:center;gap:6px">'
+          +'<i class="ti ti-trash" style="color:var(--red)"></i> Descartes e sobras de lote'
+        +'</div>'
+      +'</div>'
+      +metricCard('sobras','ti-trash','Descartes e sobras — itens','Produtos descartados — com ou sem nota de devolução ao fornecedor','<span style="color:var(--red)">'+totalDescarte.length+' '+(totalDescarte.length===1?'item':'itens')+'</span>','var(--red)','','')
+      +metricCard('sobras','ti-coin','A cobrar do fornecedor (descarte c/ nota)','Descartes autorizados: o fornecedor ressarce o custo do produto','R$ '+valorDescarteAReceber.toFixed(2).replace('.',','),'var(--amber)','','');
+
+    resumoEl.innerHTML= destaque + secaoVenda + secaoSellout + secaoTroca + secaoDescarte;
   }
   // Tabela
   var tb=document.getElementById('tbNegociacoes');
