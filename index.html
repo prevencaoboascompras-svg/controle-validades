@@ -43,6 +43,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--bd)}
 .tab{font-size:13px;font-weight:500;padding:10px 18px;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:7px;transition:color .15s}
 .tab.active{color:var(--tx);border-bottom-color:var(--green)}.tab:hover:not(.active){color:var(--tx)}
+/* Relatório redesign */
+.rel-section-label{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:10px}
+.rel-cards-row{display:grid;gap:10px;margin-bottom:20px}
+.rel-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:16px 18px}
+.rel-card-sm{background:var(--bg2);border-radius:var(--r);padding:12px 14px}
+.rel-big{font-size:28px;font-weight:600;line-height:1}
+.rel-mid{font-size:22px;font-weight:600;line-height:1}
+.rel-label{font-size:12px;color:var(--tx2);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.rel-sub{font-size:11px;color:var(--tx2);margin-top:4px}
+.rel-progress{height:6px;border-radius:99px;background:var(--bd);overflow:hidden;margin-top:8px}
+.rel-progress-fill{height:100%;border-radius:99px}
+.rel-clickable{cursor:pointer;transition:border-color .15s,transform .1s}
+.rel-clickable:hover{border-color:var(--bds);transform:translateY(-1px)}
+.rel-clickable.active-filter{border-color:var(--green);box-shadow:0 0 0 3px rgba(29,158,117,.18)}
+.badge-situacao{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;white-space:nowrap}
 .sec{display:none}.sec.active{display:block}
 .filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .filters select,.filters input[type=text]{font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none}
@@ -359,8 +374,22 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
     </div>
   </div>
   <div id="sec-relatorio" class="sec">
-    <!-- Cards de resumo negociação fornecedor -->
-    <div id="negociacaoResumo" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px"></div>
+    <!-- 1 — Situação atual do estoque -->
+    <div>
+      <p class="rel-section-label">1 — Situação atual do estoque</p>
+      <div class="rel-cards-row" id="relSituacao" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))"></div>
+    </div>
+
+    <!-- 2 — O que você pode recuperar financeiramente -->
+    <div>
+      <p class="rel-section-label">2 — O que você pode recuperar financeiramente</p>
+      <div class="rel-cards-row" id="relFinanceiro" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))"></div>
+    </div>
+
+    <!-- 3 — Negociações com fornecedores -->
+    <div>
+      <p class="rel-section-label">3 — Itens em negociação com fornecedores</p>
+    <div id="negociacaoResumoLegacy" style="display:none"></div>
 
     <!-- Tabela de negociações registradas -->
     <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px;margin-bottom:16px">
@@ -403,6 +432,8 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         </table>
       </div>
     </div>
+    </div>
+    <!-- /Seção 3 -->
 
     <!-- Gráficos -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
@@ -1256,13 +1287,13 @@ function renderMetrics(){
       +'</div>';
   }
   document.getElementById('metrics').innerHTML=
-    mc('Total cadastrado',products.length,'','')+
-    mc('Já vencidos — retirar',c.vencido,'danger','vencido')+
-    mc('Vencem em 3 dias',c.critico,'danger','critico')+
-    mc('Vencem em 7 dias',c.urgente,'warn','urgente')+
-    mc('Vencem em 15 dias',c.atencao,'warn','atencao')+
-    mc('Prazo normal — OK',c.ok,'ok','ok')+
-    mc('Sem data cadastrada',aguarda,'info','aguardando');
+    mc('Total',products.length,'','')+
+    mc('Vencidos',c.vencido,'danger','vencido')+
+    mc('Critico 3d',c.critico,'danger','critico')+
+    mc('Urgente 7d',c.urgente,'warn','urgente')+
+    mc('Atencao 15d',c.atencao,'warn','atencao')+
+    mc('OK',c.ok,'ok','ok')+
+    mc('Aguardando',aguarda,'info','aguardando');
 }
 
 function filtrarMetrica(filt){
@@ -2314,106 +2345,76 @@ function renderRelatorio(){
     return true;
   });
 
-  // Cards de resumo
-  var totalSellout=negs.filter(function(n){return n.tipo==='sell_out';});
-  var totalSellin=negs.filter(function(n){return n.tipo==='sell_in';});
-  var totalDescarte=negs.filter(function(n){return SOBRA_TIPOS.indexOf(n.tipo)>=0;});
-  var totalVendaRapida=negs.filter(function(n){return n.tipo==='venda_rapida';});
-  var valorSelloutAReceber=totalSellout.reduce(function(s,n){return s+(n.valorDesc||0);},0);
-  var valorSellout=valorSelloutAReceber;
-  var valorSellin=totalSellin.reduce(function(s,n){return s+(n.valorTotal||0);},0);
-  var valorDescarte=totalDescarte.reduce(function(s,n){return s+(n.valorTotal||0);},0);
-  var valorVendaRapida=totalVendaRapida.reduce(function(s,n){return s+(n.valorDesc||0);},0);
+  var fmtR=function(v){return'R$ '+(v||0).toFixed(2).replace('.',',');};
 
-  // A Receber total = sell-out (diferença de margem) + sobra com ressarcimento (nota dev. ou descarte aut.)
-  var valorDescarteAReceber=totalDescarte.reduce(function(s,n){return s+(n.valorDesc||0);},0);
-  var totalAReceber=valorSelloutAReceber+valorDescarteAReceber;
-  var perdaLiquida=valorDescarte-valorDescarteAReceber;
-
-  var resumoEl=document.getElementById('negociacaoResumo');
-  var tipoAtivo=document.getElementById('filtroNegTipo')?document.getElementById('filtroNegTipo').value:'';
-  if(resumoEl){
-    function metricCard(tipoFiltro, icone, label, desc, val, valColor, badgeLabel, badgeColor){
-      var isActive=tipoAtivo===tipoFiltro?'active-filter':'';
-      var onclick=tipoFiltro?'onclick="filtrarPorTipoCard(\'' + tipoFiltro + '\')"':'';
-      var clickClass=tipoFiltro?'clickable':'';
-      return'<div class="metric '+clickClass+' '+isActive+'" '+onclick+' style="display:flex;flex-direction:column;gap:4px">'
-        +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'
-          +'<i class="ti '+icone+'" style="font-size:15px;color:'+valColor+'"></i>'
-          +'<span class="metric-lbl" style="margin:0">'+label+'</span>'
-          +(badgeLabel?'<span style="margin-left:auto;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:'+badgeColor+'22;color:'+badgeColor+'">'+badgeLabel+'</span>':'')
-        +'</div>'
-        +'<div class="metric-val" style="font-size:22px;color:'+valColor+'">'+val+'</div>'
-        +'<div style="font-size:11px;color:var(--tx2);line-height:1.5;margin-top:2px">'+desc+'</div>'
-        +(tipoFiltro?'<div style="font-size:10px;color:var(--tx2);margin-top:4px;display:flex;align-items:center;gap:3px"><i class="ti ti-filter" style="font-size:10px"></i> Clique para filtrar a tabela</div>':'')
+  // ── Seção 1: Situação atual do estoque ─────────────────────────────────
+  var c={vencido:0,critico:0,urgente:0,atencao:0,ok:0};
+  var aguarda=0;
+  products.forEach(function(p){
+    if((p.status||'').toLowerCase().includes('aguard')){aguarda++;return;}
+    var s=statusFromDays(daysDiff(p.validade));
+    if(s in c)c[s]++;
+    else aguarda++;
+  });
+  var totalProdutos=products.length||1;
+  var situEl=document.getElementById('relSituacao');
+  if(situEl){
+    function situCard(label,val,sub,colorVar,pct){
+      var pctVal=Math.round((val/totalProdutos)*100);
+      return'<div class="rel-card-sm">'
+        +'<div class="rel-label">'+label+'</div>'
+        +'<div class="rel-mid" style="color:'+colorVar+'">'+val+'</div>'
+        +'<div class="rel-sub">'+sub+'</div>'
+        +'<div class="rel-progress"><div class="rel-progress-fill" style="width:'+pctVal+'%;background:'+colorVar+'"></div></div>'
       +'</div>';
     }
-
-    var destaque=''
-      +'<div class="metric" style="border:2px solid var(--amber);background:rgba(186,117,23,.06);grid-column:span 2">'
-        +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">'
-          +'<i class="ti ti-coin" style="font-size:18px;color:var(--amber)"></i>'
-          +'<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--amber)">Total a cobrar do fornecedor</span>'
-        +'</div>'
-        +'<div style="font-size:26px;font-weight:600;color:var(--amber)">R$ '+totalAReceber.toFixed(2).replace('.',',')+'</div>'
-        +'<div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.7">'
-          +'Tudo que o fornecedor deve ressarcir: sell-out + descartes autorizados'
-          +'<div style="margin-top:5px;display:flex;gap:14px;flex-wrap:wrap">'
-            +'<span>Sell-out: <strong style="color:var(--amber)">R$ '+valorSelloutAReceber.toFixed(2).replace('.',',')+'</strong></span>'
-            +'<span>Descarte c/ nota: <strong style="color:var(--amber)">R$ '+valorDescarteAReceber.toFixed(2).replace('.',',')+'</strong></span>'
-          +'</div>'
-        +'</div>'
-      +'</div>'
-      +'<div class="metric" style="border:2px solid var(--red);background:rgba(226,75,74,.05)">'
-        +'<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">'
-          +'<i class="ti ti-alert-circle" style="font-size:18px;color:var(--red)"></i>'
-          +'<span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--red)">Perda sem recuperação</span>'
-        +'</div>'
-        +'<div style="font-size:26px;font-weight:600;color:var(--red)">R$ '+perdaLiquida.toFixed(2).replace('.',',')+'</div>'
-        +'<div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.5">'
-          +'Produtos descartados sem direito a ressarcimento — dinheiro que não volta'
-        +'</div>'
-      +'</div>';
-
-    var secaoVenda=''
-      +'<div style="grid-column:1/-1;margin-top:8px;margin-bottom:2px">'
-        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);display:flex;align-items:center;gap:6px">'
-          +'<i class="ti ti-bolt" style="color:#BA7517"></i> Vendas com desconto interno (sem envolver fornecedor)'
-        +'</div>'
-      +'</div>'
-      +metricCard('venda_rapida','ti-bolt','Venda rápida — itens resolvidos','Vendemos com desconto nossa decisão, sem acordo com fornecedor','<span style="color:#BA7517">'+totalVendaRapida.length+' '+( totalVendaRapida.length===1?'item':'itens')+'</span>','#BA7517','','')
-      +metricCard('venda_rapida','ti-receipt','Margem preservada (venda rápida)','Diferença entre o preço normal e o preço praticado nessas vendas','R$ '+valorVendaRapida.toFixed(2).replace('.',','),'var(--green)','','');
-
-    var secaoSellout=''
-      +'<div style="grid-column:1/-1;margin-top:8px;margin-bottom:2px">'
-        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);display:flex;align-items:center;gap:6px">'
-          +'<i class="ti ti-tag" style="color:var(--blue)"></i> Sell-out — vendas combinadas com o fornecedor'
-        +'</div>'
-      +'</div>'
-      +metricCard('sell_out','ti-tag','Sell-out — itens resolvidos','Produtos vendidos com desconto acordado com o fornecedor','<span style="color:var(--blue)">'+totalSellout.length+' '+(totalSellout.length===1?'item':'itens')+'</span>','var(--blue)','','')
-      +metricCard('sell_out','ti-coin','A cobrar do fornecedor (sell-out)','Diferença entre o preço normal e o preço praticado — o fornecedor paga essa diferença','R$ '+valorSelloutAReceber.toFixed(2).replace('.',','),'var(--amber)','','');
-
-    var secaoTroca=''
-      +'<div style="grid-column:1/-1;margin-top:8px;margin-bottom:2px">'
-        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);display:flex;align-items:center;gap:6px">'
-          +'<i class="ti ti-building-store" style="color:var(--green)"></i> Sell-in / Troca — fornecedor trocou ou creditou'
-        +'</div>'
-      +'</div>'
-      +metricCard('sell_in','ti-building-store','Trocas e bonificações — itens','Casos em que o fornecedor trocou o produto ou deu crédito/bonificação','<span style="color:var(--green)">'+totalSellin.length+' '+(totalSellin.length===1?'item':'itens')+'</span>','var(--green)','','')
-      +metricCard('sell_in','ti-cash','Valor recuperado via troca','Total que foi compensado em forma de troca, crédito ou bonificação','R$ '+valorSellin.toFixed(2).replace('.',','),'var(--green)','','');
-
-    var secaoDescarte=''
-      +'<div style="grid-column:1/-1;margin-top:8px;margin-bottom:2px">'
-        +'<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);display:flex;align-items:center;gap:6px">'
-          +'<i class="ti ti-trash" style="color:var(--red)"></i> Descartes e sobras de lote'
-        +'</div>'
-      +'</div>'
-      +metricCard('sobras','ti-trash','Descartes e sobras — itens','Produtos descartados — com ou sem nota de devolução ao fornecedor','<span style="color:var(--red)">'+totalDescarte.length+' '+(totalDescarte.length===1?'item':'itens')+'</span>','var(--red)','','')
-      +metricCard('sobras','ti-coin','A cobrar do fornecedor (descarte c/ nota)','Descartes autorizados: o fornecedor ressarce o custo do produto','R$ '+valorDescarteAReceber.toFixed(2).replace('.',','),'var(--amber)','','');
-
-    resumoEl.innerHTML= destaque + secaoVenda + secaoSellout + secaoTroca + secaoDescarte;
+    situEl.innerHTML=
+      situCard('Já vencidos',c.vencido,'Devem ser retirados','var(--red)')+
+      situCard('Vencem em 3 dias',c.critico,'Urgência máxima','var(--red)')+
+      situCard('Vencem em 7 dias',c.urgente,'Priorizar venda','var(--amber)')+
+      situCard('Vencem em 15 dias',c.atencao,'Ficar de olho','var(--amber)')+
+      situCard('OK (prazo normal)',c.ok,'Sem ação necessária','var(--green)')+
+      situCard('Sem data cadastrada',aguarda,'Aguardando lançamento','var(--tx2)');
   }
-  // Tabela
+
+  // ── Seção 2: O que você pode recuperar financeiramente ──────────────────
+  var totalSellout=negs.filter(function(n){return n.tipo==='sell_out';});
+  var totalSellin=negs.filter(function(n){return n.tipo==='sell_in';});
+  var totalSobras=negs.filter(function(n){return SOBRA_TIPOS.indexOf(n.tipo)>=0;});
+  var totalVendaRapida=negs.filter(function(n){return n.tipo==='venda_rapida';});
+
+  var valorSelloutAReceber=totalSellout.reduce(function(s,n){return s+(n.valorDesc||0);},0);
+  var valorSellin=totalSellin.reduce(function(s,n){return s+(n.valorTotal||0);},0);
+  var valorVendaRapida=totalVendaRapida.reduce(function(s,n){return s+(n.valorDesc||0);},0);
+  var valorSobrasTotal=totalSobras.reduce(function(s,n){return s+(n.valorTotal||0);},0);
+  var valorSobrasAReceber=totalSobras.reduce(function(s,n){return s+(n.valorDesc||0);},0);
+  var valorPerdaSemReembolso=valorSobrasTotal-valorSobrasAReceber;
+  var totalAReceberFornecedor=valorSelloutAReceber+valorSobrasAReceber;
+
+  var tipoAtivo=tipo;
+  var finEl=document.getElementById('relFinanceiro');
+  if(finEl){
+    function finCard(tipoFiltro,label,icon,val,colorVar,sub){
+      var isActive=tipoAtivo===tipoFiltro?'active-filter':'';
+      var clickAttrs=tipoFiltro?'onclick="filtrarPorTipoCard(\''+tipoFiltro+'\')" class="rel-card rel-clickable '+isActive+'"':'class="rel-card"';
+      return'<div '+clickAttrs+' style="border-left:3px solid '+colorVar+';border-radius:0 var(--rl) var(--rl) 0">'
+        +'<div class="rel-label"><i class="ti '+icon+'"></i> '+label+'</div>'
+        +'<div class="rel-big" style="color:'+colorVar+'">'+fmtR(val)+'</div>'
+        +'<div class="rel-sub">'+sub+'</div>'
+      +'</div>';
+    }
+    finEl.innerHTML=
+      finCard('sobras','Perda sem reembolso','ti-alert-circle',valorPerdaSemReembolso,'var(--red)','Valor perdido, sem negociação possível')+
+      finCard('sobras','Sobras com nota/ressarcimento','ti-package-export',valorSobrasAReceber,'var(--amber)','Mercadoria sobrando que gera crédito do fornecedor')+
+      finCard('sell_out','Recuperável via sell-out','ti-tag',valorSelloutAReceber,'var(--green)','Produto vendido com promoção — diferença de margem')+
+      '<div class="rel-card" style="border:1.5px solid var(--bd);background:var(--bg2)">'
+        +'<div class="rel-label"><i class="ti ti-receipt"></i> Total a receber do fornecedor</div>'
+        +'<div class="rel-big">'+fmtR(totalAReceberFornecedor)+'</div>'
+        +'<div class="rel-sub">Soma de sell-out + sobras com ressarcimento</div>'
+      +'</div>';
+  }
+
+  // ── Seção 3: Itens em negociação com fornecedores ────────────────────────
   var tb=document.getElementById('tbNegociacoes');
   if(!tb)return;
   if(!filtrados.length){tb.innerHTML='<tr><td colspan="14" class="empty">Nenhuma negociação registrada ainda. Use o botão <strong>Resolvido</strong> na aba Validades.</td></tr>';return;}
