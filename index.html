@@ -58,6 +58,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .rel-clickable:hover{border-color:var(--bds);transform:translateY(-1px)}
 .rel-clickable.active-filter{border-color:var(--green);box-shadow:0 0 0 3px rgba(29,158,117,.18)}
 .badge-situacao{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:99px;white-space:nowrap}
+.enc-row:hover{background:var(--bg2)!important}
 .sec{display:none}.sec.active{display:block}
 .filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .filters select,.filters input[type=text]{font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none}
@@ -318,50 +319,43 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
     </div>
   </div>
   <div id="sec-encartes" class="sec">
-    <!-- Tabs Encartes / Biblioteca -->
-    <div class="enc-tabs">
-      <button class="enc-tab active" id="tabEncAtivos" onclick="goEncTab('ativos')"><i class="ti ti-photo-check"></i> Encartes gerados <span id="encBadgeTab" style="background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:2px;display:none">0</span></button>
-      <button class="enc-tab" id="tabEncBib" onclick="goEncTab('biblioteca')"><i class="ti ti-books"></i> Biblioteca de modelos <span id="bibBadge" style="background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:2px;display:none">0</span></button>
-    </div>
-
-    <!-- SEÇÃO: Encartes Ativos -->
-    <div id="secEncAtivos">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-        <div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:2px">Encartes ativos</div>
-          <p style="font-size:12px;color:var(--tx2)">Encartes gerados ficam salvos aqui. Selecione varios para imprimir juntos.</p>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn" onclick="limparEncartesAtivos()" title="Remover todos os encartes"><i class="ti ti-trash"></i> Limpar tudo</button>
-          <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Novo encarte</button>
-        </div>
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-photo-check" style="color:var(--green)"></i> Encartes gerados</div>
+        <p style="font-size:12px;color:var(--tx2)">Marque um ou mais para imprimir juntos em uma folha A4.</p>
       </div>
-
-      <!-- barra de impressao -->
-      <div class="print-bar" id="printBar" style="display:none">
-        <i class="ti ti-printer" style="color:var(--green);font-size:18px"></i>
-        <span class="print-bar-count" id="printCount">0 selecionado(s)</span>
-        <span style="font-size:12px;color:var(--tx2)">Layout por pagina A4:</span>
-        <button class="layout-btn active" id="lay2btn" onclick="setLayout(2)">2 encartes</button>
-        <button class="layout-btn" id="lay4btn" onclick="setLayout(4)">4 encartes</button>
-        <button class="layout-btn" id="lay6btn" onclick="setLayout(6)">6 encartes</button>
-        <button class="layout-btn" id="lay9btn" onclick="setLayout(9)">9 encartes</button>
-        <div style="flex:1"></div>
-        <button class="btn" onclick="deselectAll()"><i class="ti ti-x"></i> Limpar selecao</button>
-        <button class="btn btn-green" onclick="abrirPreview()"><i class="ti ti-eye"></i> Pre-visualizar</button>
-      </div>
-
-      <div id="encGrid" class="enc-grid">
-        <div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Gerar encarte" em qualquer produto e depois em "Baixar PNG".</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="limparEncartesAtivos()"><i class="ti ti-trash"></i> Limpar tudo</button>
+        <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-plus"></i> Novo encarte</button>
       </div>
     </div>
 
-    <!-- SEÇÃO: Biblioteca de Modelos -->
-    <div id="secEncBib" style="display:none">
+    <!-- Barra de impressão (aparece quando há selecionados) -->
+    <div id="printBar" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg);border:1px solid var(--green);border-radius:var(--r);padding:10px 14px;margin-bottom:14px">
+      <i class="ti ti-printer" style="color:var(--green);font-size:18px"></i>
+      <span id="printCount" style="font-size:13px;font-weight:600;color:var(--green)">0 selecionado(s)</span>
+      <span style="font-size:12px;color:var(--tx2)">Layout por página A4:</span>
+      <button class="layout-btn active" id="lay2btn" onclick="setLayout(2)">2 por página</button>
+      <button class="layout-btn" id="lay4btn" onclick="setLayout(4)">4 por página</button>
+      <button class="layout-btn" id="lay6btn" onclick="setLayout(6)">6 por página</button>
+      <button class="layout-btn" id="lay9btn" onclick="setLayout(9)">9 por página</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-sm" onclick="deselectAll()"><i class="ti ti-x"></i> Limpar seleção</button>
+      <button class="btn btn-green btn-sm" onclick="abrirPreview()"><i class="ti ti-eye"></i> Pré-visualizar impressão</button>
+    </div>
+
+    <!-- Lista QR-Ofertas style -->
+    <div id="encGrid" style="display:flex;flex-direction:column;gap:0;border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;background:var(--bg)">
+      <div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Novo encarte" para criar o primeiro.</div>
+    </div>
+
+    <!-- Biblioteca de Modelos (mantida abaixo) -->
+    <div style="margin-top:24px">
       <div class="bib-header">
         <div>
           <div class="bib-title"><i class="ti ti-books" style="color:var(--blue)"></i> Biblioteca de modelos</div>
-          <p style="font-size:12px;color:var(--tx2);margin-top:2px">Produtos pré-configurados. Clique para gerar encarte rapidamente quando entrar em data crítica.</p>
+          <p style="font-size:12px;color:var(--tx2);margin-top:2px">Produtos pré-configurados para gerar encarte rapidamente.</p>
         </div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <input type="text" class="bib-search" id="bibBusca" placeholder="Buscar produto..." oninput="renderBiblioteca()">
@@ -369,7 +363,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
         </div>
       </div>
       <div id="bibGrid" class="bib-grid">
-        <div class="bib-empty"><i class="ti ti-books"></i>Nenhum modelo salvo ainda.<br>Gere um encarte e salve como modelo, ou clique em "Adicionar modelo".</div>
+        <div class="bib-empty"><i class="ti ti-books"></i>Nenhum modelo salvo ainda.</div>
       </div>
     </div>
   </div>
@@ -1349,6 +1343,7 @@ function fmtPreco(n){
 // Evita loop de recalculo
 var _recalcLock=false;
 var _custoProduto=null;
+var _encartePrecoPor=null;
 
 function atualizarPainelCusto(){
   var custo=_custoProduto;
@@ -1711,10 +1706,16 @@ async function downloadEncarte(){
     a.download='encarte-'+prod.replace(/\s+/g,'-').toLowerCase()+'.png';
     a.href=URL.createObjectURL(blob);a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
-    // salvar nos encartes ativos
+    // salvar nos encartes ativos com dados de preço
     var reader=new FileReader();
     reader.onloadend=function(){
-      salvarEncarteAtivo(prod, reader.result);
+      var parseVal=function(id){var v=document.getElementById(id).value;if(!v)return null;var n=parseFloat(v.replace(/R\$\s*/i,'').replace(',','.'));return isNaN(n)?null:n;};
+      salvarEncarteAtivo(prod, reader.result, {
+        precoNormal:parseVal('eDe'),
+        precoPromo:parseVal('ePor'),
+        custo:_custoProduto||null,
+        obs:''
+      });
     };
     reader.readAsDataURL(blob);
   },'image/png');
@@ -1747,6 +1748,8 @@ function openEncarteModal(idx){
   document.getElementById('fotoStatus').textContent='';
   var _cod=(idx!==null&&idx!==undefined)?products[idx].cod:'';
   var _nome=(idx!==null&&idx!==undefined)?products[idx].nome:'';
+  // Armazena preço promo para uso no modal de Resolvido
+  _encartePrecoPor=document.getElementById('ePor').value||null;
   document.getElementById('eFotoBusca').value='';
   document.getElementById('encarteModal').classList.add('open');
   setTimeout(function(){
@@ -1789,19 +1792,23 @@ var encSelecionados=[];
 function getEncartesAtivos(){try{return JSON.parse(localStorage.getItem(ENC_KEY)||'[]');}catch(e){return[];}}
 function saveEncartesAtivos(arr){localStorage.setItem(ENC_KEY,JSON.stringify(arr));}
 
-function salvarEncarteAtivo(nome,dataUrl){
+function salvarEncarteAtivo(nome,dataUrl,extras){
+  extras=extras||{};
   var arr=getEncartesAtivos();
-  arr.unshift({id:Date.now(),nome:nome,img:dataUrl,criadoEm:new Date().toLocaleDateString('pt-BR')});
-  // limitar a 50 encartes para nao estourar localStorage
+  arr.unshift({
+    id:Date.now(),
+    nome:nome,
+    img:dataUrl,
+    criadoEm:new Date().toLocaleDateString('pt-BR'),
+    precoNormal:extras.precoNormal||null,
+    precoPromo:extras.precoPromo||null,
+    custo:extras.custo||null,
+    obs:extras.obs||''
+  });
   if(arr.length>50)arr=arr.slice(0,50);
   saveEncartesAtivos(arr);
   atualizarBadge();
-  // notificacao leve
-  var msg=document.createElement('div');
-  msg.style.cssText='position:fixed;bottom:20px;right:20px;background:var(--green);color:#fff;font-size:13px;font-weight:600;padding:10px 18px;border-radius:8px;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,.2)';
-  msg.textContent='Encarte salvo em "Encartes Ativos"!';
-  document.body.appendChild(msg);
-  setTimeout(function(){msg.remove();},2500);
+  mostrarToast('Encarte salvo!','ok');
 }
 
 function atualizarBadge(){
@@ -1817,20 +1824,37 @@ function renderEncartesAtivos(){
   encSelecionados=[];
   document.getElementById('printBar').style.display='none';
   if(!arr.length){
-    grid.innerHTML='<div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Gerar encarte" em qualquer produto e depois em "Baixar PNG".</div>';
+    grid.innerHTML='<div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Novo encarte" para criar o primeiro.</div>';
     return;
   }
-  grid.innerHTML=arr.map(function(e){
-    return '<div class="enc-card" id="ecard-'+e.id+'" onclick="toggleEncarteSelecao('+e.id+')">'
-      +'<div class="enc-check" id="echk-'+e.id+'"><i class="ti ti-check" style="display:none"></i></div>'
-      +'<img src="'+e.img+'" alt="'+e.nome+'" loading="lazy">'
-      +'<div class="enc-card-body">'
-        +'<div class="enc-card-name" title="'+e.nome+'">'+e.nome+'</div>'
-        +'<div class="enc-card-date">Gerado em '+e.criadoEm+'</div>'
-        +'<div class="enc-card-actions">'
-          +'<button class="btn btn-sm btn-green" onclick="event.stopPropagation();downloadEncarteAtivo('+e.id+')" title="Baixar"><i class="ti ti-download"></i></button>'
-          +'<button class="btn btn-sm" onclick="event.stopPropagation();removerEncarteAtivo('+e.id+')" title="Remover" style="color:var(--red);border-color:var(--red)"><i class="ti ti-trash"></i></button>'
-        +'</div>'
+  var fmtP=function(v){return v?'R$ '+parseFloat(v).toFixed(2).replace('.',','):'--';};
+  grid.innerHTML=arr.map(function(e,rowIdx){
+    var hasDe=e.precoNormal>0,hasPor=e.precoPromo>0,hasCusto=e.custo>0;
+    var difMargem=(hasDe&&hasPor)?(e.precoNormal-e.precoPromo):null;
+    var difStr=difMargem>0?'<span style="color:var(--red);font-size:11px">▼ R$ '+difMargem.toFixed(2).replace('.',',')+'</span>':'';
+    var precos='';
+    if(hasDe&&hasPor) precos='<span style="text-decoration:line-through;color:var(--tx2)">'+fmtP(e.precoNormal)+'</span> → <strong style="color:var(--green)">'+fmtP(e.precoPromo)+'</strong>';
+    else if(hasPor) precos='<strong style="color:var(--green)">'+fmtP(e.precoPromo)+'</strong>';
+    var custoStr=hasCusto?'<span style="font-size:11px;color:var(--tx2)">Custo: <strong>'+fmtP(e.custo)+'</strong></span>':'';
+    var border=rowIdx<arr.length-1?'border-bottom:1px solid var(--bd)':'';
+    return '<div id="erow-'+e.id+'" class="enc-row" style="display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;transition:background .1s;'+border+'" '
+      +'onclick="toggleEncarteSelecao('+e.id+')">'
+      // checkbox
+      +'<div id="echk-'+e.id+'" style="width:20px;height:20px;border-radius:5px;border:2px solid var(--bds);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s">'
+        +'<i class="ti ti-check" style="display:none;font-size:13px;color:#fff"></i>'
+      +'</div>'
+      // thumbnail
+      +'<img src="'+e.img+'" alt="'+e.nome+'" loading="lazy" style="width:56px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0;border:1px solid var(--bd)">'
+      // info
+      +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+e.nome+'">'+e.nome+'</div>'
+        +'<div style="font-size:12px;margin-top:3px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+precos+' '+difStr+' '+custoStr+'</div>'
+        +'<div style="font-size:11px;color:var(--tx2);margin-top:2px">Gerado em '+e.criadoEm+'</div>'
+      +'</div>'
+      // ações
+      +'<div style="display:flex;gap:6px;flex-shrink:0" onclick="event.stopPropagation()">'
+        +'<button class="abtn" onclick="downloadEncarteAtivo('+e.id+')" title="Baixar PNG" style="border-color:var(--green);color:var(--green)"><i class="ti ti-download"></i></button>'
+        +'<button class="abtn" onclick="removerEncarteAtivo('+e.id+')" title="Remover" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button>'
       +'</div>'
     +'</div>';
   }).join('');
@@ -1838,16 +1862,16 @@ function renderEncartesAtivos(){
 
 function toggleEncarteSelecao(id){
   var idx=encSelecionados.indexOf(id);
-  var card=document.getElementById('ecard-'+id);
+  var row=document.getElementById('erow-'+id);
   var chk=document.getElementById('echk-'+id);
   if(idx===-1){
     encSelecionados.push(id);
-    card.classList.add('selected');
-    chk.querySelector('i').style.display='';
+    if(row)row.style.background='rgba(29,158,117,.08)';
+    if(chk){chk.style.background='var(--green)';chk.style.borderColor='var(--green)';chk.querySelector('i').style.display='';}
   }else{
     encSelecionados.splice(idx,1);
-    card.classList.remove('selected');
-    chk.querySelector('i').style.display='none';
+    if(row)row.style.background='';
+    if(chk){chk.style.background='';chk.style.borderColor='var(--bds)';chk.querySelector('i').style.display='none';}
   }
   atualizarPrintBar();
 }
@@ -1872,12 +1896,13 @@ function setLayout(n){
 }
 
 function deselectAll(){
-  encSelecionados=[];
-  document.querySelectorAll('.enc-card').forEach(function(c){
-    c.classList.remove('selected');
-    var i=c.querySelector('.enc-check i');
-    if(i)i.style.display='none';
+  encSelecionados.slice().forEach(function(id){
+    var row=document.getElementById('erow-'+id);
+    var chk=document.getElementById('echk-'+id);
+    if(row)row.style.background='';
+    if(chk){chk.style.background='';chk.style.borderColor='var(--bds)';chk.querySelector('i').style.display='none';}
   });
+  encSelecionados=[];
   document.getElementById('printBar').style.display='none';
 }
 
@@ -2087,7 +2112,15 @@ function openResolvidoModal(idx){
   document.getElementById('rQtdeTotal').value=qtdeLote;
   document.getElementById('rQtdeVendida').value=qtdeLote;
   document.getElementById('rQtdeSobra').value=0;
-  document.getElementById('rPreco').value=p.precoPromo?'R$ '+p.precoPromo.toFixed(2).replace('.',','):'';
+  // Pré-preencher preço: produto → encarte salvo → vazio
+  var precoPreench=p.precoPromo||0;
+  if(!precoPreench){
+    var encMatch=getEncartesAtivos().find(function(e){
+      return e.precoPromo&&(e.nome||'').toLowerCase().startsWith((p.nome||'').substring(0,15).toLowerCase());
+    });
+    if(encMatch)precoPreench=encMatch.precoPromo;
+  }
+  document.getElementById('rPreco').value=precoPreench?'R$ '+parseFloat(precoPreench).toFixed(2).replace('.',','): '';
   // Auto-preencher fornecedor do banco de dados (por código de barras ou nome)
   var barrasBuscaForn=(p.cod||'').replace(/[^0-9]/g,'');
   var fornAuto=p.fornecedor||bancoFornecedor[barrasBuscaForn]||bancoFornecedorNome[normNome(p.nome||'')]||'';
