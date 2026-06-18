@@ -401,13 +401,18 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 
 /* Responsive */
 @media (max-width: 900px) {
-  .sidebar { transform: translateX(-100%); transition: transform .2s; }
+  .sidebar { transform: translateX(-100%); transition: transform .2s; z-index: 200; }
   .sidebar.open { transform: none; }
   .aura-main { margin-left: 0; }
   .aura-btn-burger { display: inline-flex !important; }
   .aura-header { padding: 14px 16px; }
   .aura-content { padding: 16px; }
 }
+#sidebarOverlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  z-index: 199; backdrop-filter: blur(2px);
+}
+#sidebarOverlay.show { display: block; }
 
 /* ═══════════════════════════════════════════════
    DASHBOARD MELHORADO — KPI CARDS & LAYOUT
@@ -579,10 +584,109 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .dash-tiles { grid-template-columns: repeat(2, 1fr); }
   .dash-mini-row { grid-template-columns: 1fr; }
 }
+
+/* ═══════════════════════════════
+   MOBILE — até 600px
+═══════════════════════════════ */
+@media (max-width: 600px) {
+
+  /* Conteúdo principal: menos padding */
+  .aura-content { padding: 12px 13px !important; }
+
+  /* Header */
+  .aura-header { padding: 11px 13px !important; }
+  .aura-header h1 { font-size: 17px !important; }
+  .aura-header p  { font-size: 11px !important; }
+  .aura-header-actions { gap: 5px; }
+  .aura-header-actions .btn { font-size: 11px; padding: 5px 9px; }
+
+  /* Topbar */
+  .topbar { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
+  .topbar h1 { font-size: 16px !important; }
+  .topbar-right { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+  .topbar-right .btn { flex: 1 1 auto; font-size: 11px; padding: 6px 10px; text-align: center; justify-content: center; }
+
+  /* Status row */
+  .status-row { gap: 6px; font-size: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+
+  /* Métricas do topo (barra cinza) */
+  .metrics { grid-template-columns: repeat(3, 1fr) !important; gap: 7px !important; margin-bottom: 14px; }
+  .metric { padding: 10px 10px !important; }
+  .metric-val { font-size: 22px !important; }
+  .metric-lbl { font-size: 9px !important; }
+
+  /* Tabs de navegação — scroll horizontal */
+  .tabs { overflow-x: auto; flex-wrap: nowrap !important; gap: 0; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 1px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { white-space: nowrap; font-size: 11px !important; padding: 8px 12px !important; flex-shrink: 0; }
+
+  /* Filtros da aba Validades — empilhar */
+  .filters { flex-direction: column; gap: 7px; }
+  .filters select,
+  .filters input[type=text] { width: 100% !important; min-width: unset !important; box-sizing: border-box; }
+  .filters label { font-size: 12px; }
+
+  /* Dashboard hero — números menores */
+  .dash-hero-num { font-size: 36px !important; letter-spacing: -1px !important; }
+  .dash-hero-label { font-size: 10px !important; margin-bottom: 8px !important; }
+  .dash-hero-sub { font-size: 11px !important; margin-top: 6px !important; }
+  .dash-hero-icon { width: 40px !important; height: 40px !important; top: 14px !important; right: 14px !important; }
+  .dash-hero-attention .dha-count { font-size: 24px !important; }
+  .dash-hero-attention .dha-label { font-size: 12px !important; }
+  .dash-hero-attention .dha-sub   { font-size: 11px !important; }
+
+  /* KPI Tiles — 2 por linha */
+  .dash-tiles { grid-template-columns: repeat(2, 1fr) !important; gap: 7px !important; }
+  .dash-tile { padding: 11px 10px !important; }
+  .dash-tile-num { font-size: 24px !important; }
+  .dash-tile-lbl { font-size: 10px !important; }
+  .dash-tile-sub { font-size: 9px !important; }
+
+  /* Mini KPI row */
+  .dash-mini-row { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .dash-mini { padding: 12px 13px !important; }
+  .dash-mini-val { font-size: 16px !important; }
+  .dash-mini-lbl { font-size: 10px !important; }
+
+  /* Alert bar */
+  .dash-alertbar { padding: 9px 12px !important; flex-wrap: wrap; gap: 8px; }
+  .dash-alertbar .dab-txt { font-size: 12px !important; }
+  .dash-alertbar .dab-detail { font-size: 11px !important; }
+
+  /* Botões de ação nas tabelas */
+  .abtn { font-size: 10px !important; padding: 3px 7px !important; }
+
+  /* Filtro de promoções */
+  .promo-filter-bar { gap: 5px; }
+  .promo-filter-btn { font-size: 11px !important; padding: 5px 10px !important; }
+
+  /* Biblioteca / Bib */
+  .bib-header { flex-direction: column; align-items: flex-start !important; }
+  .bib-search { width: 100% !important; min-width: unset !important; box-sizing: border-box; }
+
+  /* Modais pequenos */
+  .smodal { padding: 16px !important; width: calc(100vw - 24px) !important; }
+
+  /* Setor grid — 2 colunas no mobile */
+  #dashSetorGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+
+  /* Configuração */
+  .cfg { padding: 16px !important; }
+  .cfg h3 { font-size: 14px !important; }
+  .cfg-hint { font-size: 11px !important; }
+
+  /* Divider label */
+  .dash-divider-label { font-size: 10px !important; margin: 16px 0 9px !important; }
+
+  /* View all button */
+  .dash-view-all { font-size: 11px !important; padding: 5px 10px !important; }
+}
 </style>
 </head>
 <body>
 <div class="aura-shell">
+<!-- Overlay mobile sidebar -->
+<div id="sidebarOverlay" onclick="closeSidebar()"></div>
 <!-- Sidebar -->
 <aside class="sidebar" id="auraSidebar">
   <div class="sb-brand">
@@ -632,7 +736,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 <div class="aura-main" id="auraMain">
   <!-- Header -->
   <header class="aura-header">
-    <button class="aura-btn aura-btn-burger" id="auraBurger" onclick="document.getElementById('auraSidebar').classList.toggle('open')" style="display:none">
+    <button class="aura-btn aura-btn-burger" id="auraBurger" onclick="toggleSidebar()" style="display:none">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
     <div>
@@ -3765,6 +3869,30 @@ function gerarEncarteDoModelo(id){
   document.getElementById('encarteModal').classList.add('open');
   setTimeout(function(){atualizarPainelCusto();drawEncarte();},150);
   mostrarToast('Modelo carregado! Ajuste a validade e baixe o encarte.','ok');
+}
+
+// ── Sidebar mobile ──
+function toggleSidebar(){
+  var sb=document.getElementById('auraSidebar');
+  var ov=document.getElementById('sidebarOverlay');
+  var isOpen=sb.classList.toggle('open');
+  if(ov) ov.classList.toggle('show', isOpen);
+  document.body.style.overflow=isOpen?'hidden':'';
+}
+function closeSidebar(){
+  var sb=document.getElementById('auraSidebar');
+  var ov=document.getElementById('sidebarOverlay');
+  sb.classList.remove('open');
+  if(ov) ov.classList.remove('show');
+  document.body.style.overflow='';
+}
+// Fechar sidebar ao navegar (mobile)
+var _origGoTab=typeof goTab==='function'?goTab:null;
+if(_origGoTab){
+  goTab=function(t){
+    if(window.innerWidth<=900) closeSidebar();
+    _origGoTab(t);
+  };
 }
 
 // inicializar badges
