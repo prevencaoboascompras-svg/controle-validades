@@ -2159,7 +2159,9 @@ function setFonte(f,idx){
   drawEncarte();
 }
 function parsePreco(v){
-  if(!v)return null;
+  if(v===null||v===undefined||v==='')return null;
+  if(typeof v==='number')return isNaN(v)?null:v;
+  v=String(v);
   var n=parseFloat(v.replace(/R\$\s*/i,'').replace(',','.'));
   return isNaN(n)?null:n;
 }
