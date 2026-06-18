@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
 :root{--bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;--tx:#1a1a18;--tx2:#6b6b67;--bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);--r:8px;--rl:12px;--green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;}
 @media(prefers-color-scheme:dark){:root{--bg:#1e1e1c;--bg2:#282825;--bg3:#323230;--tx:#f0efe8;--tx2:#9b9b95;--bd:rgba(255,255,255,.1);--bds:rgba(255,255,255,.2);}}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg3);color:var(--tx);min-height:100vh}
-.app{max-width:100%;margin:0 auto;padding:24px 28px}
+.app{max-width:100%;margin:0;padding:0}
 .cfg{background:var(--bg);border:2px dashed var(--bds);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;display:none}
 .cfg h3{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--amber)}
 .cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -226,206 +226,327 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
 
 @media(max-width:700px){.cfg-grid,.form-row-2,.modal-body{grid-template-columns:1fr}.promo-grid{grid-template-columns:1fr}.enc-grid{grid-template-columns:1fr 1fr}.resolvido-opts{grid-template-columns:1fr}}
 
-/* === AURA VENCIMENTOS THEME OVERRIDE === */
-:root{
-  --bg:#0f1216 !important; --bg2:#161a20 !important; --bg3:#0b0d10 !important;
-  --tx:#e9eef5 !important; --tx2:#9aa3ad !important;
-  --bd:rgba(255,255,255,.08) !important; --bds:rgba(255,255,255,.16) !important;
-  --green:#22c55e !important; --gd:#16a34a !important;
-  --blue:#3b82f6 !important; --amber:#f59e0b !important; --red:#ef4444 !important;
-  --aura-red:#7a0d0d; --aura-red2:#3a0606; --aura-gold:#f5b301;
+/* === AURA VENCIMENTOS — NEW VISUAL THEME === */
+:root {
+  --bg: #1a1a1a; --surface: #2a2a2a; --surface-2: #333333;
+  --fg: #f5f5f5; --muted: #a0a0a0; --border: rgba(255,255,255,0.08);
+  --red: #ef4444; --red-2: #b91c1c;
+  --amber: #f59e0b; --orange: #f97316; --yellow: #eab308; --emerald: #10b981;
+  --danger-bg: rgba(239,68,68,0.15); --success-bg: rgba(16,185,129,0.15);
+  --warning-bg: rgba(245,158,11,0.15);
+  --ring-red: rgba(239,68,68,0.30); --ring-orange: rgba(249,115,22,0.30);
+  --ring-amber: rgba(245,158,11,0.30); --ring-yellow: rgba(234,179,8,0.30);
+  --ring-emerald: rgba(16,185,129,0.30);
+  /* keep app vars mapped */
+  --bg2: var(--surface); --bg3: #111; --tx: var(--fg); --tx2: var(--muted);
+  --bd: var(--border); --bds: rgba(255,255,255,0.18);
+  --green: var(--emerald); --gd: #059669; --blue: #3b82f6;
+  --r: 6px; --rl: 8px;
 }
-html,body{background:var(--bg3) !important;color:var(--tx) !important}
-body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important}
+html.light {
+  --bg: #eef0f4; --surface: #ffffff; --surface-2: #f6f7fa;
+  --fg: #1a1a1a; --muted: #6b7280; --border: rgba(0,0,0,0.10);
+  --bds: rgba(0,0,0,0.18);
+  --bg2: #f6f7fa; --bg3: #eef0f4; --tx: #1a1a1a; --tx2: #6b7280;
+  --bd: rgba(0,0,0,0.10);
+}
+html, body { background: var(--bg); color: var(--fg); }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
 
 /* Layout shell */
-body.aura{display:block}
-#auraHeader{position:fixed;top:0;left:240px;right:0;height:84px;z-index:50;
-  background:linear-gradient(90deg,var(--aura-red2) 0%,var(--aura-red) 60%,#5a0a0a 100%);
-  display:flex;align-items:center;padding:0 28px;gap:24px;
-  box-shadow:0 4px 20px rgba(0,0,0,.4);border-bottom:1px solid rgba(255,255,255,.06)}
-#auraHeader .ah-title{flex:1}
-#auraHeader h1.ah{font-family:Montserrat,sans-serif;font-weight:900;font-size:26px;
-  letter-spacing:.04em;color:#fff;line-height:1}
-#auraHeader p.ah{font-size:13px;color:var(--aura-gold);margin-top:4px;letter-spacing:.02em}
-#auraHeader .ah-actions{display:flex;gap:10px;align-items:center}
-#auraHeader .ah-actions .btn{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);color:#fff}
-#auraHeader .ah-actions .btn:hover{background:rgba(0,0,0,.45)}
-#auraHeader .ah-actions .btn.btn-gold{background:var(--aura-gold);border-color:var(--aura-gold);color:#1a1208;font-weight:600}
-#auraHeader .ah-actions .btn.btn-gold:hover{background:#ffc233}
-#auraHeader .ah-sync{font-size:11px;color:rgba(255,255,255,.75);margin-top:4px;text-align:right}
+.aura-shell { display: flex; min-height: 100vh; }
 
-#auraSidebar{position:fixed;top:0;left:0;bottom:0;width:240px;z-index:60;
-  background:#0a0c0f;border-right:1px solid rgba(255,255,255,.06);
-  display:flex;flex-direction:column}
-#auraSidebar .as-brand{padding:18px 18px;display:flex;align-items:center;gap:10px;
-  background:linear-gradient(135deg,var(--aura-red2),var(--aura-red));height:84px;
-  border-bottom:1px solid rgba(255,255,255,.06)}
-#auraSidebar .as-brand .as-logo{width:46px;height:46px;border-radius:10px;background:var(--aura-gold);
-  display:flex;align-items:center;justify-content:center;color:#1a1208;font-size:26px;flex-shrink:0;
-  box-shadow:0 4px 12px rgba(0,0,0,.3)}
-#auraSidebar .as-brand .as-bt{font-family:Montserrat,sans-serif;font-weight:900;color:#fff;
-  font-size:14px;line-height:1.05;letter-spacing:.02em}
-#auraSidebar .as-brand .as-bt small{display:block;font-size:11px;color:var(--aura-gold);font-weight:700;margin-top:2px}
-#auraSidebar nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
-#auraSidebar nav a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:8px;
-  color:#b4bcc6;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;
-  transition:background .15s,color .15s;border:none;background:none;text-align:left;width:100%}
-#auraSidebar nav a i{font-size:18px;flex-shrink:0;color:#7d8590}
-#auraSidebar nav a:hover{background:rgba(255,255,255,.04);color:#fff}
-#auraSidebar nav a:hover i{color:#fff}
-#auraSidebar nav a.active{background:linear-gradient(90deg,rgba(239,68,68,.18),transparent);
-  color:#fff;border-left:3px solid var(--red);padding-left:11px}
-#auraSidebar nav a.active i{color:var(--red)}
-#auraSidebar nav a .as-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;
-  font-weight:800;padding:2px 7px;border-radius:99px;min-width:20px;text-align:center}
-#auraSidebar .as-help{padding:14px;border-top:1px solid rgba(255,255,255,.06)}
+/* Sidebar */
+.sidebar {
+  width: 220px; flex-shrink: 0;
+  background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 60;
+}
+.sidebar .sb-brand {
+  position: relative; border-radius: 6px; overflow: hidden;
+  background: #b91c1c; color: #fff; padding: 14px;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); margin: 10px;
+}
+.sidebar .sb-brand .sb-tagline { font-size: 11px; font-weight: 700; line-height: 1.25; display: flex; align-items: center; gap: 6px; }
+.sidebar .sb-brand .sb-name { font-family: Montserrat, sans-serif; font-weight: 900; font-size: 22px; line-height: 1; letter-spacing: -0.025em; margin-top: 4px; }
+.sidebar .sb-badge-label { margin-top: 8px; background: #fde047; color: #3f1818; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 2px; display: inline-block; letter-spacing: 0.05em; }
+.sidebar nav { flex: 1; padding: 8px; overflow-y: auto; }
+.sidebar nav button {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 6px; font-size: 14px;
+  color: var(--muted); background: transparent; border: none; cursor: pointer;
+  transition: all 0.15s; text-align: left;
+}
+.sidebar nav button:hover, .sidebar nav button.active { background: var(--surface-2); color: var(--fg); }
+.sidebar nav button .sb-nav-badge {
+  background: var(--red); color: #fff; font-size: 10px; font-weight: 700;
+  border-radius: 9999px; min-width: 18px; height: 18px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px; margin-left: auto;
+}
+.sidebar .sb-footer { padding: 12px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
 
-/* Push original app to the right & below new chrome */
-.app{margin-left:240px !important;padding-top:104px !important;padding-left:24px !important;padding-right:24px !important;background:var(--bg3)}
-/* Hide the original topbar (replaced by aura header) and original tabs (replaced by sidebar) */
-.topbar, .tabs{display:none !important}
-.status-row{margin-bottom:14px}
+/* Main area */
+.aura-main { flex: 1; display: flex; flex-direction: column; min-width: 0; margin-left: 220px; }
 
-/* Card surfaces — darker, soft border */
-.metric,.rel-card,.twrap,.ecard,.cfg,.bib-grid,.modal{
-  background:var(--bg) !important;border:1px solid var(--bd) !important;
-  box-shadow:0 1px 0 rgba(255,255,255,.02), 0 6px 18px rgba(0,0,0,.25)}
-.metric:hover{border-color:var(--bds) !important}
-.metric-lbl{color:var(--tx2) !important;font-weight:600}
-.metric-val{color:var(--tx) !important;font-weight:700}
-.metric-val.danger{color:var(--red) !important}
-.metric-val.warn{color:var(--amber) !important}
-.metric-val.ok{color:var(--green) !important}
-.metric-val.info{color:var(--blue) !important}
+/* Header */
+.aura-header {
+  padding: 20px 32px;
+  background: linear-gradient(90deg, #b91c1c, #991b1b);
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid rgba(0,0,0,0.2);
+  position: sticky; top: 0; z-index: 50;
+}
+.aura-header h1 { font-size: 26px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.025em; }
+.aura-header p { color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 5px; }
+.aura-header-actions { display: flex; align-items: center; gap: 8px; }
+.aura-btn {
+  background: rgba(255,255,255,0.15); color: #fff;
+  font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 6px;
+  border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+  transition: all 0.15s; backdrop-filter: blur(4px);
+}
+.aura-btn:hover { background: rgba(255,255,255,0.25); }
+.aura-btn-accent { background: #facc15; color: #3f1818; font-weight: 700; }
+.aura-btn-accent:hover { background: #fde047; }
+.aura-syncbar { padding: 5px 32px; font-size: 11px; color: var(--muted); background: #7f1d1d; text-align: right; }
 
-/* Tables */
-th{background:#11151a !important;color:#9aa3ad !important;border-bottom:1px solid var(--bd) !important}
-td{border-bottom:1px solid var(--bd) !important;color:var(--tx) !important}
-tr:hover td{background:rgba(239,68,68,.06) !important}
+/* Theme toggle */
+.theme-toggle {
+  position: relative; display: inline-flex; height: 34px; width: 60px;
+  align-items: center; border-radius: 9999px; background: rgba(255,255,255,0.15);
+  padding: 0 3px; cursor: pointer; border: none;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.25); }
+.theme-knob {
+  display: inline-flex; height: 28px; width: 28px;
+  align-items: center; justify-content: center;
+  border-radius: 9999px; background: #fff; color: #3f1818;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.2s;
+}
+html.light .theme-toggle .theme-knob { transform: translateX(26px); }
+
+/* Content wrapper */
+.aura-content { flex: 1; overflow-y: auto; padding: 24px 32px; }
+
+/* Cards */
+.metric, .rel-card, .ecard, .cfg {
+  background: var(--surface) !important; border: 1px solid var(--border) !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.02), 0 6px 18px rgba(0,0,0,0.2);
+}
+.metric:hover { border-color: var(--bds) !important; }
+.metric-val { font-size: 34px !important; font-weight: 800 !important; line-height: 1 !important; }
+.metric-val.danger { color: var(--red) !important; }
+.metric-val.warn { color: var(--amber) !important; }
+.metric-val.ok { color: var(--emerald) !important; }
+.metric-val.info { color: var(--blue) !important; }
+.metric-lbl { font-size: 11px !important; text-transform: uppercase; letter-spacing: .06em; color: var(--muted) !important; }
+
+/* Table */
+th { background: var(--surface-2) !important; color: var(--muted) !important; border-bottom: 1px solid var(--border) !important; }
+td { border-bottom: 1px solid var(--border) !important; color: var(--fg) !important; }
+tr:hover td { background: rgba(128,128,128,0.06) !important; }
+.twrap { background: var(--surface); border-color: var(--border) !important; }
 
 /* Buttons */
-.btn{background:var(--bg2) !important;border:1px solid var(--bds) !important;color:var(--tx) !important;border-radius:8px}
-.btn:hover{background:#1f242c !important}
-.btn-green{background:var(--green) !important;border-color:var(--green) !important;color:#04210f !important;font-weight:600}
+.btn { background: var(--surface) !important; border: 1px solid var(--bds) !important; color: var(--fg) !important; border-radius: 6px; }
+.btn:hover { background: var(--surface-2) !important; }
+.btn-green { background: var(--emerald) !important; border-color: var(--emerald) !important; color: #04210f !important; font-weight: 600; }
+.btn-gold { background: #facc15 !important; border-color: #facc15 !important; color: #3f1818 !important; font-weight: 700; }
 
 /* Badges */
-.b-danger{background:rgba(239,68,68,.15) !important;color:#fca5a5 !important}
-.b-warn{background:rgba(245,158,11,.15) !important;color:#fcd34d !important}
-.b-ok{background:rgba(34,197,94,.15) !important;color:#86efac !important}
-.b-blue{background:rgba(59,130,246,.15) !important;color:#93c5fd !important}
+.b-danger { background: rgba(239,68,68,0.15) !important; color: #fca5a5 !important; }
+.b-warn { background: rgba(245,158,11,0.15) !important; color: #fcd34d !important; }
+.b-ok { background: rgba(16,185,129,0.15) !important; color: #6ee7b7 !important; }
+.b-blue { background: rgba(59,130,246,0.15) !important; color: #93c5fd !important; }
+.b-gray { background: var(--surface-2) !important; color: var(--muted) !important; }
 
-/* Alert banner — red urgent style */
-.alert{background:linear-gradient(90deg,rgba(239,68,68,.18),rgba(239,68,68,.04)) !important;
-  border-left:4px solid var(--red) !important;color:#fecaca !important;border-radius:10px !important}
+/* Badge status (new style) */
+.badge-status { display: inline-flex; align-items: center; justify-content: center; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.badge-red { background: rgba(239,68,68,0.15); color: #f87171; box-shadow: inset 0 0 0 1px rgba(239,68,68,0.3); }
+.badge-amber { background: rgba(245,158,11,0.15); color: #fbbf24; box-shadow: inset 0 0 0 1px rgba(245,158,11,0.3); }
+.badge-emerald { background: rgba(16,185,129,0.15); color: #34d399; box-shadow: inset 0 0 0 1px rgba(16,185,129,0.3); }
+
+/* Alert */
+.alert {
+  background: rgba(239,68,68,0.10) !important; border-left: 4px solid var(--red) !important;
+  color: #fca5a5 !important; border-radius: 6px !important;
+}
 
 /* Inputs */
-input,select,textarea{background:var(--bg2) !important;color:var(--tx) !important;border-color:var(--bds) !important}
+input, select, textarea { background: var(--surface) !important; color: var(--fg) !important; border-color: var(--bds) !important; }
+
+/* Hide original chrome elements */
+.topbar, .tabs { display: none !important; }
+.status-row { margin-bottom: 14px; }
+
+/* Modal surfaces */
+.modal, .smodal { background: var(--surface) !important; border: 1px solid var(--border) !important; }
+.modal-head, .modal-foot, .smodal-foot { border-color: var(--border) !important; }
 
 /* Scrollbars */
-::-webkit-scrollbar{width:10px;height:10px}
-::-webkit-scrollbar-track{background:var(--bg3)}
-::-webkit-scrollbar-thumb{background:#2a2f37;border-radius:99px}
-::-webkit-scrollbar-thumb:hover{background:#3a414b}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
 
-@media(max-width:900px){
-  #auraSidebar{transform:translateX(-100%);transition:transform .2s}
-  #auraSidebar.open{transform:none}
-  #auraHeader{left:0;padding:0 16px}
-  .app{margin-left:0 !important}
+/* Light overrides */
+html.light .sidebar { background: #fff; border-right-color: rgba(0,0,0,0.08); }
+html.light .sidebar nav button { color: #374151; }
+html.light .sidebar nav button:hover, html.light .sidebar nav button.active { background: #f6f7fa; color: #111; }
+html.light .aura-syncbar { background: #991b1b; }
+html.light tr:hover td { background: rgba(128,128,128,0.04) !important; }
+html.light input, html.light select, html.light textarea { background: #fff !important; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); transition: transform .2s; }
+  .sidebar.open { transform: none; }
+  .aura-main { margin-left: 0; }
+  .aura-btn-burger { display: inline-flex !important; }
+  .aura-header { padding: 14px 16px; }
+  .aura-content { padding: 16px; }
 }
-
-
-/* Light theme override */
-html.aura-light :root, html.aura-light{}
-html.aura-light{
-  --bg:#ffffff !important; --bg2:#f6f7fa !important; --bg3:#eef0f4 !important;
-  --tx:#1a1a1a !important; --tx2:#6b7280 !important;
-  --bd:rgba(0,0,0,.10) !important; --bds:rgba(0,0,0,.18) !important;
-}
-html.aura-light th{background:#f6f7fa !important;color:#6b7280 !important}
-html.aura-light #auraSidebar{background:#ffffff;border-right:1px solid rgba(0,0,0,.08)}
-html.aura-light #auraSidebar nav a{color:#374151}
-html.aura-light #auraSidebar nav a:hover{background:rgba(0,0,0,.04);color:#111}
-html.aura-light tr:hover td{background:rgba(239,68,68,.04) !important}
-html.aura-light input,html.aura-light select,html.aura-light textarea{background:#fff !important}
-html.aura-light .alert{color:#7f1d1d !important}
-
-/* Bigger metric numbers for KPI feel */
-.metric{padding:18px 18px !important}
-.metric-val{font-size:34px !important;font-weight:800 !important;line-height:1 !important}
-.metric-lbl{font-size:11px !important;text-transform:uppercase;letter-spacing:.06em}
-
 </style>
 </head>
-<body class="aura">
-<aside id="auraSidebar">
-  <div class="as-brand">
-    <div class="as-logo"><i class="ti ti-shopping-cart"></i></div>
-    <div class="as-bt">Boas<br>Compras<small>O super para toda a família</small></div>
+<body>
+<div class="aura-shell">
+<!-- Sidebar -->
+<aside class="sidebar" id="auraSidebar">
+  <div class="sb-brand">
+    <div class="sb-tagline">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fde047" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span>Supermercado</span>
+    </div>
+    <div class="sb-name">Boas<br>Compras</div>
+    <div class="sb-badge-label">o super para toda a família</div>
   </div>
   <nav>
-    <a href="#" class="active" onclick="event.preventDefault();auraNav(this,'dashboard')"><i class="ti ti-home"></i><span>Dashboard</span></a>
-    <a href="#" onclick="event.preventDefault();auraNav(this,'validades')"><i class="ti ti-calendar-event"></i><span>Validades</span></a>
-    <a href="#" onclick="event.preventDefault();auraNav(this,'promocoes')"><i class="ti ti-tag"></i><span>Promoções</span><span class="as-badge" id="asBadgePromo" style="display:none">0</span></a>
-    <a href="#" onclick="event.preventDefault();auraNav(this,'encartes')"><i class="ti ti-photo-check"></i><span>Encartes</span><span class="as-badge" id="asBadgeEnc" style="display:none">0</span></a>
-    <a href="#" onclick="event.preventDefault();auraNav(this,'relatorio')"><i class="ti ti-chart-bar"></i><span>Relatórios</span></a>
-    <a href="#" onclick="event.preventDefault();auraNav(this,'modalidades')"><i class="ti ti-truck-delivery"></i><span>Modalidades</span></a>
-    <a href="#" onclick="event.preventDefault();auraNav(this,'ajuda')"><i class="ti ti-help"></i><span>Como configurar</span></a>
+    <button class="active" onclick="auraNav(this,'dashboard')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button onclick="auraNav(this,'validades')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Validades</span>
+    </button>
+    <button onclick="auraNav(this,'promocoes')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+      <span>Promoções</span>
+      <span class="sb-nav-badge" id="asBadgePromo" style="display:none">0</span>
+    </button>
+    <button onclick="auraNav(this,'encartes')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Encartes</span>
+      <span class="sb-nav-badge" id="asBadgeEnc" style="display:none">0</span>
+    </button>
+    <button onclick="auraNav(this,'relatorio')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Relatórios</span>
+    </button>
+    <button onclick="auraNav(this,'modalidades')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      <span>Modalidades</span>
+    </button>
+    <button onclick="auraNav(this,'ajuda')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Como configurar</span>
+    </button>
   </nav>
-  <div class="as-help" style="display:flex;align-items:center;gap:10px;color:#7d8590;font-size:12px">
-    <i class="ti ti-info-circle"></i><span>AURA Boas Compras</span>
-  </div>
+  <div class="sb-footer">AURA Vencimentos · Boas Compras</div>
 </aside>
-<header id="auraHeader">
-  <button id="auraBurger" class="btn btn-sm" onclick="document.getElementById('auraSidebar').classList.toggle('open')" style="display:none"><i class="ti ti-menu-2"></i></button>
-  <div class="ah-title">
-    <h1 class="ah">AURA VENCIMENTOS</h1>
-    <p class="ah">Central de prevenção de perdas</p>
-  </div>
-  <div class="ah-actions">
-    <button class="btn" id="auraThemeBtn" title="Alternar tema" onclick="(function(){var h=document.documentElement;h.classList.toggle('aura-light');localStorage.setItem('auraTheme',h.classList.contains('aura-light')?'light':'dark');document.getElementById('auraThemeBtn').innerHTML=h.classList.contains('aura-light')?'<i class=\'ti ti-moon\'></i>':'<i class=\'ti ti-sun\'></i>';})()" style="padding:7px 10px"><i class="ti ti-sun"></i></button>
-    <button class="btn" id="btnSyncAura" onclick="syncAll()"><i class="ti ti-refresh"></i> Sincronizar</button>
-    <button class="btn" onclick="goTab('ajuda');document.querySelectorAll('#auraSidebar nav a').forEach(function(x){x.classList.remove('active')});var lk=document.querySelector('#auraSidebar nav a[onclick*=ajuda]');if(lk)lk.classList.add('active')"><i class="ti ti-book-2"></i> Manual</button>
-    <button class="btn btn-gold" onclick="openEncarteModal(null)"><i class="ti ti-file-text"></i> Gerar encarte</button>
-  </div>
-</header>
+
+<!-- Main -->
+<div class="aura-main" id="auraMain">
+  <!-- Header -->
+  <header class="aura-header">
+    <button class="aura-btn aura-btn-burger" id="auraBurger" onclick="document.getElementById('auraSidebar').classList.toggle('open')" style="display:none">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div>
+      <h1>AURA VENCIMENTOS</h1>
+      <p>Central de prevenção de perdas</p>
+    </div>
+    <div class="aura-header-actions">
+      <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" aria-label="Alternar tema">
+        <span class="theme-knob" id="themeKnob">
+          <svg id="moonIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3f1818" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          <svg id="sunIcon" style="display:none" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3f1818" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        </span>
+      </button>
+      <button class="aura-btn" onclick="syncAll()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+        Sincronizar
+      </button>
+      <button class="aura-btn" onclick="auraNav(document.querySelector('#auraSidebar nav button:last-child'),'ajuda')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Manual
+      </button>
+      <button class="aura-btn aura-btn-accent" onclick="openEncarteModal(null)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Gerar encarte
+      </button>
+    </div>
+  </header>
+  <div class="aura-syncbar" id="auraSyncBar">Última sincronização: —</div>
+
+  <!-- Content -->
+  <div class="aura-content">
+
 <script>
-function auraNav(el, tab){
-  document.querySelectorAll('#auraSidebar nav a').forEach(function(x){x.classList.remove('active')});
-  el.classList.add('active');
-  if(tab==='dashboard'){
-    // dashboard view = show validades section but scroll to metrics
+function auraNav(el, tab) {
+  document.querySelectorAll('#auraSidebar nav button').forEach(function(x){ x.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  if (tab === 'dashboard') {
     goTab('validades');
-    setTimeout(function(){var m=document.getElementById('metrics');if(m)m.scrollIntoView({behavior:'smooth',block:'start'});},80);
+    setTimeout(function(){ var m=document.getElementById('metrics'); if(m) m.scrollIntoView({behavior:'smooth',block:'start'}); }, 80);
   } else {
     goTab(tab);
   }
 }
-// keep sidebar badges in sync with original tab badges
+function toggleTheme() {
+  var html = document.documentElement;
+  var isLight = html.classList.toggle('light');
+  var moonIcon = document.getElementById('moonIcon');
+  var sunIcon = document.getElementById('sunIcon');
+  var btn = document.getElementById('themeBtn');
+  if (isLight) {
+    moonIcon.style.display = 'none'; sunIcon.style.display = 'block';
+  } else {
+    moonIcon.style.display = 'block'; sunIcon.style.display = 'none';
+  }
+  localStorage.setItem('auraTheme', isLight ? 'light' : 'dark');
+}
 (function(){
-  var sync=function(){
-    var pb=document.getElementById('asBadgePromo');
-    var eb=document.getElementById('asBadgeEnc');
-    var origEnc=document.getElementById('encBadge');
-    // count promos from grid
-    var pg=document.getElementById('promoGrid');
-    var promoCount=pg?pg.querySelectorAll('.ecard,.promo-card,[data-promo-card]').length:0;
-    if(pb){if(promoCount>0){pb.textContent=promoCount;pb.style.display='inline-block'}else{pb.style.display='none'}}
-    if(eb&&origEnc){eb.textContent=origEnc.textContent;eb.style.display=origEnc.style.display==='none'?'none':'inline-block';}
-  };
-  setInterval(sync,1500);
-})();
-// theme restore
-(function(){
-  var saved=localStorage.getItem('auraTheme');
-  if(saved==='light'){document.documentElement.classList.add('aura-light');}
-  var b=document.getElementById('auraThemeBtn');
-  if(b)b.innerHTML=document.documentElement.classList.contains('aura-light')?'<i class="ti ti-moon"></i>':'<i class="ti ti-sun"></i>';
-  if(window.innerWidth<900){document.getElementById('auraBurger').style.display='inline-flex'}
+  var saved = localStorage.getItem('auraTheme');
+  if (saved === 'light') {
+    document.documentElement.classList.add('light');
+    var moonIcon = document.getElementById('moonIcon');
+    var sunIcon = document.getElementById('sunIcon');
+    if (moonIcon) moonIcon.style.display = 'none';
+    if (sunIcon) sunIcon.style.display = 'block';
+  }
+  if (window.innerWidth < 900) {
+    var b = document.getElementById('auraBurger');
+    if (b) b.style.display = 'inline-flex';
+  }
+  // Sync badge
+  setInterval(function(){
+    var pb = document.getElementById('asBadgePromo');
+    var eb = document.getElementById('asBadgeEnc');
+    var origEnc = document.getElementById('encBadge');
+    var pg = document.getElementById('promoGrid');
+    var promoCount = pg ? pg.querySelectorAll('.ecard,.promo-card').length : 0;
+    if (pb) { if (promoCount>0){ pb.textContent=promoCount; pb.style.display='inline-flex'; } else { pb.style.display='none'; } }
+    if (eb && origEnc) { eb.textContent=origEnc.textContent; eb.style.display=origEnc.style.display==='none'?'none':'inline-flex'; }
+    // Sync bar
+    var st = document.getElementById('syncTime');
+    var bar = document.getElementById('auraSyncBar');
+    if (st && bar && st.textContent) bar.textContent = st.textContent;
+  }, 1500);
 })();
 </script>
-
 <div class="app">
   <div class="topbar">
     <div>
@@ -711,7 +832,10 @@ function auraNav(el, tab){
       </div>
     </div>
   </div>
-</div>
+</div><!-- /.app -->
+  </div><!-- /.aura-content -->
+</div><!-- /.aura-main -->
+</div><!-- /.aura-shell -->
 
 <!-- MODAL EDITAR NEGOCIAÇÃO -->
 <div class="modal-ov" id="editarNegModal">
