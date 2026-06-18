@@ -225,6 +225,116 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
 .neg-badge-vendido{background:var(--bg2);color:var(--tx2)}
 
 @media(max-width:700px){.cfg-grid,.form-row-2,.modal-body{grid-template-columns:1fr}.promo-grid{grid-template-columns:1fr}.enc-grid{grid-template-columns:1fr 1fr}.resolvido-opts{grid-template-columns:1fr}}
+
+/* === AURA VENCIMENTOS THEME OVERRIDE === */
+:root{
+  --bg:#0f1216 !important; --bg2:#161a20 !important; --bg3:#0b0d10 !important;
+  --tx:#e9eef5 !important; --tx2:#9aa3ad !important;
+  --bd:rgba(255,255,255,.08) !important; --bds:rgba(255,255,255,.16) !important;
+  --green:#22c55e !important; --gd:#16a34a !important;
+  --blue:#3b82f6 !important; --amber:#f59e0b !important; --red:#ef4444 !important;
+  --aura-red:#7a0d0d; --aura-red2:#3a0606; --aura-gold:#f5b301;
+}
+html,body{background:var(--bg3) !important;color:var(--tx) !important}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif !important}
+
+/* Layout shell */
+body.aura{display:block}
+#auraHeader{position:fixed;top:0;left:240px;right:0;height:84px;z-index:50;
+  background:linear-gradient(90deg,var(--aura-red2) 0%,var(--aura-red) 60%,#5a0a0a 100%);
+  display:flex;align-items:center;padding:0 28px;gap:24px;
+  box-shadow:0 4px 20px rgba(0,0,0,.4);border-bottom:1px solid rgba(255,255,255,.06)}
+#auraHeader .ah-title{flex:1}
+#auraHeader h1.ah{font-family:Montserrat,sans-serif;font-weight:900;font-size:26px;
+  letter-spacing:.04em;color:#fff;line-height:1}
+#auraHeader p.ah{font-size:13px;color:var(--aura-gold);margin-top:4px;letter-spacing:.02em}
+#auraHeader .ah-actions{display:flex;gap:10px;align-items:center}
+#auraHeader .ah-actions .btn{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);color:#fff}
+#auraHeader .ah-actions .btn:hover{background:rgba(0,0,0,.45)}
+#auraHeader .ah-actions .btn.btn-gold{background:var(--aura-gold);border-color:var(--aura-gold);color:#1a1208;font-weight:600}
+#auraHeader .ah-actions .btn.btn-gold:hover{background:#ffc233}
+#auraHeader .ah-sync{font-size:11px;color:rgba(255,255,255,.75);margin-top:4px;text-align:right}
+
+#auraSidebar{position:fixed;top:0;left:0;bottom:0;width:240px;z-index:60;
+  background:#0a0c0f;border-right:1px solid rgba(255,255,255,.06);
+  display:flex;flex-direction:column}
+#auraSidebar .as-brand{padding:18px 18px;display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--aura-red2),var(--aura-red));height:84px;
+  border-bottom:1px solid rgba(255,255,255,.06)}
+#auraSidebar .as-brand .as-logo{width:46px;height:46px;border-radius:10px;background:var(--aura-gold);
+  display:flex;align-items:center;justify-content:center;color:#1a1208;font-size:26px;flex-shrink:0;
+  box-shadow:0 4px 12px rgba(0,0,0,.3)}
+#auraSidebar .as-brand .as-bt{font-family:Montserrat,sans-serif;font-weight:900;color:#fff;
+  font-size:14px;line-height:1.05;letter-spacing:.02em}
+#auraSidebar .as-brand .as-bt small{display:block;font-size:11px;color:var(--aura-gold);font-weight:700;margin-top:2px}
+#auraSidebar nav{flex:1;padding:14px 10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto}
+#auraSidebar nav a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:8px;
+  color:#b4bcc6;font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;
+  transition:background .15s,color .15s;border:none;background:none;text-align:left;width:100%}
+#auraSidebar nav a i{font-size:18px;flex-shrink:0;color:#7d8590}
+#auraSidebar nav a:hover{background:rgba(255,255,255,.04);color:#fff}
+#auraSidebar nav a:hover i{color:#fff}
+#auraSidebar nav a.active{background:linear-gradient(90deg,rgba(239,68,68,.18),transparent);
+  color:#fff;border-left:3px solid var(--red);padding-left:11px}
+#auraSidebar nav a.active i{color:var(--red)}
+#auraSidebar nav a .as-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;
+  font-weight:800;padding:2px 7px;border-radius:99px;min-width:20px;text-align:center}
+#auraSidebar .as-help{padding:14px;border-top:1px solid rgba(255,255,255,.06)}
+
+/* Push original app to the right & below new chrome */
+.app{margin-left:240px !important;padding-top:104px !important;padding-left:24px !important;padding-right:24px !important;background:var(--bg3)}
+/* Hide the original topbar (replaced by aura header) and original tabs (replaced by sidebar) */
+.topbar, .tabs{display:none !important}
+.status-row{margin-bottom:14px}
+
+/* Card surfaces — darker, soft border */
+.metric,.rel-card,.twrap,.ecard,.cfg,.bib-grid,.modal{
+  background:var(--bg) !important;border:1px solid var(--bd) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.02), 0 6px 18px rgba(0,0,0,.25)}
+.metric:hover{border-color:var(--bds) !important}
+.metric-lbl{color:var(--tx2) !important;font-weight:600}
+.metric-val{color:var(--tx) !important;font-weight:700}
+.metric-val.danger{color:var(--red) !important}
+.metric-val.warn{color:var(--amber) !important}
+.metric-val.ok{color:var(--green) !important}
+.metric-val.info{color:var(--blue) !important}
+
+/* Tables */
+th{background:#11151a !important;color:#9aa3ad !important;border-bottom:1px solid var(--bd) !important}
+td{border-bottom:1px solid var(--bd) !important;color:var(--tx) !important}
+tr:hover td{background:rgba(239,68,68,.06) !important}
+
+/* Buttons */
+.btn{background:var(--bg2) !important;border:1px solid var(--bds) !important;color:var(--tx) !important;border-radius:8px}
+.btn:hover{background:#1f242c !important}
+.btn-green{background:var(--green) !important;border-color:var(--green) !important;color:#04210f !important;font-weight:600}
+
+/* Badges */
+.b-danger{background:rgba(239,68,68,.15) !important;color:#fca5a5 !important}
+.b-warn{background:rgba(245,158,11,.15) !important;color:#fcd34d !important}
+.b-ok{background:rgba(34,197,94,.15) !important;color:#86efac !important}
+.b-blue{background:rgba(59,130,246,.15) !important;color:#93c5fd !important}
+
+/* Alert banner — red urgent style */
+.alert{background:linear-gradient(90deg,rgba(239,68,68,.18),rgba(239,68,68,.04)) !important;
+  border-left:4px solid var(--red) !important;color:#fecaca !important;border-radius:10px !important}
+
+/* Inputs */
+input,select,textarea{background:var(--bg2) !important;color:var(--tx) !important;border-color:var(--bds) !important}
+
+/* Scrollbars */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:var(--bg3)}
+::-webkit-scrollbar-thumb{background:#2a2f37;border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:#3a414b}
+
+@media(max-width:900px){
+  #auraSidebar{transform:translateX(-100%);transition:transform .2s}
+  #auraSidebar.open{transform:none}
+  #auraHeader{left:0;padding:0 16px}
+  .app{margin-left:0 !important}
+}
+
 </style>
 </head>
 <body>
@@ -2941,5 +3051,99 @@ var _cfg=loadCfg();
 if(_cfg.id){setDot('loading','Reconectando...');syncAll();}
 else refresh();
 </script>
+
+<script>
+(function(){
+  document.body.classList.add('aura');
+
+  // Build sidebar
+  const sb = document.createElement('aside');
+  sb.id = 'auraSidebar';
+  sb.innerHTML = `
+    <div class="as-brand">
+      <div class="as-logo"><i class="ti ti-shopping-cart"></i></div>
+      <div class="as-bt">Supermercado<br>Boas Compras<small>AURA</small></div>
+    </div>
+    <nav id="auraNav">
+      <a data-tab="validades"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+      <a data-tab="validades"><i class="ti ti-calendar-event"></i> Validades</a>
+      <a data-tab="promocoes"><i class="ti ti-tag"></i> Promoções</a>
+      <a data-tab="encartes"><i class="ti ti-photo-check"></i> Encartes</a>
+      <a data-tab="relatorio"><i class="ti ti-chart-bar"></i> Relatórios</a>
+      <a data-tab="modalidades"><i class="ti ti-clipboard-list"></i> Modalidades</a>
+      <a data-tab="ajuda"><i class="ti ti-help-circle"></i> Ajuda</a>
+    </nav>
+    <div class="as-help">
+      <a data-tab="ajuda" style="display:flex;align-items:center;gap:10px;color:#9aa3ad;cursor:pointer;font-size:13px">
+        <i class="ti ti-info-circle" style="font-size:18px"></i> Ajuda
+      </a>
+    </div>`;
+  document.body.appendChild(sb);
+
+  // Build header (using original buttons from topbar where possible)
+  const hdr = document.createElement('header');
+  hdr.id = 'auraHeader';
+  hdr.innerHTML = `
+    <div class="ah-title">
+      <h1 class="ah">AURA VENCIMENTOS</h1>
+      <p class="ah">Central de prevenção de perdas</p>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      <div class="ah-actions">
+        <button class="btn" onclick="syncAll && syncAll()"><i class="ti ti-refresh"></i> Sincronizar</button>
+        <button class="btn" onclick="goTab && goTab('ajuda')"><i class="ti ti-book"></i> Manual</button>
+        <button class="btn btn-gold" onclick="goTab && goTab('encartes')"><i class="ti ti-printer"></i> Gerar encarte</button>
+      </div>
+      <div class="ah-sync" id="ahSyncTime">Última sincronização: —</div>
+    </div>`;
+  document.body.appendChild(hdr);
+
+  // Mirror sync time
+  const orig = document.getElementById('syncTime');
+  if (orig){
+    const mo = new MutationObserver(()=>{
+      const t = orig.textContent.trim();
+      document.getElementById('ahSyncTime').textContent = t ? ('Última sincronização: '+t) : 'Última sincronização: —';
+    });
+    mo.observe(orig,{childList:true,characterData:true,subtree:true});
+  }
+
+  // Wire sidebar nav to existing goTab
+  const navLinks = sb.querySelectorAll('a[data-tab]');
+  function setActive(tab){
+    navLinks.forEach(a=>a.classList.toggle('active', a.dataset.tab===tab));
+  }
+  navLinks.forEach(a=>{
+    a.addEventListener('click',()=>{
+      const t = a.dataset.tab;
+      if (window.goTab) window.goTab(t);
+      setActive(t);
+    });
+  });
+  // Initial: validades
+  setActive('validades');
+
+  // Mirror tab badges
+  function mirror(srcId, label){
+    const src = document.getElementById(srcId);
+    if(!src) return;
+    const target = Array.from(navLinks).find(a=>a.textContent.trim().toLowerCase().startsWith(label.toLowerCase()));
+    if(!target) return;
+    const sync = ()=>{
+      let b = target.querySelector('.as-badge');
+      const visible = src.style.display !== 'none' && src.textContent.trim() && src.textContent.trim() !== '0';
+      if (visible){
+        if(!b){ b=document.createElement('span'); b.className='as-badge'; target.appendChild(b); }
+        b.textContent = src.textContent.trim();
+      } else if (b){ b.remove(); }
+    };
+    new MutationObserver(sync).observe(src,{childList:true,characterData:true,subtree:true,attributes:true});
+    sync();
+  }
+  mirror('encBadge','Encartes');
+  mirror('negBadge','Relatórios');
+})();
+</script>
+
 </body>
 </html>
