@@ -428,6 +428,8 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   position: relative;
   overflow: hidden;
 }
+.dash-hero-card.clickable { cursor: pointer; transition: transform .15s, box-shadow .15s, border-color .15s; }
+.dash-hero-card.clickable:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.25); border-color: var(--bds); }
 .dash-hero-card::after {
   content: '';
   position: absolute;
@@ -763,7 +765,7 @@ function toggleTheme() {
     <!-- Hero Row -->
     <div class="dash-hero">
       <!-- Card 1: Total -->
-      <div class="dash-hero-card card-red">
+      <div class="dash-hero-card card-red clickable" onclick="filtrarTudo()" title="Ver todos os produtos">
         <div class="dash-hero-label">Produtos monitorados</div>
         <div class="dash-hero-num" id="dTotal">—</div>
         <div class="dash-hero-sub" id="dTotalSub">Aguardando sincronização</div>
@@ -773,7 +775,7 @@ function toggleTheme() {
       </div>
 
       <!-- Card 2: Atenção -->
-      <div class="dash-hero-card card-amber">
+      <div class="dash-hero-card card-amber clickable" onclick="filtrarAtencaoGeral()" title="Ver todos os itens que precisam de atenção">
         <div class="dash-hero-label">Itens que precisam de atenção</div>
         <div class="dash-hero-attention">
           <div class="dha-icon">
@@ -788,7 +790,7 @@ function toggleTheme() {
       </div>
 
       <!-- Card 3: Valor em risco -->
-      <div class="dash-hero-card card-red">
+      <div class="dash-hero-card card-red clickable" onclick="filtrarRisco()" title="Ver produtos em risco de vencimento">
         <div class="dash-hero-label">
           Valor em risco
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -867,13 +869,13 @@ function toggleTheme() {
 
   <div id="sec-validades" class="sec">
     <div class="filters">
-      <select id="fSetor" onchange="renderTable()">
+      <select id="fSetor" onchange="_multiStatusFilter=null;renderTable()">
         <option value="">Todos os setores</option>
         <option>Acougue</option><option>Bebidas</option><option>Congelados</option>
         <option>FLV</option><option>Frios</option><option>Laticinios</option>
         <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
       </select>
-      <select id="fStatus" onchange="renderTable()">
+      <select id="fStatus" onchange="_multiStatusFilter=null;renderTable()">
         <option value="">Todos os status</option>
         <option value="vencido">Vencido</option>
         <option value="critico">Critico (3d)</option>
@@ -1738,7 +1740,9 @@ function renderTable(){
   var all=products.filter(function(p){
     var s=statusFromDays(daysDiff(p.validade));
     if(setor&&p.setor!==setor)return false;
-    if(status){
+    if(_multiStatusFilter){
+      if(!_multiStatusFilter.includes(s))return false;
+    } else if(status){
       if(status==='aguardando'){
         if(!(p.status||'').toLowerCase().includes('aguard'))return false;
       } else {
@@ -2110,7 +2114,7 @@ function renderMetrics(){
       +'</div>';
   }
   document.getElementById('metrics').innerHTML=
-    mc('Total',products.length,'','')+
+    mc('Total',products.length,'','todos')+
     mc('Vencidos',c.vencido,'danger','vencido')+
     mc('Critico 3d',c.critico,'danger','critico')+
     mc('Urgente 7d',c.urgente,'warn','urgente')+
@@ -2119,7 +2123,36 @@ function renderMetrics(){
     mc('Aguardando',aguarda,'info','aguardando');
 }
 
+// filtro multi-status (usado pelos hero cards)
+var _multiStatusFilter=null;
+
+function filtrarTudo(){
+  _multiStatusFilter=null;
+  goTab('validades');
+  document.getElementById('fBusca').value='';
+  document.getElementById('fSetor').value='';
+  document.getElementById('fStatus').value='';
+  renderTable();
+}
+function filtrarAtencaoGeral(){
+  _multiStatusFilter=['vencido','critico','urgente','atencao'];
+  goTab('validades');
+  document.getElementById('fBusca').value='';
+  document.getElementById('fSetor').value='';
+  document.getElementById('fStatus').value='';
+  renderTable();
+}
+function filtrarRisco(){
+  _multiStatusFilter=['vencido','critico','urgente'];
+  goTab('validades');
+  document.getElementById('fBusca').value='';
+  document.getElementById('fSetor').value='';
+  document.getElementById('fStatus').value='';
+  renderTable();
+}
 function filtrarMetrica(filt){
+  _multiStatusFilter=null;
+  if(filt==='todos'){filtrarTudo();return;}
   goTab('validades');
   var sel=document.getElementById('fStatus');
   if(!sel)return;
