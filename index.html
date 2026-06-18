@@ -812,6 +812,11 @@ function toggleTheme() {
       <button class="dab-btn" onclick="filtrarMetrica('vencido')">Ver críticos</button>
     </div>
 
+    <!-- Setor breakdown (movido para o topo) -->
+    <div class="dash-divider-label">Por setor</div>
+    <div id="dashSetorGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:24px">
+    </div>
+
     <!-- KPI Tiles -->
     <div class="dash-divider-label">Status dos produtos</div>
     <div class="dash-tiles" id="dashTiles">
@@ -856,10 +861,7 @@ function toggleTheme() {
       </table>
     </div>
 
-    <!-- Setor breakdown -->
-    <div class="dash-divider-label">Por setor</div>
-    <div id="dashSetorGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:24px">
-    </div>
+
 
   </div>
 
