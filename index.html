@@ -5,46 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Validades</title>
 <link rel="stylesheet" href="https://unpkg.com/@tabler/icons-webfont@3.10.0/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&display=swap">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-/* Aura design tokens — dark by default, light via html.light */
-:root{
-  --bg:#2a2a2a;       /* original "card/bg" surface -> aura surface */
-  --bg2:#333333;      /* subtle surface -> aura surface-2 */
-  --bg3:#1a1a1a;      /* page background -> aura bg */
-  --tx:#f5f5f5;       /* foreground */
-  --tx2:#a0a0a0;      /* muted */
-  --bd:rgba(255,255,255,.08);
-  --bds:rgba(255,255,255,.18);
-  --r:10px;
-  --rl:14px;
-  --green:#10b981;    /* emerald */
-  --gd:#059669;
-  --blue:#3b82f6;
-  --amber:#f59e0b;
-  --red:#ef4444;
-  --orange:#f97316;
-  --yellow:#eab308;
-}
-html.light{
-  --bg:#ffffff;
-  --bg2:#f6f7fa;
-  --bg3:#eef0f4;
-  --tx:#1a1a1a;
-  --tx2:#6b7280;
-  --bd:rgba(0,0,0,.10);
-  --bds:rgba(0,0,0,.18);
-  --green:#059669;
-  --gd:#047857;
-  --blue:#2563eb;
-  --amber:#d97706;
-  --red:#dc2626;
-}
-body{font-family:"Montserrat",-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;background:var(--bg3);color:var(--tx);min-height:100vh;-webkit-font-smoothing:antialiased}
-h1,h2,h3,h4,h5,h6{font-family:"Montserrat",sans-serif;font-weight:700;letter-spacing:-.01em}
-.aura-theme-toggle{position:fixed;top:14px;right:14px;z-index:9999;width:38px;height:38px;border-radius:50%;border:1px solid var(--bds);background:var(--bg);color:var(--tx);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 14px rgba(0,0,0,.18);transition:transform .15s}
-.aura-theme-toggle:hover{transform:scale(1.05)}
+:root{--bg:#fff;--bg2:#f5f5f3;--bg3:#eeede8;--tx:#1a1a18;--tx2:#6b6b67;--bd:rgba(0,0,0,.12);--bds:rgba(0,0,0,.22);--r:8px;--rl:12px;--green:#1D9E75;--gd:#0F6E56;--blue:#378ADD;--amber:#BA7517;--red:#E24B4A;}
+@media(prefers-color-scheme:dark){:root{--bg:#1e1e1c;--bg2:#282825;--bg3:#323230;--tx:#f0efe8;--tx2:#9b9b95;--bd:rgba(255,255,255,.1);--bds:rgba(255,255,255,.2);}}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg3);color:var(--tx);min-height:100vh}
 .app{max-width:100%;margin:0 auto;padding:24px 28px}
 .cfg{background:var(--bg);border:2px dashed var(--bds);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;display:none}
 .cfg h3{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--amber)}
@@ -369,11 +335,97 @@ input,select,textarea{background:var(--bg2) !important;color:var(--tx) !importan
   .app{margin-left:0 !important}
 }
 
+
+/* Light theme override */
+html.aura-light :root, html.aura-light{}
+html.aura-light{
+  --bg:#ffffff !important; --bg2:#f6f7fa !important; --bg3:#eef0f4 !important;
+  --tx:#1a1a1a !important; --tx2:#6b7280 !important;
+  --bd:rgba(0,0,0,.10) !important; --bds:rgba(0,0,0,.18) !important;
+}
+html.aura-light th{background:#f6f7fa !important;color:#6b7280 !important}
+html.aura-light #auraSidebar{background:#ffffff;border-right:1px solid rgba(0,0,0,.08)}
+html.aura-light #auraSidebar nav a{color:#374151}
+html.aura-light #auraSidebar nav a:hover{background:rgba(0,0,0,.04);color:#111}
+html.aura-light tr:hover td{background:rgba(239,68,68,.04) !important}
+html.aura-light input,html.aura-light select,html.aura-light textarea{background:#fff !important}
+html.aura-light .alert{color:#7f1d1d !important}
+
+/* Bigger metric numbers for KPI feel */
+.metric{padding:18px 18px !important}
+.metric-val{font-size:34px !important;font-weight:800 !important;line-height:1 !important}
+.metric-lbl{font-size:11px !important;text-transform:uppercase;letter-spacing:.06em}
+
 </style>
 </head>
-<body>
-<button class="aura-theme-toggle" id="auraThemeToggle" title="Alternar tema" onclick="(function(){var h=document.documentElement;h.classList.toggle('light');localStorage.setItem('auraTheme',h.classList.contains('light')?'light':'dark');document.getElementById('auraThemeToggle').innerHTML=h.classList.contains('light')?'\u{1F319}':'\u2600\uFE0F';})()">☀️</button>
-<script>(function(){var saved=localStorage.getItem('auraTheme');if(saved==='light'){document.documentElement.classList.add('light');}var b=document.getElementById('auraThemeToggle');if(b)b.innerHTML=document.documentElement.classList.contains('light')?'\u{1F319}':'\u2600\uFE0F';})();</script>
+<body class="aura">
+<aside id="auraSidebar">
+  <div class="as-brand">
+    <div class="as-logo"><i class="ti ti-shopping-cart"></i></div>
+    <div class="as-bt">Boas<br>Compras<small>O super para toda a família</small></div>
+  </div>
+  <nav>
+    <a href="#" class="active" onclick="event.preventDefault();auraNav(this,'dashboard')"><i class="ti ti-home"></i><span>Dashboard</span></a>
+    <a href="#" onclick="event.preventDefault();auraNav(this,'validades')"><i class="ti ti-calendar-event"></i><span>Validades</span></a>
+    <a href="#" onclick="event.preventDefault();auraNav(this,'promocoes')"><i class="ti ti-tag"></i><span>Promoções</span><span class="as-badge" id="asBadgePromo" style="display:none">0</span></a>
+    <a href="#" onclick="event.preventDefault();auraNav(this,'encartes')"><i class="ti ti-photo-check"></i><span>Encartes</span><span class="as-badge" id="asBadgeEnc" style="display:none">0</span></a>
+    <a href="#" onclick="event.preventDefault();auraNav(this,'relatorio')"><i class="ti ti-chart-bar"></i><span>Relatórios</span></a>
+    <a href="#" onclick="event.preventDefault();auraNav(this,'modalidades')"><i class="ti ti-truck-delivery"></i><span>Modalidades</span></a>
+    <a href="#" onclick="event.preventDefault();auraNav(this,'ajuda')"><i class="ti ti-help"></i><span>Como configurar</span></a>
+  </nav>
+  <div class="as-help" style="display:flex;align-items:center;gap:10px;color:#7d8590;font-size:12px">
+    <i class="ti ti-info-circle"></i><span>AURA Boas Compras</span>
+  </div>
+</aside>
+<header id="auraHeader">
+  <button id="auraBurger" class="btn btn-sm" onclick="document.getElementById('auraSidebar').classList.toggle('open')" style="display:none"><i class="ti ti-menu-2"></i></button>
+  <div class="ah-title">
+    <h1 class="ah">AURA VENCIMENTOS</h1>
+    <p class="ah">Central de prevenção de perdas</p>
+  </div>
+  <div class="ah-actions">
+    <button class="btn" id="auraThemeBtn" title="Alternar tema" onclick="(function(){var h=document.documentElement;h.classList.toggle('aura-light');localStorage.setItem('auraTheme',h.classList.contains('aura-light')?'light':'dark');document.getElementById('auraThemeBtn').innerHTML=h.classList.contains('aura-light')?'<i class=\'ti ti-moon\'></i>':'<i class=\'ti ti-sun\'></i>';})()" style="padding:7px 10px"><i class="ti ti-sun"></i></button>
+    <button class="btn" id="btnSyncAura" onclick="syncAll()"><i class="ti ti-refresh"></i> Sincronizar</button>
+    <button class="btn" onclick="goTab('ajuda');document.querySelectorAll('#auraSidebar nav a').forEach(function(x){x.classList.remove('active')});var lk=document.querySelector('#auraSidebar nav a[onclick*=ajuda]');if(lk)lk.classList.add('active')"><i class="ti ti-book-2"></i> Manual</button>
+    <button class="btn btn-gold" onclick="openEncarteModal(null)"><i class="ti ti-file-text"></i> Gerar encarte</button>
+  </div>
+</header>
+<script>
+function auraNav(el, tab){
+  document.querySelectorAll('#auraSidebar nav a').forEach(function(x){x.classList.remove('active')});
+  el.classList.add('active');
+  if(tab==='dashboard'){
+    // dashboard view = show validades section but scroll to metrics
+    goTab('validades');
+    setTimeout(function(){var m=document.getElementById('metrics');if(m)m.scrollIntoView({behavior:'smooth',block:'start'});},80);
+  } else {
+    goTab(tab);
+  }
+}
+// keep sidebar badges in sync with original tab badges
+(function(){
+  var sync=function(){
+    var pb=document.getElementById('asBadgePromo');
+    var eb=document.getElementById('asBadgeEnc');
+    var origEnc=document.getElementById('encBadge');
+    // count promos from grid
+    var pg=document.getElementById('promoGrid');
+    var promoCount=pg?pg.querySelectorAll('.ecard,.promo-card,[data-promo-card]').length:0;
+    if(pb){if(promoCount>0){pb.textContent=promoCount;pb.style.display='inline-block'}else{pb.style.display='none'}}
+    if(eb&&origEnc){eb.textContent=origEnc.textContent;eb.style.display=origEnc.style.display==='none'?'none':'inline-block';}
+  };
+  setInterval(sync,1500);
+})();
+// theme restore
+(function(){
+  var saved=localStorage.getItem('auraTheme');
+  if(saved==='light'){document.documentElement.classList.add('aura-light');}
+  var b=document.getElementById('auraThemeBtn');
+  if(b)b.innerHTML=document.documentElement.classList.contains('aura-light')?'<i class="ti ti-moon"></i>':'<i class="ti ti-sun"></i>';
+  if(window.innerWidth<900){document.getElementById('auraBurger').style.display='inline-flex'}
+})();
+</script>
+
 <div class="app">
   <div class="topbar">
     <div>
