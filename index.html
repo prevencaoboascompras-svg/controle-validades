@@ -2424,38 +2424,19 @@ function setFotoStatus(msg, cor){
 }
 
 async function buscarFotoOpenFoodFacts(ean, nomeProduto){
-  // Tenta pelo EAN primeiro
-  if(ean){
-    try{
-      setFotoStatus('Buscando foto pelo código de barras...','var(--amber)');
-      var res=await fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json?fields=image_url,image_front_url,product_name');
-      var data=await res.json();
-      if(data.status===1&&data.product){
-        var imgUrl=data.product.image_front_url||data.product.image_url;
-        if(imgUrl){
-          await carregarImagemUrl(imgUrl);
-          setFotoStatus('✓ Foto encontrada pelo código de barras','var(--green)');
-          return true;
-        }
-      }
-    }catch(e){}
-  }
-  // Tenta pelo nome
-  if(nomeProduto){
-    return await buscarFotoPorNome(nomeProduto);
-  }
-  setFotoStatus('Foto não encontrada. Envie manualmente.','var(--red)');
-  return false;
+  // Ponto de entrada usado na abertura automática do modal de encarte.
+  // Delega tudo para buscarFotoCompleta, que SEMPRE tenta o Google (fundo
+  // branco) primeiro — o EAN só entra como reforço/fallback, nunca como
+  // atalho que encerra a busca antes do Google atuar.
+  return await buscarFotoCompleta(ean, nomeProduto);
 }
 
 // ── Configurações Google Custom Search ──────────────────────────────────────
 var GCSE_API_KEY = 'AIzaSyClxbl8yzMpHdahpB38Fc66NcqtDWxjdvw';
 var GCSE_CX      = 'a74b49ecb1fd546fb';
 
-async function buscarFotoGoogleCSE(nome){
+async function buscarFotoGoogleCSE(query){
   try{
-    var query = nome.replace(/\s*\(\d+.*$/,'').replace(/\s*\{.*$/,'').trim()
-                + ' fundo branco produto embalagem';
     var url = 'https://www.googleapis.com/customsearch/v1'
       + '?key=' + GCSE_API_KEY
       + '&cx='  + GCSE_CX
@@ -2468,58 +2449,101 @@ async function buscarFotoGoogleCSE(nome){
     var res  = await fetch(url);
     var data = await res.json();
     if(data.error){
-      // Cota esgotada ou erro de API — sinaliza para tentar Open Food Facts
+      // Cota esgotada ou erro de API — sinaliza para tentar outras fontes
       console.warn('Google CSE erro:', data.error.message);
-      return null; // null = tente fallback
+      return null; // null = erro/cota, tente fallback
     }
     if(data.items && data.items.length > 0){
       for(var i = 0; i < data.items.length; i++){
         var imgUrl = data.items[i].link;
         if(!imgUrl) continue;
         var ok = await carregarImagemUrl(imgUrl);
-        if(ok !== false){
-          setFotoStatus('✓ Foto encontrada (Google): "'+nome+'"','var(--green)');
-          return true;
-        }
+        if(ok !== false) return true;
       }
     }
-    return false; // buscou, não achou nada
+    return false; // buscou, não achou nada utilizável
   }catch(e){
     console.warn('Google CSE exception:', e);
-    return null; // null = tente fallback
+    return null; // null = erro, tente fallback
   }
 }
 
-async function buscarFotoPorNome(nome){
-  setFotoStatus('Buscando foto...','var(--amber)');
-  var query = nome.replace(/\s*\(\d+.*$/,'').replace(/\s*\{.*$/,'').trim();
+// Orquestra TODAS as fontes, sempre dando a primeira chance ao Google
+// (fundo branco). EAN e nome "puro" só entram como tentativas adicionais
+// quando a tentativa anterior não encontrar nada.
+async function buscarFotoCompleta(ean, nomeProduto){
+  var nomeLimpo = (nomeProduto||'').replace(/\s*\(\d+.*$/,'').replace(/\s*\{.*$/,'').trim();
 
-  // 1ª tentativa: Google Custom Search (fundo branco)
-  var gResult = await buscarFotoGoogleCSE(query);
-  if(gResult === true)  return true;   // achou
-  if(gResult === false){               // buscou mas não achou — tenta Open Food Facts
-    setFotoStatus('Google não achou. Tentando Open Food Facts...','var(--amber)');
+  // 1ª tentativa — Google CSE pelo NOME do produto (fundo branco)
+  if(nomeLimpo){
+    setFotoStatus('Buscando foto (fundo branco)...','var(--amber)');
+    var g1 = await buscarFotoGoogleCSE(nomeLimpo + ' fundo branco produto embalagem');
+    if(g1 === true){
+      setFotoStatus('✓ Foto encontrada (Google): "'+nomeLimpo+'"','var(--green)');
+      return true;
+    }
   }
-  // null = cota/erro — vai direto pro fallback sem mensagem de falha
 
-  // 2ª tentativa: Open Food Facts
-  try{
-    var res=await fetch('https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(query)+'&search_simple=1&action=process&json=1&page_size=5&fields=image_front_url,image_url,product_name');
-    var data=await res.json();
-    if(data.products&&data.products.length>0){
-      for(var i=0;i<data.products.length;i++){
-        var imgUrl=data.products[i].image_front_url||data.products[i].image_url;
+  // 2ª tentativa — Google CSE pelo CÓDIGO DE BARRAS (alguns produtos têm a
+  // foto indexada em sites de varejo associada ao EAN)
+  if(ean){
+    setFotoStatus('Tentando buscar pelo código de barras (Google)...','var(--amber)');
+    var g2 = await buscarFotoGoogleCSE(ean + ' produto embalagem fundo branco');
+    if(g2 === true){
+      setFotoStatus('✓ Foto encontrada (Google, por código de barras)','var(--green)');
+      return true;
+    }
+  }
+
+  // 3ª tentativa — Open Food Facts pelo EAN exato
+  if(ean){
+    setFotoStatus('Google não achou. Tentando Open Food Facts (código de barras)...','var(--amber)');
+    try{
+      var res=await fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json?fields=image_url,image_front_url,product_name');
+      var data=await res.json();
+      if(data.status===1&&data.product){
+        var imgUrl=data.product.image_front_url||data.product.image_url;
         if(imgUrl){
-          await carregarImagemUrl(imgUrl);
-          setFotoStatus('✓ Foto encontrada (Open Food Facts): "'+(data.products[i].product_name||query)+'"','var(--green)');
-          return true;
+          var ok=await carregarImagemUrl(imgUrl);
+          if(ok!==false){
+            setFotoStatus('✓ Foto encontrada (Open Food Facts, código de barras)','var(--green)');
+            return true;
+          }
         }
       }
-    }
-  }catch(e){}
+    }catch(e){}
+  }
+
+  // 4ª tentativa — Open Food Facts pelo nome
+  if(nomeLimpo){
+    setFotoStatus('Tentando Open Food Facts (nome)...','var(--amber)');
+    try{
+      var res2=await fetch('https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(nomeLimpo)+'&search_simple=1&action=process&json=1&page_size=5&fields=image_front_url,image_url,product_name');
+      var data2=await res2.json();
+      if(data2.products&&data2.products.length>0){
+        for(var i=0;i<data2.products.length;i++){
+          var imgUrl2=data2.products[i].image_front_url||data2.products[i].image_url;
+          if(imgUrl2){
+            var ok2=await carregarImagemUrl(imgUrl2);
+            if(ok2!==false){
+              setFotoStatus('✓ Foto encontrada (Open Food Facts): "'+(data2.products[i].product_name||nomeLimpo)+'"','var(--green)');
+              return true;
+            }
+          }
+        }
+      }
+    }catch(e){}
+  }
 
   setFotoStatus('Foto não encontrada. Envie manualmente.','var(--red)');
   return false;
+}
+
+// Mantido por compatibilidade com chamadas que buscam só por nome
+// (ex.: campo "Buscar por nome" no modal). Também passa pelo Google primeiro.
+async function buscarFotoPorNome(nome){
+  setFotoStatus('Buscando foto...','var(--amber)');
+  return await buscarFotoCompleta('', nome);
 }
 
 async function buscarFotoNome(){
