@@ -594,11 +594,13 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .aura-content { padding: 12px 13px !important; }
 
   /* Header */
-  .aura-header { padding: 11px 13px !important; }
-  .aura-header h1 { font-size: 17px !important; }
-  .aura-header p  { font-size: 11px !important; }
-  .aura-header-actions { gap: 5px; }
-  .aura-header-actions .btn { font-size: 11px; padding: 5px 9px; }
+  .aura-header { padding: 10px 12px !important; flex-wrap: wrap; gap: 6px; }
+  .aura-header h1 { font-size: 15px !important; white-space: nowrap; }
+  .aura-header p  { font-size: 10px !important; white-space: nowrap; }
+  .aura-header-actions { gap: 4px; flex-shrink: 0; }
+  .aura-header-actions .aura-btn { font-size: 11px; padding: 5px 8px; gap: 4px; }
+  .aura-header-actions .aura-btn span { display: none; }
+  .aura-syncbar { padding: 4px 12px !important; }
 
   /* Topbar */
   .topbar { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
@@ -619,6 +621,10 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .tabs { overflow-x: auto; flex-wrap: nowrap !important; gap: 0; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 1px; }
   .tabs::-webkit-scrollbar { display: none; }
   .tab { white-space: nowrap; font-size: 11px !important; padding: 8px 12px !important; flex-shrink: 0; }
+
+  /* Tabelas — no mobile libera layout automático e nowrap nas células */
+  table { table-layout: auto !important; min-width: unset !important; }
+  .twrap table td, .twrap table th { white-space: nowrap; }
 
   /* Filtros da aba Validades — empilhar */
   .filters { flex-direction: column; gap: 7px; }
@@ -1875,7 +1881,7 @@ function renderTable(){
     var btnResolvido=jaResolvido
       ?'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--tx2);color:var(--tx2);background:var(--bg2)" title="Já resolvido — clique para registrar novamente"><i class="ti ti-circle-check"></i> OK</button>'
       :'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)" title="Marcar como resolvido"><i class="ti ti-circle-check"></i> Resolvido</button>';
-    return'<tr style="'+rs+'"><td style="font-family:monospace;font-size:11px;color:var(--tx2)">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;max-width:170px">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:40px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--amber);font-weight:600">'+(custoProd?fmtR(custoProd):'--')+'</td><td style="font-size:11px;color:var(--tx2);max-width:130px;white-space:normal;line-height:1.3">'+fornProd+'</td><td>'+badge(s)+'</td><td style="white-space:nowrap">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido+'</td></tr>';
+    return'<tr style="'+rs+'"><td style="font-family:monospace;font-size:11px;color:var(--tx2);white-space:nowrap">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;white-space:nowrap">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:40px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--amber);font-weight:600">'+(custoProd?fmtR(custoProd):'--')+'</td><td style="font-size:11px;color:var(--tx2);max-width:130px;white-space:normal;line-height:1.3">'+fornProd+'</td><td>'+badge(s)+'</td><td style="white-space:nowrap">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido+'</td></tr>';
   }
   var rows=ativos.map(function(p){return rowHtml(p,false);});
   if(vencidos.length){
@@ -2173,7 +2179,7 @@ function renderDashboard(){
     :urgent.map(function(p){
       var qtd=parseInt(p.qtde)||1;
       return '<tr>'
-        +'<td><div style="font-weight:500;font-size:12px">'+escHtml(p.nome||'—')+'</div>'
+        +'<td style="white-space:nowrap"><div style="font-weight:500;font-size:12px">'+escHtml(p.nome||'—')+'</div>'
         +'<div style="font-size:10px;color:var(--muted)">'+escHtml(p.codigo||'')+'</div></td>'
         +'<td style="color:var(--muted);font-size:12px">'+escHtml(p.setor||'—')+'</td>'
         +'<td style="font-size:12px">'+escHtml(p.validade||'—')+'</td>'
