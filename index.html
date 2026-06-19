@@ -3353,17 +3353,20 @@ function selectResolucao(tipo){
   // Para descarte puro: zera vendida, preenche sobra com total
   var p=_resolvidoIdx!==null?products[_resolvidoIdx]:null;
   var qtdeLote=p?p.qtde||1:1;
+  var campoPreco=document.getElementById('rPreco');
+  var precoJaPreenchido=campoPreco&&campoPreco.value.trim()!=='';
   if(tipo==='descarte'){
     document.getElementById('rQtdeVendida').value=0;
     document.getElementById('rQtdeSobra').value=qtdeLote;
-    // Preço praticado = custo (base para cálculo de perda)
-    if(p&&p.custo>0)document.getElementById('rPreco').value='R$ '+p.custo.toFixed(2).replace('.',',');
+    // Preço praticado = custo (base para cálculo de perda) — só preenche se o campo estiver vazio
+    if(!precoJaPreenchido&&p&&p.custo>0)campoPreco.value='R$ '+p.custo.toFixed(2).replace('.',',');
     document.getElementById('wrapFornecedor').style.display='none';
   } else {
     document.getElementById('rQtdeVendida').value=qtdeLote;
     document.getElementById('rQtdeSobra').value=0;
-    // Preço praticado = preço promocional
-    if(p&&p.precoPromo>0)document.getElementById('rPreco').value='R$ '+p.precoPromo.toFixed(2).replace('.',',');
+    // Preço praticado = preço promocional (sugestão inicial) — só preenche se o campo estiver vazio,
+    // nunca sobrescreve um valor que o usuário já digitou manualmente
+    if(!precoJaPreenchido&&p&&p.precoPromo>0)campoPreco.value='R$ '+p.precoPromo.toFixed(2).replace('.',',');
     document.getElementById('wrapFornecedor').style.display=(tipo==='sell_in'||tipo==='sell_out')?'':'none';
   }
   recalcResumo();
