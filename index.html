@@ -310,7 +310,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sa
 .aura-btn:hover { background: rgba(255,255,255,0.25); }
 .aura-btn-accent { background: #facc15; color: #3f1818; font-weight: 700; }
 .aura-btn-accent:hover { background: #fde047; }
-.aura-syncbar { padding: 5px 32px; font-size: 11px; color: var(--muted); background: #7f1d1d; text-align: right; }
+.aura-syncbar {
+  padding: 5px 32px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.75);
+  background: #7f1d1d;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.aura-syncbar .dot { flex-shrink: 0; }
+.aura-syncbar .st { color: rgba(255,255,255,0.9); font-weight: 500; }
+.aura-syncbar .sync-time { color: rgba(255,255,255,0.6); margin-left: auto; }
+.aura-syncbar .btn { font-size: 11px; padding: 3px 10px; border-color: rgba(255,255,255,0.3); color: #fff; background: rgba(255,255,255,0.1); }
+.aura-syncbar .btn:hover { background: rgba(255,255,255,0.2); }
 
 /* Theme toggle */
 .theme-toggle {
@@ -779,7 +794,14 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
       </button>
     </div>
   </header>
-  <div class="aura-syncbar" id="auraSyncBar">Última sincronização: —</div>
+  <div class="aura-syncbar" id="auraSyncBar">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <div class="dot" id="dot"></div>
+      <span class="st" id="stText">Não conectado</span>
+      <button class="btn btn-sm" onclick="toggleCfg()"><i class="ti ti-settings"></i> Configurar</button>
+    </div>
+    <span class="sync-time" id="syncTime"></span>
+  </div>
 
   <!-- Content -->
   <div class="aura-content">
@@ -862,12 +884,7 @@ function toggleTheme() {
       ID na URL: <code>docs.google.com/spreadsheets/d/<strong>ID</strong>/edit</code>
     </div>
   </div>
-  <div class="status-row">
-    <div class="dot" id="dot"></div>
-    <span class="st" id="stText">Nao conectado</span>
-    <button class="btn btn-sm" onclick="toggleCfg()"><i class="ti ti-settings"></i> Configurar</button>
-    <span class="sync-time" id="syncTime"></span>
-  </div>
+
   <div class="metrics" id="metrics"></div>
   <div class="alert" id="alertBanner"><i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0"></i><span id="alertTxt"></span></div>
   <div class="tabs">
