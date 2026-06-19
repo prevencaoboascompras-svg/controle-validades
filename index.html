@@ -198,11 +198,37 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
 .mod-ac-item .ac-tag.pend{background:#FAEEDA;color:#854F0B}
 .mod-ac-item .ac-name{font-weight:600;flex:1}
 /* ── Seção separator na tabela ── */
-.mod-section-sep td{padding:8px 14px!important;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--bd)!important}
-.mod-section-sep.ok td{background:rgba(29,158,117,.07);color:var(--green)}
-.mod-section-sep.pend td{background:rgba(186,117,23,.07);color:var(--amber)}
-.mod-pend-row{opacity:.75}
-.mod-pend-row:hover{opacity:1}
+/* ── Modalidades Cards ── */
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.mod-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;transition:box-shadow .15s,opacity .2s}
+.mod-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.13);border-color:var(--bds)}
+.mod-card.pend{opacity:.65;border-style:dashed}
+.mod-card.pend:hover{opacity:1}
+.mod-card.editing{border:2px solid var(--blue);box-shadow:0 0 0 3px rgba(55,138,221,.15)}
+.mod-card-hd{background:linear-gradient(135deg,#378ADD,#185FA5);padding:12px 16px;display:flex;align-items:flex-start;gap:10px}
+.mod-card-hd.pend{background:linear-gradient(135deg,#BA7517,#8B560F)}
+.mod-card-hdicon{width:40px;height:40px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mod-card-hdicon i{font-size:20px;color:#fff}
+.mod-card-hdinfo{flex:1;min-width:0}
+.mod-card-hdname{font-size:13px;font-weight:700;color:#fff;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mod-card-hdproc{display:inline-block;margin-top:5px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:rgba(255,255,255,.22);color:#fff;white-space:nowrap}
+.mod-card-body{padding:13px 16px}
+.mod-info-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:7px;font-size:12px;line-height:1.4}
+.mod-info-row:last-child{margin-bottom:0}
+.mod-info-ic{font-size:13px;color:var(--tx2);flex-shrink:0;margin-top:1px}
+.mod-info-lbl{font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-right:4px;white-space:nowrap}
+.mod-info-val{color:var(--tx);word-break:break-word}
+.mod-info-val.muted{color:var(--tx2)}
+.mod-card-foot{display:flex;gap:7px;padding:10px 16px;border-top:1px solid var(--bd);background:var(--bg2)}
+.mod-edit-body{padding:13px 16px;display:flex;flex-direction:column;gap:9px}
+.mod-edit-field label{display:block;font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.mod-edit-field input,.mod-edit-field select{width:100%;font-size:12px;padding:7px 9px;border:1px solid var(--bds);border-radius:6px;background:var(--bg);color:var(--tx);outline:none;font-family:inherit}
+.mod-edit-field input:focus,.mod-edit-field select:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(55,138,221,.12)}
+.mod-section-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:8px;margin:20px 0 12px}
+.mod-section-lbl::after{content:'';flex:1;height:1px;background:var(--bd)}
+.mod-section-lbl.ok{color:var(--green)}
+.mod-section-lbl.pend{color:var(--amber)}
+@media(max-width:600px){.mod-grid{grid-template-columns:1fr}}
 .enc-tab{font-size:13px;font-weight:500;padding:9px 18px;cursor:pointer;color:var(--tx2);border-bottom:3px solid transparent;margin-bottom:-2px;display:flex;align-items:center;gap:6px;transition:color .15s;background:none;border-top:none;border-left:none;border-right:none}
 .enc-tab.active{color:var(--tx);border-bottom-color:var(--green)}
 .enc-tab:hover:not(.active){color:var(--tx)}
@@ -1231,19 +1257,7 @@ function toggleTheme() {
         </div>
         <div id="modSummary" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"></div>
       </div>
-      <div class="twrap">
-        <table style="width:100%">
-          <thead><tr>
-            <th style="width:14%;padding:12px 14px">Fornecedor</th>
-            <th style="width:14%;padding:12px 14px">Procedimento</th>
-            <th style="width:28%;padding:12px 14px">Mix de marcas</th>
-            <th style="width:16%;padding:12px 14px">Contato</th>
-            <th style="width:22%;padding:12px 14px">Observação</th>
-            <th style="width:6%;padding:12px 14px"></th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
+      <div id="modCardsArea"></div>
     </div>
   </div>
   <div id="sec-ajuda" class="sec">
@@ -3279,31 +3293,24 @@ function renderModalidades(){
   var list=getModalidades();
   var busca=(document.getElementById('modBusca')||{}).value||'';
   busca=busca.toLowerCase().trim();
-  var tb=document.querySelector('#sec-modalidades tbody');
-  if(!tb)return;
+  var area=document.getElementById('modCardsArea');
+  if(!area)return;
 
-  // Fornecedores únicos do banco de dados (coluna E da planilha)
-  var bancofornSeen={};
-  var bancofornList=[];
+  // Fornecedores únicos do banco de dados
+  var bancofornSeen={};var bancofornList=[];
   function addBancoForn(fn){fn=String(fn||'').trim();if(fn&&!bancofornSeen[fn.toLowerCase()]){bancofornSeen[fn.toLowerCase()]=fn;bancofornList.push(fn);}}
   for(var k in bancoFornecedor)addBancoForn(bancoFornecedor[k]);
   for(var k2 in bancoFornecedorNome)addBancoForn(bancoFornecedorNome[k2]);
   bancofornList.sort(function(a,b){return a.localeCompare(b,'pt-BR');});
 
-  // Mapa de fornecedores já cadastrados nas modalidades
   var modMap={};
   list.forEach(function(m){if(m.fornecedor)modMap[normForn(m.fornecedor)]=true;});
-
-  // Fornecedores do banco SEM modalidade cadastrada
   var pendentes=bancofornList.filter(function(fn){return!modMap[normForn(fn)];});
 
-  // Filtrar lista existente
   var filtered=list.map(function(m,i){return{m:m,i:i};}).filter(function(o){
     if(!busca)return true;
-    return(o.m.fornecedor||'').toLowerCase().includes(busca)||(o.m.mix||'').toLowerCase().includes(busca)||(o.m.obs||'').toLowerCase().includes(busca);
+    return(o.m.fornecedor||'').toLowerCase().includes(busca)||(o.m.mix||'').toLowerCase().includes(busca)||(o.m.obs||'').toLowerCase().includes(busca)||(o.m.procedimento||'').toLowerCase().includes(busca);
   });
-
-  // Filtrar pendentes
   var filteredPend=pendentes.filter(function(fn){
     if(!busca)return true;
     return fn.toLowerCase().includes(busca);
@@ -3319,7 +3326,7 @@ function renderModalidades(){
   }
 
   if(!filtered.length&&!filteredPend.length){
-    tb.innerHTML='<tr><td colspan="6" class="empty"><i class="ti ti-search" style="font-size:28px;display:block;margin-bottom:8px;opacity:.3"></i>Nenhum fornecedor encontrado.</td></tr>';
+    area.innerHTML='<div class="empty"><i class="ti ti-search" style="font-size:36px;display:block;margin-bottom:10px;opacity:.35"></i>Nenhum fornecedor encontrado.</div>';
     return;
   }
 
@@ -3327,57 +3334,91 @@ function renderModalidades(){
 
   // ── Seção 1: com modalidade ──
   if(filtered.length){
-    html+='<tr class="mod-section-sep ok"><td colspan="6"><i class="ti ti-circle-check"></i> Com modalidade cadastrada — '+filtered.length+' fornecedor'+(filtered.length>1?'es':'')+'</td></tr>';
+    html+='<div class="mod-section-lbl ok"><i class="ti ti-circle-check"></i> Com modalidade cadastrada ('+filtered.length+')</div>';
+    html+='<div class="mod-grid">';
     html+=filtered.map(function(o){
-      var m=o.m,i=o.i;
-      if(_modEditIdx===i)return modalidadeRowEdit(m,i);
-      return modalidadeRowView(m,i);
+      if(_modEditIdx===o.i)return modalidadeCardEdit(o.m,o.i);
+      return modalidadeCardView(o.m,o.i);
     }).join('');
+    html+='</div>';
   }
 
   // ── Seção 2: pendentes do banco ──
   if(filteredPend.length){
-    html+='<tr class="mod-section-sep pend"><td colspan="6"><i class="ti ti-clock-exclamation"></i> Pendentes no banco de dados — falta definir modalidade — '+filteredPend.length+' fornecedor'+(filteredPend.length>1?'es':'')+'</td></tr>';
+    html+='<div class="mod-section-lbl pend"><i class="ti ti-clock-exclamation"></i> Pendentes no banco de dados — sem modalidade ('+filteredPend.length+')</div>';
+    html+='<div class="mod-grid">';
     html+=filteredPend.map(function(fn){
       var fnEsc=fn.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-      return'<tr class="mod-pend-row">'
-        +'<td style="font-size:13px;font-weight:700;padding:12px 14px">'+esc(fn)+'</td>'
-        +'<td style="padding:12px 14px"><span class="badge" style="background:rgba(186,117,23,.15);color:var(--amber);font-size:11px;font-weight:600">⏳ Não cadastrado</span></td>'
-        +'<td style="font-size:12px;color:var(--tx2);padding:12px 14px">—</td>'
-        +'<td style="font-size:12px;color:var(--tx2);padding:12px 14px">—</td>'
-        +'<td style="font-size:12px;color:var(--tx2);padding:12px 14px">—</td>'
-        +'<td style="white-space:nowrap;padding:12px 14px">'
-          +'<button class="abtn" onclick="adicionarModalidadeFornecedor(\''+fnEsc+'\')" style="border-color:var(--green);color:var(--green);font-size:11px"><i class="ti ti-plus"></i> Cadastrar</button>'
-        +'</td>'
-      +'</tr>';
+      return'<div class="mod-card pend">'
+        +'<div class="mod-card-hd pend">'
+          +'<div class="mod-card-hdicon"><i class="ti ti-truck-delivery"></i></div>'
+          +'<div class="mod-card-hdinfo">'
+            +'<div class="mod-card-hdname">'+esc(fn)+'</div>'
+            +'<span class="mod-card-hdproc">⏳ Não cadastrado</span>'
+          +'</div>'
+        +'</div>'
+        +'<div class="mod-card-body" style="color:var(--tx2);font-size:12px;padding:14px 16px">'
+          +'<i class="ti ti-info-circle" style="margin-right:5px;opacity:.5"></i>Fornecedor da planilha sem procedimento definido.'
+        +'</div>'
+        +'<div class="mod-card-foot">'
+          +'<button class="btn btn-green" style="flex:1;font-size:12px;padding:6px 10px" onclick="adicionarModalidadeFornecedor(\''+fnEsc+'\')"><i class="ti ti-plus"></i> Cadastrar modalidade</button>'
+        +'</div>'
+      +'</div>';
     }).join('');
-    html+='<tr><td colspan="6" style="padding:10px 14px;text-align:center">'
-      +'<span style="font-size:11px;color:var(--tx2)">Esses fornecedores aparecem na planilha mas ainda não têm procedimento definido. Clique em <strong>Cadastrar</strong> para adicionar.</span>'
-      +'</td></tr>';
+    html+='</div>';
   }
 
-  tb.innerHTML=html;
+  area.innerHTML=html;
 }
 
-// Adicionar modalidade com nome pré-preenchido (vindo do banco ou autocomplete)
-function adicionarModalidadeFornecedor(nome){
-  var list=getModalidades();
-  // Verifica se já existe
-  var exists=list.findIndex(function(m){return normForn(m.fornecedor)===normForn(nome);});
-  if(exists>=0){
-    _modEditIdx=exists;
-    renderModalidades();
-    return;
+function modalidadeCardView(m,i){
+  var mix=m.mix&&m.mix!=='--'?m.mix:'';
+  var contato=m.contato&&m.contato!=='--'?m.contato:'';
+  var obs=m.obs&&m.obs!=='--'?m.obs:'';
+  return'<div class="mod-card" id="modcard-'+i+'">'
+    +'<div class="mod-card-hd">'
+      +'<div class="mod-card-hdicon"><i class="ti ti-truck-delivery"></i></div>'
+      +'<div class="mod-card-hdinfo">'
+        +'<div class="mod-card-hdname" title="'+esc(m.fornecedor||'')+'">'+esc(m.fornecedor||'--')+'</div>'
+        +'<span class="mod-card-hdproc">'+esc(m.procedimento||'--')+'</span>'
+      +'</div>'
+    +'</div>'
+    +'<div class="mod-card-body">'
+      +(mix?'<div class="mod-info-row"><i class="ti ti-tag mod-info-ic"></i><div><span class="mod-info-lbl">Mix</span><span class="mod-info-val">'+esc(mix)+'</span></div></div>':'')
+      +(contato?'<div class="mod-info-row"><i class="ti ti-phone mod-info-ic"></i><div><span class="mod-info-lbl">Contato</span><span class="mod-info-val">'+esc(contato)+'</span></div></div>':'')
+      +(obs?'<div class="mod-info-row"><i class="ti ti-notes mod-info-ic"></i><div><span class="mod-info-lbl">Obs</span><span class="mod-info-val">'+esc(obs)+'</span></div></div>':'')
+      +(!mix&&!contato&&!obs?'<div style="font-size:12px;color:var(--tx2);font-style:italic">Sem detalhes cadastrados.</div>':'')
+    +'</div>'
+    +'<div class="mod-card-foot">'
+      +'<button class="abtn" onclick="editarModalidade('+i+')" style="border-color:var(--blue);color:var(--blue);flex:1;justify-content:center"><i class="ti ti-pencil"></i> Editar</button>'
+      +'<button class="abtn" onclick="removerModalidade('+i+')" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button>'
+    +'</div>'
+  +'</div>';
+}
+
+function modalidadeCardEdit(m,i){
+  var procOptions=PROCEDIMENTOS_PADRAO.map(function(p){return'<option value="'+esc(p)+'" '+(p===m.procedimento?'selected':'')+'>'+esc(p)+'</option>';}).join('');
+  if(m.procedimento&&PROCEDIMENTOS_PADRAO.indexOf(m.procedimento)<0){
+    procOptions='<option value="'+esc(m.procedimento)+'" selected>'+esc(m.procedimento)+'</option>'+procOptions;
   }
-  list.unshift({fornecedor:nome,procedimento:'CONTATO',mix:'',contato:'',obs:''});
-  saveModalidades(list);
-  _modEditIdx=0;
-  renderModalidades();
-  var inp=document.getElementById('modEdit_fornecedor');
-  if(inp)inp.focus();
+  return'<div class="mod-card editing" id="modcard-'+i+'">'
+    +'<div class="mod-card-hd" style="background:linear-gradient(135deg,#4a90e2,#2563ba)">'
+      +'<div class="mod-card-hdicon"><i class="ti ti-pencil"></i></div>'
+      +'<div class="mod-card-hdinfo"><div class="mod-card-hdname">Editando fornecedor</div><span class="mod-card-hdproc">✏ Em edição</span></div>'
+    +'</div>'
+    +'<div class="mod-edit-body">'
+      +'<div class="mod-edit-field"><label>Fornecedor</label><input id="modEdit_fornecedor" value="'+esc(m.fornecedor||'')+'" placeholder="Nome do fornecedor"></div>'
+      +'<div class="mod-edit-field"><label>Procedimento</label><select id="modEdit_procedimento">'+procOptions+'</select></div>'
+      +'<div class="mod-edit-field"><label>Mix de marcas</label><input id="modEdit_mix" value="'+esc(m.mix||'')+'" placeholder="Ex: LACTA, HALLS, NESTLE..."></div>'
+      +'<div class="mod-edit-field"><label>Contato</label><input id="modEdit_contato" value="'+esc(m.contato||'')+'" placeholder="Ex: 51 9 9999-9999 — João"></div>'
+      +'<div class="mod-edit-field"><label>Observação</label><input id="modEdit_obs" value="'+esc(m.obs||'')+'" placeholder="Ex: Recolhe na entrega..."></div>'
+    +'</div>'
+    +'<div class="mod-card-foot">'
+      +'<button class="abtn" onclick="salvarModalidade('+i+')" style="border-color:var(--green);color:var(--green);flex:1;justify-content:center"><i class="ti ti-check"></i> Salvar</button>'
+      +'<button class="abtn" onclick="cancelarEdicaoModalidade()"><i class="ti ti-x"></i> Cancelar</button>'
+    +'</div>'
+  +'</div>';
 }
-
-// ── Autocomplete da busca de fornecedores ──
 var _modAcFocus=-1;
 function modAcGetList(){
   var list=[];
@@ -3441,40 +3482,7 @@ function modAcKeydown(e){
   else if(e.key==='Escape'){modAcClose();}
 }
 
-function modalidadeRowView(m,i){
-  return'<tr style="height:48px">'
-    +'<td style="font-size:13px;font-weight:700;padding:12px 14px">'+esc(m.fornecedor||'--')+'</td>'
-    +'<td style="padding:12px 14px"><span class="badge b-gray" style="font-size:11px;font-weight:600">'+esc(m.procedimento||'--')+'</span></td>'
-    +'<td style="font-size:12px;color:var(--tx2);padding:12px 14px;line-height:1.5">'+esc(m.mix||'--')+'</td>'
-    +'<td style="font-size:12px;color:var(--tx2);padding:12px 14px;white-space:nowrap">'+esc(m.contato||'--')+'</td>'
-    +'<td style="font-size:12px;color:var(--tx2);padding:12px 14px;line-height:1.5">'+esc(m.obs||'--')+'</td>'
-    +'<td style="white-space:nowrap;padding:12px 14px">'
-      +'<button class="abtn" onclick="editarModalidade('+i+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> '
-      +'<button class="abtn" onclick="removerModalidade('+i+')" title="Remover" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button>'
-    +'</td>'
-  +'</tr>';
-}
-
-function modalidadeRowEdit(m,i){
-  var procOptions=PROCEDIMENTOS_PADRAO.map(function(p){return'<option value="'+esc(p)+'" '+(p===m.procedimento?'selected':'')+'>'+esc(p)+'</option>';}).join('');
-  if(m.procedimento&&PROCEDIMENTOS_PADRAO.indexOf(m.procedimento)<0){
-    procOptions='<option value="'+esc(m.procedimento)+'" selected>'+esc(m.procedimento)+'</option>'+procOptions;
-  }
-  var inpStyle='width:100%;font-size:12px;padding:8px 10px;border:1px solid var(--bds);border-radius:6px;background:var(--bg);color:var(--tx);outline:none';
-  return'<tr style="background:rgba(74,144,226,.06)">'
-    +'<td style="padding:10px 14px"><input id="modEdit_fornecedor" value="'+esc(m.fornecedor)+'" style="'+inpStyle+';font-weight:700"></td>'
-    +'<td style="padding:10px 14px"><select id="modEdit_procedimento" style="'+inpStyle+'">'+procOptions+'</select></td>'
-    +'<td style="padding:10px 14px"><input id="modEdit_mix" value="'+esc(m.mix)+'" style="'+inpStyle+'"></td>'
-    +'<td style="padding:10px 14px"><input id="modEdit_contato" value="'+esc(m.contato)+'" style="'+inpStyle+'"></td>'
-    +'<td style="padding:10px 14px"><input id="modEdit_obs" value="'+esc(m.obs)+'" style="'+inpStyle+'"></td>'
-    +'<td style="white-space:nowrap;padding:10px 14px">'
-      +'<button class="abtn" onclick="salvarModalidade('+i+')" title="Salvar" style="border-color:var(--green);color:var(--green)"><i class="ti ti-check"></i></button> '
-      +'<button class="abtn" onclick="cancelarEdicaoModalidade()" title="Cancelar"><i class="ti ti-x"></i></button>'
-    +'</td>'
-  +'</tr>';
-}
-
-function editarModalidade(i){_modEditIdx=i;renderModalidades();}
+function editarModalidade(i){_modEditIdx=i;renderModalidades();var el=document.getElementById('modcard-'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});}
 function cancelarEdicaoModalidade(){_modEditIdx=null;renderModalidades();}
 
 function salvarModalidade(i){
