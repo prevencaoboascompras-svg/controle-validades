@@ -256,51 +256,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sa
 /* Layout shell */
 .aura-shell { display: flex; min-height: 100vh; }
 
-/* Sidebar */
-.sidebar {
-  width: 220px; flex-shrink: 0;
-  background: var(--surface); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  position: fixed; top: 0; left: 0; bottom: 0; z-index: 60;
-}
-.sidebar .sb-brand {
-  position: relative; border-radius: 6px; overflow: hidden;
-  background: #b91c1c; color: #fff; padding: 14px;
-  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); margin: 10px;
-}
-.sidebar .sb-brand .sb-tagline { font-size: 11px; font-weight: 700; line-height: 1.25; display: flex; align-items: center; gap: 6px; }
-.sidebar .sb-brand .sb-name { font-family: Montserrat, sans-serif; font-weight: 900; font-size: 22px; line-height: 1; letter-spacing: -0.025em; margin-top: 4px; }
-.sidebar .sb-badge-label { margin-top: 8px; background: #fde047; color: #3f1818; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 2px; display: inline-block; letter-spacing: 0.05em; }
-.sidebar nav { flex: 1; padding: 8px; overflow-y: auto; }
-.sidebar nav button {
-  width: 100%; display: flex; align-items: center; gap: 12px;
-  padding: 10px 12px; border-radius: 6px; font-size: 14px;
-  color: var(--muted); background: transparent; border: none; cursor: pointer;
-  transition: all 0.15s; text-align: left;
-}
-.sidebar nav button:hover, .sidebar nav button.active { background: var(--surface-2); color: var(--fg); }
-.sidebar nav button .sb-nav-badge {
-  background: var(--red); color: #fff; font-size: 10px; font-weight: 700;
-  border-radius: 9999px; min-width: 18px; height: 18px;
-  display: flex; align-items: center; justify-content: center;
-  padding: 0 4px; margin-left: auto;
-}
-.sidebar .sb-footer { padding: 12px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
-
 /* Main area */
-.aura-main { flex: 1; display: flex; flex-direction: column; min-width: 0; margin-left: 220px; }
+.aura-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 
 /* Header */
 .aura-header {
-  padding: 20px 32px;
+  padding: 18px 32px;
   background: linear-gradient(90deg, #b91c1c, #991b1b);
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 1px solid rgba(0,0,0,0.2);
   position: sticky; top: 0; z-index: 50;
+  gap: 16px; flex-wrap: wrap;
 }
-.aura-header h1 { font-size: 26px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.025em; }
+.aura-header-brand .sb-tagline { font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,0.85); margin-bottom: 4px; }
+.aura-header-brand .sb-badge-label { margin-left: 4px; background: #fde047; color: #3f1818; font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 2px; letter-spacing: 0.05em; }
+.aura-header h1 { font-size: 24px; font-weight: 700; color: #fff; line-height: 1; letter-spacing: -0.025em; }
 .aura-header p { color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 5px; }
-.aura-header-actions { display: flex; align-items: center; gap: 8px; }
+.aura-header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .aura-btn {
   background: rgba(255,255,255,0.15); color: #fff;
   font-size: 13px; font-weight: 500; padding: 7px 14px; border-radius: 6px;
@@ -310,6 +282,31 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sa
 .aura-btn:hover { background: rgba(255,255,255,0.25); }
 .aura-btn-accent { background: #facc15; color: #3f1818; font-weight: 700; }
 .aura-btn-accent:hover { background: #fde047; }
+
+/* Nav bar (was sidebar) */
+.aura-nav {
+  display: flex; align-items: center; gap: 2px;
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 24px; overflow-x: auto; scrollbar-width: none;
+  position: sticky; top: 0; z-index: 49;
+}
+.aura-nav::-webkit-scrollbar { display: none; }
+.aura-nav button {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  padding: 13px 16px; font-size: 13px; font-weight: 500;
+  color: var(--muted); background: transparent; border: none;
+  border-bottom: 2px solid transparent; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap;
+}
+.aura-nav button:hover { color: var(--fg); }
+.aura-nav button.active { color: var(--fg); border-bottom-color: var(--red); }
+.aura-nav button .sb-nav-badge {
+  background: var(--red); color: #fff; font-size: 10px; font-weight: 700;
+  border-radius: 9999px; min-width: 17px; height: 17px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+}
+
 .aura-syncbar {
   padding: 5px 32px;
   font-size: 11px;
@@ -407,27 +404,18 @@ input, select, textarea { background: var(--surface) !important; color: var(--fg
 ::-webkit-scrollbar-thumb:hover { background: #555; }
 
 /* Light overrides */
-html.light .sidebar { background: #fff; border-right-color: rgba(0,0,0,0.08); }
-html.light .sidebar nav button { color: #374151; }
-html.light .sidebar nav button:hover, html.light .sidebar nav button.active { background: #f6f7fa; color: #111; }
+html.light .aura-nav { background: #fff; border-bottom-color: rgba(0,0,0,0.08); }
+html.light .aura-nav button { color: #374151; }
+html.light .aura-nav button.active { color: #111; }
 html.light .aura-syncbar { background: #991b1b; }
 html.light tr:hover td { background: rgba(128,128,128,0.04) !important; }
 html.light input, html.light select, html.light textarea { background: #fff !important; }
 
 /* Responsive */
 @media (max-width: 900px) {
-  .sidebar { transform: translateX(-100%); transition: transform .2s; z-index: 200; }
-  .sidebar.open { transform: none; }
-  .aura-main { margin-left: 0; }
-  .aura-btn-burger { display: inline-flex !important; }
   .aura-header { padding: 14px 16px; }
   .aura-content { padding: 16px; }
 }
-#sidebarOverlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
-  z-index: 199; backdrop-filter: blur(2px);
-}
-#sidebarOverlay.show { display: block; }
 
 /* ═══════════════════════════════════════════════
    DASHBOARD MELHORADO — KPI CARDS & LAYOUT
@@ -610,12 +598,19 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 
   /* Header */
   .aura-header { padding: 10px 12px !important; flex-wrap: wrap; gap: 6px; }
+  .aura-header-brand .sb-tagline { font-size: 9px !important; flex-wrap: wrap; gap: 4px; }
+  .aura-header-brand .sb-badge-label { font-size: 8px !important; white-space: nowrap; }
   .aura-header h1 { font-size: 15px !important; white-space: nowrap; }
   .aura-header p  { font-size: 10px !important; white-space: nowrap; }
   .aura-header-actions { gap: 4px; flex-shrink: 0; }
   .aura-header-actions .aura-btn { font-size: 11px; padding: 5px 8px; gap: 4px; }
   .aura-header-actions .aura-btn span { display: none; }
   .aura-syncbar { padding: 4px 12px !important; }
+
+  /* Nav (was sidebar) — scroll horizontal */
+  .aura-nav { padding: 0 10px !important; }
+  .aura-nav button { padding: 10px 10px !important; font-size: 11px !important; }
+  .aura-nav button span:not(.sb-nav-badge) { white-space: nowrap; }
 
   /* Topbar */
   .topbar { flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 14px; }
@@ -715,61 +710,16 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 </head>
 <body>
 <div class="aura-shell">
-<!-- Overlay mobile sidebar -->
-<div id="sidebarOverlay" onclick="closeSidebar()"></div>
-<!-- Sidebar -->
-<aside class="sidebar" id="auraSidebar">
-  <div class="sb-brand">
-    <div class="sb-tagline">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fde047" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-      <span>Supermercado</span>
-    </div>
-    <div class="sb-name">Boas<br>Compras</div>
-    <div class="sb-badge-label">o super para toda a família</div>
-  </div>
-  <nav>
-    <button class="active" onclick="auraNav(this,'dashboard')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span>Dashboard</span>
-    </button>
-    <button onclick="auraNav(this,'validades')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span>Validades</span>
-    </button>
-    <button onclick="auraNav(this,'promocoes')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
-      <span>Promoções</span>
-      <span class="sb-nav-badge" id="asBadgePromo" style="display:none">0</span>
-    </button>
-    <button onclick="auraNav(this,'encartes')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <span>Encartes</span>
-      <span class="sb-nav-badge" id="asBadgeEnc" style="display:none">0</span>
-    </button>
-    <button onclick="auraNav(this,'relatorio')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      <span>Relatórios</span>
-    </button>
-    <button onclick="auraNav(this,'modalidades')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-      <span>Modalidades</span>
-    </button>
-    <button onclick="auraNav(this,'ajuda')">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <span>Como configurar</span>
-    </button>
-  </nav>
-  <div class="sb-footer">AURA Vencimentos · Boas Compras</div>
-</aside>
-
 <!-- Main -->
 <div class="aura-main" id="auraMain">
   <!-- Header -->
   <header class="aura-header">
-    <button class="aura-btn aura-btn-burger" id="auraBurger" onclick="toggleSidebar()" style="display:none">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
-    <div>
+    <div class="aura-header-brand">
+      <div class="sb-tagline">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fde047" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span>Supermercado Boas Compras</span>
+        <span class="sb-badge-label">o super para toda a família</span>
+      </div>
       <h1>AURA VENCIMENTOS</h1>
       <p>Central de prevenção de perdas</p>
     </div>
@@ -782,18 +732,57 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
       </button>
       <button class="aura-btn" onclick="syncAll()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
-        Sincronizar
+        <span>Sincronizar</span>
       </button>
-      <button class="aura-btn" onclick="auraNav(document.querySelector('#auraSidebar nav button:last-child'),'ajuda')">
+      <button class="aura-btn" onclick="auraNav(document.getElementById('navAjuda'),'ajuda')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        Manual
+        <span>Manual</span>
+      </button>
+      <button class="aura-btn" onclick="openAddModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Registro manual</span>
       </button>
       <button class="aura-btn aura-btn-accent" onclick="openEncarteModal(null)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        Gerar encarte
+        <span>Gerar encarte</span>
       </button>
     </div>
   </header>
+
+  <!-- Nav (anteriormente sidebar) -->
+  <nav class="aura-nav" id="auraNav">
+    <button class="active" onclick="auraNav(this,'dashboard')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button onclick="auraNav(this,'validades')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Validades</span>
+    </button>
+    <button onclick="auraNav(this,'promocoes')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
+      <span>Promoções</span>
+      <span class="sb-nav-badge" id="asBadgePromo" style="display:none">0</span>
+    </button>
+    <button onclick="auraNav(this,'encartes')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Encartes</span>
+      <span class="sb-nav-badge" id="asBadgeEnc" style="display:none">0</span>
+    </button>
+    <button onclick="auraNav(this,'relatorio')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Relatórios</span>
+    </button>
+    <button onclick="auraNav(this,'modalidades')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      <span>Modalidades</span>
+    </button>
+    <button id="navAjuda" onclick="auraNav(this,'ajuda')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>Como configurar</span>
+    </button>
+  </nav>
+
   <div class="aura-syncbar" id="auraSyncBar">
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <div class="dot" id="dot"></div>
@@ -808,7 +797,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 
 <script>
 function auraNav(el, tab) {
-  document.querySelectorAll('#auraSidebar nav button').forEach(function(x){ x.classList.remove('active'); });
+  document.querySelectorAll('#auraNav button').forEach(function(x){ x.classList.remove('active'); });
   if (el) el.classList.add('active');
   goTab(tab);
 }
@@ -833,10 +822,6 @@ function toggleTheme() {
     var sunIcon = document.getElementById('sunIcon');
     if (moonIcon) moonIcon.style.display = 'none';
     if (sunIcon) sunIcon.style.display = 'block';
-  }
-  if (window.innerWidth < 900) {
-    var b = document.getElementById('auraBurger');
-    if (b) b.style.display = 'inline-flex';
   }
   // Sync badge
   setInterval(function(){
@@ -974,7 +959,7 @@ function toggleTheme() {
         <div class="dash-section-title">Vencidos &amp; Críticos</div>
         <div class="dash-section-sub">Produtos que exigem ação imediata (vencidos ou críticos ≤ 3 dias)</div>
       </div>
-      <button class="dash-view-all" onclick="auraNav(document.querySelector('#auraSidebar nav button:nth-child(2)'), 'validades')">
+      <button class="dash-view-all" onclick="auraNav(document.querySelector('#auraNav button:nth-child(2)'), 'validades')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         Ver todos
       </button>
@@ -2162,7 +2147,7 @@ function renderDashboard(){
   ];
 
   document.getElementById('dashTiles').innerHTML=tiles.map(function(t){
-    var click=t.filt?'onclick="filtrarMetrica(\'' + t.filt + '\');auraNav(document.querySelector(\'#auraSidebar nav button:nth-child(2)\'),\'validades\')"':'';
+    var click=t.filt?'onclick="filtrarMetrica(\'' + t.filt + '\');auraNav(document.querySelector(\'#auraNav button:nth-child(2)\'),\'validades\')"':'';
     return '<div class="dash-tile '+t.cls+' dash-tile-ring" '+click+' title="'+(t.filt?'Filtrar: '+t.lbl:t.lbl)+'">'
       +'<div class="dash-tile-hd"><div class="dash-tile-num">'+t.val+'</div>'+t.icon+'</div>'
       +'<div class="dash-tile-lbl">'+t.lbl+'</div>'
@@ -2262,7 +2247,7 @@ function renderDashboard(){
 }
 
 function filtrarSetor(setor){
-  auraNav(document.querySelector('#auraSidebar nav button:nth-child(2)'),'validades');
+  auraNav(document.querySelector('#auraNav button:nth-child(2)'),'validades');
   var s=document.getElementById('fSetor');
   if(s){s.value=setor;renderTable();}
 }
@@ -4051,30 +4036,6 @@ function gerarEncarteDoModelo(id){
   document.getElementById('encarteModal').classList.add('open');
   setTimeout(function(){atualizarPainelCusto();drawEncarte();},150);
   mostrarToast('Modelo carregado! Ajuste a validade e baixe o encarte.','ok');
-}
-
-// ── Sidebar mobile ──
-function toggleSidebar(){
-  var sb=document.getElementById('auraSidebar');
-  var ov=document.getElementById('sidebarOverlay');
-  var isOpen=sb.classList.toggle('open');
-  if(ov) ov.classList.toggle('show', isOpen);
-  document.body.style.overflow=isOpen?'hidden':'';
-}
-function closeSidebar(){
-  var sb=document.getElementById('auraSidebar');
-  var ov=document.getElementById('sidebarOverlay');
-  sb.classList.remove('open');
-  if(ov) ov.classList.remove('show');
-  document.body.style.overflow='';
-}
-// Fechar sidebar ao navegar (mobile)
-var _origGoTab=typeof goTab==='function'?goTab:null;
-if(_origGoTab){
-  goTab=function(t){
-    if(window.innerWidth<=900) closeSidebar();
-    _origGoTab(t);
-  };
 }
 
 // inicializar badges
