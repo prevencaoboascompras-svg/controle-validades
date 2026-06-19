@@ -428,6 +428,9 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   gap: 16px;
   margin-bottom: 20px;
 }
+.dash-hero.dash-hero-2col {
+  grid-template-columns: 1fr 1fr;
+}
 .dash-hero-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -884,7 +887,7 @@ function toggleTheme() {
   <div id="sec-dashboard" class="sec active">
 
     <!-- Hero Row -->
-    <div class="dash-hero">
+    <div class="dash-hero dash-hero-2col">
       <!-- Card 1: Total -->
       <div class="dash-hero-card card-red clickable" onclick="filtrarTudo()" title="Ver todos os produtos">
         <div class="dash-hero-label">Produtos monitorados</div>
@@ -909,7 +912,10 @@ function toggleTheme() {
           </div>
         </div>
       </div>
+    </div>
 
+    <!-- Hero Row 2: destaque lado a lado -->
+    <div class="dash-hero dash-hero-2col">
       <!-- Card 3: Valor em risco -->
       <div class="dash-hero-card card-red clickable" onclick="filtrarRisco()" title="Ver produtos em risco de vencimento">
         <div class="dash-hero-label">
@@ -921,6 +927,22 @@ function toggleTheme() {
         <div class="dash-trend up" id="dTrend" style="display:none">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
           <span id="dTrendTxt"></span>
+        </div>
+        <div class="dash-hero-icon" style="background:rgba(239,68,68,.18)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+        </div>
+      </div>
+
+      <!-- Card 4: Perda evitada -->
+      <div class="dash-hero-card card-emerald clickable" onclick="auraNav(document.getElementById('navAjuda'),'ajuda')" title="Produtos encerrados/resolvidos no sistema" id="cardPerdaEvitada">
+        <div class="dash-hero-label">
+          Perda evitada
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="dash-hero-num clr-emr" id="dPerdaEvitada">—</div>
+        <div class="dash-hero-sub">Produtos encerrados/resolvidos no sistema</div>
+        <div class="dash-hero-icon" style="background:rgba(16,185,129,.18)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         </div>
       </div>
     </div>
@@ -2038,6 +2060,7 @@ function renderDashboard(){
     document.getElementById('dTotalSub').textContent='Nenhum produto carregado';
     document.getElementById('dAlerta').textContent='0';
     document.getElementById('dValorRisco').textContent='R$ 0,00';
+    document.getElementById('dPerdaEvitada').textContent='R$ 0,00';
     document.getElementById('dashAlertBar').style.display='none';
     document.getElementById('dashTiles').innerHTML='';
     document.getElementById('dashMini').innerHTML='';
@@ -2114,6 +2137,7 @@ function renderDashboard(){
   document.getElementById('dAlertaSub').textContent=
     c.urgente+' vencem em até 7 dias · Críticos: '+c.critico;
   document.getElementById('dValorRisco').textContent=fmtBRL(valorRisco);
+  document.getElementById('dPerdaEvitada').textContent=fmtBRL(valorPerdaEvitada);
 
   // ── Alert bar ──
   var bar=document.getElementById('dashAlertBar');
