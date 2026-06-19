@@ -667,6 +667,15 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   /* Modais pequenos */
   .smodal { padding: 16px !important; width: calc(100vw - 24px) !important; }
 
+  /* Rodapés de modal — botões podem quebrar linha em telas estreitas */
+  .modal-foot, .smodal-foot { flex-wrap: wrap !important; justify-content: stretch !important; }
+  .modal-foot .btn, .smodal-foot .btn { flex: 1 1 auto; justify-content: center; font-size: 12px !important; padding: 8px 10px !important; }
+  .modal-head { padding: 12px 14px !important; }
+  .modal-head h3 { font-size: 14px !important; }
+  .modal-foot, .smodal-foot { padding: 10px 14px !important; }
+  .encarte-controls { padding: 14px !important; }
+  .encarte-preview { padding: 12px !important; }
+
   /* Setor grid — 2 colunas no mobile */
   #dashSetorGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
 
