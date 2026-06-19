@@ -1309,7 +1309,7 @@ function toggleTheme() {
 <!-- MODAL RESOLVIDO -->
 <div class="modal-ov" id="resolvidoModal">
   <div class="smodal" style="width:520px">
-    <h3><i class="ti ti-circle-check" style="color:var(--green)"></i> Marcar como Resolvido</h3>
+    <h3 id="resolvidoModalTitulo"><i class="ti ti-circle-check" style="color:var(--green)"></i> Marcar como Resolvido</h3>
     <div style="font-size:13px;font-weight:600;margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--r)" id="resolvidoProdNome">—</div>
     <div style="font-size:12px;color:var(--tx2);margin-bottom:14px">Como este produto foi tratado?</div>
     <div class="resolvido-opts" style="grid-template-columns:1fr 1fr 1fr">
@@ -1410,7 +1410,7 @@ function toggleTheme() {
       </div>
     </div>
     <div class="smodal-foot">
-      <button class="btn" onclick="closeModal('resolvidoModal')">Cancelar</button>
+      <button class="btn" onclick="_encerrandoPromoCod=null;_encerrandoPromoNome=null;closeModal('resolvidoModal')">Cancelar</button>
       <button class="btn btn-green" id="btnConfirmarResolvido" onclick="confirmarResolvido()" disabled><i class="ti ti-check"></i> Confirmar</button>
     </div>
   </div>
@@ -1921,14 +1921,41 @@ function toggleEncerradas(){
 }
 
 function encerrarPromo(cod,nome){
-  if(!confirm('Encerrar promoção de:\n'+nome+'?\n\nO produto será removido da lista de promoções ativas.'))return;
-  var enc=getEncerradas();
-  var jaExiste=enc.find(function(e){return e.cod===cod;});
-  if(!jaExiste){
-    enc.push({cod:cod,nome:nome,encerradaEm:new Date().toISOString().substring(0,10)});
-    saveEncerradas(enc);
+  // Busca o produto no array global para usar o modal de Marcar como Resolvido
+  var idx=products.findIndex(function(p){return p.cod===cod;});
+  _encerrandoPromoCod=cod;
+  _encerrandoPromoNome=nome;
+  if(idx>=0){
+    openResolvidoModal(idx);
+  } else {
+    // Produto não encontrado no array (raro): abre modal em modo simplificado
+    _resolvidoIdx=null;
+    _resolucaoSelecionada=null;
+    document.getElementById('resolvidoProdNome').textContent=(nome||'Produto')+' — encerrando promoção';
+    document.getElementById('rQtdeTotal').value='';
+    document.getElementById('rQtdeVendida').value='';
+    document.getElementById('rQtdeSobra').value='';
+    document.getElementById('rPreco').value='';
+    document.getElementById('rFornecedor').value='';
+    document.getElementById('rObs').value='';
+    document.getElementById('painelResumoFinanceiro').style.display='none';
+    ['sell_out','sell_in','vendido','descarte','venda_rapida'].forEach(function(o){document.getElementById('opt_'+o).classList.remove('selected');});
+    document.getElementById('resolvidoExtras').style.display='none';
+    _tratamentoSobra='';
+    document.getElementById('btnConfirmarResolvido').disabled=true;
+    document.getElementById('resolvidoModal').classList.add('open');
   }
-  renderPromos();
+  // Atualiza label do modal para indicar contexto de encerramento de promoção
+  setTimeout(function(){
+    var tit=document.getElementById('resolvidoModalTitulo');
+    if(tit)tit.innerHTML='<i class="ti ti-circle-x" style="color:var(--red)"></i> Encerrar Promoção';
+    var nomEl=document.getElementById('resolvidoProdNome');
+    if(nomEl){
+      // Remove sufixo anterior se houver
+      var txt=nomEl.textContent.replace(/ — encerrando promoção$/,'').replace(/ —.*un\. no lote$/,'');
+      nomEl.textContent=txt+' — encerrando promoção';
+    }
+  },20);
 }
 
 function reativarPromo(cod){
@@ -3209,6 +3236,8 @@ var NEG_KEY='boascompras_negociacoes';
 var RESOLVIDOS_KEY='boascompras_resolvidos';
 var _resolvidoIdx=null;
 var _resolucaoSelecionada=null;
+var _encerrandoPromoCod=null;
+var _encerrandoPromoNome=null;
 
 function getNegociacoes(){try{return JSON.parse(localStorage.getItem(NEG_KEY)||'[]');}catch(e){return[];}}
 function saveNegociacoes(arr){localStorage.setItem(NEG_KEY,JSON.stringify(arr));}
@@ -3220,6 +3249,9 @@ function openResolvidoModal(idx){
   _resolucaoSelecionada=null;
   var p=products[idx];
   if(!p)return;
+  // Título padrão (pode ser sobrescrito por encerrarPromo)
+  var tit=document.getElementById('resolvidoModalTitulo');
+  if(tit)tit.innerHTML='<i class="ti ti-circle-check" style="color:var(--green)"></i> Marcar como Resolvido';
   var qtdeLote=p.qtde||1;
   document.getElementById('resolvidoProdNome').textContent=(p.nome||'Produto')+' — '+qtdeLote+' un. no lote';
   // Pré-preencher campos
@@ -3442,6 +3474,19 @@ function confirmarResolvido(){
   atualizarNegBadge();
   renderTable();
   renderRelatorio();
+
+  // Se veio de encerrarPromo: registrar encerramento da promoção
+  if(_encerrandoPromoCod){
+    var enc=getEncerradas();
+    var jaExiste=enc.find(function(e){return e.cod===_encerrandoPromoCod;});
+    if(!jaExiste){
+      enc.push({cod:_encerrandoPromoCod,nome:_encerrandoPromoNome,encerradaEm:new Date().toISOString().substring(0,10)});
+      saveEncerradas(enc);
+    }
+    _encerrandoPromoCod=null;
+    _encerrandoPromoNome=null;
+    renderPromos();
+  }
 
   var temSobra=qtdeSobra>0&&_resolucaoSelecionada!=='descarte';
   var msg=_resolucaoSelecionada==='descarte'?'Descarte registrado — '+qtdeSobra+' un. perdidas':
