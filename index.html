@@ -1278,6 +1278,53 @@ function toggleTheme() {
 </div><!-- /.aura-shell -->
 
 <!-- MODAL EDITAR NEGOCIAÇÃO -->
+<!-- MODAL MODALIDADE FORNECEDOR -->
+<div class="modal-ov" id="modModal">
+  <div class="smodal" style="width:520px">
+    <h3><i class="ti ti-truck-delivery" style="color:var(--blue)"></i> <span id="modModalTitulo">Cadastrar Modalidade</span></h3>
+    <div id="modModalFornNome" style="font-size:13px;font-weight:700;padding:10px 12px;background:var(--bg2);border-radius:var(--r);margin-bottom:16px;display:flex;align-items:center;gap:8px"><i class="ti ti-building-store" style="color:var(--blue)"></i><span id="modModalFornSpan">—</span></div>
+    <input type="hidden" id="modModalIdx">
+    <div style="display:grid;gap:12px">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Fornecedor</label>
+        <input type="text" id="modModalFornecedor" placeholder="Nome do fornecedor" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Procedimento</label>
+        <select id="modModalProcedimento" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+          <option value="" disabled selected>Selecione o procedimento...</option>
+          <option value="CONTATO">CONTATO</option>
+          <option value="DESCARTE">DESCARTE</option>
+          <option value="LOTE + QTD">LOTE + QTD</option>
+          <option value="NF DEVOLUÇÃO">NF DEVOLUÇÃO</option>
+          <option value="REGISTRO E DESCARTE">REGISTRO E DESCARTE</option>
+          <option value="TROCA - (AVARIADOS)">TROCA - (AVARIADOS)</option>
+          <option value="TROCA / DESCONTO">TROCA / DESCONTO</option>
+          <option value="TROCA P/ TROCA">TROCA P/ TROCA</option>
+          <option value="RELATORIO + FOTO">RELATORIO + FOTO</option>
+          <option value="NF DEVOLUÇÃO + BOLETO OU PIX">NF DEVOLUÇÃO + BOLETO OU PIX</option>
+          <option value="FOTO LOTE + QTD + DESCRIÇÃO">FOTO LOTE + QTD + DESCRIÇÃO</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Mix de marcas</label>
+        <input type="text" id="modModalMix" placeholder="Ex: LACTA, HALLS, NESTLE..." style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Contato</label>
+        <input type="text" id="modModalContato" placeholder="Ex: 51 9 9999-9999 — João" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Observação</label>
+        <input type="text" id="modModalObs" placeholder="Ex: Recolhe na entrega do pedido..." style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+    </div>
+    <div class="smodal-foot">
+      <button class="btn" onclick="closeModal('modModal')">Cancelar</button>
+      <button class="btn btn-green" onclick="salvarModModal()"><i class="ti ti-check"></i> Salvar</button>
+    </div>
+  </div>
+</div>
 <div class="modal-ov" id="editarNegModal">
   <div class="smodal" style="width:560px">
     <h3><i class="ti ti-pencil" style="color:var(--blue)"></i> Editar Negociação</h3>
@@ -3337,7 +3384,6 @@ function renderModalidades(){
     html+='<div class="mod-section-lbl ok"><i class="ti ti-circle-check"></i> Com modalidade cadastrada ('+filtered.length+')</div>';
     html+='<div class="mod-grid">';
     html+=filtered.map(function(o){
-      if(_modEditIdx===o.i)return modalidadeCardEdit(o.m,o.i);
       return modalidadeCardView(o.m,o.i);
     }).join('');
     html+='</div>';
@@ -3390,35 +3436,13 @@ function modalidadeCardView(m,i){
       +(!mix&&!contato&&!obs?'<div style="font-size:12px;color:var(--tx2);font-style:italic">Sem detalhes cadastrados.</div>':'')
     +'</div>'
     +'<div class="mod-card-foot">'
-      +'<button class="abtn" onclick="editarModalidade('+i+')" style="border-color:var(--blue);color:var(--blue);flex:1;justify-content:center"><i class="ti ti-pencil"></i> Editar</button>'
+      +'<button class="abtn" onclick="openModModal('+i+')" style="border-color:var(--blue);color:var(--blue);flex:1;justify-content:center"><i class="ti ti-pencil"></i> Editar</button>'
       +'<button class="abtn" onclick="removerModalidade('+i+')" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button>'
     +'</div>'
   +'</div>';
 }
 
-function modalidadeCardEdit(m,i){
-  var procOptions=PROCEDIMENTOS_PADRAO.map(function(p){return'<option value="'+esc(p)+'" '+(p===m.procedimento?'selected':'')+'>'+esc(p)+'</option>';}).join('');
-  if(m.procedimento&&PROCEDIMENTOS_PADRAO.indexOf(m.procedimento)<0){
-    procOptions='<option value="'+esc(m.procedimento)+'" selected>'+esc(m.procedimento)+'</option>'+procOptions;
-  }
-  return'<div class="mod-card editing" id="modcard-'+i+'">'
-    +'<div class="mod-card-hd" style="background:linear-gradient(135deg,#4a90e2,#2563ba)">'
-      +'<div class="mod-card-hdicon"><i class="ti ti-pencil"></i></div>'
-      +'<div class="mod-card-hdinfo"><div class="mod-card-hdname">Editando fornecedor</div><span class="mod-card-hdproc">✏ Em edição</span></div>'
-    +'</div>'
-    +'<div class="mod-edit-body">'
-      +'<div class="mod-edit-field"><label>Fornecedor</label><input id="modEdit_fornecedor" value="'+esc(m.fornecedor||'')+'" placeholder="Nome do fornecedor"></div>'
-      +'<div class="mod-edit-field"><label>Procedimento</label><select id="modEdit_procedimento">'+procOptions+'</select></div>'
-      +'<div class="mod-edit-field"><label>Mix de marcas</label><input id="modEdit_mix" value="'+esc(m.mix||'')+'" placeholder="Ex: LACTA, HALLS, NESTLE..."></div>'
-      +'<div class="mod-edit-field"><label>Contato</label><input id="modEdit_contato" value="'+esc(m.contato||'')+'" placeholder="Ex: 51 9 9999-9999 — João"></div>'
-      +'<div class="mod-edit-field"><label>Observação</label><input id="modEdit_obs" value="'+esc(m.obs||'')+'" placeholder="Ex: Recolhe na entrega..."></div>'
-    +'</div>'
-    +'<div class="mod-card-foot">'
-      +'<button class="abtn" onclick="salvarModalidade('+i+')" style="border-color:var(--green);color:var(--green);flex:1;justify-content:center"><i class="ti ti-check"></i> Salvar</button>'
-      +'<button class="abtn" onclick="cancelarEdicaoModalidade()"><i class="ti ti-x"></i> Cancelar</button>'
-    +'</div>'
-  +'</div>';
-}
+function modalidadeCardEdit(m,i){return modalidadeCardView(m,i);} // fallback não usado
 var _modAcFocus=-1;
 function modAcGetList(){
   var list=[];
@@ -3457,15 +3481,16 @@ function modAcSelect(nome){
   if(inp)inp.value=nome;
   modAcClose();
   renderModalidades();
-  // Scroll para o fornecedor na tabela
+  // Scroll para o fornecedor no grid de cards
   setTimeout(function(){
-    var rows=document.querySelectorAll('#sec-modalidades tbody tr');
-    for(var i=0;i<rows.length;i++){
-      if((rows[i].textContent||'').toLowerCase().includes(nome.toLowerCase())){
-        rows[i].scrollIntoView({behavior:'smooth',block:'center'});
-        rows[i].style.transition='background .3s';
-        rows[i].style.background='rgba(29,158,117,.12)';
-        setTimeout(function(r){r.style.background='';},1200,rows[i]);
+    var cards=document.querySelectorAll('#modCardsArea .mod-card');
+    for(var i=0;i<cards.length;i++){
+      var hdname=cards[i].querySelector('.mod-card-hdname');
+      if(hdname&&(hdname.textContent||'').toLowerCase().includes(nome.toLowerCase())){
+        cards[i].scrollIntoView({behavior:'smooth',block:'center'});
+        cards[i].style.transition='box-shadow .3s';
+        cards[i].style.boxShadow='0 0 0 3px rgba(29,158,117,.45)';
+        setTimeout(function(c){c.style.boxShadow='';},1200,cards[i]);
         break;
       }
     }
@@ -3482,8 +3507,64 @@ function modAcKeydown(e){
   else if(e.key==='Escape'){modAcClose();}
 }
 
-function editarModalidade(i){_modEditIdx=i;renderModalidades();var el=document.getElementById('modcard-'+i);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});}
-function cancelarEdicaoModalidade(){_modEditIdx=null;renderModalidades();}
+// ── MODAL de cadastro/edição de modalidade ──
+function editarModalidade(i){openModModal(i);}
+
+function adicionarModalidadeFornecedor(nome){
+  var list=getModalidades();
+  var exists=list.findIndex(function(m){return normForn(m.fornecedor)===normForn(nome);});
+  if(exists>=0){openModModal(exists);return;}
+  openModModal(-1, nome);
+}
+
+function openModModal(idx, nomePrefill){
+  var list=getModalidades();
+  var isNew=(idx<0);
+  document.getElementById('modModalTitulo').textContent=isNew?'Cadastrar Modalidade':'Editar Modalidade';
+  document.getElementById('modModalIdx').value=idx;
+  if(isNew){
+    var nome=nomePrefill||'';
+    document.getElementById('modModalFornSpan').textContent=nome||'Novo fornecedor';
+    document.getElementById('modModalFornecedor').value=nome;
+    document.getElementById('modModalProcedimento').value='';
+    document.getElementById('modModalMix').value='';
+    document.getElementById('modModalContato').value='';
+    document.getElementById('modModalObs').value='';
+  } else {
+    var m=list[idx];
+    if(!m)return;
+    document.getElementById('modModalFornSpan').textContent=m.fornecedor||'—';
+    document.getElementById('modModalFornecedor').value=m.fornecedor||'';
+    document.getElementById('modModalProcedimento').value=m.procedimento||'';
+    document.getElementById('modModalMix').value=m.mix||'';
+    document.getElementById('modModalContato').value=m.contato||'';
+    document.getElementById('modModalObs').value=m.obs||'';
+  }
+  document.getElementById('modModal').classList.add('open');
+  setTimeout(function(){document.getElementById('modModalProcedimento').focus();},120);
+}
+
+function salvarModModal(){
+  var fornVal=document.getElementById('modModalFornecedor').value.trim();
+  var procVal=document.getElementById('modModalProcedimento').value;
+  if(!fornVal){alert('Informe o nome do fornecedor.');document.getElementById('modModalFornecedor').focus();return;}
+  if(!procVal){alert('Selecione o procedimento.');document.getElementById('modModalProcedimento').focus();return;}
+  var list=getModalidades();
+  var idx=parseInt(document.getElementById('modModalIdx').value);
+  var entry={
+    fornecedor:fornVal,
+    procedimento:procVal,
+    mix:document.getElementById('modModalMix').value.trim(),
+    contato:document.getElementById('modModalContato').value.trim(),
+    obs:document.getElementById('modModalObs').value.trim()
+  };
+  if(idx>=0&&list[idx]){list[idx]=entry;}
+  else{list.unshift(entry);}
+  saveModalidades(list);
+  closeModal('modModal');
+  renderModalidades();
+  mostrarToast('Modalidade salva!','ok');
+}
 
 function salvarModalidade(i){
   var list=getModalidades();
@@ -3504,19 +3585,12 @@ function removerModalidade(i){
   var list=getModalidades();
   list.splice(i,1);
   saveModalidades(list);
-  if(_modEditIdx===i)_modEditIdx=null;
-  else if(_modEditIdx!==null&&_modEditIdx>i)_modEditIdx--;
+  _modEditIdx=null;
   renderModalidades();
+  mostrarToast('Fornecedor removido.','warn');
 }
-function adicionarModalidade(){
-  var list=getModalidades();
-  list.unshift({fornecedor:'',procedimento:'CONTATO',mix:'',contato:'',obs:''});
-  saveModalidades(list);
-  _modEditIdx=0;
-  renderModalidades();
-  var inp=document.getElementById('modEdit_fornecedor');
-  if(inp)inp.focus();
-}
+function adicionarModalidade(){openModModal(-1,'');}
+
 
 // ── Resolvido / Negociações ──────────────────────────────────────────────
 var NEG_KEY='boascompras_negociacoes';
