@@ -1061,6 +1061,9 @@ function toggleTheme() {
         <p style="font-size:12px;color:var(--tx2)">Marque um ou mais para imprimir juntos em uma folha A4.</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="exportarEncartesJSON()" title="Baixar backup JSON"><i class="ti ti-download"></i> Exportar JSON</button>
+        <button class="btn" onclick="exportarEncartesCSV()" title="Baixar planilha CSV"><i class="ti ti-file-spreadsheet"></i> Exportar CSV</button>
+        <label class="btn" style="cursor:pointer" title="Restaurar backup JSON"><i class="ti ti-upload"></i> Importar JSON<input type="file" accept=".json" style="display:none" onchange="importarEncartesJSON(this)"></label>
         <button class="btn" onclick="limparEncartesAtivos()"><i class="ti ti-trash"></i> Limpar tudo</button>
         <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-plus"></i> Novo encarte</button>
       </div>
@@ -1085,22 +1088,7 @@ function toggleTheme() {
       <div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Novo encarte" para criar o primeiro.</div>
     </div>
 
-    <!-- Biblioteca de Modelos (mantida abaixo) -->
-    <div style="margin-top:24px">
-      <div class="bib-header">
-        <div>
-          <div class="bib-title"><i class="ti ti-books" style="color:var(--blue)"></i> Biblioteca de modelos</div>
-          <p style="font-size:12px;color:var(--tx2);margin-top:2px">Produtos pré-configurados para gerar encarte rapidamente.</p>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input type="text" class="bib-search" id="bibBusca" placeholder="Buscar produto..." oninput="renderBiblioteca()">
-          <button class="btn btn-green" onclick="openSalvarNaBibliotecaModal()"><i class="ti ti-plus"></i> Adicionar modelo</button>
-        </div>
-      </div>
-      <div id="bibGrid" class="bib-grid">
-        <div class="bib-empty"><i class="ti ti-books"></i>Nenhum modelo salvo ainda.</div>
-      </div>
-    </div>
+
   </div>
   <div id="sec-relatorio" class="sec">
     <!-- 1 — Situação atual do estoque -->
@@ -2881,6 +2869,64 @@ var encSelecionados=[];
 function getEncartesAtivos(){try{return JSON.parse(localStorage.getItem(ENC_KEY)||'[]');}catch(e){return[];}}
 function saveEncartesAtivos(arr){localStorage.setItem(ENC_KEY,JSON.stringify(arr));}
 
+// ── Exportar / Importar backup de encartes ────────────────────────────────────
+function exportarEncartesJSON(){
+  var arr=getEncartesAtivos();
+  if(!arr.length){mostrarToast('Nenhum encarte para exportar.','warn');return;}
+  var blob=new Blob([JSON.stringify(arr,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  var d=new Date();var ds=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
+  a.download='encartes_backup_'+ds+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+  mostrarToast('Backup JSON baixado com '+arr.length+' encarte(s)!','ok');
+}
+
+function exportarEncartesCSV(){
+  var arr=getEncartesAtivos();
+  if(!arr.length){mostrarToast('Nenhum encarte para exportar.','warn');return;}
+  var cols=['id','produto','setor','validade','precoNormal','precoPraticado','pctDesc','qtde','unidade','tipo','fornecedor','riscar','mostraPct','maior18','criadoEm'];
+  var header=cols.join(',')+','+'imagem';
+  var rows=arr.map(function(e){
+    return cols.map(function(c){
+      var v=e[c]===undefined?'':String(e[c]);
+      return '"'+v.replace(/"/g,'""')+'"';
+    }).join(',') + ',"[imagem base64 omitida]"';
+  });
+  var csv=[header].concat(rows).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  var d=new Date();var ds=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
+  a.download='encartes_backup_'+ds+'.csv';
+  a.click();URL.revokeObjectURL(a.href);
+  mostrarToast('Planilha CSV baixada com '+arr.length+' encarte(s)!','ok');
+}
+
+function importarEncartesJSON(input){
+  var file=input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var imported=JSON.parse(e.target.result);
+      if(!Array.isArray(imported))throw new Error('Formato inválido');
+      var atual=getEncartesAtivos();
+      // mescla: adiciona apenas os que não existem (por id)
+      var idsAtuais=atual.map(function(x){return x.id;});
+      var novos=imported.filter(function(x){return x.id&&!idsAtuais.includes(x.id);});
+      var merged=novos.concat(atual);
+      if(merged.length>50)merged=merged.slice(0,50);
+      saveEncartesAtivos(merged);
+      renderEncartesAtivos();
+      mostrarToast('Importados '+novos.length+' encarte(s) do backup!','ok');
+    }catch(err){
+      mostrarToast('Erro ao importar: arquivo inválido.','warn');
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
 function salvarEncarteAtivo(nome,dataUrl,extras){
   extras=extras||{};
   var arr=getEncartesAtivos();
@@ -2987,7 +3033,7 @@ function renderEncartesAtivos(){
             +['Cada','Kg','100g','Litro','Par','Pacote','Caixa','Fardo'].map(function(u){return'<option'+(u===uni?' selected':'')+'>'+u+'</option>';}).join('')
             +'</select>'
           +'</div>'
-          +'<div class="ef-row" style="align-items:flex-start"><span class="'+fl+'" style="padding-top:5px">Observação</span><textarea class="ef-textarea" oninput="updEncField('+eid+',\'obs\',this.value)">'+obs+'</textarea></div>'
+
           +'<div class="ef-toggle-row">'
             +'<label class="ef-toggle"><input type="checkbox" '+riscar+' onchange="updEncField('+eid+',\'riscar\',this.checked)"><span style="margin-left:4px">Riscar preço normal</span></label>'
             +'<label class="ef-toggle"><input type="checkbox" '+mostraPct+' onchange="updEncField('+eid+',\'mostraPct\',this.checked)"><span style="margin-left:4px">Mostrar desconto %</span></label>'
