@@ -916,6 +916,10 @@ function toggleTheme() {
     </div>
   </div>
 
+  <div class="dash-divider-label">Por setor</div>
+  <div id="dashSetorGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:24px">
+  </div>
+
   <div class="metrics" id="metrics"></div>
   <div class="alert" id="alertBanner"><i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0"></i><span id="alertTxt"></span></div>
   <div class="tabs">
@@ -998,11 +1002,6 @@ function toggleTheme() {
         <span class="dab-detail" id="dashAlertDetail"></span>
       </div>
       <button class="dab-btn" onclick="filtrarMetrica('vencido')">Ver críticos</button>
-    </div>
-
-    <!-- Setor breakdown (movido para o topo) -->
-    <div class="dash-divider-label">Por setor</div>
-    <div id="dashSetorGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:24px">
     </div>
 
     <!-- KPI Tiles -->
@@ -2996,7 +2995,58 @@ function openEncarteModal(idx){
     if(_cod||_nome) buscarFotoOpenFoodFacts(_cod,_nome);
   },150);
 }
-function openAddModal(){document.getElementById('addModal').classList.add('open');}
+function openAddModal(){
+  // Limpa estado anterior do modal
+  document.getElementById('fCod').value='';
+  document.getElementById('fNome').value='';
+  document.getElementById('fNome').style.borderColor='';
+  document.getElementById('fVal').value='';
+  document.getElementById('fQtde').value='1';
+  document.getElementById('fSetorM').value='Acougue';
+  document.getElementById('fBancoInfo').style.display='none';
+  var st=document.getElementById('fCodStatus');st.style.display='none';st.textContent='';
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(function(){document.getElementById('fCod').focus();},100);
+}
+
+function addModalBipar(){
+  var cod=document.getElementById('fCod').value.trim().replace(/[^0-9]/g,'');
+  var nomeInp=document.getElementById('fNome');
+  var info=document.getElementById('fBancoInfo');
+  var infoTxt=document.getElementById('fBancoInfoTxt');
+  var st=document.getElementById('fCodStatus');
+
+  if(!cod){
+    info.style.display='none';
+    st.style.display='none';
+    nomeInp.style.borderColor='';
+    return;
+  }
+
+  var nomeBanco=(typeof banco!=='undefined')?banco[cod]:null;
+
+  if(nomeBanco){
+    nomeInp.value=nomeBanco;
+    nomeInp.style.borderColor='var(--green)';
+    var fornBanco=(typeof bancoFornecedor!=='undefined')?bancoFornecedor[cod]:null;
+    var custoBanco=(typeof bancoCusto!=='undefined')?bancoCusto[cod]:null;
+    var extra=[];
+    if(fornBanco)extra.push('Fornecedor: '+fornBanco);
+    if(custoBanco)extra.push('Custo: '+fmtBRL(custoBanco));
+    infoTxt.textContent='Produto encontrado: '+nomeBanco+(extra.length?' · '+extra.join(' · '):'');
+    info.style.display='flex';
+    st.style.display='inline';
+    st.style.color='var(--green)';
+    st.innerHTML='<i class="ti ti-check"></i>';
+  } else {
+    nomeInp.style.borderColor='';
+    info.style.display='none';
+    st.style.display='inline';
+    st.style.color='var(--amber)';
+    st.innerHTML='<i class="ti ti-alert-triangle" title="Codigo nao encontrado no banco de dados"></i>';
+  }
+}
+
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function addManual(){
   var cod=document.getElementById('fCod').value.trim();
