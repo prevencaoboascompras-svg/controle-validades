@@ -1971,7 +1971,7 @@ async function syncAll(){
 function setDot(t,m){var d=document.getElementById('dot'),tx=document.getElementById('stText');d.className='dot'+(t==='ok'?' ok':t==='err'?' err':t==='loading'?' loading':'');tx.innerHTML=m;}
 
 function daysDiff(v){if(!v)return null;var d=new Date(v);d.setHours(0,0,0,0);return Math.round((d-TODAY)/86400000);}
-function statusFromDays(d){if(d===null)return'sem-data';if(d<=0)return'vencido';if(d<=3)return'critico';if(d<=7)return'urgente';if(d<=15)return'atencao';return'ok';}
+function statusFromDays(d){if(d===null)return'sem-data';if(d<0)return'vencido';if(d<=3)return'critico';if(d<=7)return'urgente';if(d<=15)return'atencao';return'ok';}
 function badge(s){var m={vencido:['b-danger','Vencido'],critico:['b-danger','Critico'],urgente:['b-warn','Urgente'],atencao:['b-warn','Atencao'],ok:['b-ok','OK'],'sem-data':['b-gray','Sem data']};var cl=m[s]||['b-gray','?'];return'<span class="badge '+cl[0]+'">'+cl[1]+'</span>';}
 function barColor(s){return{vencido:'#E24B4A',critico:'#E24B4A',urgente:'#BA7517',atencao:'#EF9F27',ok:'#1D9E75','sem-data':'#888'}[s]||'#888';}
 function fmt(d){return d?d.split('-').reverse().join('/'):'--';}
