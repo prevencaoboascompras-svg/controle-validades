@@ -124,7 +124,18 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .promo-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
 .val-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
 @media (max-width:700px){.val-grid{grid-template-columns:1fr;gap:10px}}
-.val-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:14px 16px;transition:opacity .2s,border-color .15s;display:flex;flex-direction:column}
+.val-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;transition:opacity .2s,border-color .15s;display:flex;flex-direction:column;padding:0}
+.val-card-header{padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
+.val-card-header.status-vencido{background:linear-gradient(135deg,#7f1d1d,#991b1b)}
+.val-card-header.status-critico{background:linear-gradient(135deg,#92190c,#b91c1c)}
+.val-card-header.status-urgente{background:linear-gradient(135deg,#9a3412,#c2410c)}
+.val-card-header.status-atencao{background:linear-gradient(135deg,#92400e,#b45309)}
+.val-card-header.status-ok{background:linear-gradient(135deg,#065f46,#047857)}
+.val-card-header.status-none{background:linear-gradient(135deg,#1e3a5f,#1e40af)}
+.val-card-hdr-left{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.val-card-hdr-nome{font-size:13px;font-weight:600;color:#fff;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.val-card-hdr-cod{font-family:monospace;font-size:10px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:6px}
+.val-card-body{padding:12px 14px;display:flex;flex-direction:column;flex:1}
 .val-card:hover{border-color:var(--bds)}
 .val-card.faded{opacity:.55}
 .val-card.resolvido{opacity:.65}
@@ -147,18 +158,14 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .val-card-forn{font-size:10.5px;color:var(--tx2);line-height:1.3;max-width:160px}
 .val-card-actions{display:flex;gap:6px;flex-wrap:wrap}
 .val-divider{grid-column:1/-1;padding:8px 12px;background:var(--bg2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);border-radius:var(--r);display:flex;align-items:center;gap:6px;margin-top:6px}
-/* Flag de validade */
-.val-flag-row{margin-bottom:10px}
-.val-flag{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;padding:5px 11px;border-radius:6px;letter-spacing:.01em}
-.val-flag i{font-size:13px}
-.val-flag-red{background:rgba(239,68,68,.18);color:#f87171;box-shadow:inset 0 0 0 1px rgba(239,68,68,.35)}
-.val-flag-amber{background:rgba(245,158,11,.18);color:#fbbf24;box-shadow:inset 0 0 0 1px rgba(245,158,11,.35)}
-.val-flag-green{background:rgba(16,185,129,.15);color:#34d399;box-shadow:inset 0 0 0 1px rgba(16,185,129,.30)}
-.val-flag-gray{background:var(--bg2);color:var(--tx2);box-shadow:inset 0 0 0 1px var(--bds)}
+/* Flag de validade — dentro do banner colorido */
+.val-flag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px;letter-spacing:.01em;background:rgba(0,0,0,.25);color:#fff;white-space:nowrap}
+.val-flag i{font-size:12px}
 
 /* Mobile val-card */
 @media (max-width:700px){
-  .val-card{padding:12px 14px}
+  .val-card{padding:0}
+  .val-card-body{padding:10px 12px}
   .val-card-title{font-size:13px}
   .val-card-cod{font-size:10px}
   .val-card-field-lbl{font-size:9.5px}
@@ -2073,27 +2080,32 @@ function renderTable(){
       ?'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--tx2);color:var(--tx2);background:var(--bg2)" title="Já resolvido — clique para registrar novamente"><i class="ti ti-circle-check"></i> OK</button>'
       :'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)" title="Marcar como resolvido"><i class="ti ti-circle-check"></i> Resolvido</button>';
     function campo(lbl,val){return '<div class="val-card-field"><span class="val-card-field-lbl">'+lbl+'</span><span class="val-card-field-val">'+val+'</span></div>';}
+    var hdrCls='val-card-header status-'+(days===null?'none':s);
     return '<div class="'+cardCls+'">'
-      +'<div class="val-card-hd">'
-        +'<div style="min-width:0;flex:1">'
-          +'<div class="val-card-title">'+escHtml(p.nome||'--')+'</div>'
-          +'<div class="val-card-cod">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></div>'
+      +'<div class="'+hdrCls+'">'
+        +'<div class="val-card-hdr-left">'
+          +'<div class="val-card-hdr-nome">'+escHtml(p.nome||'--')+'</div>'
+          +'<div class="val-card-hdr-cod">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'" style="opacity:.8">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></div>'
         +'</div>'
-        +badge(s)
+        +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'
+          +flagValidade(days, p.validade)
+          +badge(s)
+        +'</div>'
       +'</div>'
-      +'<div class="val-flag-row">'+flagValidade(days, p.validade)+'</div>'
-      +'<div class="val-card-bar"><div class="bar-wrap" style="flex:1"><div class="bar-bg" style="max-width:none"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:60px;text-align:right;color:var(--tx2)">'+dTxt+'</span></div></div>'
-      +'<div class="val-card-fields">'
-        +campo('Setor',escHtml(p.setor||'--'))
-        +campo('Qtde',p.qtde||'--')
-        +campo('Preço normal',p.precoNormal?fmtR(p.precoNormal):'--')
-        +campo('Preço promoção','<b style="color:var(--green)">'+(p.precoPromo?fmtR(p.precoPromo):'--')+'</b>')
-        +campo('Desconto',p.pctDesc?'<b style="color:var(--amber)">'+fmtPct(p.pctDesc)+'</b>':'--')
-        +campo('Custo',custoProd?'<b style="color:var(--amber)">'+fmtR(custoProd)+'</b>':'--')
-      +'</div>'
-      +'<div class="val-card-forn-row" title="'+escHtml(fornProd)+'"><i class="ti ti-truck-delivery" style="opacity:.6"></i> '+escHtml(fornProd)+'</div>'
-      +'<div class="val-card-foot">'
-        +'<div class="val-card-actions" style="margin-left:auto">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido+'</div>'
+      +'<div class="val-card-body">'
+        +'<div class="val-card-bar"><div class="bar-wrap" style="flex:1"><div class="bar-bg" style="max-width:none"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:60px;text-align:right;color:var(--tx2)">'+dTxt+'</span></div></div>'
+        +'<div class="val-card-fields">'
+          +campo('Setor',escHtml(p.setor||'--'))
+          +campo('Qtde',p.qtde||'--')
+          +campo('Preço normal',p.precoNormal?fmtR(p.precoNormal):'--')
+          +campo('Preço promoção','<b style="color:var(--green)">'+(p.precoPromo?fmtR(p.precoPromo):'--')+'</b>')
+          +campo('Desconto',p.pctDesc?'<b style="color:var(--amber)">'+fmtPct(p.pctDesc)+'</b>':'--')
+          +campo('Custo',custoProd?'<b style="color:var(--amber)">'+fmtR(custoProd)+'</b>':'--')
+        +'</div>'
+        +'<div class="val-card-forn-row" title="'+escHtml(fornProd)+'"><i class="ti ti-truck-delivery" style="opacity:.6"></i> '+escHtml(fornProd)+'</div>'
+        +'<div class="val-card-foot">'
+          +'<div class="val-card-actions" style="margin-left:auto">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido+'</div>'
+        +'</div>'
       +'</div>'
     +'</div>';
   }
