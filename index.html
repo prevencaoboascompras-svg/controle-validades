@@ -122,6 +122,33 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .price-por{font-size:24px;font-weight:700;color:var(--green)}
 .promo-meta{font-size:12px;color:var(--tx2);display:flex;gap:12px;flex-wrap:wrap}
 .promo-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
+.val-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:1400px){.val-grid{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:1000px){.val-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.val-grid{grid-template-columns:1fr}}
+.val-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:14px 16px;transition:opacity .2s,border-color .15s;display:flex;flex-direction:column}
+.val-card:hover{border-color:var(--bds)}
+.val-card.faded{opacity:.55}
+.val-card.resolvido{opacity:.65}
+.val-card-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.val-card-title{font-size:13px;font-weight:600;color:var(--tx);line-height:1.3}
+.val-card-cod{font-family:monospace;font-size:10px;color:var(--tx2);margin-top:2px;display:flex;align-items:center;gap:6px}
+.val-card-meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;color:var(--tx2);margin-bottom:10px}
+.val-card-meta b{color:var(--tx);font-weight:600}
+.val-card-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.val-card-prices{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.val-card-price-normal{font-size:12px;color:var(--tx2);text-decoration:line-through}
+.val-card-price-promo{font-size:18px;font-weight:700;color:var(--green)}
+.val-card-pct{font-size:11px;font-weight:600;color:var(--amber)}
+.val-card-fields{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;padding:10px 0;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);margin-bottom:10px}
+.val-card-field{display:flex;flex-direction:column;gap:1px;min-width:0}
+.val-card-field-lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2)}
+.val-card-field-val{font-size:12.5px;color:var(--tx);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.val-card-forn-row{font-size:11px;color:var(--tx2);line-height:1.3;margin-bottom:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.val-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:10px;border-top:1px solid var(--bd);flex-wrap:wrap;margin-top:auto}
+.val-card-forn{font-size:10.5px;color:var(--tx2);line-height:1.3;max-width:160px}
+.val-card-actions{display:flex;gap:6px;flex-wrap:wrap}
+.val-divider{grid-column:1/-1;padding:8px 12px;background:var(--bg2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);border-radius:var(--r);display:flex;align-items:center;gap:6px;margin-top:6px}
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:20px}
 .modal-ov.open{display:flex}
 .modal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);width:960px;max-width:98vw;max-height:96vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.25)}
@@ -1054,7 +1081,7 @@ function toggleTheme() {
 
   <div id="sec-validades" class="sec">
     <div class="filters">
-      <select id="fSetor" onchange="_multiStatusFilter=null;renderTable()">
+      <select id="fSetor" onchange="setorAtivo=this.value;_multiStatusFilter=null;renderTable();atualizarSetorGridDestaque()">
         <option value="">Todos os setores</option>
         <option>Acougue</option><option>Bebidas</option><option>Congelados</option>
         <option>FLV</option><option>Frios</option><option>Laticinios</option>
@@ -1075,30 +1102,7 @@ function toggleTheme() {
         Mostrar resolvidos
       </label>
     </div>
-    <div class="twrap">
-      <table>
-        <colgroup>
-          <col style="width:90px"><!-- Codigo -->
-          <col style="width:180px"><!-- Produto -->
-          <col style="width:100px"><!-- Setor -->
-          <col style="width:90px"><!-- Validade -->
-          <col style="width:90px"><!-- Dias -->
-          <col style="width:55px"><!-- Qtde -->
-          <col style="width:105px"><!-- Preco normal -->
-          <col style="width:110px"><!-- Preco promocao -->
-          <col style="width:80px"><!-- Desconto -->
-          <col style="width:75px"><!-- Custo -->
-          <col style="width:140px"><!-- Fornecedor -->
-          <col style="width:75px"><!-- Status -->
-          <col style="width:175px"><!-- Acoes -->
-        </colgroup>
-        <thead><tr>
-          <th>Código</th><th>Produto</th><th>Setor</th><th>Validade</th>
-          <th>Dias</th><th>Qtde</th><th>Preço normal</th><th>Preço promoção</th><th>Desconto</th><th>Custo</th><th>Fornecedor</th><th>Status</th><th>Ações</th>
-        </tr></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
+    <div class="val-grid" id="valGrid"></div>
   </div>
   <div id="sec-promocoes" class="sec">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px">
@@ -1115,6 +1119,10 @@ function toggleTheme() {
       <button class="promo-filter-btn"        id="pfSemana"   onclick="setPromoFiltro('semana')">Esta semana</button>
       <button class="promo-filter-btn"        id="pfFuturas"  onclick="setPromoFiltro('futuras')">Futuras (+7d)</button>
       <div style="flex:1"></div>
+      <span id="promoSetorChip" style="display:none;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--green);background:rgba(52,211,153,.12);border:1px solid var(--green);border-radius:999px;padding:4px 10px">
+        <i class="ti ti-filter"></i><span id="promoSetorChipTxt"></span>
+        <i class="ti ti-x" style="cursor:pointer" onclick="filtrarSetor(setorAtivo)" title="Limpar filtro de setor"></i>
+      </span>
       <button class="promo-filter-btn enc-active" id="pfEncerradas" onclick="toggleEncerradas()" style="display:none" id="btnVerEncerradas">
         <i class="ti ti-eye"></i> Ver encerradas (<span id="countEncerradas">0</span>)
       </button>
@@ -1733,6 +1741,7 @@ var CFG_KEY='aura_cfg',PROD_KEY='aura_prod';
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var fotoImg=null;
 var products=JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
+var setorAtivo='';
 function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}');}
 function saveProd(){localStorage.setItem(PROD_KEY,JSON.stringify(products));}
 
@@ -1995,9 +2004,9 @@ function renderTable(){
     .sort(function(a,b){return(daysDiff(a.validade)||9999)-(daysDiff(b.validade)||9999);});
   var vencidos=all.filter(function(p){var d=daysDiff(p.validade);return d!==null&&d<0;})
     .sort(function(a,b){return(daysDiff(b.validade)||0)-(daysDiff(a.validade)||0);});
-  var tb=document.getElementById('tbody');
-  if(!all.length){tb.innerHTML='<tr><td colspan="13" class="empty">Nenhum produto encontrado.</td></tr>';return;}
-  function rowHtml(p,fade){
+  var grid=document.getElementById('valGrid');
+  if(!all.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><i class="ti ti-search-off"></i>Nenhum produto encontrado.</div>';return;}
+  function cardHtml(p,fade){
     var days=daysDiff(p.validade);
     var s=statusFromDays(days);
     var pct=days===null?0:Math.min(100,Math.max(0,days>30?100:(days/30)*100));
@@ -2005,21 +2014,45 @@ function renderTable(){
     var idx=products.indexOf(p);
     var needsPromo=['vencido','critico','urgente','atencao'].includes(s);
     var jaResolvido=resolvidos.includes(produtoChave(p));
-    var rs=fade?'opacity:.5;':(jaResolvido?'opacity:.65;':'');
+    var cardCls='val-card'+(fade?' faded':'')+(jaResolvido?' resolvido':'');
     var barrasBusca=(p.cod||'').replace(/[^0-9]/g,'');
     var custoProd=p.custo||bancoCusto[barrasBusca]||0;
     var fornProd=p.fornecedor||bancoFornecedor[barrasBusca]||bancoFornecedorNome[normNome(p.nome||'')]||'--';
     var btnResolvido=jaResolvido
       ?'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--tx2);color:var(--tx2);background:var(--bg2)" title="Já resolvido — clique para registrar novamente"><i class="ti ti-circle-check"></i> OK</button>'
       :'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)" title="Marcar como resolvido"><i class="ti ti-circle-check"></i> Resolvido</button>';
-    return'<tr style="'+rs+'"><td style="font-family:monospace;font-size:11px;color:var(--tx2);white-space:nowrap">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></td><td style="font-weight:500;font-size:12px;white-space:nowrap">'+(p.nome||'--')+'</td><td style="font-size:12px">'+(p.setor||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmt(p.validade)+'</td><td><div class="bar-wrap"><div class="bar-bg"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:40px">'+dTxt+'</span></div></td><td style="font-size:12px">'+(p.qtde||'--')+'</td><td style="font-size:12px;white-space:nowrap">'+fmtR(p.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmtR(p.precoPromo)+'</td><td style="font-size:12px">'+fmtPct(p.pctDesc)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--amber);font-weight:600">'+(custoProd?fmtR(custoProd):'--')+'</td><td style="font-size:11px;color:var(--tx2);max-width:130px;white-space:normal;line-height:1.3">'+fornProd+'</td><td>'+badge(s)+'</td><td style="white-space:nowrap">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido+'</td></tr>';
+    function campo(lbl,val){return '<div class="val-card-field"><span class="val-card-field-lbl">'+lbl+'</span><span class="val-card-field-val">'+val+'</span></div>';}
+    return '<div class="'+cardCls+'">'
+      +'<div class="val-card-hd">'
+        +'<div style="min-width:0;flex:1">'
+          +'<div class="val-card-title">'+escHtml(p.nome||'--')+'</div>'
+          +'<div class="val-card-cod">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></div>'
+        +'</div>'
+        +badge(s)
+      +'</div>'
+      +'<div class="val-card-bar"><div class="bar-wrap" style="flex:1"><div class="bar-bg" style="max-width:none"><div class="bar-fill" style="width:'+pct+'%;background:'+barColor(s)+'"></div></div><span style="font-size:12px;min-width:60px;text-align:right;color:var(--tx2)">'+dTxt+'</span></div></div>'
+      +'<div class="val-card-fields">'
+        +campo('Setor',escHtml(p.setor||'--'))
+        +campo('Validade',fmt(p.validade))
+        +campo('Dias',dTxt)
+        +campo('Qtde',p.qtde||'--')
+        +campo('Preço normal',p.precoNormal?fmtR(p.precoNormal):'--')
+        +campo('Preço promoção','<b style="color:var(--green)">'+(p.precoPromo?fmtR(p.precoPromo):'--')+'</b>')
+        +campo('Desconto',p.pctDesc?'<b style="color:var(--amber)">'+fmtPct(p.pctDesc)+'</b>':'--')
+        +campo('Custo',custoProd?'<b style="color:var(--amber)">'+fmtR(custoProd)+'</b>':'--')
+      +'</div>'
+      +'<div class="val-card-forn-row" title="'+escHtml(fornProd)+'"><i class="ti ti-truck-delivery" style="opacity:.6"></i> '+escHtml(fornProd)+'</div>'
+      +'<div class="val-card-foot">'
+        +'<div class="val-card-actions" style="margin-left:auto">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido+'</div>'
+      +'</div>'
+    +'</div>';
   }
-  var rows=ativos.map(function(p){return rowHtml(p,false);});
+  var cards=ativos.map(function(p){return cardHtml(p,false);});
   if(vencidos.length){
-    rows.push('<tr><td colspan="13" style="padding:6px 12px;background:var(--bg2);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);border-top:2px dashed var(--bd)"><i class="ti ti-calendar-x" style="margin-right:5px"></i>Vencidos — remover da planilha ('+vencidos.length+')</td></tr>');
-    rows=rows.concat(vencidos.map(function(p){return rowHtml(p,true);}));
+    cards.push('<div class="val-divider"><i class="ti ti-calendar-x"></i>Vencidos — remover da planilha ('+vencidos.length+')</div>');
+    cards=cards.concat(vencidos.map(function(p){return cardHtml(p,true);}));
   }
-  tb.innerHTML=rows.join('');
+  grid.innerHTML=cards.join('');
 }
 
 // ── Promoções: estado ──────────────────────────────────────────────────
@@ -2103,12 +2136,26 @@ function promoCardHtml(p,idx,encerrada){
 }
 
 function renderPromos(){
+  // Chip de filtro de setor
+  var chip=document.getElementById('promoSetorChip');
+  if(chip){
+    if(setorAtivo){
+      chip.style.display='inline-flex';
+      document.getElementById('promoSetorChipTxt').textContent='Setor: '+setorAtivo;
+    } else {
+      chip.style.display='none';
+    }
+  }
+
   var encCods=getEncerradas().map(function(e){return e.cod;});
   var enc=getEncerradas();
   var today=new Date();today.setHours(0,0,0,0);
 
   // Todos os candidatos: sheets com Aguarda
   var base=products.filter(function(p){return p.src==='sheets'&&(p.status||'').toLowerCase().includes('aguard');});
+
+  // Filtro de setor (clique nos cards "Por setor")
+  if(setorAtivo)base=base.filter(function(p){return p.setor===setorAtivo;});
 
   // Ativos = não encerrados
   var ativos=base.filter(function(p){return!encCods.includes(p.cod);});
@@ -2363,7 +2410,7 @@ function renderDashboard(){
     var urgCnt=sm.vencido+sm.critico+sm.urgente;
     var pct=sm.total>0?Math.round((sm.ok/sm.total)*100):0;
     var barColor=pct>=80?'#34d399':pct>=50?'#fbbf24':'#f87171';
-    return '<div class="dash-hero-card" style="padding:14px 16px;cursor:pointer" onclick="filtrarSetor(\''+s+'\')" title="Filtrar por '+s+'">'
+    return '<div class="dash-hero-card" data-setor="'+escHtml(s)+'" style="padding:14px 16px;cursor:pointer" onclick="filtrarSetor(\''+s+'\')" title="Filtrar por '+s+'">'
       +'<div style="font-size:12px;font-weight:600;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(s)+'</div>'
       +'<div style="font-size:22px;font-weight:800;line-height:1">'+sm.total+'</div>'
       +'<div style="font-size:10px;color:var(--muted);margin-top:2px">'
@@ -2375,12 +2422,46 @@ function renderDashboard(){
       +'<div style="font-size:10px;color:var(--muted);margin-top:3px">'+pct+'% OK</div>'
       +'</div>';
   }).join('');
+  atualizarSetorGridDestaque();
 }
 
 function filtrarSetor(setor){
-  auraNav(document.querySelector('#auraNav button:nth-child(2)'),'validades');
+  // alterna: clicar de novo no mesmo setor remove o filtro
+  setorAtivo=(setorAtivo===setor)?'':setor;
+
+  // sincroniza com o select da aba Validades (mesmo que não seja a aba atual)
   var s=document.getElementById('fSetor');
-  if(s){s.value=setor;renderTable();}
+  if(s)s.value=setorAtivo;
+
+  // re-renderiza a aba em que o usuário está agora, sem trocar de aba
+  switch(currentTabName){
+    case 'validades': renderTable(); break;
+    case 'promocoes': renderPromos(); break;
+    case 'encartes':
+      renderEncartesAtivos();
+      if(setorAtivo)mostrarToast('Encartes não filtram por setor ainda.','warn');
+      break;
+    case 'relatorio':
+      renderRelatorio();
+      if(setorAtivo)mostrarToast('Relatório não filtra por setor ainda.','warn');
+      break;
+    case 'modalidades':
+      renderModalidades();
+      if(setorAtivo)mostrarToast('Modalidades não filtra por setor ainda.','warn');
+      break;
+    default:
+      // dashboard e ajuda não têm listagem filtrável: manda para Validades
+      auraNav(document.querySelector('#auraNav button:nth-child(2)'),'validades');
+      renderTable();
+  }
+  atualizarSetorGridDestaque();
+}
+
+function atualizarSetorGridDestaque(){
+  var cards=document.querySelectorAll('#dashSetorGrid .dash-hero-card');
+  cards.forEach(function(c){
+    c.style.outline=(setorAtivo&&c.getAttribute('data-setor')===setorAtivo)?'2px solid var(--green)':'';
+  });
 }
 
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -2450,7 +2531,7 @@ function filtrarMetrica(filt){
   sel.value=filt;
   renderTable();
   var sec=document.getElementById('sec-validades');
-  if(sec)setTimeout(function(){var tbl=sec.querySelector('table');if(tbl)tbl.scrollIntoView({behavior:'smooth',block:'start'});},150);
+  if(sec)setTimeout(function(){var tbl=sec.querySelector('.val-grid');if(tbl)tbl.scrollIntoView({behavior:'smooth',block:'start'});},150);
 }
 
 var charts={};
@@ -3056,7 +3137,9 @@ function addManual(){
   saveProd();closeModal('addModal');refresh();
 }
 
+var currentTabName='dashboard';
 function goTab(name){
+  currentTabName=name;
   var tabNames=['dashboard','validades','promocoes','encartes','relatorio','modalidades','ajuda'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
