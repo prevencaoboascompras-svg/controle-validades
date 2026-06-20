@@ -122,10 +122,8 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .price-por{font-size:24px;font-weight:700;color:var(--green)}
 .promo-meta{font-size:12px;color:var(--tx2);display:flex;gap:12px;flex-wrap:wrap}
 .promo-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
-.val-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-@media (max-width:1400px){.val-grid{grid-template-columns:repeat(3,1fr)}}
-@media (max-width:1000px){.val-grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:640px){.val-grid{grid-template-columns:repeat(2,1fr);gap:8px}}
+.val-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+@media (max-width:700px){.val-grid{grid-template-columns:1fr;gap:10px}}
 .val-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:14px 16px;transition:opacity .2s,border-color .15s;display:flex;flex-direction:column}
 .val-card:hover{border-color:var(--bds)}
 .val-card.faded{opacity:.55}
@@ -158,20 +156,14 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .val-flag-green{background:rgba(16,185,129,.15);color:#34d399;box-shadow:inset 0 0 0 1px rgba(16,185,129,.30)}
 .val-flag-gray{background:var(--bg2);color:var(--tx2);box-shadow:inset 0 0 0 1px var(--bds)}
 
-/* Mobile val-card: 2 colunas, fontes maiores */
-@media (max-width:640px){
-  .val-card{padding:10px 11px}
-  .val-card-title{font-size:12px}
-  .val-card-cod{font-size:9px}
-  .val-card-meta{font-size:10px;gap:4px 10px;margin-bottom:8px}
-  .val-card-price-promo{font-size:15px}
-  .val-card-price-normal{font-size:11px}
-  .val-card-pct{font-size:10px}
-  .val-card-field-lbl{font-size:9px}
-  .val-card-field-val{font-size:11px}
-  .val-card-forn-row{font-size:10px;margin-bottom:8px}
-  .val-card-forn{font-size:9.5px;max-width:none}
-  .val-card-actions .abtn{font-size:10px;padding:3px 7px}
+/* Mobile val-card */
+@media (max-width:700px){
+  .val-card{padding:12px 14px}
+  .val-card-title{font-size:13px}
+  .val-card-cod{font-size:10px}
+  .val-card-field-lbl{font-size:9.5px}
+  .val-card-field-val{font-size:12px}
+  .val-card-forn-row{font-size:10.5px;margin-bottom:8px}
   .val-divider{font-size:10px;padding:6px 10px}
 }
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:20px}
