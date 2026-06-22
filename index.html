@@ -2292,8 +2292,50 @@ function renderDashboard(){
     document.getElementById('dashAlertBar').style.display='none';
     document.getElementById('dashTiles').innerHTML='';
     document.getElementById('dashMini').innerHTML='';
-    document.getElementById('dashUrgentTbody').innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Nenhum produto carregado.</td></tr>';
-    return;
+    // Renderizar como cards com gauge em vez de tabela
+  var urgentContainer = document.getElementById('dashUrgentTbody');
+  var urgentParent = urgentContainer ? urgentContainer.closest('.twrap') : null;
+  if (urgentParent) {
+    // Troca a tabela por uma div de cards (só uma vez)
+    if (!urgentParent._gaugeMode) {
+      urgentParent.style.border = 'none';
+      urgentParent.style.background = 'transparent';
+      urgentParent.style.overflow = 'visible';
+      urgentParent.style.maxHeight = 'none';
+      urgentParent._gaugeMode = true;
+    }
+  }
+  document.getElementById('dashUrgentTbody').innerHTML=
+    urgent.length===0
+    ?'<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Nenhum produto vencido ou crítico. </td></tr>'
+    :urgent.map(function(p){
+      var days = daysDiff(p.validade);
+      var s = statusFromDays(days);
+      var qtd = parseInt(p.qtde)||1;
+      var idx = products.indexOf(p);
+      var fmtP = function(v){return v?'R$ '+parseFloat(v).toFixed(2).replace('.',','):'—';};
+      return '<tr>'
+        +'<td style="width:80px;vertical-align:middle;padding:8px">' + gaugeCircleSVG(days, s) + '</td>'
+        +'<td style="white-space:nowrap"><div style="font-weight:500;font-size:12px">'+escHtml(p.nome||'—')+'</div>'
+        +'<div style="font-size:10px;color:var(--muted)">'+escHtml(p.codigo||'')+'</div></td>'
+        +'<td style="color:var(--muted);font-size:12px">'+escHtml(p.setor||'—')+'</td>'
+        +'<td style="font-size:12px">'+escHtml(p.validade||'—')+'</td>'
+        +'<td>'+daysBadge(p)+'</td>'
+        +'<td style="font-size:12px">'+qtd+'</td>'
+        +'<td style="color:#34d399;font-weight:500;font-size:12px">'+fmtP(p.precoPromo)+'</td>'
+        +'<td style="font-size:12px">'+(p.desconto?p.desconto+'%':'—')+'</td>'
+        +'<td style="font-size:11px;color:var(--muted)">'+escHtml((p.fornecedor||'—').substring(0,22))+'</td>'
+        +'<td>'+statusBadge(p)+'</td>'
+        +'<td>'
+          +'<button class="abtn encarte" onclick="openEncarteModal('+idx+')" style="margin-right:4px">'
+          +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>'
+          +' Encarte</button>'
+          +'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)">'
+          +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>'
+          +' Resolvido</button>'
+        +'</td>'
+        +'</tr>';
+    }).join('');
   }
 
   // ── Compute counts ──
