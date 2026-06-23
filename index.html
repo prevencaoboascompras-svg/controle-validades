@@ -113,7 +113,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .promo-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin:18px 0 10px;display:flex;align-items:center;gap:6px}
 .promo-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:visible;transition:opacity .2s}
 .promo-card.encerrada{opacity:.55;border-style:dashed}
-.promo-card-header{background:linear-gradient(135deg,#1D9E75,#0F6E56);padding:12px 16px 12px 20px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:visible;border-radius:var(--rl) var(--rl) 0 0}
+.promo-card-header{background:linear-gradient(135deg,#1D9E75,#0F6E56);padding:12px 16px 12px 48px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:visible;border-radius:var(--rl) var(--rl) 0 0}
 .pct{font-size:28px;font-weight:700;color:#fff;line-height:1}.pct small{font-size:12px;font-weight:400;display:block}
 .promo-name{font-size:13px;color:rgba(255,255,255,.9);flex:1;margin:0 12px;font-weight:500}
 .promo-card-body{padding:14px 16px}
@@ -126,7 +126,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 /* ── Dashboard urgente cards ─────────────────────────── */
 .urg-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:visible;display:flex;flex-direction:column;transition:border-color .15s}
 .urg-card:hover{border-color:var(--bds)}
-.urg-card-header{padding:10px 13px 10px 18px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;overflow:visible}
+.urg-card-header{padding:10px 13px 10px 48px;display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;overflow:visible}
 .urg-card-header.status-vencido{background:linear-gradient(135deg,#7f1d1d,#991b1b);border-radius:var(--rl) var(--rl) 0 0}
 .urg-card-header.status-critico{background:linear-gradient(135deg,#92190c,#b91c1c);border-radius:var(--rl) var(--rl) 0 0}
 .urg-card-nome{font-size:12px;font-weight:700;color:#fff;line-height:1.3;flex:1;min-width:0;white-space:normal;word-break:break-word}
@@ -145,7 +145,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .val-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
 @media (max-width:700px){.val-grid{grid-template-columns:1fr;gap:10px}}
 .val-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:visible;transition:opacity .2s,border-color .15s;display:flex;flex-direction:column;padding:0}
-.val-card-header{padding:11px 14px 11px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;position:relative;overflow:visible}
+.val-card-header{padding:11px 14px 11px 48px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;position:relative;overflow:visible}
 .val-card-header.status-vencido{background:linear-gradient(135deg,#7f1d1d,#991b1b);border-radius:var(--rl) var(--rl) 0 0}
 .val-card-header.status-critico{background:linear-gradient(135deg,#92190c,#b91c1c);border-radius:var(--rl) var(--rl) 0 0}
 .val-card-header.status-urgente{background:linear-gradient(135deg,#9a3412,#c2410c);border-radius:var(--rl) var(--rl) 0 0}
@@ -156,7 +156,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .val-card-hdr-nome{font-size:13px;font-weight:600;color:#fff;line-height:1.3;white-space:normal;word-break:break-word}
 .val-card-hdr-cod{font-family:monospace;font-size:10px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:6px}
 .val-card-hdr-data{font-size:22px;font-weight:700;color:#fff;line-height:1;letter-spacing:-.5px;text-align:right}
-.val-card-qtde-badge{position:absolute;top:-10px;left:-10px;display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;padding:0 8px;border-radius:999px;background:#fff;font-size:12px;font-weight:800;letter-spacing:-.3px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.35);z-index:10}
+.val-card-qtde-badge{position:absolute;top:8px;left:8px;display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;padding:0 9px;border-radius:999px;background:#fff;font-size:13px;font-weight:900;letter-spacing:-.5px;white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.4);z-index:10}
 .val-card-qtde-badge.status-vencido{color:#991b1b}
 .val-card-qtde-badge.status-critico{color:#b91c1c}
 .val-card-qtde-badge.status-urgente{color:#c2410c}
