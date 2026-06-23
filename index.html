@@ -882,6 +882,10 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>Gerar encarte</span>
       </button>
+      <button class="aura-btn" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.4);color:#fca5a5" onclick="abrirRelatorioRetirada()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <span>Retirada</span>
+      </button>
     </div>
   </header>
 
@@ -4629,10 +4633,114 @@ atualizarBadge();
 atualizarNegBadge();
 atualizarBibBadge();
 
+
 document.getElementById('cfgBox').style.display='none';
 var _cfg=loadCfg();
 if(_cfg.id){setDot('loading','Reconectando...');syncAll();}
 else refresh();
+
+// ── Relatório de Retirada ──────────────────────────────────────────────────
+function abrirRelatorioRetirada() {
+  var hoje = products.filter(function(p) {
+    var d = daysDiff(p.validade);
+    return d !== null && d <= 0;
+  }).sort(function(a,b) {
+    return (daysDiff(a.validade)||0) - (daysDiff(b.validade)||0);
+  });
+
+  var dataHoje = new Date();
+  var dataFmt = dataHoje.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  var dataFmtCurta = dataHoje.toLocaleDateString('pt-BR');
+
+  function statusCor(d) {
+    if (d <= -1) return {bg:'#7f1d1d', borda:'#991b1b', txt:'Vencido há '+(Math.abs(d))+'d'};
+    return {bg:'#92190c', borda:'#b91c1c', txt:'Vence hoje'};
+  }
+
+  var cardsHtml = hoje.length === 0
+    ? '<div style="text-align:center;padding:48px 20px;color:#666"><div style="font-size:48px;margin-bottom:12px">✅</div><div style="font-size:18px;font-weight:700;color:#333">Nenhum produto vencido hoje</div><div style="font-size:14px;margin-top:6px;color:#888">Tudo dentro da validade</div></div>'
+    : hoje.map(function(p) {
+        var d = daysDiff(p.validade);
+        var sc = statusCor(d);
+        var nomeLimpo = cleanNome(p.nome || '--');
+        var valFmt = p.validade ? p.validade.split('-').reverse().join('/') : '--';
+        var custoProd = p.custo || bancoCusto[(p.cod||'').replace(/[^0-9]/g,'')] || 0;
+        return [
+          '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.12);margin-bottom:14px">',
+            '<div style="background:linear-gradient(135deg,'+sc.bg+','+sc.borda+');padding:12px 14px 12px 52px;position:relative;min-height:60px">',
+              p.qtde ? '<span style="position:absolute;top:10px;left:10px;min-width:32px;height:32px;padding:0 8px;border-radius:999px;background:#fff;color:'+sc.borda+';font-size:15px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3)">'+p.qtde+'</span>' : '',
+              '<div style="font-size:14px;font-weight:700;color:#fff;line-height:1.3">'+nomeLimpo+'</div>',
+              '<div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:3px;font-family:monospace">'+(p.cod||'--')+'</div>',
+              '<div style="position:absolute;top:10px;right:12px;background:rgba(0,0,0,.3);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap">'+sc.txt+'</div>',
+            '</div>',
+            '<div style="padding:10px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 10px">',
+              '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:2px">Setor</div><div style="font-size:12px;font-weight:600;color:#222">'+(p.setor||'--')+'</div></div>',
+              '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:2px">Qtde</div><div style="font-size:12px;font-weight:700;color:#b91c1c">'+(p.qtde||'--')+'</div></div>',
+              '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:2px">Validade</div><div style="font-size:12px;font-weight:600;color:#222">'+valFmt+'</div></div>',
+              custoProd ? '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:2px">Custo unit.</div><div style="font-size:12px;font-weight:600;color:#b45309">R$ '+custoProd.toFixed(2).replace('.',',')+'</div></div>' : '<div></div>',
+              custoProd && p.qtde ? '<div style="grid-column:span 2"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:2px">Perda estimada</div><div style="font-size:13px;font-weight:700;color:#991b1b">R$ '+(custoProd*(parseInt(p.qtde)||1)).toFixed(2).replace('.',',')+'</div></div>' : '<div style="grid-column:span 2"></div>',
+            '</div>',
+            p.fornecedor ? '<div style="padding:0 14px 10px;font-size:11px;color:#666;border-top:1px solid #f0f0f0;padding-top:8px">🚚 '+(p.fornecedor)+'</div>' : '',
+          '</div>'
+        ].join('');
+      }).join('');
+
+  var totalQtde = hoje.reduce(function(s,p){ return s+(parseInt(p.qtde)||1); }, 0);
+  var totalPerda = hoje.reduce(function(s,p){
+    var c = p.custo || bancoCusto[(p.cod||'').replace(/[^0-9]/g,'')] || 0;
+    return s + c*(parseInt(p.qtde)||1);
+  }, 0);
+
+  var html = [
+    '<!DOCTYPE html><html lang="pt-BR"><head>',
+    '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
+    '<title>Retirada '+dataFmtCurta+'</title>',
+    '<style>',
+      '*{box-sizing:border-box;margin:0;padding:0}',
+      'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f2f2f7;color:#1c1c1e;padding:0}',
+      '.header{background:linear-gradient(135deg,#b91c1c,#7f1d1d);color:#fff;padding:20px 16px 16px;position:sticky;top:0;z-index:10}',
+      '.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}',
+      '.header h1{font-size:20px;font-weight:800;letter-spacing:-.3px}',
+      '.header-sub{font-size:12px;opacity:.85;margin-top:2px;text-transform:capitalize}',
+      '.header-badge{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;white-space:nowrap}',
+      '.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 14px 4px}',
+      '.sum-card{background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}',
+      '.sum-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:4px}',
+      '.sum-val{font-size:22px;font-weight:800;color:#b91c1c}',
+      '.sum-val.green{color:#065f46}',
+      '.cards{padding:10px 14px 30px}',
+      '.print-btn{display:block;margin:0 14px 14px;background:#b91c1c;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;text-align:center;cursor:pointer;width:calc(100% - 28px)}',
+      '.print-btn:active{background:#991b1b}',
+      '.rodape{text-align:center;font-size:11px;color:#aaa;padding:0 14px 20px}',
+      '@media print{.print-btn{display:none}.header{position:relative}}',
+    '</style></head><body>',
+    '<div class="header">',
+      '<div class="header-top">',
+        '<div>',
+          '<div style="font-size:11px;opacity:.75;font-weight:600;text-transform:uppercase;letter-spacing:.08em">Boas Compras — Retirada</div>',
+          '<h1>🗑️ Produtos Vencidos</h1>',
+          '<div class="header-sub">'+dataFmt+'</div>',
+        '</div>',
+        hoje.length > 0 ? '<div class="header-badge">'+hoje.length+' item'+(hoje.length>1?'s':'')+'</div>' : '',
+      '</div>',
+    '</div>',
+    hoje.length > 0 ? [
+      '<div class="summary">',
+        '<div class="sum-card"><div class="sum-lbl">Total de unidades</div><div class="sum-val">'+totalQtde+'</div></div>',
+        '<div class="sum-card"><div class="sum-lbl">Perda estimada</div><div class="sum-val">R$ '+totalPerda.toFixed(2).replace('.',',')+'</div></div>',
+      '</div>',
+    ].join('') : '',
+    '<div class="cards">',cardsHtml,'</div>',
+    hoje.length > 0 ? '<button class="print-btn" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>' : '',
+    '<div class="rodape">AURA Vencimentos · Gerado em '+new Date().toLocaleString('pt-BR')+'</div>',
+    '</body></html>'
+  ].join('');
+
+  var janela = window.open('', '_blank', 'width=420,height=800');
+  janela.document.write(html);
+  janela.document.close();
+}
+
 </script>
 
 
