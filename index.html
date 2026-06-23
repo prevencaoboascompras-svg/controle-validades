@@ -709,8 +709,19 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 }
 @media (max-width: 700px) {
   .dash-hero { grid-template-columns: 1fr; }
+  .dash-hero.dash-hero-2col { grid-template-columns: 1fr 1fr; }
   .dash-tiles { grid-template-columns: repeat(2, 1fr); }
   .dash-mini-row { grid-template-columns: 1fr; }
+  .dash-hero-num { font-size: 36px; letter-spacing: -1px; }
+  .dash-hero-icon { width: 40px; height: 40px; top: 12px; right: 12px; }
+  .dash-hero-icon svg { width: 20px; height: 20px; }
+  .dash-hero-card { padding: 14px 14px; }
+  .dash-hero-label { margin-bottom: 6px; font-size: 10px; }
+  .dash-hero-sub { font-size: 11px; margin-top: 6px; }
+}
+@media (max-width: 420px) {
+  .dash-hero.dash-hero-2col { grid-template-columns: 1fr; }
+  .dash-hero-num { font-size: 32px; }
 }
 
 /* ═══════════════════════════════
