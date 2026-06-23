@@ -1852,6 +1852,7 @@ var bancoFornecedorNome={}; // índice: nome normalizado → fornecedor (fallbac
 
 // Normaliza nome de produto removendo quantidades "(NUN)", "{N}" e espaços extras
 function normNome(n){return n.replace(/\s*\(.*?\)\s*/g,'').replace(/\s*\{.*?\}/g,'').replace(/\s+/g,' ').trim().toUpperCase();}
+function cleanNome(n){return String(n).replace(/\s*\(\d+[^)]*\)\s*/g,' ').replace(/\s*\{\d+\}\s*/g,' ').replace(/\s+/g,' ').trim();}
 
 async function loadBanco(cfg){
   if(!cfg.idBanco)cfg.idBanco=cfg.id;
@@ -2108,7 +2109,7 @@ function renderTable(){
       +'<div class="'+hdrCls+'">'
         +(p.qtde?'<span class="val-card-qtde-badge '+badgeSt+'" title="'+p.qtde+' unidades a vencer">'+p.qtde+'</span>':'')
         +'<div class="val-card-hdr-left">'
-          +'<div class="val-card-hdr-nome">'+escHtml(p.nome||'--')+'</div>'
+          +'<div class="val-card-hdr-nome">'+escHtml(cleanNome(p.nome||'--'))+'</div>'
           +'<div class="val-card-hdr-cod">'+(p.cod||'--')+'<span class="src-tag '+(p.src==='sheets'?'sheets':'')+'" style="opacity:.8">'+(p.src==='sheets'?'Sheets':'Manual')+'</span></div>'
         +'</div>'
         +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'
@@ -2219,7 +2220,7 @@ function promoCardHtml(p,idx,encerrada){
     ?'<button class="btn btn-sm" onclick="reativarPromo(\''+p.cod+'\')"><i class="ti ti-rotate"></i> Reativar</button>'
     :'<button class="btn btn-green btn-sm" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>'
      +'<button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="encerrarPromo(\''+p.cod+'\',\''+p.nome.replace(/'/g,"\\'")+'\')" title="Encerrar promoção"><i class="ti ti-circle-x"></i> Encerrar</button>';
-  return'<div class="promo-card'+encClass+'"><div class="promo-card-header">'+(p.qtde?'<span class="val-card-qtde-badge status-'+s+'" title="'+p.qtde+' unidades a vencer">'+p.qtde+'</span>':'')+'<div class="pct">'+(pct?pct.toFixed(0):'?')+'%<small>desconto</small></div><div class="promo-name" style="white-space:normal;word-break:break-word;flex:1">'+(p.nome||'--')+'</div>'+badge(s)+'</div><div class="promo-card-body"><div class="promo-prices"><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">De</div><div class="price-de">'+fmtR(p.precoNormal)+'</div></div><div style="font-size:18px;color:var(--tx2)">&rarr;</div><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Por</div><div class="price-por">'+fmtR(p.precoPromo)+'</div></div><div style="margin-left:auto;text-align:right"><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Economia</div><div style="font-size:16px;font-weight:600;color:var(--amber)">'+fmtR(p.valorDesc)+'</div></div></div><div class="promo-meta"><span>'+fmt(p.validade)+'</span><span>'+dTxt+'</span><span>'+p.setor+'</span></div><div class="promo-actions">'+acoes+'</div></div></div>';
+  return'<div class="promo-card'+encClass+'"><div class="promo-card-header">'+(p.qtde?'<span class="val-card-qtde-badge status-'+s+'" title="'+p.qtde+' unidades a vencer">'+p.qtde+'</span>':'')+'<div class="pct">'+(pct?pct.toFixed(0):'?')+'%<small>desconto</small></div><div class="promo-name" style="white-space:normal;word-break:break-word;flex:1">'+(cleanNome(p.nome||'--'))+'</div>'+badge(s)+'</div><div class="promo-card-body"><div class="promo-prices"><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">De</div><div class="price-de">'+fmtR(p.precoNormal)+'</div></div><div style="font-size:18px;color:var(--tx2)">&rarr;</div><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Por</div><div class="price-por">'+fmtR(p.precoPromo)+'</div></div><div style="margin-left:auto;text-align:right"><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Economia</div><div style="font-size:16px;font-weight:600;color:var(--amber)">'+fmtR(p.valorDesc)+'</div></div></div><div class="promo-meta"><span>'+fmt(p.validade)+'</span><span>'+dTxt+'</span><span>'+p.setor+'</span></div><div class="promo-actions">'+acoes+'</div></div></div>';
 }
 
 function renderPromos(){
@@ -2515,7 +2516,7 @@ function renderDashboard(){
         +'<div class="'+hdrCls+'">'
           +(p.qtde?'<span class="val-card-qtde-badge '+urgBadgeSt+'" title="'+p.qtde+' unidades a vencer">'+p.qtde+'</span>':'')
           +'<div style="min-width:0;flex:1">'
-            +'<div class="urg-card-nome">'+escHtml(p.nome||'—')+'</div>'
+            +'<div class="urg-card-nome">'+escHtml(cleanNome(p.nome||'—'))+'</div>'
             +'<div class="urg-card-cod">'+(p.cod||'')+'</div>'
           +'</div>'
           +badge(s)
