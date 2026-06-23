@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR" class="dark">
 <head>
@@ -123,6 +122,26 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .price-por{font-size:24px;font-weight:700;color:var(--green)}
 .promo-meta{font-size:12px;color:var(--tx2);display:flex;gap:12px;flex-wrap:wrap}
 .promo-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
+
+/* ── Dashboard urgente cards ─────────────────────────── */
+.urg-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s}
+.urg-card:hover{border-color:var(--bds)}
+.urg-card-header{padding:10px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.urg-card-header.status-vencido{background:linear-gradient(135deg,#7f1d1d,#991b1b)}
+.urg-card-header.status-critico{background:linear-gradient(135deg,#92190c,#b91c1c)}
+.urg-card-nome{font-size:12px;font-weight:700;color:#fff;line-height:1.3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.urg-card-cod{font-family:monospace;font-size:9px;color:rgba(255,255,255,.65);margin-top:2px}
+.urg-card-body{padding:12px 13px;display:flex;flex-direction:column;gap:10px;flex:1}
+.urg-card-mid{display:flex;align-items:center;gap:12px}
+.urg-speedo-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.urg-speedo-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);text-align:center}
+.urg-card-info{flex:1;min-width:0;display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}
+.urg-info-field{display:flex;flex-direction:column;gap:1px}
+.urg-info-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2)}
+.urg-info-val{font-size:12px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.urg-card-forn{font-size:10px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-top:6px;border-top:1px solid var(--bd)}
+.urg-card-foot{display:flex;gap:6px;padding:10px 13px;border-top:1px solid var(--bd);background:var(--bg2)}
+
 .val-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
 @media (max-width:700px){.val-grid{grid-template-columns:1fr;gap:10px}}
 .val-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;transition:opacity .2s,border-color .15s;display:flex;flex-direction:column;padding:0}
@@ -1081,24 +1100,8 @@ function toggleTheme() {
         Ver todos
       </button>
     </div>
-    <div class="twrap" style="margin-bottom:24px">
-      <table style="min-width:750px">
-        <thead><tr>
-          <th>Produto</th>
-          <th>Setor</th>
-          <th>Validade</th>
-          <th>Dias</th>
-          <th>Qtde</th>
-          <th>Preço promoção</th>
-          <th>Desconto</th>
-          <th>Fornecedor</th>
-          <th>Status</th>
-          <th style="width:160px">Ações</th>
-        </tr></thead>
-        <tbody id="dashUrgentTbody">
-          <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Sincronize para ver os itens urgentes.</td></tr>
-        </tbody>
-      </table>
+    <div id="dashUrgentGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:24px">
+      <div id="dashUrgentTbody" style="display:contents"></div>
     </div>
 
 
@@ -2293,50 +2296,8 @@ function renderDashboard(){
     document.getElementById('dashAlertBar').style.display='none';
     document.getElementById('dashTiles').innerHTML='';
     document.getElementById('dashMini').innerHTML='';
-    // Renderizar como cards com gauge em vez de tabela
-  var urgentContainer = document.getElementById('dashUrgentTbody');
-  var urgentParent = urgentContainer ? urgentContainer.closest('.twrap') : null;
-  if (urgentParent) {
-    // Troca a tabela por uma div de cards (só uma vez)
-    if (!urgentParent._gaugeMode) {
-      urgentParent.style.border = 'none';
-      urgentParent.style.background = 'transparent';
-      urgentParent.style.overflow = 'visible';
-      urgentParent.style.maxHeight = 'none';
-      urgentParent._gaugeMode = true;
-    }
-  }
-  document.getElementById('dashUrgentTbody').innerHTML=
-    urgent.length===0
-    ?'<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Nenhum produto vencido ou crítico. </td></tr>'
-    :urgent.map(function(p){
-      var days = daysDiff(p.validade);
-      var s = statusFromDays(days);
-      var qtd = parseInt(p.qtde)||1;
-      var idx = products.indexOf(p);
-      var fmtP = function(v){return v?'R$ '+parseFloat(v).toFixed(2).replace('.',','):'—';};
-      return '<tr>'
-        +'<td style="width:80px;vertical-align:middle;padding:8px">' + gaugeCircleSVG(days, s) + '</td>'
-        +'<td style="white-space:nowrap"><div style="font-weight:500;font-size:12px">'+escHtml(p.nome||'—')+'</div>'
-        +'<div style="font-size:10px;color:var(--muted)">'+escHtml(p.codigo||'')+'</div></td>'
-        +'<td style="color:var(--muted);font-size:12px">'+escHtml(p.setor||'—')+'</td>'
-        +'<td style="font-size:12px">'+escHtml(p.validade||'—')+'</td>'
-        +'<td>'+daysBadge(p)+'</td>'
-        +'<td style="font-size:12px">'+qtd+'</td>'
-        +'<td style="color:#34d399;font-weight:500;font-size:12px">'+fmtP(p.precoPromo)+'</td>'
-        +'<td style="font-size:12px">'+(p.desconto?p.desconto+'%':'—')+'</td>'
-        +'<td style="font-size:11px;color:var(--muted)">'+escHtml((p.fornecedor||'—').substring(0,22))+'</td>'
-        +'<td>'+statusBadge(p)+'</td>'
-        +'<td>'
-          +'<button class="abtn encarte" onclick="openEncarteModal('+idx+')" style="margin-right:4px">'
-          +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>'
-          +' Encarte</button>'
-          +'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)">'
-          +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>'
-          +' Resolvido</button>'
-        +'</td>'
-        +'</tr>';
-    }).join('');
+    document.getElementById('dashUrgentTbody').innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Nenhum produto carregado.</td></tr>';
+    return;
   }
 
   // ── Compute counts ──
@@ -2492,30 +2453,81 @@ function renderDashboard(){
     return '<span class="badge-status '+cls+'">'+(d<0?d+'d':'+'+d+'d')+'</span>';
   }
 
+  function speedometerSVG(days, s){
+    // Gauge: 0 = vencido (needle at right/red), 15+ = ok (needle at left/green)
+    // Arc goes from 210deg to 330deg (150deg sweep) left to right = ok to vencido
+    var MAX_DAYS=15;
+    var clampedDays=days===null?0:Math.max(0,Math.min(MAX_DAYS,days));
+    // needle angle: 0 days = 330deg (far right = danger), MAX_DAYS = 210deg (far left = ok)
+    var needleAngle=330-(clampedDays/MAX_DAYS)*120;
+    var rad=function(deg){return deg*Math.PI/180;};
+    var cx=44,cy=44,r=32;
+    // Arc segments colors mapped to zones
+    var zones=[
+      {from:210,to:240,color:'#34d399'}, // ok
+      {from:240,to:265,color:'#fbbf24'}, // atencao
+      {from:265,to:295,color:'#f97316'}, // urgente
+      {from:295,to:330,color:'#ef4444'}  // critico/vencido
+    ];
+    function arcPath(from,to,radius){
+      var x1=cx+radius*Math.cos(rad(from));
+      var y1=cy+radius*Math.sin(rad(from));
+      var x2=cx+radius*Math.cos(rad(to));
+      var y2=cy+radius*Math.sin(rad(to));
+      return 'M '+x1+' '+y1+' A '+radius+' '+radius+' 0 0 1 '+x2+' '+y2;
+    }
+    var arcsSVG=zones.map(function(z){
+      return '<path d="'+arcPath(z.from,z.to,r)+'" stroke="'+z.color+'" stroke-width="5" fill="none" stroke-linecap="round"/>';
+    }).join('');
+    // track bg
+    var trackSVG='<path d="'+arcPath(210,330,r)+'" stroke="#333" stroke-width="5" fill="none"/>';
+    // needle
+    var nx=cx+22*Math.cos(rad(needleAngle));
+    var ny=cy+22*Math.sin(rad(needleAngle));
+    var needleSVG='<line x1="'+cx+'" y1="'+cy+'" x2="'+nx+'" y2="'+ny+'" stroke="white" stroke-width="2" stroke-linecap="round"/>'
+      +'<circle cx="'+cx+'" cy="'+cy+'" r="4" fill="white"/>';
+    // center label
+    var daysLabel=days===null?'?':days<=0?'<tspan fill="#ef4444">Venc.</tspan>':(days+'d');
+    var centerLabel='<text x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-size="9" fill="#aaa">'+daysLabel+'</text>';
+    return '<svg width="88" height="70" viewBox="0 0 88 70" xmlns="http://www.w3.org/2000/svg">'+trackSVG+arcsSVG+needleSVG+centerLabel+'</svg>';
+  }
+
   document.getElementById('dashUrgentTbody').innerHTML=
     urgent.length===0
-    ?'<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Nenhum produto vencido ou crítico. </td></tr>'
+    ?'<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">Nenhum produto vencido ou crítico.</div>'
     :urgent.map(function(p){
-      var qtd=parseInt(p.qtde)||1;
-      return '<tr>'
-        +'<td style="white-space:nowrap"><div style="font-weight:500;font-size:12px">'+escHtml(p.nome||'—')+'</div>'
-        +'<div style="font-size:10px;color:var(--muted)">'+escHtml(p.codigo||'')+'</div></td>'
-        +'<td style="color:var(--muted);font-size:12px">'+escHtml(p.setor||'—')+'</td>'
-        +'<td style="font-size:12px">'+escHtml(p.validade||'—')+'</td>'
-        +'<td>'+daysBadge(p)+'</td>'
-        +'<td style="font-size:12px">'+qtd+'</td>'
-        +'<td style="color:#34d399;font-weight:500;font-size:12px">'+escHtml(p.precoPromo||'—')+'</td>'
-        +'<td style="font-size:12px">'+(p.desconto?p.desconto+'%':'—')+'</td>'
-        +'<td style="font-size:11px;color:var(--muted)">'+escHtml((p.fornecedor||'—').substring(0,22))+'</td>'
-        +'<td>'+statusBadge(p)+'</td>'
-        +'<td>'
-          +'<button class="abtn encarte" onclick="openEncarteModal('+JSON.stringify(p)+')" style="margin-right:4px">'
-          +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>'
-          +' Encarte</button>'
-          +'<button class="abtn" onclick="openResolvidoModal('+JSON.stringify(p)+')" style="border-color:var(--green);color:var(--green)">'
-          +'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>'
-          +' Resolvido</button>'
-        +'</td>'
+      var days=daysDiff(p.validade);
+      var s=statusFromDays(days);
+      var hdrCls='urg-card-header status-'+(s==='critico'||s==='vencido'?s:'critico');
+      var idx=products.indexOf(p);
+      var fornProd=p.fornecedor||bancoFornecedor[(p.cod||'').replace(/[^0-9]/g,'')]||'—';
+      return '<div class="urg-card">'
+        +'<div class="'+hdrCls+'">'
+          +'<div style="min-width:0;flex:1">'
+            +'<div class="urg-card-nome">'+escHtml(p.nome||'—')+'</div>'
+            +'<div class="urg-card-cod">'+(p.cod||'')+'</div>'
+          +'</div>'
+          +badge(s)
+        +'</div>'
+        +'<div class="urg-card-body">'
+          +'<div class="urg-card-mid">'
+            +'<div class="urg-speedo-wrap">'+speedometerSVG(days,s)+'<span class="urg-speedo-lbl">Validade</span></div>'
+            +'<div class="urg-card-info">'
+              +'<div class="urg-info-field"><span class="urg-info-lbl">Vence em</span><span class="urg-info-val" style="color:'+(days<=0?'#ef4444':days<=3?'#f97316':'#fbbf24')+'">'+(days<=0?'Vencido':days===1?'Amanhã':'Faltam '+days+'d')+'</span></div>'
+              +'<div class="urg-info-field"><span class="urg-info-lbl">Data</span><span class="urg-info-val">'+fmtDataExtenso(p.validade||'')+'</span></div>'
+              +'<div class="urg-info-field"><span class="urg-info-lbl">Setor</span><span class="urg-info-val">'+escHtml(p.setor||'—')+'</span></div>'
+              +'<div class="urg-info-field"><span class="urg-info-lbl">Qtde</span><span class="urg-info-val">'+escHtml(p.qtde||'—')+'</span></div>'
+              +(p.precoPromo?'<div class="urg-info-field"><span class="urg-info-lbl">Promoção</span><span class="urg-info-val" style="color:#34d399">'+fmtR(p.precoPromo)+'</span></div>':'')
+              +(p.pctDesc?'<div class="urg-info-field"><span class="urg-info-lbl">Desconto</span><span class="urg-info-val" style="color:#fbbf24">'+fmtPct(p.pctDesc)+'</span></div>':'')
+            +'</div>'
+          +'</div>'
+          +'<div class="urg-card-forn"><i class="ti ti-truck-delivery" style="opacity:.6"></i> '+escHtml(fornProd)+'</div>'
+        +'</div>'
+        +'<div class="urg-card-foot">'
+          +'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>'
+          +'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)"><i class="ti ti-circle-check"></i> Resolvido</button>'
+        +'</div>'
+      +'</div>';
         +'</tr>';
     }).join('');
 
