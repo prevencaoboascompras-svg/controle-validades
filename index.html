@@ -129,7 +129,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .urg-card-header{padding:10px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .urg-card-header.status-vencido{background:linear-gradient(135deg,#7f1d1d,#991b1b)}
 .urg-card-header.status-critico{background:linear-gradient(135deg,#92190c,#b91c1c)}
-.urg-card-nome{font-size:12px;font-weight:700;color:#fff;line-height:1.3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.urg-card-nome{font-size:12px;font-weight:700;color:#fff;line-height:1.3;flex:1;min-width:0;white-space:normal;word-break:break-word}
 .urg-card-cod{font-family:monospace;font-size:9px;color:rgba(255,255,255,.65);margin-top:2px}
 .urg-card-body{padding:12px 13px;display:flex;flex-direction:column;gap:10px;flex:1}
 .urg-card-mid{display:flex;align-items:center;gap:12px}
@@ -153,9 +153,10 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .val-card-header.status-ok{background:linear-gradient(135deg,#065f46,#047857)}
 .val-card-header.status-none{background:linear-gradient(135deg,#1e3a5f,#1e40af)}
 .val-card-hdr-left{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
-.val-card-hdr-nome{font-size:13px;font-weight:600;color:#fff;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.val-card-hdr-nome{font-size:13px;font-weight:600;color:#fff;line-height:1.3;white-space:normal;word-break:break-word}
 .val-card-hdr-cod{font-family:monospace;font-size:10px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:6px}
 .val-card-hdr-data{font-size:22px;font-weight:700;color:#fff;line-height:1;letter-spacing:-.5px;text-align:right}
+.val-card-qtde-badge{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 7px;border-radius:999px;background:rgba(0,0,0,.35);color:#fff;font-size:12px;font-weight:700;letter-spacing:-.3px;border:1.5px solid rgba(255,255,255,.25);white-space:nowrap;align-self:flex-end}
 .val-card-body{padding:12px 14px;display:flex;flex-direction:column;flex:1}
 .val-card:hover{border-color:var(--bds)}
 .val-card.faded{opacity:.55}
@@ -2106,6 +2107,7 @@ function renderTable(){
           +(p.validade?'<div class="val-card-hdr-data">'+fmtDataExtenso(p.validade)+'</div>':'')
           +flagValidade(days, p.validade)
           +badge(s)
+          +(p.qtde?'<span class="val-card-qtde-badge" title="'+p.qtde+' unidades a vencer">'+p.qtde+' un</span>':'')
         +'</div>'
       +'</div>'
       +'<div class="val-card-body">'
@@ -2210,7 +2212,7 @@ function promoCardHtml(p,idx,encerrada){
     ?'<button class="btn btn-sm" onclick="reativarPromo(\''+p.cod+'\')"><i class="ti ti-rotate"></i> Reativar</button>'
     :'<button class="btn btn-green btn-sm" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>'
      +'<button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="encerrarPromo(\''+p.cod+'\',\''+p.nome.replace(/'/g,"\\'")+'\')" title="Encerrar promoção"><i class="ti ti-circle-x"></i> Encerrar</button>';
-  return'<div class="promo-card'+encClass+'"><div class="promo-card-header"><div class="pct">'+(pct?pct.toFixed(0):'?')+'%<small>desconto</small></div><div class="promo-name">'+(p.nome||'--')+'</div>'+badge(s)+'</div><div class="promo-card-body"><div class="promo-prices"><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">De</div><div class="price-de">'+fmtR(p.precoNormal)+'</div></div><div style="font-size:18px;color:var(--tx2)">&rarr;</div><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Por</div><div class="price-por">'+fmtR(p.precoPromo)+'</div></div><div style="margin-left:auto;text-align:right"><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Economia</div><div style="font-size:16px;font-weight:600;color:var(--amber)">'+fmtR(p.valorDesc)+'</div></div></div><div class="promo-meta"><span>'+fmt(p.validade)+'</span><span>'+dTxt+'</span><span>'+p.setor+'</span></div><div class="promo-actions">'+acoes+'</div></div></div>';
+  return'<div class="promo-card'+encClass+'"><div class="promo-card-header"><div class="pct">'+(pct?pct.toFixed(0):'?')+'%<small>desconto</small></div><div class="promo-name" style="white-space:normal;word-break:break-word;flex:1">'+(p.nome||'--')+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'+badge(s)+(p.qtde?'<span class="val-card-qtde-badge" title="'+p.qtde+' unidades a vencer">'+p.qtde+' un</span>':'')+'</div></div><div class="promo-card-body"><div class="promo-prices"><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">De</div><div class="price-de">'+fmtR(p.precoNormal)+'</div></div><div style="font-size:18px;color:var(--tx2)">&rarr;</div><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Por</div><div class="price-por">'+fmtR(p.precoPromo)+'</div></div><div style="margin-left:auto;text-align:right"><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Economia</div><div style="font-size:16px;font-weight:600;color:var(--amber)">'+fmtR(p.valorDesc)+'</div></div></div><div class="promo-meta"><span>'+fmt(p.validade)+'</span><span>'+dTxt+'</span><span>'+p.setor+'</span></div><div class="promo-actions">'+acoes+'</div></div></div>';
 }
 
 function renderPromos(){
@@ -2507,7 +2509,10 @@ function renderDashboard(){
             +'<div class="urg-card-nome">'+escHtml(p.nome||'—')+'</div>'
             +'<div class="urg-card-cod">'+(p.cod||'')+'</div>'
           +'</div>'
-          +badge(s)
+          +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'
+            +badge(s)
+            +(p.qtde?'<span class="val-card-qtde-badge" title="'+p.qtde+' unidades a vencer">'+p.qtde+' un</span>':'')
+          +'</div>'
         +'</div>'
         +'<div class="urg-card-body">'
           +'<div class="urg-card-mid">'
