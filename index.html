@@ -4861,6 +4861,9 @@ else refresh();
 // ── ANTECIPAÇÃO DE ENCARTES ──────────────────────────────────────────────
 var ANT_SEL_KEY = 'aura_ant_sel';
 var antSelecionados = {}; // cod_index → true
+var _antUltimoClicado = null; // último item clicado para seleção em range
+var _antProdutosVisiveis = []; // lista ordenada de produtos visíveis (para shift+click)
+var _antProdutosPorMes = {}; // { '2026-07': [prod1, prod2, ...], ... }
 
 function getAntSel() { try { return JSON.parse(localStorage.getItem(ANT_SEL_KEY) || '{}'); } catch(e) { return {}; } }
 function saveAntSel() { localStorage.setItem(ANT_SEL_KEY, JSON.stringify(antSelecionados)); }
@@ -4996,6 +4999,14 @@ function renderAntecipacao() {
     });
   });
 
+  // Popular listas para shift+click (range selection)
+  _antProdutosPorMes = {};
+  _antProdutosVisiveis = [];
+  mesesOrdenados.forEach(function(ym) {
+    _antProdutosPorMes[ym] = grupos[ym].map(function(p) { return produtoChaveAnt(p); });
+    _antProdutosVisiveis = _antProdutosVisiveis.concat(grupos[ym].map(function(p) { return produtoChaveAnt(p); }));
+  });
+
   var container = document.getElementById('antMesesContainer');
   if (mesesOrdenados.length === 0) {
     container.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="ti ti-search-off"></i>Nenhum produto encontrado com esses filtros.<br>Ajuste a data, quantidade ou outros campos.</div>';
@@ -5056,7 +5067,7 @@ function renderAntecipacao() {
       }
       var corQtd = corBadge(qtd);
 
-      html += '<div data-ant-mes="'+ym+'" data-ant-chave="'+chave.replace(/"/g,'&quot;')+'" style="background:var(--surface-2);border:1px solid '+(sel?'var(--green)':'var(--border)')+';border-radius:var(--rl);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;position:relative" onclick="toggleAntSel(\''+chave.replace(/'/g,"\\'")+'\')" title="Clique para '+(sel?'remover da':'adicionar à')+' lista do encarte">';
+      html += '<div data-ant-mes="'+ym+'" data-ant-chave="'+chave.replace(/"/g,'&quot;')+'" style="background:var(--surface-2);border:1px solid '+(sel?'var(--green)':'var(--border)')+';border-radius:var(--rl);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;position:relative" onclick="toggleAntSel(event, \''+chave.replace(/'/g,"\\'")+'\', \''+ym+'\')" title="Clique para '+(sel?'remover da':'adicionar à')+' lista do encarte">';
       
       // Badge de quantidade (canto superior direito)
       html += '<div style="position:absolute;top:10px;right:10px;min-width:32px;height:32px;padding:0 9px;border-radius:999px;background:'+corQtd.bg+';border:2px solid '+corQtd.border+';box-shadow:'+corQtd.shadow+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:'+corQtd.txt+';letter-spacing:-.5px" title="'+qtd+' unidade'+(qtd>1?'s':'')+' a vencer">'+qtd+'</div>';
@@ -5112,12 +5123,36 @@ function renderAntecipacao() {
   atualizarContadorAnt();
 }
 
-function toggleAntSel(chave) {
-  if (antSelecionados[chave]) {
-    delete antSelecionados[chave];
+function toggleAntSel(event, chave, mes) {
+  var shiftPressionado = event && event.shiftKey;
+  
+  if (shiftPressionado && _antUltimoClicado) {
+    // Shift+click: selecionar range dentro do mesmo mês
+    var listaMes = _antProdutosPorMes[mes] || [];
+    var idxUltimo = listaMes.indexOf(_antUltimoClicado);
+    var idxAtual = listaMes.indexOf(chave);
+    
+    if (idxUltimo >= 0 && idxAtual >= 0) {
+      var inicio = Math.min(idxUltimo, idxAtual);
+      var fim = Math.max(idxUltimo, idxAtual);
+      
+      // Selecionar todos no range
+      for (var i = inicio; i <= fim; i++) {
+        antSelecionados[listaMes[i]] = true;
+      }
+    }
   } else {
-    antSelecionados[chave] = true;
+    // Click normal: toggle do item
+    if (antSelecionados[chave]) {
+      delete antSelecionados[chave];
+    } else {
+      antSelecionados[chave] = true;
+    }
   }
+  
+  // Atualizar último clicado
+  _antUltimoClicado = chave;
+  
   saveAntSel();
   renderAntecipacao();
 }
@@ -5170,6 +5205,7 @@ function antSelecionarMes() {
 
 function antLimparSelecao() {
   antSelecionados = {};
+  _antUltimoClicado = null;
   saveAntSel();
   renderAntecipacao();
 }
