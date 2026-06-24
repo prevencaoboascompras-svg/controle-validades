@@ -1268,37 +1268,87 @@ function toggleTheme() {
         <p style="font-size:12px;color:var(--tx2)">Identifique produtos com potencial de venda antes de virarem ação de queima rápida. Selecione os que farão parte do próximo encarte.</p>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" onclick="antSelecionarTodosMes()"><i class="ti ti-checks"></i> Selecionar mês visível</button>
         <button class="btn" onclick="antLimparSelecao()"><i class="ti ti-x"></i> Limpar seleção</button>
         <button class="btn btn-green" onclick="abrirRelatorioAntecipacao()"><i class="ti ti-file-text"></i> Gerar PDF Encarte</button>
       </div>
     </div>
 
     <!-- Filtros -->
-    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:12px 16px">
-      <span style="font-size:12px;color:var(--tx2);font-weight:600">Filtros:</span>
-      <select id="antFiltroSetor" onchange="renderAntecipacao()" style="font-size:12px;padding:6px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-        <option value="">Todos os setores</option>
-        <option>Acougue</option><option>Bebidas</option><option>Congelados</option>
-        <option>FLV</option><option>Frios</option><option>Laticinios</option>
-        <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
-      </select>
-      <select id="antFiltroMinQtde" onchange="renderAntecipacao()" style="font-size:12px;padding:6px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-        <option value="0">Qualquer quantidade</option>
-        <option value="2">≥ 2 unidades</option>
-        <option value="3">≥ 3 unidades</option>
-        <option value="5">≥ 5 unidades</option>
-        <option value="10">≥ 10 unidades</option>
-      </select>
-      <select id="antFiltroPreco" onchange="renderAntecipacao()" style="font-size:12px;padding:6px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-        <option value="0">Qualquer preço</option>
-        <option value="5">Preço ≥ R$ 5,00</option>
-        <option value="10">Preço ≥ R$ 10,00</option>
-        <option value="20">Preço ≥ R$ 20,00</option>
-        <option value="50">Preço ≥ R$ 50,00</option>
-      </select>
-      <div style="flex:1"></div>
-      <div id="antSelCount" style="font-size:12px;font-weight:600;color:var(--green);white-space:nowrap">0 selecionado(s)</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <i class="ti ti-filter" style="color:var(--muted);font-size:14px"></i>
+        <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Filtros de busca</span>
+        <div style="flex:1"></div>
+        <div id="antSelCount" style="font-size:12px;font-weight:600;color:var(--green);white-space:nowrap">0 selecionado(s)</div>
+        <button class="btn btn-sm" onclick="antLimparFiltros()"><i class="ti ti-eraser"></i> Limpar filtros</button>
+      </div>
+
+      <!-- Linha 1: Setor + Busca produto + Validade De/Até -->
+      <div style="display:grid;grid-template-columns:minmax(140px,180px) 1fr minmax(120px,150px) minmax(120px,150px);gap:10px;align-items:end;margin-bottom:10px">
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Setor</label>
+          <select id="antFiltroSetor" onchange="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
+            <option value="">Todos os setores</option>
+            <option>Acougue</option><option>Bebidas</option><option>Congelados</option>
+            <option>FLV</option><option>Frios</option><option>Laticinios</option>
+            <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Buscar produto</label>
+          <input type="text" id="antFiltroBusca" placeholder="Digite nome ou código..." oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Validade de</label>
+          <input type="date" id="antFiltroDataDe" onchange="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Validade até</label>
+          <input type="date" id="antFiltroDataAte" onchange="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
+        </div>
+      </div>
+
+      <!-- Linha 2: Qtde mín + Preço mín + Preço máx + Fornecedor + Mes seletor -->
+      <div style="display:grid;grid-template-columns:minmax(100px,130px) minmax(100px,130px) minmax(100px,130px) 1fr minmax(160px,220px);gap:10px;align-items:end">
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Qtde mínima</label>
+          <input type="number" id="antFiltroMinQtde" placeholder="Ex: 3" min="0" oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Preço mín (R$)</label>
+          <input type="number" id="antFiltroPrecoMin" placeholder="Ex: 10,00" min="0" step="0.01" oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Preço máx (R$)</label>
+          <input type="number" id="antFiltroPrecoMax" placeholder="Ex: 50,00" min="0" step="0.01" oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Fornecedor</label>
+          <input type="text" id="antFiltroForn" placeholder="Digite o fornecedor..." oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
+        </div>
+        <div>
+          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Selecionar mês inteiro</label>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select id="antFiltroMesSel" style="flex:1;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
+              <option value="">-- Selecione o mês --</option>
+            </select>
+            <button class="btn btn-sm" onclick="antSelecionarMes()" title="Marcar todos deste mês" style="white-space:nowrap"><i class="ti ti-checks"></i> Marcar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linha 3: Atalhos rápidos de data -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);align-items:center">
+        <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-right:4px">Atalhos:</span>
+        <button class="btn btn-sm" onclick="antAtalhoData('mesAtual')">Este mês</button>
+        <button class="btn btn-sm" onclick="antAtalhoData('proximoMes')">Próximo mês</button>
+        <button class="btn btn-sm" onclick="antAtalhoData('julho')">Julho 2026</button>
+        <button class="btn btn-sm" onclick="antAtalhoData('agosto')">Agosto 2026</button>
+        <button class="btn btn-sm" onclick="antAtalhoData('setembro')">Setembro 2026</button>
+        <button class="btn btn-sm" onclick="antAtalhoData('30d')">Próx. 30 dias</button>
+        <button class="btn btn-sm" onclick="antAtalhoData('60d')">Próx. 60 dias</button>
+        <button class="btn btn-sm" onclick="antAtalhoData('90d')">Próx. 90 dias</button>
+      </div>
     </div>
 
     <!-- Cards por mês -->
@@ -4860,30 +4910,50 @@ function produtoChaveAnt(p) {
 
 function renderAntecipacao() {
   var filtroSetor = document.getElementById('antFiltroSetor').value;
+  var filtroBusca = (document.getElementById('antFiltroBusca').value || '').toLowerCase().trim();
+  var filtroDataDe = document.getElementById('antFiltroDataDe').value; // YYYY-MM-DD or empty
+  var filtroDataAte = document.getElementById('antFiltroDataAte').value;
   var filtroQtde = parseInt(document.getElementById('antFiltroMinQtde').value) || 0;
-  var filtroPreco = parseFloat(document.getElementById('antFiltroPreco').value) || 0;
+  var filtroPrecoMin = parseFloat(document.getElementById('antFiltroPrecoMin').value) || 0;
+  var filtroPrecoMax = parseFloat(document.getElementById('antFiltroPrecoMax').value) || 0;
+  var filtroForn = (document.getElementById('antFiltroForn').value || '').toLowerCase().trim();
   var resolvidos = getResolvidos();
 
-  // Filtrar produtos: com vencimento nos próximos 4 meses (incluindo mês atual)
+  // Converter datas de filtro em objetos Date
+  var dataDe = filtroDataDe ? new Date(filtroDataDe + 'T00:00:00') : null;
+  var dataAte = filtroDataAte ? new Date(filtroDataAte + 'T23:59:59') : null;
+
+  // Se nenhum filtro de data, usar padrão: hoje até +4 meses
   var hoje = new Date(); hoje.setHours(0,0,0,0);
-  var daqui4Meses = new Date(hoje.getFullYear(), hoje.getMonth() + 4, 0); // último dia do mês +3
+  if (!dataDe) dataDe = hoje;
+  if (!dataAte) dataAte = new Date(hoje.getFullYear(), hoje.getMonth() + 4, 0, 23, 59, 59);
 
   var candidatos = products.filter(function(p) {
     if (!p.validade) return false;
     var d = daysDiff(p.validade);
     if (d === null) return false;
-    // Não incluir já vencidos (esses vão pra retirada)
+    // Não incluir já vencidos
     if (d < 0) return false;
-    // Incluir dentro da janela de 4 meses
+    // Filtro de data
     var parts = p.validade.split('-');
     var valDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-    if (valDate > daqui4Meses) return false;
+    if (valDate < dataDe || valDate > dataAte) return false;
     // Filtros
     if (filtroSetor && p.setor !== filtroSetor) return false;
+    if (filtroBusca) {
+      var nomeLC = (p.nome || '').toLowerCase();
+      var codLC = (p.cod || '').toLowerCase();
+      if (nomeLC.indexOf(filtroBusca) < 0 && codLC.indexOf(filtroBusca) < 0) return false;
+    }
     if (filtroQtde > 0 && (parseInt(p.qtde) || 1) < filtroQtde) return false;
-    if (filtroPreco > 0) {
-      var preco = p.precoNormal || p.precoPromo || 0;
-      if (preco < filtroPreco) return false;
+    var preco = p.precoNormal || p.precoPromo || 0;
+    if (filtroPrecoMin > 0 && preco < filtroPrecoMin) return false;
+    if (filtroPrecoMax > 0 && preco > filtroPrecoMax) return false;
+    // Fornecedor
+    if (filtroForn) {
+      var forn = (p.fornecedor || '').toLowerCase();
+      var fornBanco = (bancoFornecedor[(p.cod||'').replace(/[^0-9]/g,'')] || '').toLowerCase();
+      if (forn.indexOf(filtroForn) < 0 && fornBanco.indexOf(filtroForn) < 0) return false;
     }
     // Não incluir já resolvidos
     if (resolvidos.includes(produtoChave(p))) return false;
@@ -4903,6 +4973,20 @@ function renderAntecipacao() {
   // Ordenar meses
   var mesesOrdenados = Object.keys(grupos).sort(mesSort);
 
+  // Atualizar dropdown de seleção de mês
+  var selMes = document.getElementById('antFiltroMesSel');
+  if (selMes) {
+    var valAtual = selMes.value;
+    selMes.innerHTML = '<option value="">-- Selecione o mês --</option>';
+    mesesOrdenados.forEach(function(ym) {
+      var opt = document.createElement('option');
+      opt.value = ym;
+      opt.textContent = mesLabel(ym) + ' (' + grupos[ym].length + ')';
+      selMes.appendChild(opt);
+    });
+    if (valAtual && mesesOrdenados.indexOf(valAtual) >= 0) selMes.value = valAtual;
+  }
+
   // Ordenar produtos dentro de cada grupo: mais urgente primeiro, depois por qtde desc
   mesesOrdenados.forEach(function(ym) {
     grupos[ym].sort(function(a, b) {
@@ -4914,7 +4998,7 @@ function renderAntecipacao() {
 
   var container = document.getElementById('antMesesContainer');
   if (mesesOrdenados.length === 0) {
-    container.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="ti ti-calendar-off"></i>Nenhum produto encontrado na janela de antecipação.<br>Ajuste os filtros ou aguarde a sincronização.</div>';
+    container.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="ti ti-search-off"></i>Nenhum produto encontrado com esses filtros.<br>Ajuste a data, quantidade ou outros campos.</div>';
     atualizarContadorAnt();
     return;
   }
@@ -4929,6 +5013,7 @@ function renderAntecipacao() {
       return s + (preco * (parseInt(p.qtde) || 1));
     }, 0);
     var selCount = prods.filter(function(p) { return antSelecionados[produtoChaveAnt(p)]; }).length;
+    var allSel = selCount === prods.length;
 
     html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:16px;overflow:hidden">';
     // Cabeçalho do mês
@@ -4938,10 +5023,11 @@ function renderAntecipacao() {
     html += '<div style="font-size:14px;font-weight:700;color:'+cor.txt+'">'+mesLabel(ym)+'</div>';
     html += '<span style="font-size:11px;color:var(--muted);background:var(--surface);padding:2px 8px;border-radius:999px;border:1px solid '+cor.border+'">'+prods.length+' produto'+(prods.length!==1?'s':'')+'</span>';
     html += '</div>';
-    html += '<div style="display:flex;gap:14px;font-size:12px;flex-wrap:wrap">';
+    html += '<div style="display:flex;gap:14px;font-size:12px;flex-wrap:wrap;align-items:center">';
     html += '<span style="color:var(--muted)"><b style="color:var(--fg)">'+totalQtde+'</b> unidades</span>';
-    html += '<span style="color:var(--muted)">Valor total: <b style="color:var(--fg)">'+fmtR(totalValor)+'</b></span>';
-    if (selCount > 0) html += '<span style="color:var(--green);font-weight:700">'+selCount+' selecionado'+(selCount!==1?'s':'')+'</span>';
+    html += '<span style="color:var(--muted)">Valor: <b style="color:var(--fg)">'+fmtR(totalValor)+'</b></span>';
+    if (selCount > 0) html += '<span style="color:var(--green);font-weight:700">'+selCount+'/'+prods.length+' selecionados</span>';
+    html += '<button class="btn btn-sm" onclick="antSelecionarMesEspec(\''+ym+'\')" title="'+(allSel?'Desmarcar todos':'Marcar todos deste mês')+'" style="font-size:11px;padding:4px 10px">'+(allSel?'<i class="ti ti-x"></i> Desmarcar':'<i class="ti ti-checks"></i> Marcar todos')+'</button>';
     html += '</div>';
     html += '</div>';
 
@@ -4960,15 +5046,28 @@ function renderAntecipacao() {
       var custoProd = p.custo || bancoCusto[(p.cod||'').replace(/[^0-9]/g,'')] || 0;
       var qtd = parseInt(p.qtde) || 1;
 
-      html += '<div style="background:var(--surface-2);border:1px solid '+(sel?'var(--green)':'var(--border)')+';border-radius:var(--rl);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;position:relative" onclick="toggleAntSel(\''+chave.replace(/'/g,"\\'")+'\')" title="Clique para '+(sel?'remover da':'adicionar à')+' lista do encarte">';
+      // Cor do badge de quantidade baseada no volume
+      function corBadge(q) {
+        if (q >= 20) return { bg: '#fff', border: '#ec4899', txt: '#db2777', shadow: '0 2px 8px rgba(236,72,153,.3)' };
+        if (q >= 10) return { bg: '#fff', border: '#f97316', txt: '#ea580c', shadow: '0 2px 8px rgba(249,115,22,.25)' };
+        if (q >= 5)  return { bg: '#fff', border: '#22c55e', txt: '#16a34a', shadow: '0 2px 8px rgba(34,197,94,.2)' };
+        if (q >= 3)  return { bg: '#fff', border: '#3b82f6', txt: '#2563eb', shadow: '0 2px 6px rgba(59,130,246,.2)' };
+        return { bg: '#fff', border: '#9ca3af', txt: '#6b7280', shadow: '0 1px 4px rgba(156,163,175,.15)' };
+      }
+      var corQtd = corBadge(qtd);
+
+      html += '<div data-ant-mes="'+ym+'" data-ant-chave="'+chave.replace(/"/g,'&quot;')+'" style="background:var(--surface-2);border:1px solid '+(sel?'var(--green)':'var(--border)')+';border-radius:var(--rl);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;position:relative" onclick="toggleAntSel(\''+chave.replace(/'/g,"\\'")+'\')" title="Clique para '+(sel?'remover da':'adicionar à')+' lista do encarte">';
       
+      // Badge de quantidade (canto superior direito)
+      html += '<div style="position:absolute;top:10px;right:10px;min-width:32px;height:32px;padding:0 9px;border-radius:999px;background:'+corQtd.bg+';border:2px solid '+corQtd.border+';box-shadow:'+corQtd.shadow+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:'+corQtd.txt+';letter-spacing:-.5px" title="'+qtd+' unidade'+(qtd>1?'s':'')+' a vencer">'+qtd+'</div>';
+
       // Checkbox visual
       html += '<div style="position:absolute;top:10px;left:10px;width:20px;height:20px;border-radius:5px;border:2px solid '+(sel?'var(--green)':'var(--bds)')+';background:'+(sel?'var(--green)':'transparent')+';display:flex;align-items:center;justify-content:center;transition:all .15s">';
       if (sel) html += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       html += '</div>';
 
       // Conteúdo do card
-      html += '<div style="padding-left:28px">';
+      html += '<div style="padding-left:28px;padding-right:36px">';
       html += '<div style="font-size:13px;font-weight:700;color:var(--fg);line-height:1.3;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+nomeLimpo+'">'+nomeLimpo+'</div>';
       
       // Linha de info: vencimento + dias
@@ -4980,8 +5079,7 @@ function renderAntecipacao() {
       html += '</div>';
 
       // Dados do produto em grid
-      html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px 8px;font-size:11px">';
-      html += '<div><span style="color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em">Qtde</span><div style="font-weight:800;font-size:15px;color:'+(qtd>=5?'var(--green)':'var(--fg)')+'">'+qtd+'</div></div>';
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:11px">';
       html += '<div><span style="color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em">Preço</span><div style="font-weight:700;color:var(--fg)">'+fmtR(preco)+'</div></div>';
       if (precoPromo > 0) {
         html += '<div><span style="color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em">Promo</span><div style="font-weight:700;color:var(--green)">'+fmtR(precoPromo)+'</div></div>';
@@ -5024,24 +5122,98 @@ function toggleAntSel(chave) {
   renderAntecipacao();
 }
 
-function antSelecionarTodosMes() {
-  // Seleciona todos os produtos visíveis (que passaram nos filtros)
-  var cards = document.querySelectorAll('#antMesesContainer [onclick^="toggleAntSel"]');
-  cards.forEach(function(card) {
-    var onclick = card.getAttribute('onclick');
-    var match = onclick.match(/toggleAntSel\('(.+?)'\)/);
-    if (match) {
-      var chave = match[1].replace(/\\'/g, "'");
-      antSelecionados[chave] = true;
+// Selecionar/desmarcar todos os produtos de um mês específico pelo botão no header
+function antSelecionarMesEspec(ym) {
+  var meses = document.querySelectorAll('#antMesesContainer [data-ant-mes]');
+  var todosSel = true;
+  // Checar se todos do mês estão selecionados
+  meses.forEach(function(card) {
+    if (card.getAttribute('data-ant-mes') === ym) {
+      var chave = card.getAttribute('data-ant-chave');
+      if (!antSelecionados[chave]) todosSel = false;
+    }
+  });
+  // Se todos selecionados → desmarcar. Senão → marcar todos
+  meses.forEach(function(card) {
+    if (card.getAttribute('data-ant-mes') === ym) {
+      var chave = card.getAttribute('data-ant-chave');
+      if (todosSel) {
+        delete antSelecionados[chave];
+      } else {
+        antSelecionados[chave] = true;
+      }
     }
   });
   saveAntSel();
   renderAntecipacao();
 }
 
+// Selecionar mês via dropdown
+function antSelecionarMes() {
+  var ym = document.getElementById('antFiltroMesSel').value;
+  if (!ym) { mostrarToast('Selecione um mês no campo ao lado.','warn'); return; }
+  // Seleciona todos os produtos visíveis desse mês
+  var meses = document.querySelectorAll('#antMesesContainer [data-ant-mes]');
+  var count = 0;
+  meses.forEach(function(card) {
+    if (card.getAttribute('data-ant-mes') === ym) {
+      var chave = card.getAttribute('data-ant-chave');
+      antSelecionados[chave] = true;
+      count++;
+    }
+  });
+  saveAntSel();
+  if (count > 0) mostrarToast(count + ' produtos de ' + mesLabel(ym) + ' selecionados!','ok');
+  else mostrarToast('Nenhum produto encontrado para esse mês.','warn');
+  renderAntecipacao();
+}
+
 function antLimparSelecao() {
   antSelecionados = {};
   saveAntSel();
+  renderAntecipacao();
+}
+
+function antLimparFiltros() {
+  document.getElementById('antFiltroSetor').value = '';
+  document.getElementById('antFiltroBusca').value = '';
+  document.getElementById('antFiltroDataDe').value = '';
+  document.getElementById('antFiltroDataAte').value = '';
+  document.getElementById('antFiltroMinQtde').value = '';
+  document.getElementById('antFiltroPrecoMin').value = '';
+  document.getElementById('antFiltroPrecoMax').value = '';
+  document.getElementById('antFiltroForn').value = '';
+  document.getElementById('antFiltroMesSel').value = '';
+  renderAntecipacao();
+}
+
+// Atalhos de data
+function antAtalhoData(tipo) {
+  var hoje = new Date(); hoje.setHours(0,0,0,0);
+  var de, ate;
+  function fmt(d) { return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0'); }
+
+  if (tipo === 'mesAtual') {
+    de = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    ate = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0);
+  } else if (tipo === 'proximoMes') {
+    de = new Date(hoje.getFullYear(), hoje.getMonth()+1, 1);
+    ate = new Date(hoje.getFullYear(), hoje.getMonth()+2, 0);
+  } else if (tipo === 'julho') {
+    de = new Date(2026, 6, 1); ate = new Date(2026, 6, 31);
+  } else if (tipo === 'agosto') {
+    de = new Date(2026, 7, 1); ate = new Date(2026, 7, 31);
+  } else if (tipo === 'setembro') {
+    de = new Date(2026, 8, 1); ate = new Date(2026, 8, 30);
+  } else if (tipo === '30d') {
+    de = new Date(hoje); ate = new Date(hoje.getTime() + 30*86400000);
+  } else if (tipo === '60d') {
+    de = new Date(hoje); ate = new Date(hoje.getTime() + 60*86400000);
+  } else if (tipo === '90d') {
+    de = new Date(hoje); ate = new Date(hoje.getTime() + 90*86400000);
+  }
+  document.getElementById('antFiltroDataDe').value = fmt(de);
+  document.getElementById('antFiltroDataAte').value = fmt(ate);
   renderAntecipacao();
 }
 
@@ -5124,11 +5296,19 @@ function abrirRelatorioAntecipacao() {
       var qtd = parseInt(p.qtde) || 1;
       var days = daysDiff(p.validade);
 
+      // Cor do badge baseado na quantidade
+      var badgeCor;
+      if (qtd >= 20) badgeCor = { border: '#ec4899', txt: '#db2777', shadow: 'rgba(236,72,153,.4)' };
+      else if (qtd >= 10) badgeCor = { border: '#f97316', txt: '#ea580c', shadow: 'rgba(249,115,22,.35)' };
+      else if (qtd >= 5) badgeCor = { border: '#22c55e', txt: '#16a34a', shadow: 'rgba(34,197,94,.3)' };
+      else if (qtd >= 3) badgeCor = { border: '#3b82f6', txt: '#2563eb', shadow: 'rgba(59,130,246,.25)' };
+      else badgeCor = { border: '#9ca3af', txt: '#6b7280', shadow: 'rgba(156,163,175,.2)' };
+
       cardsHtml += '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:10px">';
       // Header do card
       var headerBg = days <= 3 ? 'linear-gradient(135deg,#92190c,#b91c1c)' : days <= 7 ? 'linear-gradient(135deg,#9a3412,#c2410c)' : days <= 15 ? 'linear-gradient(135deg,#92400e,#b45309)' : 'linear-gradient(135deg,#065f46,#047857)';
       cardsHtml += '<div style="background:'+headerBg+';padding:13px 14px 13px 54px;position:relative;min-height:58px;display:flex;flex-direction:column;justify-content:center">';
-      cardsHtml += '<span style="position:absolute;top:50%;left:10px;transform:translateY(-50%);min-width:34px;height:34px;padding:0 8px;border-radius:999px;background:#fff;color:'+(days<=7?'#b91c1c':'#047857')+';font-size:16px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);white-space:nowrap">'+qtd+'</span>';
+      cardsHtml += '<span style="position:absolute;top:50%;left:10px;transform:translateY(-50%);min-width:34px;height:34px;padding:0 8px;border-radius:999px;background:#fff;border:2px solid '+badgeCor.border+';color:'+badgeCor.txt+';font-size:16px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px '+badgeCor.shadow+';white-space:nowrap">'+qtd+'</span>';
       cardsHtml += '<div style="font-size:14px;font-weight:800;color:#fff;line-height:1.25;padding-right:8px">'+nomeLimpo+'</div>';
       cardsHtml += '<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:3px">'+( p.setor||'--')+' · Vence '+valFmt+(days!==null?' ('+days+'d)':'')+'</div>';
       cardsHtml += '</div>';
