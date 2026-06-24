@@ -106,6 +106,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .abtn{font-size:12px;padding:4px 9px;border:1px solid var(--bds);border-radius:var(--r);cursor:pointer;background:var(--bg);color:var(--tx);margin-right:3px;display:inline-flex;align-items:center;gap:4px;transition:background .15s}
 .abtn:hover{background:var(--bg2)}.abtn.encarte{border-color:var(--green);color:var(--green)}.abtn.encarte:hover{background:#EAF3DE}
 .promo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+@media (max-width:700px){.promo-grid{grid-template-columns:1fr 1fr;gap:8px}}
 .promo-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
 .promo-filter-btn{border:1px solid var(--bds);background:var(--bg);color:var(--tx2);font-size:12px;font-weight:500;padding:6px 14px;border-radius:20px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .promo-filter-btn.active{background:var(--green);border-color:var(--green);color:#fff}
@@ -122,6 +123,18 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .price-por{font-size:24px;font-weight:700;color:var(--green)}
 .promo-meta{font-size:12px;color:var(--tx2);display:flex;gap:12px;flex-wrap:wrap}
 .promo-actions{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
+@media (max-width:700px){
+  .promo-card-header{padding:9px 8px 9px 40px}
+  .pct{font-size:20px}.pct small{font-size:10px}
+  .promo-name{font-size:11px;margin:0 6px;line-height:1.25}
+  .promo-card-body{padding:9px 10px}
+  .promo-prices{gap:8px;margin-bottom:7px}
+  .price-de{font-size:11px}
+  .price-por{font-size:18px}
+  .promo-meta{font-size:10px;gap:6px;flex-direction:column}
+  .promo-actions{gap:4px;margin-top:8px;padding-top:8px}
+  .promo-actions .aura-btn{font-size:11px;padding:5px 8px}
+}
 
 /* ── Dashboard urgente cards ─────────────────────────── */
 .urg-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:visible;display:flex;flex-direction:column;transition:border-color .15s}
@@ -143,7 +156,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .urg-card-foot{display:flex;gap:6px;padding:10px 13px;border-top:1px solid var(--bd);background:var(--bg2)}
 
 .val-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
-@media (max-width:700px){.val-grid{grid-template-columns:1fr;gap:10px}}
+@media (max-width:700px){.val-grid{grid-template-columns:1fr 1fr;gap:8px}}
 .val-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:visible;transition:opacity .2s,border-color .15s;display:flex;flex-direction:column;padding:0}
 .val-card-header{padding:11px 14px 11px 48px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;position:relative;overflow:visible}
 .val-card-header.status-vencido{background:linear-gradient(135deg,#7f1d1d,#991b1b);border-radius:var(--rl) var(--rl) 0 0}
@@ -193,13 +206,27 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 /* Mobile val-card */
 @media (max-width:700px){
   .val-card{padding:0}
-  .val-card-body{padding:10px 12px}
-  .val-card-title{font-size:13px}
-  .val-card-cod{font-size:10px}
-  .val-card-field-lbl{font-size:9.5px}
-  .val-card-field-val{font-size:12px}
-  .val-card-forn-row{font-size:10.5px;margin-bottom:8px}
+  .val-card-body{padding:8px 10px}
+  .val-card-title{font-size:12px}
+  .val-card-cod{font-size:9px}
+  .val-card-field-lbl{font-size:8.5px}
+  .val-card-field-val{font-size:11px}
+  .val-card-forn-row{font-size:9.5px;margin-bottom:6px}
   .val-divider{font-size:10px;padding:6px 10px}
+  .val-card-header{padding:9px 8px 9px 40px}
+  .val-card-hdr-nome{font-size:11px;line-height:1.25}
+  .val-card-hdr-cod{font-size:10px}
+  .val-card-hdr-data{font-size:16px}
+  .val-card-qtde-badge{min-width:26px;height:26px;font-size:13px;top:6px;left:6px;padding:0 7px}
+  .val-flag{font-size:9px;padding:2px 6px}
+  .val-card-meta{font-size:10px;gap:4px 10px;margin-bottom:7px}
+  .val-card-bar{margin-bottom:7px}
+  .val-card-prices{margin-bottom:7px}
+  .val-card-price-promo{font-size:15px}
+  .val-card-fields{gap:4px 8px;padding:7px 0;margin-bottom:7px}
+  .val-card-actions{gap:4px}
+  .val-card-actions .aura-btn{font-size:11px;padding:5px 8px}
+  .val-card-foot{padding-top:7px}
 }
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:20px}
 .modal-ov.open{display:flex}
