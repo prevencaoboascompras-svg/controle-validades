@@ -2255,14 +2255,98 @@ function reativarPromo(cod){
 function promoCardHtml(p,idx,encerrada){
   var days=daysDiff(p.validade);
   var s=statusFromDays(days);
-  var dTxt=days===null?'--':days<0?(Math.abs(days)+'d atras'):days===0?'Hoje':(days+'d');
   var pct=p.pctDesc<1?p.pctDesc*100:p.pctDesc;
   var encClass=encerrada?' encerrada':'';
-  var acoes=encerrada
-    ?'<button class="btn btn-sm" onclick="reativarPromo(\''+p.cod+'\')"><i class="ti ti-rotate"></i> Reativar</button>'
-    :'<button class="btn btn-green btn-sm" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>'
-     +'<button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="encerrarPromo(\''+p.cod+'\',\''+p.nome.replace(/'/g,"\\'")+'\')" title="Encerrar promoção"><i class="ti ti-circle-x"></i> Encerrar</button>';
-  return'<div class="promo-card'+encClass+'"><div class="promo-card-header">'+(p.qtde?'<span class="val-card-qtde-badge status-'+s+'" title="'+p.qtde+' unidades a vencer">'+p.qtde+'</span>':'')+'<div class="pct">'+(pct?pct.toFixed(0):'?')+'%<small>desconto</small></div><div class="promo-name" style="white-space:normal;word-break:break-word;flex:1">'+(cleanNome(p.nome||'--'))+'</div>'+badge(s)+'</div><div class="promo-card-body"><div class="promo-prices"><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">De</div><div class="price-de">'+fmtR(p.precoNormal)+'</div></div><div style="font-size:18px;color:var(--tx2)">&rarr;</div><div><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Por</div><div class="price-por">'+fmtR(p.precoPromo)+'</div></div><div style="margin-left:auto;text-align:right"><div style="font-size:11px;color:var(--tx2);margin-bottom:2px">Economia</div><div style="font-size:16px;font-weight:600;color:var(--amber)">'+fmtR(p.valorDesc)+'</div></div></div><div class="promo-meta"><span>'+fmt(p.validade)+'</span><span>'+dTxt+'</span><span>'+p.setor+'</span></div><div class="promo-actions">'+acoes+'</div></div></div>';
+
+  // Cores por urgência
+  var paleta={
+    vencido: {bg:'#7f1d1d', grad:'#991b1b', arc:'#ef4444', glow:'rgba(239,68,68,.35)', txt:'VENCIDO',     txcl:'#fca5a5'},
+    critico: {bg:'#7c1d0a', grad:'#b91c1c', arc:'#f97316', glow:'rgba(249,115,22,.35)', txt:'CRÍTICO',     txcl:'#fdba74'},
+    urgente: {bg:'#7c2d12', grad:'#c2410c', arc:'#fb923c', glow:'rgba(251,146,60,.30)', txt:'URGENTE',     txcl:'#fed7aa'},
+    atencao: {bg:'#78350f', grad:'#b45309', arc:'#fbbf24', glow:'rgba(251,191,36,.28)', txt:'ATENÇÃO',     txcl:'#fde68a'},
+    ok:      {bg:'#064e3b', grad:'#047857', arc:'#34d399', glow:'rgba(52,211,153,.25)', txt:'OK',           txcl:'#6ee7b7'},
+    'sem-data':{bg:'#1e3a5f',grad:'#1e40af',arc:'#60a5fa',glow:'rgba(96,165,250,.25)', txt:'SEM DATA',    txcl:'#bfdbfe'}
+  };
+  var cor = paleta[s] || paleta['sem-data'];
+
+  // Velocímetro SVG — arco de 0-100% (mapeado pelo % de desconto)
+  var ang = Math.min(pct||0, 100) / 100; // 0..1
+  // arco de 210° até 330° (sweep 180° = meia rosca)
+  var startDeg = 210, sweepDeg = 120 * ang * 1.5; // 0→180°
+  var r = 38, cx = 52, cy = 56;
+  function polarToXY(deg, radius) {
+    var rad = (deg - 90) * Math.PI / 180;
+    return {x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad)};
+  }
+  var start = polarToXY(210, r);
+  var end   = polarToXY(210 + 180, r);
+  var fillEnd = polarToXY(210 + Math.min(ang * 180, 179.9), r);
+  var largeArc = ang * 180 > 180 ? 1 : 0;
+  var fillLarge = (ang * 180) > 180 ? 1 : 0;
+  var speedoSvg = [
+    '<svg width="104" height="68" viewBox="0 0 104 68" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">',
+      // trilha cinza
+      '<path d="M'+start.x.toFixed(1)+' '+start.y.toFixed(1)+' A '+r+' '+r+' 0 1 1 '+end.x.toFixed(1)+' '+end.y.toFixed(1)+'" stroke="rgba(255,255,255,.15)" stroke-width="7" stroke-linecap="round" fill="none"/>',
+      // arco preenchido
+      ang > 0.01 ? '<path d="M'+start.x.toFixed(1)+' '+start.y.toFixed(1)+' A '+r+' '+r+' 0 '+fillLarge+' 1 '+fillEnd.x.toFixed(1)+' '+fillEnd.y.toFixed(1)+'" stroke="'+cor.arc+'" stroke-width="7" stroke-linecap="round" fill="none" filter="url(#glow_'+idx+')" />':'',
+      // glow filter
+      '<defs><filter id="glow_'+idx+'" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>',
+      // percentual central
+      '<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="17" font-weight="900" fill="'+cor.arc+'">'+((pct||0).toFixed(0))+'%</text>',
+      '<text x="'+cx+'" y="'+(cy+7)+'" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="8" font-weight="600" fill="rgba(255,255,255,.55)" letter-spacing="0.5">DESC</text>',
+    '</svg>'
+  ].join('');
+
+  // Dias restantes label
+  var diasLabel = days===null ? '—' : days<0 ? 'Venceu há '+Math.abs(days)+'d' : days===0 ? 'Vence hoje!' : days===1 ? 'Amanhã' : 'Faltam '+days+'d';
+  var diasCl = (days!==null&&days<=1) ? '#ef4444' : (days!==null&&days<=7) ? '#fb923c' : (days!==null&&days<=15) ? '#fbbf24' : '#6ee7b7';
+
+  var nomeLimpo = cleanNome(p.nome||'--');
+  var acoes = encerrada
+    ? '<button class="btn btn-sm" onclick="reativarPromo(\''+p.cod+'\')"><i class="ti ti-rotate"></i> Reativar</button>'
+    : '<button class="btn btn-green btn-sm" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>'
+      +'<button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="encerrarPromo(\''+p.cod+'\',\''+p.nome.replace(/'/g,"\\'")+'\')"><i class="ti ti-circle-x"></i> Encerrar</button>';
+
+  return [
+    '<div class="promo-card'+encClass+'" style="border-color:'+cor.arc+'40">',
+
+      // ── HEADER colorido com velocímetro ──
+      '<div style="background:linear-gradient(135deg,'+cor.bg+','+cor.grad+');border-radius:var(--rl) var(--rl) 0 0;padding:12px 12px 10px 12px;position:relative;overflow:visible">',
+        // badge qtde
+        p.qtde ? '<span class="val-card-qtde-badge status-'+s+'" style="top:8px;left:8px">'+p.qtde+'</span>' : '',
+        // urgência pill (topo direito)
+        '<span style="position:absolute;top:8px;right:10px;background:rgba(0,0,0,.35);color:'+cor.txcl+';font-size:9px;font-weight:800;padding:3px 8px;border-radius:20px;letter-spacing:.06em">'+cor.txt+'</span>',
+        // velocímetro + nome
+        '<div style="display:flex;align-items:center;gap:8px;padding-top:'+(p.qtde?'10':'0')+'px">',
+          speedoSvg,
+          '<div style="flex:1;min-width:0">',
+            '<div style="font-size:12px;font-weight:800;color:#fff;line-height:1.3;word-break:break-word">'+nomeLimpo+'</div>',
+            '<div style="margin-top:5px;display:flex;align-items:center;gap:6px">',
+              '<span style="font-size:11px;font-weight:700;color:'+diasCl+'">'+diasLabel+'</span>',
+              '<span style="font-size:10px;color:rgba(255,255,255,.5)">·</span>',
+              '<span style="font-size:10px;color:rgba(255,255,255,.6)">'+p.setor+'</span>',
+            '</div>',
+          '</div>',
+        '</div>',
+      '</div>',
+
+      // ── CORPO ──
+      '<div style="padding:10px 12px 0">',
+        // preços
+        '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:8px">',
+          p.precoNormal ? '<span style="font-size:11px;color:var(--tx2);text-decoration:line-through">'+fmtR(p.precoNormal)+'</span>' : '',
+          p.precoPromo  ? '<span style="font-size:20px;font-weight:900;color:'+cor.arc+';line-height:1;letter-spacing:-.5px">'+fmtR(p.precoPromo)+'</span>' : '',
+          p.valorDesc   ? '<span style="font-size:11px;font-weight:700;color:var(--amber);background:rgba(251,191,36,.12);padding:2px 7px;border-radius:999px">-'+fmtR(p.valorDesc)+'</span>' : '',
+        '</div>',
+      '</div>',
+
+      // ── RODAPÉ ──
+      '<div style="display:flex;gap:6px;padding:8px 12px 10px;border-top:1px solid var(--bd);margin-top:2px">',
+        acoes,
+      '</div>',
+
+    '</div>'
+  ].join('');
 }
 
 function renderPromos(){
