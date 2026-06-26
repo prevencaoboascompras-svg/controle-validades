@@ -1189,7 +1189,52 @@ function toggleTheme() {
       <div id="dashUrgentTbody" style="display:contents"></div>
     </div>
 
+    <!-- ══════════════════════════════════════════════
+         CARD: ÚLTIMAS COLETAS (Respostas do formulário)
+         ══════════════════════════════════════════════ -->
+    <div class="dash-divider-label">Últimas coletas do formulário</div>
+    <div class="dash-section-hd">
+      <div>
+        <div class="dash-section-title">Coletas Recentes</div>
+        <div class="dash-section-sub">Registros enviados pelo app — filtre por urgência, volume ou setor</div>
+      </div>
+      <button class="dash-view-all" onclick="renderUltimasColetas(true)" title="Recarregar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.61"/></svg>
+        Atualizar
+      </button>
+    </div>
 
+    <!-- Filtros das coletas -->
+    <div id="ucFiltros" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center">
+      <select id="ucFiltroUrgencia" onchange="_ucFiltrar()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer">
+        <option value="">⚡ Todas as urgências</option>
+        <option value="vencido">🔴 Vencido</option>
+        <option value="critico">🟠 Crítico (≤3d)</option>
+        <option value="urgente">🟡 Urgente (≤7d)</option>
+        <option value="atencao">🔵 Atenção (≤15d)</option>
+        <option value="ok">🟢 OK</option>
+      </select>
+      <select id="ucFiltroSetor" onchange="_ucFiltrar()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer">
+        <option value="">🏪 Todos os setores</option>
+      </select>
+      <select id="ucFiltroColaborador" onchange="_ucFiltrar()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer">
+        <option value="">👤 Todos os colaboradores</option>
+      </select>
+      <select id="ucFiltroOrdem" onchange="_ucFiltrar()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer">
+        <option value="recente">🕒 Mais recentes</option>
+        <option value="urgencia">⚠️ Mais urgentes</option>
+        <option value="qtde">📦 Maior quantidade</option>
+      </select>
+      <span id="ucContador" style="font-size:11px;color:var(--muted);margin-left:4px"></span>
+    </div>
+
+    <!-- Grid de cards das coletas -->
+    <div id="ucGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:12px;margin-bottom:28px">
+      <div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);font-size:13px">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.4;margin-bottom:8px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div>Carregando coletas...</div>
+      </div>
+    </div>
 
   </div>
 
@@ -2821,6 +2866,304 @@ function renderDashboard(){
       +'</div>';
   }).join('');
   atualizarSetorGridDestaque();
+
+  // Carregar card de últimas coletas (sem forçar refresh se já tem dados)
+  renderUltimasColetas(false);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ÚLTIMAS COLETAS — lê aba "Respostas ao formulário 1" via gviz
+//  Cruza EAN com banco{} para obter nome do produto
+// ═══════════════════════════════════════════════════════════════
+var _ucDados = [];   // cache das coletas brutas
+var _ucFiltrados = []; // após filtros
+
+// ── Dicionário de usuários (e-mail → nome) ──────────────────────
+var UC_USERS_KEY = 'aura_uc_users';
+var _ucUsersDefault = {
+  'angelamaria.ao727@gmail.com':       'Angela Maria',
+  'cleitonbarbosaalencastro@gmail.com':'Cleiton Barbosa',
+  'comercialvitoriacarnes@gmail.com':  'ADM Televendas',
+  'gamagulartn@gmail.com':             'Natanieli Gama',
+  'janacosta1989@hotmail.com':         'Janaina da Silva',
+  'katulula28251723@gmail.com':        'Karen Fortuna',
+  'leila.darocha.5@gmail.com':         'Leila da Rocha',
+  'lima23stefani@gmail.com':           'Stefani Lima',
+  'stefanilima000@gmail.com':          'Stefani Lima',
+  'marineumann@gmail.com':             'Mari Neumann',
+  'pinheiroduarteweslyn@gmail.com':    'Weslyn Pinheiro',
+  'pontodigital1960@gmail.com':        'Tablet Depósito',
+  'prevencaoboascompras@gmail.com':    'Leonardo Ribeiro',
+  'sinuelo6@gmail.com':                'Rafael Pereira',
+  'viniciusaraujomotorola@gmail.com':  'Vinicius Araujo'
+};
+function _ucGetUsers(){
+  try{var s=JSON.parse(localStorage.getItem(UC_USERS_KEY)||'{}');return Object.assign({},_ucUsersDefault,s);}
+  catch(e){return Object.assign({},_ucUsersDefault);}
+}
+function _ucSaveUser(email,nome){
+  try{var s=JSON.parse(localStorage.getItem(UC_USERS_KEY)||'{}');s[email.toLowerCase().trim()]=nome.trim();localStorage.setItem(UC_USERS_KEY,JSON.stringify(s));}catch(e){}
+}
+function _ucResolveNome(email){
+  if(!email)return null;
+  var u=_ucGetUsers();
+  return u[email.toLowerCase().trim()]||null;
+}
+function _ucAbrirCadastroUser(email){
+  var existente=_ucResolveNome(email)||'';
+  var html='<div id="ucUserModal" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center">'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:24px;width:360px;max-width:90vw">'
+    +'<div style="font-weight:700;font-size:15px;margin-bottom:4px">Cadastrar usuário</div>'
+    +'<div style="font-size:11px;color:var(--muted);margin-bottom:16px;word-break:break-all">'+escHtml(email)+'</div>'
+    +'<input id="ucUserNomeInput" placeholder="Nome do colaborador" value="'+escHtml(existente)+'" '
+    +'style="width:100%;box-sizing:border-box;background:var(--surface3,#1a1a2e);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-size:13px;margin-bottom:14px" '
+    +'onkeydown="if(event.key==='Enter')_ucSalvarUser(''+email.replace(/'/g,"\'")+'')">'
+    +'<div style="display:flex;gap:8px;justify-content:flex-end">'
+    +'<button onclick="document.getElementById('ucUserModal').remove()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:7px 14px;cursor:pointer;font-size:12px">Cancelar</button>'
+    +'<button onclick="_ucSalvarUser(''+email.replace(/'/g,"\'")+'')" style="background:#D4001A;border:none;color:white;border-radius:6px;padding:7px 16px;cursor:pointer;font-size:12px;font-weight:600">Salvar</button>'
+    +'</div>'
+    +'</div>'
+    +'</div>';
+  document.body.insertAdjacentHTML('beforeend',html);
+  setTimeout(function(){var i=document.getElementById('ucUserNomeInput');if(i){i.focus();i.select();}},50);
+}
+function _ucSalvarUser(email){
+  var input=document.getElementById('ucUserNomeInput');
+  if(!input)return;
+  var nome=input.value.trim();
+  if(!nome){input.focus();return;}
+  _ucSaveUser(email,nome);
+  var modal=document.getElementById('ucUserModal');if(modal)modal.remove();
+  mostrarToast('Usuário "'+nome+'" salvo!','ok');
+  _ucDados.forEach(function(d){if(d.email&&d.email.toLowerCase()===email.toLowerCase())d.nomeColeta=nome;});
+  _ucFiltrar();
+}
+
+async function renderUltimasColetas(forceRefresh) {
+  var el = document.getElementById('ucGrid');
+  if (!el) return;
+
+  var cfg = loadCfg();
+  if (!cfg.id) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">Configure a planilha primeiro.</div>';
+    return;
+  }
+
+  // Só busca se ainda não tem dados ou se forçou refresh
+  if (!_ucDados.length || forceRefresh) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;vertical-align:middle;margin-right:6px"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Buscando coletas...</div>';
+    try {
+      var abaResp = cfg.abaResp || 'Respostas ao formulario 1';
+      var table = await fetchSheet(cfg.id, abaResp);
+      var rows = rawRows(table);
+      _ucDados = [];
+
+      // Detectar colunas pelo cabeçalho (linha 0 ou table.cols)
+      var ciTs=-1, ciSetor=-1, ciEan=-1, ciVal=-1, ciQtde=-1, ciEmail=-1;
+      function detectCols(headers) {
+        headers.forEach(function(h, i) {
+          var u = h.toUpperCase();
+          if (/CARIMBO|TIMESTAMP|DATA.HORA/.test(u)) ciTs = i;
+          else if (/SETOR/.test(u)) ciSetor = i;
+          else if (/BARRAS?|EAN|C[OÓ]DIGO/.test(u)) ciEan = i;
+          else if (/VALIDADE/.test(u)) ciVal = i;
+          else if (/QUANTIDADE|QTD|QTY/.test(u)) ciQtde = i;
+          else if (/E.?MAIL|EMAIL/.test(u)) ciEmail = i;
+        });
+      }
+
+      if (table.cols && table.cols.length) {
+        detectCols(table.cols.map(function(c){ return String(c.label||''); }));
+      }
+      if (ciEan < 0 && rows.length) {
+        detectCols((rows[0].c||[]).map(function(c){ return String((c&&c.f)||(c&&c.v)||''); }));
+        rows = rows.slice(1);
+      }
+      // fallback posição fixa: Carimbo=0, Setor=1, EAN=2, Validade=3, Qtde=4, Email=5
+      if (ciTs < 0) ciTs = 0;
+      if (ciSetor < 0) ciSetor = 1;
+      if (ciEan < 0) ciEan = 2;
+      if (ciVal < 0) ciVal = 3;
+      if (ciQtde < 0) ciQtde = 4;
+      if (ciEmail < 0) ciEmail = 5;
+
+      var hoje = new Date(); hoje.setHours(0,0,0,0);
+
+      rows.forEach(function(row) {
+        var c = row.c || [];
+        var ean = String((c[ciEan]&&c[ciEan].f)||(c[ciEan]&&c[ciEan].v)||'').replace(/[^0-9]/g,'').trim();
+        if (!ean) return;
+        var valRaw = (c[ciVal]&&c[ciVal].v)||'';
+        var valStr = parseDate(valRaw);
+        var ts = (c[ciTs]&&c[ciTs].v)||'';
+        var setor = String((c[ciSetor]&&c[ciSetor].f)||(c[ciSetor]&&c[ciSetor].v)||'').trim();
+        var qtde = parseFloat((c[ciQtde]&&c[ciQtde].v)||0)||0;
+
+        // dias até vencimento
+        var dias = null;
+        if (valStr) {
+          var dv = new Date(valStr + 'T00:00:00');
+          dias = Math.round((dv - hoje) / 86400000);
+        }
+
+        // nome do produto pelo banco (EAN → nome)
+        var nome = banco[ean] || '(produto não encontrado)';
+
+        // timestamp de coleta
+        var tsDate = null;
+        if (ts) {
+          var dm = String(ts).match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/);
+          if (dm) tsDate = new Date(+dm[1], +dm[2], +dm[3], +dm[4], +dm[5], +dm[6]);
+          else if (!isNaN(ts)) tsDate = new Date((Number(ts)-25569)*86400000);
+        }
+
+        var email = String((c[ciEmail]&&c[ciEmail].f)||(c[ciEmail]&&c[ciEmail].v)||'').trim().toLowerCase();
+        var nomeColeta = _ucResolveNome(email);
+        _ucDados.push({ ean: ean, nome: nome, setor: setor, qtde: qtde, dias: dias, valStr: valStr, ts: tsDate, email: email, nomeColeta: nomeColeta });
+      });
+
+      // Preencher select de setores
+      var setoresUnicos = [...new Set(_ucDados.map(function(d){ return d.setor; }).filter(Boolean))].sort();
+      var selSetor = document.getElementById('ucFiltroSetor');
+      if (selSetor) {
+        var opcAtual = selSetor.value;
+        selSetor.innerHTML = '<option value="">🏪 Todos os setores</option>' +
+          setoresUnicos.map(function(s){ return '<option value="'+escHtml(s)+'">'+escHtml(s)+'</option>'; }).join('');
+        selSetor.value = opcAtual;
+      }
+    } catch(e) {
+      el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#f87171">Erro ao carregar coletas: ' + escHtml(e.message) + '</div>';
+      return;
+    }
+  }
+
+  _ucFiltrar();
+}
+
+function _ucFiltrar() {
+  var urgFilt = (document.getElementById('ucFiltroUrgencia')||{}).value || '';
+  var setorFilt = (document.getElementById('ucFiltroSetor')||{}).value || '';
+  var colab = (document.getElementById('ucFiltroColaborador')||{}).value || '';
+  var ordem = (document.getElementById('ucFiltroOrdem')||{}).value || 'recente';
+  // Popular select de colaboradores dinamicamente
+  var selColab = document.getElementById('ucFiltroColaborador');
+  if (selColab) {
+    var colabAtual = selColab.value;
+    var colabSet = {};
+    _ucDados.forEach(function(d){
+      var n = d.nomeColeta || (d.email ? d.email : null);
+      if (n) colabSet[n] = d.nomeColeta ? d.nomeColeta : ('📧 '+d.email);
+    });
+    var colabKeys = Object.keys(colabSet).sort();
+    selColab.innerHTML = '<option value="">👤 Todos os colaboradores</option>'
+      + colabKeys.map(function(k){ return '<option value="'+escHtml(k)+'">'+escHtml(colabSet[k])+'</option>'; }).join('');
+    selColab.value = colabAtual;
+  }
+  var el = document.getElementById('ucGrid');
+  if (!el) return;
+
+  var dados = _ucDados.slice();
+
+  // Filtrar por urgência
+  if (urgFilt) {
+    dados = dados.filter(function(d) {
+      return statusFromDays(d.dias) === urgFilt;
+    });
+  }
+  // Filtrar por setor
+  if (setorFilt) {
+    dados = dados.filter(function(d) { return d.setor === setorFilt; });
+  }
+  // Filtrar por colaborador
+  if (colab) {
+    dados = dados.filter(function(d) {
+      return (d.nomeColeta || d.email) === colab;
+    });
+  }
+
+  // Ordenar
+  if (ordem === 'recente') {
+    dados.sort(function(a,b){ return (b.ts||0) - (a.ts||0); });
+  } else if (ordem === 'urgencia') {
+    dados.sort(function(a,b){
+      var ord = {vencido:0,critico:1,urgente:2,atencao:3,ok:4};
+      var sa = ord[statusFromDays(a.dias)]??5;
+      var sb = ord[statusFromDays(b.dias)]??5;
+      return sa !== sb ? sa - sb : (a.dias??999) - (b.dias??999);
+    });
+  } else if (ordem === 'qtde') {
+    dados.sort(function(a,b){ return b.qtde - a.qtde; });
+  }
+
+  _ucFiltrados = dados;
+
+  var cnt = document.getElementById('ucContador');
+  if (cnt) cnt.textContent = dados.length + ' registro' + (dados.length!==1?'s':'');
+
+  var MAX = 30;
+  var exibir = dados.slice(0, MAX);
+
+  if (!exibir.length) {
+    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">Nenhuma coleta encontrada com esses filtros.</div>';
+    return;
+  }
+
+  var statusCor = { vencido:'#ef4444', critico:'#f97316', urgente:'#fbbf24', atencao:'#60a5fa', ok:'#34d399' };
+  var statusLbl = { vencido:'Vencido', critico:'Crítico', urgente:'Urgente', atencao:'Atenção', ok:'OK' };
+
+  el.innerHTML = exibir.map(function(d) {
+    var s = statusFromDays(d.dias);
+    var cor = statusCor[s] || '#6b7280';
+    var lbl = statusLbl[s] || 'Aguardando';
+    var diasTxt = d.dias === null ? '—' : d.dias < 0 ? 'Vencido há '+Math.abs(d.dias)+'d' : d.dias === 0 ? 'Vence hoje!' : 'Faltam '+d.dias+'d';
+    var tsTxt = d.ts ? d.ts.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    var qtdeColor = d.qtde >= 20 ? '#f97316' : d.qtde >= 10 ? '#fbbf24' : '#94a3b8';
+    // Linha do colaborador
+    var nomeExib = d.nomeColeta || null;
+    var avatarLetter = nomeExib ? nomeExib.trim()[0].toUpperCase() : '?';
+    var coletaHTML = nomeExib
+      ? '<div style="display:flex;align-items:center;gap:7px;border-top:1px solid var(--border);padding-top:8px;margin-top:2px">'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:#D4001A22;border:1px solid #D4001A55;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#D4001A;flex-shrink:0">'+escHtml(avatarLetter)+'</div>'
+          +'<span style="font-size:13px;color:var(--text);font-weight:600;flex:1">'+escHtml(nomeExib)+'</span>'
+          +'</div>'
+          +'<div style="font-size:11px;color:var(--muted);padding-left:36px">🕒 '+escHtml(tsTxt)+'</div>'
+        +'</div>'
+      : '<div style="display:flex;align-items:center;gap:7px;border-top:1px solid var(--border);padding-top:8px;margin-top:2px">'
+          +'<div style="width:28px;height:28px;border-radius:50%;background:#ffffff11;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);flex-shrink:0">?</div>'
+          +(d.email
+            ? '<button onclick="_ucAbrirCadastroUser(\'' + (d.email||'').replace(/'/g,"\\'") + '\')" style="background:transparent;border:1px dashed #D4001A66;color:#D4001A;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;flex:1;text-align:left">✏️ '+escHtml(d.email)+' — cadastrar nome</button>'
+            : '<span style="font-size:10px;color:var(--muted)">Sem e-mail</span>')
+          +'</div>'
+          +'<div style="font-size:11px;color:var(--muted);padding-left:36px">🕒 '+escHtml(tsTxt)+'</div>'
+        +'</div>';
+    return '<div style="background:var(--surface2);border:1px solid var(--border);border-top:3px solid '+cor+';border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .2s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.3)\'" onmouseout="this.style.boxShadow=\'none\'">'
+      // Header: nome produto + badge status
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
+        +'<div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.4;flex:1;min-width:0">'+escHtml(cleanNome(d.nome))+'</div>'
+        +'<span style="background:'+cor+'22;color:'+cor+';border:1px solid '+cor+'44;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap">'+lbl+'</span>'
+      +'</div>'
+      // EAN + Setor
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+        +'<span style="background:var(--surface3,#1e1e2e);color:var(--muted);border-radius:4px;padding:3px 8px;font-size:11px;font-family:monospace">'+escHtml(d.ean)+'</span>'
+        +(d.setor?'<span style="background:var(--surface3,#1e1e2e);color:var(--muted);border-radius:4px;padding:3px 8px;font-size:11px">'+escHtml(d.setor)+'</span>':'')
+      +'</div>'
+      // Validade + dias
+      +'<div style="display:flex;justify-content:space-between;align-items:center">'
+        +'<div style="font-size:12px;color:var(--muted)">📅 Vence: <strong style="color:var(--text)">'+(d.valStr?d.valStr.split('-').reverse().join('/'):'—')+'</strong></div>'
+        +'<div style="font-size:12px;font-weight:700;color:'+cor+'">'+escHtml(diasTxt)+'</div>'
+      +'</div>'
+      // Quantidade
+      +'<div style="font-size:13px;border-top:1px solid var(--border);padding-top:10px;margin-top:2px">'
+        +'📦 <strong style="color:'+qtdeColor+'">'+d.qtde+'</strong> <span style="color:var(--muted);font-size:11px">un. coletadas</span>'
+      +'</div>'
+      // Colaborador + horário
+      +coletaHTML
+    +'</div>';
+  }).join('');
+
+  if (dados.length > MAX) {
+    el.innerHTML += '<div style="grid-column:1/-1;text-align:center;padding:12px;color:var(--muted);font-size:12px">Exibindo '+MAX+' de '+dados.length+' registros. Use os filtros para refinar.</div>';
+  }
 }
 
 function filtrarSetor(setor){
