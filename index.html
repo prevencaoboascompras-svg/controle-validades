@@ -1071,7 +1071,6 @@ function toggleTheme() {
       <div class="cfg-field"><label>ID Banco de Dados</label><input id="cIdBanco" placeholder="mesmo ID ou outro"></div>
       <div class="cfg-field"><label>Aba Banco de Dados</label><input id="cAbaBanco" placeholder="BANCO DE DADOS"></div>
       <div class="cfg-field"><label>Aba Respostas Formulario</label><input id="cAbaResp" placeholder="Respostas ao formulario 1"></div>
-      <div class="cfg-field" style="grid-column:1/-1"><label>URL do Apps Script (GAS)</label><input id="cUrl" placeholder="https://script.google.com/macros/s/..."></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:14px">
       <button class="btn btn-green" onclick="saveConfig()"><i class="ti ti-check"></i> Salvar e conectar</button>
@@ -2091,13 +2090,13 @@ function loadAsset(src){return new Promise(function(r){var i=new Image();i.onloa
 var CFG_KEY='aura_cfg',PROD_KEY='aura_prod';
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var fotoImg=null;
-var products=JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
+var products=[];
 var setorAtivo='';
 function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}');}
-function saveProd(){localStorage.setItem(PROD_KEY,JSON.stringify(products));}
+function saveProd(){try{localStorage.setItem(PROD_KEY,JSON.stringify(products));}catch(e){console.warn('localStorage cheio — dados mantidos só em memória:',e.message);}}
 
 function saveConfig(){
-  var cfg={id:document.getElementById('cId').value.trim(),aba:document.getElementById('cAba').value.trim()||'2025',idBanco:document.getElementById('cIdBanco').value.trim(),abaBanco:document.getElementById('cAbaBanco').value.trim()||'BANCO DE DADOS',abaResp:document.getElementById('cAbaResp').value.trim()||'Respostas ao formulario 1',url:document.getElementById('cUrl').value.trim()||'https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk2OOaOOG_oOhpGdKETgZgIkTrZOBY36_UzS35Ns8s/exec'};
+  var cfg={id:document.getElementById('cId').value.trim(),aba:document.getElementById('cAba').value.trim()||'2025',idBanco:document.getElementById('cIdBanco').value.trim(),abaBanco:document.getElementById('cAbaBanco').value.trim()||'BANCO DE DADOS',abaResp:document.getElementById('cAbaResp').value.trim()||'Respostas ao formulario 1'};
   if(!cfg.id){alert('Informe o ID da planilha.');return;}
   if(!cfg.idBanco)cfg.idBanco=cfg.id;
   localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
@@ -2107,7 +2106,7 @@ function toggleCfg(){
   var b=document.getElementById('cfgBox');
   var show=b.style.display==='none'||!b.style.display;
   b.style.display=show?'block':'none';
-  if(show){var c=loadCfg();document.getElementById('cId').value=c.id||'';document.getElementById('cAba').value=c.aba||'2025';document.getElementById('cIdBanco').value=c.idBanco||'';document.getElementById('cAbaBanco').value=c.abaBanco||'BANCO DE DADOS';document.getElementById('cAbaResp').value=c.abaResp||'Respostas ao formulario 1';document.getElementById('cUrl').value=c.url||'https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk2OOaOOG_oOhpGdKETgZgIkTrZOBY36_UzS35Ns8s/exec';}
+  if(show){var c=loadCfg();document.getElementById('cId').value=c.id||'';document.getElementById('cAba').value=c.aba||'2025';document.getElementById('cIdBanco').value=c.idBanco||'';document.getElementById('cAbaBanco').value=c.abaBanco||'BANCO DE DADOS';document.getElementById('cAbaResp').value=c.abaResp||'Respostas ao formulario 1';}
 }
 
 function sheetsURL(id,aba){return'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(aba);}
