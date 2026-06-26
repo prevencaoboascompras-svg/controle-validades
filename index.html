@@ -950,6 +950,10 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <span>Validades</span>
     </button>
+    <button onclick="auraNav(this,'estoque')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      <span>Estoque</span>
+    </button>
     <button onclick="auraNav(this,'promocoes')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
       <span>Promoções</span>
@@ -972,6 +976,11 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
     <button onclick="auraNav(this,'modalidades')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
       <span>Modalidades</span>
+    </button>
+    <button onclick="auraNav(this,'tarefas')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>Tarefas</span>
+      <span class="sb-nav-badge" id="asBadgeTarefas" style="display:none">0</span>
     </button>
     <button id="navAjuda" onclick="auraNav(this,'ajuda')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -1062,6 +1071,7 @@ function toggleTheme() {
       <div class="cfg-field"><label>ID Banco de Dados</label><input id="cIdBanco" placeholder="mesmo ID ou outro"></div>
       <div class="cfg-field"><label>Aba Banco de Dados</label><input id="cAbaBanco" placeholder="BANCO DE DADOS"></div>
       <div class="cfg-field"><label>Aba Respostas Formulario</label><input id="cAbaResp" placeholder="Respostas ao formulario 1"></div>
+      <div class="cfg-field" style="grid-column:1/-1"><label>URL do Apps Script (GAS)</label><input id="cUrl" placeholder="https://script.google.com/macros/s/..."></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:14px">
       <button class="btn btn-green" onclick="saveConfig()"><i class="ti ti-check"></i> Salvar e conectar</button>
@@ -1521,6 +1531,39 @@ function toggleTheme() {
       <div id="modCardsArea"></div>
     </div>
   </div>
+  <div id="sec-estoque" class="sec">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-package" style="color:var(--blue)"></i> Estoque por produto</div>
+        <p style="font-size:12px;color:var(--tx2)">Visão agrupada por produto — cada lote com sua validade e quantidade</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="estoqueBusca" placeholder="Buscar produto..." oninput="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;min-width:200px">
+        <select id="estoqueSetor" onchange="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+          <option value="">Todos os setores</option>
+          <option>Acougue</option><option>Bebidas</option><option>Congelados</option>
+          <option>FLV</option><option>Frios</option><option>Laticinios</option>
+          <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
+        </select>
+      </div>
+    </div>
+    <div id="estoqueGrid" style="display:grid;gap:14px"></div>
+  </div>
+  <div id="sec-tarefas" class="sec">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-clipboard-check" style="color:var(--amber)"></i> Tarefas atribuídas</div>
+        <p style="font-size:12px;color:var(--tx2)">Atribua tarefas de conferência de estoque para os colaboradores</p>
+      </div>
+      <button class="btn btn-green" onclick="openTarefaModal()"><i class="ti ti-plus"></i> Nova tarefa</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button class="promo-filter-btn active" id="tf_todas" onclick="filtrarTarefas('todas')">Todas</button>
+      <button class="promo-filter-btn" id="tf_pendentes" onclick="filtrarTarefas('pendentes')">Pendentes</button>
+      <button class="promo-filter-btn" id="tf_concluidas" onclick="filtrarTarefas('concluidas')">Concluídas</button>
+    </div>
+    <div id="tarefasGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
+  </div>
   <div id="sec-ajuda" class="sec">
     <div class="help-box">
       <h4><i class="ti ti-brand-google" style="color:#4285F4"></i> Como conectar ao Google Sheets</h4>
@@ -1968,6 +2011,39 @@ function toggleTheme() {
   </div>
 </div>
 
+<!-- MODAL CRIAR TAREFA -->
+<!-- MODAL CRIAR TAREFA -->
+<div class="modal-ov" id="tarefaModal">
+  <div class="smodal" style="width:520px">
+    <h3><i class="ti ti-clipboard-check" style="color:var(--amber)"></i> Atribuir Tarefa</h3>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:14px">Peça para um colaborador conferir o estoque</div>
+    <div style="display:grid;gap:12px">
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Produto</label>
+        <input type="text" id="tarefaProduto" placeholder="Nome do produto" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Código de barras</label>
+        <input type="text" id="tarefaCod" placeholder="Opcional" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Descrição (opcional)</label>
+        <textarea id="tarefaDescricao" placeholder="Ex: Conferir se ainda tem no corredor 3..." style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;min-height:50px;resize:vertical;font-family:inherit"></textarea>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Colaborador</label>
+        <select id="tarefaColaborador" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+          <option value="">Selecione o colaborador...</option>
+        </select>
+      </div>
+    </div>
+    <div class="smodal-foot">
+      <button class="btn" onclick="closeModal('tarefaModal')">Cancelar</button>
+      <button class="btn btn-green" onclick="criarTarefa()"><i class="ti ti-send"></i> Atribuir tarefa</button>
+    </div>
+  </div>
+</div>
+
 <!-- area de impressao (invisivel na tela, visivel ao imprimir) -->
 <div id="printArea" style="display:none"></div>
 
@@ -2021,7 +2097,7 @@ function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}');}
 function saveProd(){localStorage.setItem(PROD_KEY,JSON.stringify(products));}
 
 function saveConfig(){
-  var cfg={id:document.getElementById('cId').value.trim(),aba:document.getElementById('cAba').value.trim()||'2025',idBanco:document.getElementById('cIdBanco').value.trim(),abaBanco:document.getElementById('cAbaBanco').value.trim()||'BANCO DE DADOS',abaResp:document.getElementById('cAbaResp').value.trim()||'Respostas ao formulario 1'};
+  var cfg={id:document.getElementById('cId').value.trim(),aba:document.getElementById('cAba').value.trim()||'2025',idBanco:document.getElementById('cIdBanco').value.trim(),abaBanco:document.getElementById('cAbaBanco').value.trim()||'BANCO DE DADOS',abaResp:document.getElementById('cAbaResp').value.trim()||'Respostas ao formulario 1',url:document.getElementById('cUrl').value.trim()||'https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk2OOaOOG_oOhpGdKETgZgIkTrZOBY36_UzS35Ns8s/exec'};
   if(!cfg.id){alert('Informe o ID da planilha.');return;}
   if(!cfg.idBanco)cfg.idBanco=cfg.id;
   localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
@@ -2031,7 +2107,7 @@ function toggleCfg(){
   var b=document.getElementById('cfgBox');
   var show=b.style.display==='none'||!b.style.display;
   b.style.display=show?'block':'none';
-  if(show){var c=loadCfg();document.getElementById('cId').value=c.id||'';document.getElementById('cAba').value=c.aba||'2025';document.getElementById('cIdBanco').value=c.idBanco||'';document.getElementById('cAbaBanco').value=c.abaBanco||'BANCO DE DADOS';document.getElementById('cAbaResp').value=c.abaResp||'Respostas ao formulario 1';}
+  if(show){var c=loadCfg();document.getElementById('cId').value=c.id||'';document.getElementById('cAba').value=c.aba||'2025';document.getElementById('cIdBanco').value=c.idBanco||'';document.getElementById('cAbaBanco').value=c.abaBanco||'BANCO DE DADOS';document.getElementById('cAbaResp').value=c.abaResp||'Respostas ao formulario 1';document.getElementById('cUrl').value=c.url||'https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk2OOaOOG_oOhpGdKETgZgIkTrZOBY36_UzS35Ns8s/exec';}
 }
 
 function sheetsURL(id,aba){return'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(aba);}
@@ -2260,7 +2336,9 @@ function renderTable(){
   var busca=document.getElementById('fBusca').value.toLowerCase();
   var resolvidos=getResolvidos();
   var mostrarResolvidos=document.getElementById('chkMostrarResolvidos')&&document.getElementById('chkMostrarResolvidos').checked;
+  var promoAtivas=getPromoAtivas();
   var all=products.filter(function(p){
+    if(promoAtivas.includes(p.cod))return false;
     var s=statusFromDays(daysDiff(p.validade));
     if(setor&&p.setor!==setor)return false;
     if(_multiStatusFilter){
@@ -2348,7 +2426,7 @@ function renderTable(){
         +'</div>'
         +'<div class="val-card-forn-row" title="'+escHtml(fornProd)+'"><i class="ti ti-truck-delivery" style="opacity:.6"></i> '+escHtml(fornProd)+'</div>'
         +'<div class="val-card-foot">'
-          +'<div class="val-card-actions" style="margin-left:auto">'+(needsPromo?'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido+'</div>'
+          +'<div class="val-card-actions" style="margin-left:auto">'+(needsPromo?'<button class="abtn" style="border-color:var(--amber);color:var(--amber)" onclick="openTarefaModal('+idx+')" title="Sinalizar promoção ativa e atribuir tarefa"><i class="ti ti-tag"></i> Promoção ativa</button><button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido+'</div>'
         +'</div>'
       +'</div>'
     +'</div>';
@@ -2480,7 +2558,8 @@ function promoCardHtml(p,idx,encerrada){
   var nomeLimpo = cleanNome(p.nome||'--');
   var acoes = encerrada
     ? '<button class="btn btn-sm" onclick="reativarPromo(\''+p.cod+'\')"><i class="ti ti-rotate"></i> Reativar</button>'
-    : '<button class="btn btn-green btn-sm" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>'
+    : '<button class="btn btn-sm" style="border-color:var(--amber);color:var(--amber)" onclick="confirmarEstoquePromo(\''+p.cod+'\',\''+p.nome.replace(/'/g,"\\'")+'\')"><i class="ti ti-clipboard-check"></i> Confirmar</button>'
+      +'<button class="btn btn-green btn-sm" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>'
       +'<button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="encerrarPromo(\''+p.cod+'\',\''+p.nome.replace(/'/g,"\\'")+'\')"><i class="ti ti-circle-x"></i> Encerrar</button>';
 
   return [
@@ -2548,7 +2627,8 @@ function renderPromos(){
   if(setorAtivo)base=base.filter(function(p){return p.setor===setorAtivo;});
 
   // Ativos = não encerrados
-  var ativos=base.filter(function(p){return!encCods.includes(p.cod);});
+  var promoAtivasCods=getPromoAtivas();
+  var ativos=base.filter(function(p){return!encCods.includes(p.cod)||promoAtivasCods.includes(p.cod);});
 
   // Filtro urgência
   ativos=ativos.filter(function(p){
@@ -3888,7 +3968,7 @@ function addManual(){
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
-  var tabNames=['dashboard','validades','promocoes','encartes','antecipacao','relatorio','modalidades','ajuda'];
+  var tabNames=['dashboard','validades','estoque','promocoes','encartes','antecipacao','relatorio','modalidades','tarefas','ajuda'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('active');
@@ -3902,6 +3982,8 @@ function goTab(name){
   if(name==='modalidades')renderModalidades();
   if(name==='antecipacao')renderAntecipacao();
   if(name==='dashboard')renderDashboard();
+  if(name==='estoque')renderEstoque();
+  if(name==='tarefas')renderTarefas();
 }
 function refresh(){renderMetrics();renderTable();atualizarNegBadge();renderDashboard();}
 
@@ -5881,10 +5963,299 @@ function abrirRelatorioRetirada() {
   janela.document.close();
 }
 
+// ═══ SISTEMA DE TAREFAS ═══
+var COLABORADORES = [
+  {nome: 'Maria', email: 'maria@boascompras.com.br'},
+  {nome: 'João', email: 'joao@boascompras.com.br'},
+  {nome: 'Ana', email: 'ana@boascompras.com.br'},
+  {nome: 'Pedro', email: 'pedro@boascompras.com.br'},
+  {nome: 'Carla', email: 'carla@boascompras.com.br'}
+];
+var TAREFAS_KEY = 'boascompras_tarefas';
+
+function getTarefas() { try { return JSON.parse(localStorage.getItem(TAREFAS_KEY) || '[]'); } catch(e) { return []; } }
+function saveTarefas(arr) { localStorage.setItem(TAREFAS_KEY, JSON.stringify(arr)); }
+function getPromoAtivas() { try { return JSON.parse(localStorage.getItem('boascompras_promo_ativas') || '[]'); } catch(e) { return []; } }
+
+function openTarefaModal(prodIdx) {
+  var modal = document.getElementById('tarefaModal');
+  var p = prodIdx !== undefined ? products[prodIdx] : null;
+  document.getElementById('tarefaProduto').value = p ? cleanNome(p.nome || '') : '';
+  document.getElementById('tarefaCod').value = p ? (p.cod || '') : '';
+  document.getElementById('tarefaDescricao').value = '';
+  
+  var sel = document.getElementById('tarefaColaborador');
+  sel.innerHTML = '<option value="">Selecione o colaborador...</option>';
+  COLABORADORES.forEach(function(c) {
+    sel.innerHTML += '<option value="' + c.email + '">' + c.nome + ' (' + c.email + ')</option>';
+  });
+  
+  modal.classList.add('open');
+}
+
+function criarTarefa() {
+  var produto = document.getElementById('tarefaProduto').value.trim();
+  var cod = document.getElementById('tarefaCod').value.trim();
+  var descricao = document.getElementById('tarefaDescricao').value.trim();
+  var email = document.getElementById('tarefaColaborador').value;
+  
+  if (!produto) { mostrarToast('Informe o produto', 'err'); return; }
+  if (!email) { mostrarToast('Selecione o colaborador', 'err'); return; }
+  
+  var colab = COLABORADORES.find(function(c) { return c.email === email; });
+  
+  var tarefa = {
+    id: 'T' + Date.now(),
+    produto: produto,
+    cod: cod,
+    descricao: descricao,
+    email: email,
+    nomeColaborador: colab ? colab.nome : email,
+    status: 'pendente',
+    quantidadeConfirmada: null,
+    criadoEm: new Date().toISOString(),
+    confirmadoEm: null,
+    criadoPor: 'gestor'
+  };
+  
+  var tarefas = getTarefas();
+  tarefas.push(tarefa);
+  saveTarefas(tarefas);
+  enviarTarefaParaSheets(tarefa);
+  
+  closeModal('tarefaModal');
+  mostrarToast('Tarefa atribuída para ' + (colab ? colab.nome : email), 'ok');
+  
+  if (cod) {
+    var promoAtivas = getPromoAtivas();
+    if (!promoAtivas.includes(cod)) {
+      promoAtivas.push(cod);
+      localStorage.setItem('boascompras_promo_ativas', JSON.stringify(promoAtivas));
+    }
+    renderTable();
+    renderPromos();
+  }
+  
+  renderTarefas();
+}
+
+function enviarTarefaParaSheets(tarefa) {
+  var cfg = loadCfg();
+  if (!cfg.url) return;
+  try {
+    fetch(cfg.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+      body: JSON.stringify({ action: 'criarTarefa', tarefa: tarefa })
+    });
+  } catch(e) {}
+}
+
+function renderTarefas() {
+  var container = document.getElementById('tarefasGrid');
+  if (!container) return;
+  var tarefas = getTarefas();
+  var filtro = window._tarefasFiltro || 'todas';
+  
+  var filtered = tarefas.filter(function(t) {
+    if (filtro === 'pendentes') return t.status === 'pendente';
+    if (filtro === 'concluidas') return t.status === 'concluida';
+    return true;
+  });
+  
+  filtered.sort(function(a, b) {
+    if (a.status !== b.status) return a.status === 'pendente' ? -1 : 1;
+    return new Date(b.criadoEm) - new Date(a.criadoEm);
+  });
+  
+  if (!filtered.length) {
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:13px"><i class="ti ti-clipboard-check" style="font-size:36px;display:block;margin-bottom:10px;opacity:.4"></i>Nenhuma tarefa ' + (filtro !== 'todas' ? filtro : 'ainda') + '</div>';
+    return;
+  }
+  
+  container.innerHTML = filtered.map(function(t) {
+    var dataCriacao = new Date(t.criadoEm);
+    var dataFmt = dataCriacao.toLocaleDateString('pt-BR') + ' ' + dataCriacao.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    var isPend = t.status === 'pendente';
+    var statusColor = isPend ? 'var(--amber)' : 'var(--green)';
+    var statusIcon = isPend ? 'ti-clock' : 'ti-circle-check';
+    var statusText = isPend ? 'Pendente' : 'Concluída';
+    
+    var qtdeInfo = '';
+    if (t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
+      qtdeInfo = '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:600"><i class="ti ti-package"></i> Quantidade confirmada: <b>' + t.quantidadeConfirmada + ' un.</b></div>';
+    }
+    
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;transition:border-color .15s">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      +   '<div style="display:flex;align-items:center;gap:8px">'
+      +     '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + (isPend ? 'rgba(245,158,11,.15)' : 'rgba(16,185,129,.15)') + ';color:' + statusColor + '"><i class="ti ' + statusIcon + '"></i> ' + statusText + '</span>'
+      +     '<span style="font-size:11px;color:var(--muted)">' + dataFmt + '</span>'
+      +   '</div>'
+      +   (isPend ? '<button class="btn btn-sm" style="color:var(--red);border-color:var(--red);font-size:11px;padding:3px 8px" onclick="cancelarTarefa(\'' + t.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button>' : '')
+      + '</div>'
+      + '<div style="font-size:14px;font-weight:600;margin-bottom:4px">' + escHtml(t.produto) + '</div>'
+      + (t.cod ? '<div style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:6px">' + t.cod + '</div>' : '')
+      + (t.descricao ? '<div style="font-size:12px;color:var(--tx2);margin-bottom:6px;line-height:1.4">' + escHtml(t.descricao) + '</div>' : '')
+      + '<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)">'
+      +   '<i class="ti ti-user" style="font-size:14px"></i> '
+      +   '<span style="font-weight:600">' + escHtml(t.nomeColaborador) + '</span>'
+      + '</div>'
+      + qtdeInfo
+      + (t.confirmadoEm ? '<div style="font-size:10px;color:var(--muted);margin-top:6px">Confirmado em ' + new Date(t.confirmadoEm).toLocaleString('pt-BR') + '</div>' : '')
+      + '</div>';
+  }).join('');
+  
+  var pendCount = tarefas.filter(function(t) { return t.status === 'pendente'; }).length;
+  var badge = document.getElementById('asBadgeTarefas');
+  if (badge) {
+    badge.textContent = pendCount;
+    badge.style.display = pendCount > 0 ? 'inline-flex' : 'none';
+  }
+}
+
+function cancelarTarefa(id) {
+  var tarefas = getTarefas().filter(function(t) { return t.id !== id; });
+  saveTarefas(tarefas);
+  renderTarefas();
+  mostrarToast('Tarefa cancelada', 'ok');
+}
+
+function filtrarTarefas(filtro) {
+  window._tarefasFiltro = filtro;
+  ['todas','pendentes','concluidas'].forEach(function(f) {
+    var el = document.getElementById('tf_' + f);
+    if (el) el.classList.toggle('active', f === filtro);
+  });
+  renderTarefas();
+}
+
+function confirmarEstoquePromo(cod, nome) {
+  var p = products.find(function(x) { return x.cod === cod; });
+  if (!p) return;
+  openTarefaModal(products.indexOf(p));
+  document.getElementById('tarefaDescricao').value = 'Confirmar se ainda tem em loja e informar quantidade';
+}
+
+function sincronizarTarefas() {
+  var cfg = loadCfg();
+  if (!cfg.id) return;
+  var url = sheetsURL(cfg.id, 'Tarefas');
+  fetch(url).then(function(r) { return r.text(); }).then(function(t) {
+    var j = JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+    if (j.status === 'error' || !j.table || !j.table.rows) return;
+    var rows = rawRows(j.table);
+    if (rows.length < 2) return;
+    var tarefas = [];
+    for (var i = 1; i < rows.length; i++) {
+      var c = rows[i].c || [];
+      var id = cellStr(c[0]);
+      if (!id) continue;
+      tarefas.push({
+        id: id,
+        produto: cellStr(c[1]),
+        cod: cellStr(c[2]),
+        descricao: cellStr(c[3]),
+        email: cellStr(c[4]),
+        nomeColaborador: cellStr(c[5]),
+        status: cellStr(c[6]) || 'pendente',
+        quantidadeConfirmada: c[7] ? (cellStr(c[7]) ? parseInt(cellStr(c[7])) : null) : null,
+        criadoEm: cellStr(c[8]),
+        confirmadoEm: cellStr(c[9]) || null,
+        criadoPor: cellStr(c[10]) || 'gestor'
+      });
+    }
+    var locais = getTarefas();
+    var localMap = {};
+    locais.forEach(function(t) { localMap[t.id] = t; });
+    tarefas.forEach(function(t) { localMap[t.id] = t; });
+    saveTarefas(Object.keys(localMap).map(function(k) { return localMap[k]; }));
+    renderTarefas();
+  }).catch(function() {});
+}
+
+// ═══ ESTOQUE AGRUPADO ═══
+function renderEstoque() {
+  var container = document.getElementById('estoqueGrid');
+  if (!container) return;
+  
+  var busca = (document.getElementById('estoqueBusca').value || '').toLowerCase();
+  var setor = document.getElementById('estoqueSetor').value;
+  
+  var grupos = {};
+  products.forEach(function(p) {
+    var nomeNorm = normNome(p.nome || '');
+    if (!nomeNorm) return;
+    if (busca && !nomeNorm.toLowerCase().includes(busca) && !(p.cod || '').toLowerCase().includes(busca)) return;
+    if (setor && p.setor !== setor) return;
+    if (!grupos[nomeNorm]) grupos[nomeNorm] = {nome: nomeNorm, lotes: [], totalQtde: 0, setor: p.setor};
+    grupos[nomeNorm].lotes.push(p);
+    grupos[nomeNorm].totalQtde += parseInt(p.qtde) || 1;
+  });
+  
+  var lista = Object.keys(grupos).sort().map(function(k) {
+    var g = grupos[k];
+    g.lotes.sort(function(a, b) { return (a.validade || '').localeCompare(b.validade || ''); });
+    return g;
+  });
+  
+  if (!lista.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-size:13px"><i class="ti ti-package-off" style="font-size:36px;display:block;margin-bottom:10px;opacity:.4"></i>Nenhum produto encontrado</div>';
+    return;
+  }
+  
+  container.innerHTML = lista.map(function(g) {
+    var nomeLimpo = cleanNome(g.nome);
+    var lotesHtml = g.lotes.map(function(lot) {
+      var valFmt = lot.validade ? lot.validade.split('-').reverse().join('/') : 'sem data';
+      var dias = daysDiff(lot.validade);
+      var s = statusFromDays(dias);
+      var badgeColor = s === 'vencido' ? '#ef4444' : s === 'critico' ? '#f97316' : s === 'urgente' ? '#fbbf24' : s === 'atencao' ? '#facc15' : '#34d399';
+      var diasTxt = dias === null ? '' : dias < 0 ? 'vencido' : dias === 0 ? 'hoje' : dias + 'd';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border-radius:var(--r);border-left:3px solid ' + badgeColor + '">'
+        + '<span style="font-family:monospace;font-size:10px;color:var(--muted);min-width:80px">' + (lot.cod || '--') + '</span>'
+        + '<div style="flex:1;min-width:0">'
+        +   '<div style="font-size:12px;font-weight:600">' + valFmt + '</div>'
+        +   '<div style="font-size:10px;color:var(--muted)">' + diasTxt + '</div>'
+        + '</div>'
+        + '<div style="text-align:right;min-width:50px">'
+        +   '<div style="font-size:16px;font-weight:800;color:var(--tx)">' + (lot.qtde || 1) + '</div>'
+        +   '<div style="font-size:9px;color:var(--muted)">unidades</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+    
+    var firstProd = g.lotes[0];
+    var prodIdx = products.indexOf(firstProd);
+    
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden">'
+      + '<div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px">'
+      +   '<div style="flex:1;min-width:0">'
+      +     '<div style="font-size:14px;font-weight:700">' + escHtml(nomeLimpo) + '</div>'
+      +     '<div style="font-size:11px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:8px">'
+      +       '<span>' + g.lotes.length + ' lote(s)</span>'
+      +       '<span>·</span>'
+      +       '<span>Setor: ' + escHtml(g.setor || '--') + '</span>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div style="text-align:center;padding:0 16px">'
+      +     '<div style="font-size:24px;font-weight:900;color:var(--tx)">' + g.totalQtde + '</div>'
+      +     '<div style="font-size:9px;color:var(--muted);text-transform:uppercase">Total</div>'
+      +   '</div>'
+      +   '<button class="btn btn-sm" style="border-color:var(--amber);color:var(--amber)" onclick="openTarefaModal(' + prodIdx + ')"><i class="ti ti-clipboard-check"></i> Conferir</button>'
+      + '</div>'
+      + '<div style="padding:10px 16px;display:grid;gap:6px">'
+      +   lotesHtml
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
 
 </script>
 
 
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
