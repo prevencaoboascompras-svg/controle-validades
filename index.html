@@ -892,6 +892,13 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   #sec-antecipacao [data-ant-mes] [style*="font-size:13px;font-weight:700"] { font-size: 12px !important; }
   #sec-antecipacao [data-ant-mes] [style*="font-size:11px"] { font-size: 10px !important; }
   #sec-antecipacao [data-ant-mes] span[style*="padding:2px 7px"] { padding: 2px 5px !important; }
+
+  /* Relatório — filtros e tabela */
+  #sec-relatorio .filters, #sec-relatorio [style*="display:flex"][style*="gap:8px"] { flex-wrap: wrap !important; }
+  #sec-relatorio select { width: 100% !important; box-sizing: border-box; }
+
+  /* Estoque — select largura total */
+  #sec-estoque select { flex: 1; min-width: 0; }
 }
 </style>
 </head>
@@ -1479,7 +1486,7 @@ function toggleTheme() {
           <option value="boleto_pix">NF devolução + boleto/pix</option>
           <option value="lote_qtd">Lote + qtde</option>
         </select>
-        <input type="text" id="filtroNegBusca" placeholder="Buscar produto..." oninput="renderRelatorio()" style="font-size:12px;padding:5px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);min-width:180px">
+        <input type="text" id="filtroNegBusca" placeholder="Buscar produto..." oninput="renderRelatorio()" style="font-size:12px;padding:5px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);flex:1;min-width:0">
       </div>
       <div class="twrap">
         <table style="min-width:700px">
@@ -1496,7 +1503,7 @@ function toggleTheme() {
     <!-- /Seção 3 -->
 
     <!-- Gráficos -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:16px">
       <div style="background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px">
         <h4 style="font-size:13px;font-weight:500;color:var(--tx2);margin-bottom:12px">Produtos por status</h4>
         <div style="position:relative;height:200px"><canvas id="cStatus"></canvas></div>
@@ -1536,8 +1543,8 @@ function toggleTheme() {
         <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-package" style="color:var(--blue)"></i> Estoque por produto</div>
         <p style="font-size:12px;color:var(--tx2)">Visão agrupada por produto — cada lote com sua validade e quantidade</p>
       </div>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="estoqueBusca" placeholder="Buscar produto..." oninput="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;min-width:200px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;width:100%">
+        <input type="text" id="estoqueBusca" placeholder="Buscar produto..." oninput="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:0">
         <select id="estoqueSetor" onchange="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
           <option value="">Todos os setores</option>
           <option>Acougue</option><option>Bebidas</option><option>Congelados</option>
