@@ -1085,7 +1085,7 @@ function tentarLogin() {
       }
     }
   } catch(e) {}
-  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginScreen').className = '';
   setTimeout(function(){ var inp = document.getElementById('loginSenha'); if(inp) inp.focus(); }, 200);
 })();
 </script>
