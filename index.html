@@ -2477,6 +2477,16 @@ function daysDiff(v){if(!v)return null;var p=v.split('-');if(p.length!==3)return
 function statusFromDays(d){if(d===null)return'sem-data';if(d<=0)return'vencido';if(d<=3)return'critico';if(d<=7)return'urgente';if(d<=15)return'atencao';return'ok';}
 function badge(s){var m={vencido:['b-danger','Vencido'],critico:['b-danger','Critico'],urgente:['b-warn','Urgente'],atencao:['b-warn','Atencao'],ok:['b-ok','OK'],'sem-data':['b-gray','Sem data']};var cl=m[s]||['b-gray','?'];return'<span class="badge '+cl[0]+'">'+cl[1]+'</span>';}
 function barColor(s){return{vencido:'#E24B4A',critico:'#E24B4A',urgente:'#BA7517',atencao:'#EF9F27',ok:'#1D9E75','sem-data':'#888'}[s]||'#888';}
+function fmtDataExtenso(validade){
+  if(!validade) return '--';
+  var parts=validade.split('-');
+  if(parts.length!==3) return '--';
+  var d=parseInt(parts[2],10);
+  var meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var m=meses[parseInt(parts[1],10)-1]||'';
+  var y=parts[0];
+  return d+' '+m+' '+y;
+}
 function fmt(d){return d?d.split('-').reverse().join('/'):'--';}
 function fmtR(v){if(!v)return'--';return'R$ '+v.toFixed(2).replace('.',',');}
 function fmtPct(v){if(!v)return'--';var p=v<1?v*100:v;return p.toFixed(2).replace('.',',')+'%';}
@@ -2511,16 +2521,6 @@ function renderTable(){
     .sort(function(a,b){return(daysDiff(b.validade)||0)-(daysDiff(a.validade)||0);});
   var grid=document.getElementById('valGrid');
   if(!all.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><i class="ti ti-search-off"></i>Nenhum produto encontrado.</div>';return;}
-  function fmtDataExtenso(validade){
-    if(!validade) return '--';
-    var parts=validade.split('-');
-    if(parts.length!==3) return '--';
-    var d=parseInt(parts[2],10);
-    var meses=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-    var m=meses[parseInt(parts[1],10)-1]||'';
-    var y=parts[0];
-    return d+' '+m+' '+y;
-  }
   function flagValidade(days, validade){
     if(days===null) return '<span class="val-flag val-flag-gray"><i class="ti ti-calendar-off"></i> Sem data</span>';
     if(days<0) return '<span class="val-flag val-flag-red"><i class="ti ti-alert-triangle"></i> Vencido há '+Math.abs(days)+'d</span>';
@@ -6422,6 +6422,7 @@ function renderEstoque() {
 </script>
 
 
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
