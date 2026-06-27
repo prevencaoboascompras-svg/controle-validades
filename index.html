@@ -1015,7 +1015,7 @@ async function tentarLogin() {
   var hash = await sha256(senha);
 
   if (_USUARIOS[usuario] && _USUARIOS[usuario] === hash) {
-    sessionStorage.setItem(_SESSAO_KEY, JSON.stringify({ usuario: usuario, ts: Date.now() }));
+    try { sessionStorage.setItem(_SESSAO_KEY, JSON.stringify({ usuario: usuario, ts: Date.now() })); } catch(e) {}
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('loginSenha').value = '';
   } else {
