@@ -903,6 +903,151 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════════
+     TELA DE LOGIN
+══════════════════════════════════════════════ -->
+<style>
+#loginScreen {
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#1a1a1a 0%,#2a0a0a 100%);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+#loginScreen.hidden{display:none}
+.login-box{
+  background:#1e1e1c;border:1px solid rgba(255,255,255,.1);
+  border-radius:20px;width:100%;max-width:400px;
+  padding:40px 36px 36px;box-shadow:0 32px 80px rgba(0,0,0,.6);
+  text-align:center;
+}
+.login-logo{font-size:42px;margin-bottom:12px}
+.login-brand{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:4px}
+.login-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px;letter-spacing:-.02em}
+.login-sub{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:32px;line-height:1.5}
+.login-field{margin-bottom:14px;text-align:left}
+.login-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:block}
+.login-select,.login-input{
+  width:100%;height:52px;background:#2a2a28;border:1.5px solid rgba(255,255,255,.12);
+  border-radius:10px;padding:0 16px;font-size:15px;color:#f0efe8;
+  outline:none;-webkit-appearance:none;appearance:none;
+  transition:border-color .15s;
+}
+.login-select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238B8FA8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;background-size:18px;
+  padding-right:40px;cursor:pointer;
+}
+.login-select:focus,.login-input:focus{border-color:#E24B4A;box-shadow:0 0 0 3px rgba(226,75,74,.15)}
+.login-input::placeholder{color:rgba(255,255,255,.25)}
+.login-btn{
+  width:100%;height:52px;background:#E24B4A;color:#fff;
+  font-size:15px;font-weight:800;border:none;border-radius:10px;
+  cursor:pointer;letter-spacing:.04em;margin-top:8px;
+  transition:background .12s,transform .08s;
+}
+.login-btn:hover{background:#c93b3a}
+.login-btn:active{transform:scale(.97)}
+.login-btn:disabled{opacity:.5;cursor:not-allowed}
+.login-error{
+  color:#fca5a5;font-size:13px;font-weight:600;
+  margin-top:12px;display:none;
+  background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);
+  border-radius:8px;padding:10px 14px;
+}
+.login-error.show{display:block}
+.login-footer{font-size:11px;color:rgba(255,255,255,.2);margin-top:24px}
+</style>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🛒</div>
+    <div class="login-brand">Supermercado Boas Compras</div>
+    <div class="login-title">AURA Vencimentos</div>
+    <div class="login-sub">Área restrita — faça login para continuar</div>
+
+    <div class="login-field">
+      <label class="login-lbl">Usuário</label>
+      <select class="login-select" id="loginUsuario">
+        <option value="">Selecione…</option>
+        <option value="leonardo">Leonardo de Souza Ribeiro</option>
+        <option value="wagner">Wagner</option>
+      </select>
+    </div>
+
+    <div class="login-field">
+      <label class="login-lbl">Senha</label>
+      <input type="password" class="login-input" id="loginSenha"
+        placeholder="Digite sua senha"
+        onkeydown="if(event.key==='Enter')tentarLogin()">
+    </div>
+
+    <button class="login-btn" id="loginBtn" onclick="tentarLogin()">Entrar</button>
+    <div class="login-error" id="loginErro">Usuário ou senha incorretos.</div>
+    <div class="login-footer">Acesso exclusivo para gestores autorizados</div>
+  </div>
+</div>
+
+<script>
+// Hashes SHA-256 das senhas (as senhas originais não ficam no código)
+var _USUARIOS = {
+  'leonardo': '06c117bb812639e8f80c10b64953df8b099fd534b2fcae74f49f735b93fedba4',
+  'wagner':   '7d3ca4a4cc367aa11f38e2ad017ed96c1e2a8d00b59a982ab2b4e32d3b98b946'
+};
+var _SESSAO_KEY = 'aura_auth_v1';
+
+async function sha256(texto) {
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(texto));
+  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+}
+
+async function tentarLogin() {
+  var usuario = document.getElementById('loginUsuario').value;
+  var senha   = document.getElementById('loginSenha').value;
+  var btn     = document.getElementById('loginBtn');
+  var erro    = document.getElementById('loginErro');
+
+  erro.classList.remove('show');
+  if (!usuario || !senha) { erro.textContent = 'Selecione o usuário e digite a senha.'; erro.classList.add('show'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Verificando…';
+
+  var hash = await sha256(senha);
+
+  if (_USUARIOS[usuario] && _USUARIOS[usuario] === hash) {
+    sessionStorage.setItem(_SESSAO_KEY, JSON.stringify({ usuario: usuario, ts: Date.now() }));
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('loginSenha').value = '';
+  } else {
+    erro.textContent = 'Usuário ou senha incorretos.';
+    erro.classList.add('show');
+    document.getElementById('loginSenha').value = '';
+    document.getElementById('loginSenha').focus();
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Entrar';
+}
+
+// Verificar sessão ao carregar
+(function verificarSessao() {
+  try {
+    var s = sessionStorage.getItem(_SESSAO_KEY);
+    if (s) {
+      var dados = JSON.parse(s);
+      // Sessão válida por 8 horas
+      if (dados && dados.ts && (Date.now() - dados.ts) < 8 * 3600 * 1000) {
+        document.getElementById('loginScreen').classList.add('hidden');
+        return;
+      }
+    }
+  } catch(e) {}
+  // Sem sessão válida — mostrar login
+  document.getElementById('loginScreen').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('loginSenha').focus(); }, 100);
+})();
+</script>
+
 <div class="aura-shell">
 <!-- Main -->
 <div class="aura-main" id="auraMain">
