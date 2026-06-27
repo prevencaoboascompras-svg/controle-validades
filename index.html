@@ -969,7 +969,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
       <label class="login-lbl">Usuário</label>
       <select class="login-select" id="loginUsuario">
         <option value="">Selecione…</option>
-        <option value="leonardo">Leonardo</option>
+        <option value="leonardo">Leonardo de Souza Ribeiro</option>
         <option value="wagner">Wagner</option>
       </select>
     </div>
@@ -2286,7 +2286,8 @@ var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var fotoImg=null;
 var products=[];
 var setorAtivo='';
-function loadCfg(){return JSON.parse(localStorage.getItem(CFG_KEY)||'{}');}
+var GAS_URL='https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk2OOaOOG_oOhpGdKETgZgIkTrZOBY36_UzS35Ns8s/exec';
+function loadCfg(){var d={id:'1HDJvgbKqYRUh8YvKeNTJZ5PhjbqyqZTsYT3bUnjp0VQ',aba:'2025',idBanco:'1HDJvgbKqYRUh8YvKeNTJZ5PhjbqyqZTsYT3bUnjp0VQ',abaBanco:'BANCO DE DADOS',abaResp:'Respostas ao formulario 1',url:GAS_URL};var s=localStorage.getItem(CFG_KEY);if(!s)return d;var c=JSON.parse(s);return Object.assign(d,c);}
 function saveProd(){try{localStorage.setItem(PROD_KEY,JSON.stringify(products));}catch(e){console.warn('localStorage cheio — dados mantidos só em memória:',e.message);}}
 
 function saveConfig(){
@@ -3166,7 +3167,7 @@ var _ucUsersDefault = {
   'marineumann@gmail.com':             'Mari Estela da Silveira Neumann',
   'pinheiroduarteweslyn@gmail.com':    'Weslyn Pinheiro Duarte',
   'pontodigital1960@gmail.com':        'Tablet Depósito 1960',
-  'prevencaoboascompras@gmail.com':    'Leonardo',
+  'prevencaoboascompras@gmail.com':    'Leonardo de Souza Ribeiro',
   'sinuelo6@gmail.com':                'Rafael da Costa Pereira',
   'viniciusaraujomotorola@gmail.com':  'Vinicius Araujo'
 };
@@ -4182,7 +4183,7 @@ function goTab(name){
   if(name==='antecipacao')renderAntecipacao();
   if(name==='dashboard')renderDashboard();
   if(name==='estoque')renderEstoque();
-  if(name==='tarefas')renderTarefas();
+  if(name==='tarefas'){renderTarefas();sincronizarTarefasCompleto();}
 }
 function refresh(){renderMetrics();renderTable();atualizarNegBadge();renderDashboard();}
 
@@ -5510,7 +5511,7 @@ atualizarBibBadge();
 
 document.getElementById('cfgBox').style.display='none';
 var _cfg=loadCfg();
-if(_cfg.id){setDot('loading','Reconectando...');syncAll();}
+if(_cfg.id){setDot('loading','Reconectando...');syncAll();sincronizarTarefasCompleto();}
 else refresh();
 
 // ── ANTECIPAÇÃO DE ENCARTES ──────────────────────────────────────────────
@@ -6176,14 +6177,71 @@ var COLABORADORES = [
   {nome: 'Mari Estela da Silveira Neumann',   email: 'marineumann@gmail.com'},
   {nome: 'Weslyn Pinheiro Duarte',            email: 'pinheiroduarteweslyn@gmail.com'},
   {nome: 'Tablet Depósito 1960',              email: 'pontodigital1960@gmail.com'},
-  {nome: 'Leonardo',         email: 'prevencaoboascompras@gmail.com'},
+  {nome: 'Leonardo de Souza Ribeiro',         email: 'prevencaoboascompras@gmail.com'},
   {nome: 'Rafael da Costa Pereira',           email: 'sinuelo6@gmail.com'},
   {nome: 'Vinicius Araujo',                   email: 'viniciusaraujomotorola@gmail.com'}
 ];
 var TAREFAS_KEY = 'boascompras_tarefas';
+var TAREFAS_FILA_KEY = 'boascompras_tarefas_fila';
 
-function getTarefas() { try { return JSON.parse(localStorage.getItem(TAREFAS_KEY) || '[]'); } catch(e) { return []; } }
-function saveTarefas(arr) { localStorage.setItem(TAREFAS_KEY, JSON.stringify(arr)); }
+function getTarefas(){try{return JSON.parse(localStorage.getItem(TAREFAS_KEY)||'[]');}catch(e){return[];}}
+function saveTarefas(arr){localStorage.setItem(TAREFAS_KEY,JSON.stringify(arr));}
+function getFilaTarefas(){try{return JSON.parse(localStorage.getItem(TAREFAS_FILA_KEY)||'[]');}catch(e){return[];}}
+function saveFilaTarefas(arr){localStorage.setItem(TAREFAS_FILA_KEY,JSON.stringify(arr));}
+
+// Reenvia tarefas criadas offline quando a conexão voltar
+function reenviarFilaTarefas(){
+  var fila=getFilaTarefas();
+  if(!fila.length)return;
+  var cfg=loadCfg();
+  if(!cfg.url)return;
+  var pendentes=fila.slice();
+  saveFilaTarefas([]);
+  pendentes.forEach(function(tarefa){
+    fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action:'criarTarefa',tarefa:tarefa})})
+      .catch(function(){
+        var f=getFilaTarefas();f.push(tarefa);saveFilaTarefas(f);
+      });
+  });
+  if(pendentes.length>0)mostrarToast(pendentes.length+' tarefa(s) offline enviada(s) ao Sheets!','ok');
+}
+
+// Sincroniza todas as tarefas do Sheets com o localStorage
+function sincronizarTarefasCompleto(){
+  var cfg=loadCfg();
+  if(!cfg.id)return;
+  var url=sheetsURL(cfg.id,'Tarefas');
+  fetch(url).then(function(r){return r.text();}).then(function(t){
+    try{
+      var j=JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+      if(j.status==='error'||!j.table||!j.table.rows)return;
+      var rows=rawRows(j.table);
+      if(rows.length<2)return;
+      var tarefasSheets=[];
+      for(var i=1;i<rows.length;i++){
+        var c=rows[i].c||[];
+        var id=cellStr(c[0]);
+        if(!id)continue;
+        tarefasSheets.push({
+          id:id,produto:cellStr(c[1]),cod:cellStr(c[2]),descricao:cellStr(c[3]),
+          email:cellStr(c[4]),nomeColaborador:cellStr(c[5]),
+          status:cellStr(c[6])||'pendente',
+          quantidadeConfirmada:c[7]?(cellStr(c[7])?parseInt(cellStr(c[7])):null):null,
+          criadoEm:cellStr(c[8]),confirmadoEm:cellStr(c[9])||null,
+          criadoPor:cellStr(c[10])||'gestor'
+        });
+      }
+      // Sheets tem prioridade — mescla com local
+      var mapaLocal={};
+      getTarefas().forEach(function(t){mapaLocal[t.id]=t;});
+      tarefasSheets.forEach(function(t){mapaLocal[t.id]=t;});
+      saveTarefas(Object.values(mapaLocal));
+      renderTarefas();
+      // Agora tenta reenviar o que ficou offline
+      reenviarFilaTarefas();
+    }catch(e){console.warn('sincronizarTarefasCompleto erro:',e);}
+  }).catch(function(){});
+}
 function getPromoAtivas() { try { return JSON.parse(localStorage.getItem('boascompras_promo_ativas') || '[]'); } catch(e) { return []; } }
 
 function openTarefaModal(prodIdx) {
@@ -6251,13 +6309,17 @@ function criarTarefa() {
 function enviarTarefaParaSheets(tarefa) {
   var cfg = loadCfg();
   if (!cfg.url) return;
-  try {
-    fetch(cfg.url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-      body: JSON.stringify({ action: 'criarTarefa', tarefa: tarefa })
-    });
-  } catch(e) {}
+  fetch(cfg.url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+    body: JSON.stringify({ action: 'criarTarefa', tarefa: tarefa })
+  }).catch(function() {
+    // Sem conexão — guarda na fila para reenviar depois
+    var fila = getFilaTarefas();
+    fila.push(tarefa);
+    saveFilaTarefas(fila);
+    mostrarToast('Sem conexão — tarefa salva para sincronizar depois', 'warn');
+  });
 }
 
 function renderTarefas() {
@@ -6346,42 +6408,8 @@ function confirmarEstoquePromo(cod, nome) {
   document.getElementById('tarefaDescricao').value = 'Confirmar se ainda tem em loja e informar quantidade';
 }
 
-function sincronizarTarefas() {
-  var cfg = loadCfg();
-  if (!cfg.id) return;
-  var url = sheetsURL(cfg.id, 'Tarefas');
-  fetch(url).then(function(r) { return r.text(); }).then(function(t) {
-    var j = JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
-    if (j.status === 'error' || !j.table || !j.table.rows) return;
-    var rows = rawRows(j.table);
-    if (rows.length < 2) return;
-    var tarefas = [];
-    for (var i = 1; i < rows.length; i++) {
-      var c = rows[i].c || [];
-      var id = cellStr(c[0]);
-      if (!id) continue;
-      tarefas.push({
-        id: id,
-        produto: cellStr(c[1]),
-        cod: cellStr(c[2]),
-        descricao: cellStr(c[3]),
-        email: cellStr(c[4]),
-        nomeColaborador: cellStr(c[5]),
-        status: cellStr(c[6]) || 'pendente',
-        quantidadeConfirmada: c[7] ? (cellStr(c[7]) ? parseInt(cellStr(c[7])) : null) : null,
-        criadoEm: cellStr(c[8]),
-        confirmadoEm: cellStr(c[9]) || null,
-        criadoPor: cellStr(c[10]) || 'gestor'
-      });
-    }
-    var locais = getTarefas();
-    var localMap = {};
-    locais.forEach(function(t) { localMap[t.id] = t; });
-    tarefas.forEach(function(t) { localMap[t.id] = t; });
-    saveTarefas(Object.keys(localMap).map(function(k) { return localMap[k]; }));
-    renderTarefas();
-  }).catch(function() {});
-}
+// sincronizarTarefas() substituída por sincronizarTarefasCompleto()
+function sincronizarTarefas(){sincronizarTarefasCompleto();}
 
 // ═══ ESTOQUE AGRUPADO ═══
 function renderEstoque() {
