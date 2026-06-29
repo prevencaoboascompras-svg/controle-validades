@@ -908,7 +908,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
      TELA DE LOGIN
 ══════════════════════════════════════════════ -->
 <style>
-#loginScreen {
+#loginScreen{
   position:fixed;inset:0;z-index:9999;
   background:linear-gradient(135deg,#1a1a1a 0%,#2a0a0a 100%);
   display:flex;align-items:center;justify-content:center;padding:24px;
@@ -923,26 +923,59 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .login-logo{font-size:42px;margin-bottom:12px}
 .login-brand{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:4px}
 .login-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px;letter-spacing:-.02em}
-.login-sub{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:32px;line-height:1.5}
-.login-field{margin-bottom:14px;text-align:left}
-.login-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:block}
-.login-select,.login-input{
+.login-sub{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:28px;line-height:1.5}
+
+/* ── avatares ── */
+.login-avatars{display:flex;gap:24px;justify-content:center;margin-bottom:28px}
+.login-avatar-btn{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  background:none;border:2px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:18px 22px;cursor:pointer;
+  transition:border-color .15s,transform .1s,background .15s;
+  outline:none;
+}
+.login-avatar-btn:hover{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.05);transform:translateY(-2px)}
+.login-avatar-btn.selected{border-color:#E24B4A;background:rgba(226,75,74,.12)}
+.login-avatar-circle{
+  width:64px;height:64px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,#D4001A,#8B0011);
+  box-shadow:0 4px 16px rgba(212,0,26,.4);
+  transition:transform .1s;
+}
+.login-avatar-btn.selected .login-avatar-circle{transform:scale(1.08)}
+.login-avatar-name{font-size:13px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.02em}
+.login-avatar-btn.selected .login-avatar-name{color:#fff}
+
+/* ── campo senha ── */
+.login-senha-wrap{
+  overflow:hidden;max-height:0;opacity:0;
+  transition:max-height .3s ease,opacity .25s ease,margin .3s ease;
+  margin-bottom:0;
+}
+.login-senha-wrap.visible{max-height:200px;opacity:1;margin-bottom:4px}
+.login-senha-header{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;padding-bottom:14px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.login-senha-who{
+  font-size:14px;font-weight:700;color:#fff;
+}
+.login-senha-role{font-size:11px;color:rgba(255,255,255,.4);margin-top:1px}
+.login-input{
   width:100%;height:52px;background:#2a2a28;border:1.5px solid rgba(255,255,255,.12);
   border-radius:10px;padding:0 16px;font-size:15px;color:#f0efe8;
-  outline:none;-webkit-appearance:none;appearance:none;
-  transition:border-color .15s;
+  outline:none;transition:border-color .15s;
+  font-family:inherit;
 }
-.login-select{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238B8FA8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 14px center;background-size:18px;
-  padding-right:40px;cursor:pointer;
-}
-.login-select:focus,.login-input:focus{border-color:#E24B4A;box-shadow:0 0 0 3px rgba(226,75,74,.15)}
+.login-input:focus{border-color:#E24B4A;box-shadow:0 0 0 3px rgba(226,75,74,.15)}
 .login-input::placeholder{color:rgba(255,255,255,.25)}
 .login-btn{
   width:100%;height:52px;background:#E24B4A;color:#fff;
   font-size:15px;font-weight:800;border:none;border-radius:10px;
-  cursor:pointer;letter-spacing:.04em;margin-top:8px;
+  cursor:pointer;letter-spacing:.04em;margin-top:12px;
   transition:background .12s,transform .08s;
 }
 .login-btn:hover{background:#c93b3a}
@@ -963,25 +996,33 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
     <div class="login-logo">🛒</div>
     <div class="login-brand">Supermercado Boas Compras</div>
     <div class="login-title">AURA Vencimentos</div>
-    <div class="login-sub">Área restrita — faça login para continuar</div>
+    <div class="login-sub">Quem está acessando?</div>
 
-    <div class="login-field">
-      <label class="login-lbl">Usuário</label>
-      <select class="login-select" id="loginUsuario">
-        <option value="">Selecione…</option>
-        <option value="leonardo">Leonardo</option>
-        <option value="wagner">Wagner</option>
-      </select>
+    <div class="login-avatars">
+      <button class="login-avatar-btn" id="avLeonardo" onclick="selecionarUsuario('leonardo')" type="button">
+        <div class="login-avatar-circle">L</div>
+        <span class="login-avatar-name">Leonardo</span>
+      </button>
+      <button class="login-avatar-btn" id="avWagner" onclick="selecionarUsuario('wagner')" type="button">
+        <div class="login-avatar-circle">W</div>
+        <span class="login-avatar-name">Wagner</span>
+      </button>
     </div>
 
-    <div class="login-field">
-      <label class="login-lbl">Senha</label>
+    <div class="login-senha-wrap" id="loginSenhaWrap">
+      <div class="login-senha-header">
+        <div class="login-avatar-circle" id="loginSenhaAvatar" style="width:38px;height:38px;font-size:16px;flex-shrink:0">?</div>
+        <div>
+          <div class="login-senha-who" id="loginSenhaNome">—</div>
+          <div class="login-senha-role">Gestor autorizado</div>
+        </div>
+      </div>
       <input type="password" class="login-input" id="loginSenha"
         placeholder="Digite sua senha"
         onkeydown="if(event.key==='Enter')tentarLogin()">
+      <button class="login-btn" id="loginBtn" onclick="tentarLogin()" type="button">Entrar</button>
     </div>
 
-    <button class="login-btn" id="loginBtn" onclick="tentarLogin()">Entrar</button>
     <div class="login-error" id="loginErro">Usuário ou senha incorretos.</div>
     <div class="login-footer">Acesso exclusivo para gestores autorizados</div>
   </div>
@@ -994,6 +1035,25 @@ var _USUARIOS = {
   'wagner':   '7d3ca4a4cc367aa11f38e2ad017ed96c1e2a8d00b59a982ab2b4e32d3b98b946'
 };
 var _SESSAO_KEY = 'aura_auth_v1';
+var _usuarioSelecionado = '';
+
+function selecionarUsuario(usuario) {
+  _usuarioSelecionado = usuario;
+  // Marca avatar
+  ['leonardo','wagner'].forEach(function(u){
+    var el = document.getElementById('av' + u.charAt(0).toUpperCase() + u.slice(1));
+    if (el) el.classList.toggle('selected', u === usuario);
+  });
+  // Atualiza cabeçalho do campo de senha
+  var nomeFormatado = usuario.charAt(0).toUpperCase() + usuario.slice(1);
+  document.getElementById('loginSenhaNome').textContent = nomeFormatado;
+  document.getElementById('loginSenhaAvatar').textContent = nomeFormatado.charAt(0);
+  // Exibe campo de senha
+  document.getElementById('loginSenhaWrap').classList.add('visible');
+  document.getElementById('loginErro').classList.remove('show');
+  document.getElementById('loginSenha').value = '';
+  setTimeout(function(){ document.getElementById('loginSenha').focus(); }, 320);
+}
 
 // SHA-256 síncrono em JS puro — funciona em qualquer navegador/dispositivo
 function sha256(msg) {
@@ -1035,14 +1095,14 @@ function sha256(msg) {
 // Login síncrono — sem async/await para máxima compatibilidade
 function tentarLogin() {
   try {
-    var usuario = document.getElementById('loginUsuario').value;
+    var usuario = _usuarioSelecionado;
     var senha   = document.getElementById('loginSenha').value;
     var btn     = document.getElementById('loginBtn');
     var erro    = document.getElementById('loginErro');
 
     erro.classList.remove('show');
     if (!usuario || !senha) {
-      erro.textContent = 'Selecione o usuário e digite a senha.';
+      erro.textContent = !usuario ? 'Selecione um usuário acima.' : 'Digite a senha.';
       erro.classList.add('show');
       return;
     }
@@ -1086,7 +1146,6 @@ function tentarLogin() {
     }
   } catch(e) {}
   document.getElementById('loginScreen').className = '';
-  setTimeout(function(){ var inp = document.getElementById('loginSenha'); if(inp) inp.focus(); }, 200);
 })();
 </script>
 
