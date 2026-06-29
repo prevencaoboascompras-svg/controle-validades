@@ -2349,6 +2349,34 @@ function toggleTheme() {
   </div>
 </div>
 
+<!-- modal de transferência de tarefa -->
+<div class="modal-ov" id="transferirModal">
+  <div class="smodal" style="width:480px">
+    <h3><i class="ti ti-arrows-exchange" style="color:var(--blue)"></i> Transferir Tarefa</h3>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:14px">Reatribua esta tarefa para outro colaborador</div>
+    <input type="hidden" id="transferirTarefaId">
+    <div style="background:var(--bg2);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;font-size:13px">
+      <div style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px">Tarefa</div>
+      <div id="transferirProdNome" style="font-weight:600"></div>
+      <div id="transferirAtualColab" style="font-size:12px;color:var(--tx2);margin-top:3px;display:flex;align-items:center;gap:5px"><i class="ti ti-user" style="font-size:12px"></i> <span></span></div>
+    </div>
+    <div>
+      <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Novo colaborador</label>
+      <select id="transferirNovoColab" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+        <option value="">Selecione o colaborador...</option>
+      </select>
+    </div>
+    <div style="margin-top:12px">
+      <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Motivo (opcional)</label>
+      <input type="text" id="transferirMotivo" placeholder="Ex: colaborador de folga, indisponível..." style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+    </div>
+    <div class="smodal-foot">
+      <button class="btn" onclick="closeModal('transferirModal')">Cancelar</button>
+      <button class="btn btn-green" onclick="confirmarTransferencia()"><i class="ti ti-arrows-exchange"></i> Transferir</button>
+    </div>
+  </div>
+</div>
+
 <!-- area de impressao (invisivel na tela, visivel ao imprimir) -->
 <div id="printArea" style="display:none"></div>
 
@@ -6521,7 +6549,10 @@ function renderTarefas() {
       +     '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + (isPend ? 'rgba(245,158,11,.15)' : 'rgba(16,185,129,.15)') + ';color:' + statusColor + '"><i class="ti ' + statusIcon + '"></i> ' + statusText + '</span>'
       +     '<span style="font-size:11px;color:var(--muted)">' + dataFmt + '</span>'
       +   '</div>'
-      +   (isPend ? '<button class="btn btn-sm" style="color:var(--red);border-color:var(--red);font-size:11px;padding:3px 8px" onclick="cancelarTarefa(\'' + t.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button>' : '')
+      +   (isPend ? '<div style="display:flex;gap:6px">'
+      +     '<button class="btn btn-sm" style="color:var(--blue);border-color:var(--blue);font-size:11px;padding:3px 8px" onclick="abrirTransferirModal(\'' + t.id + '\')" title="Transferir para outro colaborador"><i class="ti ti-arrows-exchange"></i> Transferir</button>'
+      +     '<button class="btn btn-sm" style="color:var(--red);border-color:var(--red);font-size:11px;padding:3px 8px" onclick="cancelarTarefa(\'' + t.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button>'
+      +   '</div>' : '')
       + '</div>'
       + '<div style="font-size:14px;font-weight:600;margin-bottom:4px">' + escHtml(t.produto) + '</div>'
       + (t.cod ? '<div style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:6px">' + t.cod + '</div>' : '')
@@ -6548,6 +6579,68 @@ function cancelarTarefa(id) {
   saveTarefas(tarefas);
   renderTarefas();
   mostrarToast('Tarefa cancelada', 'ok');
+}
+
+function abrirTransferirModal(id) {
+  var tarefas = getTarefas();
+  var t = tarefas.find(function(x) { return x.id === id; });
+  if (!t) return;
+
+  document.getElementById('transferirTarefaId').value = id;
+  document.getElementById('transferirProdNome').textContent = t.produto + (t.cod ? ' — ' + t.cod : '');
+  document.getElementById('transferirAtualColab').querySelector('span').textContent = 'Atual: ' + t.nomeColaborador;
+  document.getElementById('transferirMotivo').value = '';
+
+  var sel = document.getElementById('transferirNovoColab');
+  sel.innerHTML = '<option value="">Selecione o colaborador...</option>';
+  COLABORADORES.forEach(function(c) {
+    if (c.email === t.email) return;
+    sel.innerHTML += '<option value="' + c.email + '">' + c.nome + (c.email ? ' (' + c.email + ')' : '') + '</option>';
+  });
+
+  document.getElementById('transferirModal').classList.add('open');
+}
+
+function confirmarTransferencia() {
+  var id = document.getElementById('transferirTarefaId').value;
+  var novoEmail = document.getElementById('transferirNovoColab').value;
+  var motivo = document.getElementById('transferirMotivo').value.trim();
+
+  if (!novoEmail) { mostrarToast('Selecione o novo colaborador', 'err'); return; }
+
+  var novoColab = COLABORADORES.find(function(c) { return c.email === novoEmail; });
+  var nomeNovo = novoColab ? novoColab.nome : novoEmail;
+
+  var tarefas = getTarefas();
+  var t = tarefas.find(function(x) { return x.id === id; });
+  if (!t) return;
+
+  var nomeAnterior = t.nomeColaborador;
+  t.emailAnterior = t.email;
+  t.nomeAnterior = nomeAnterior;
+  t.email = novoEmail;
+  t.nomeColaborador = nomeNovo;
+  t.transferidoEm = new Date().toISOString();
+  t.motivoTransferencia = motivo || null;
+  if (motivo) t.descricao = (t.descricao ? t.descricao + ' | ' : '') + 'Transferido de ' + nomeAnterior + ': ' + motivo;
+  else t.descricao = (t.descricao ? t.descricao + ' | ' : '') + 'Transferido de ' + nomeAnterior;
+
+  saveTarefas(tarefas);
+
+  var cfg = loadCfg();
+  if (cfg.url) {
+    fetch(cfg.url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+      body: JSON.stringify({ action: 'transferirTarefa', tarefa: t })
+    }).catch(function() {
+      mostrarToast('Transferência salva localmente — sem conexão ao Sheets', 'warn');
+    });
+  }
+
+  closeModal('transferirModal');
+  renderTarefas();
+  mostrarToast('Tarefa transferida para ' + nomeNovo, 'ok');
 }
 
 function filtrarTarefas(filtro) {
