@@ -907,87 +907,143 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 <!-- ══════════════════════════════════════════════
      TELA DE LOGIN
 ══════════════════════════════════════════════ -->
+
 <style>
-#loginScreen {
-  position:fixed;inset:0;z-index:9999;
-  background:linear-gradient(135deg,#1a1a1a 0%,#2a0a0a 100%);
-  display:flex;align-items:center;justify-content:center;padding:24px;
-}
-#loginScreen.hidden{display:none}
-.login-box{
-  background:#1e1e1c;border:1px solid rgba(255,255,255,.1);
-  border-radius:20px;width:100%;max-width:400px;
-  padding:40px 36px 36px;box-shadow:0 32px 80px rgba(0,0,0,.6);
-  text-align:center;
-}
-.login-logo{font-size:42px;margin-bottom:12px}
-.login-brand{font-size:11px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.5);text-transform:uppercase;margin-bottom:4px}
-.login-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px;letter-spacing:-.02em}
-.login-sub{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:32px;line-height:1.5}
-.login-field{margin-bottom:14px;text-align:left}
-.login-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:block}
-.login-select,.login-input{
-  width:100%;height:52px;background:#2a2a28;border:1.5px solid rgba(255,255,255,.12);
-  border-radius:10px;padding:0 16px;font-size:15px;color:#f0efe8;
-  outline:none;-webkit-appearance:none;appearance:none;
-  transition:border-color .15s;
-}
-.login-select{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238B8FA8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 14px center;background-size:18px;
-  padding-right:40px;cursor:pointer;
-}
-.login-select:focus,.login-input:focus{border-color:#E24B4A;box-shadow:0 0 0 3px rgba(226,75,74,.15)}
-.login-input::placeholder{color:rgba(255,255,255,.25)}
-.login-btn{
-  width:100%;height:52px;background:#E24B4A;color:#fff;
-  font-size:15px;font-weight:800;border:none;border-radius:10px;
-  cursor:pointer;letter-spacing:.04em;margin-top:8px;
-  transition:background .12s,transform .08s;
-}
-.login-btn:hover{background:#c93b3a}
-.login-btn:active{transform:scale(.97)}
-.login-btn:disabled{opacity:.5;cursor:not-allowed}
-.login-error{
-  color:#fca5a5;font-size:13px;font-weight:600;
-  margin-top:12px;display:none;
-  background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);
-  border-radius:8px;padding:10px 14px;
-}
-.login-error.show{display:block}
-.login-footer{font-size:11px;color:rgba(255,255,255,.2);margin-top:24px}
+  .login-bg {
+    min-height: 480px;
+    background: #1a0a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    border-radius: 12px;
+    position: relative;
+  }
+  .login-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: radial-gradient(ellipse at 80% 50%, rgba(140,20,20,0.25) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .login-card {
+    background: #222;
+    border-radius: 16px;
+    padding: 2rem 2rem 1.5rem;
+    width: 360px;
+    border: 1px solid #333;
+    position: relative;
+    z-index: 1;
+  }
+  .login-header { text-align: center; margin-bottom: 1.5rem; }
+  .cart-icon { font-size: 32px; color: #aab8cc; margin-bottom: 8px; }
+  .login-subtitle { font-size: 10px; letter-spacing: 1.5px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+  .login-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .login-desc { font-size: 12px; color: #666; }
+  .section-label { font-size: 10px; letter-spacing: 1.2px; color: #888; text-transform: uppercase; margin-bottom: 10px; }
+  .users-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  .user-card {
+    background: #2a2a2a;
+    border: 1.5px solid #3a3a3a;
+    border-radius: 12px;
+    padding: 20px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .user-card:hover { background: #333; border-color: #e05555; }
+  .user-card.selected { border-color: #e05555; background: #2f1c1c; }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; color: #fff;
+    margin: 0 auto 10px;
+  }
+  .user-name { font-size: 14px; font-weight: 500; color: #ddd; margin-bottom: 4px; }
+  .user-email { font-size: 11px; color: #e05555; }
+  .password-section { display: none; margin-bottom: 1rem; }
+  .password-section.visible { display: block; }
+  .password-input {
+    width: 100%; background: #1e1e1e; border: 1.5px solid #e05555;
+    border-radius: 8px; padding: 11px 14px; color: #fff; font-size: 14px;
+    outline: none; box-sizing: border-box;
+  }
+  .password-input::placeholder { color: #555; }
+  .btn-entrar {
+    width: 100%; background: #e05555; color: #fff; border: none;
+    border-radius: 8px; padding: 13px; font-size: 14px; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.5px; display: none;
+  }
+  .btn-entrar.visible { display: block; }
+  .btn-entrar:hover { background: #c94444; }
+  .hint { font-size: 11px; color: #888; text-align: center; margin-bottom: 8px; display: none; }
+  .hint.visible { display: block; }
+  .hint span { color: #e05555; font-weight: 500; }
+  .footer-note { text-align: center; margin-top: 14px; font-size: 10px; color: #555; }
 </style>
 
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo">🛒</div>
-    <div class="login-brand">Supermercado Boas Compras</div>
-    <div class="login-title">AURA Vencimentos</div>
-    <div class="login-sub">Área restrita — faça login para continuar</div>
-
-    <div class="login-field">
-      <label class="login-lbl">Usuário</label>
-      <select class="login-select" id="loginUsuario">
-        <option value="">Selecione…</option>
-        <option value="leonardo">Leonardo</option>
-        <option value="wagner">Wagner</option>
-      </select>
+<div class="login-bg">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="cart-icon"><i class="ti ti-shopping-cart" aria-hidden="true"></i></div>
+      <p class="login-subtitle">Supermercado Boas Compras</p>
+      <p class="login-title">AURA Vencimentos</p>
+      <p class="login-desc">Área restrita — faça login para continuar</p>
     </div>
 
-    <div class="login-field">
-      <label class="login-lbl">Senha</label>
-      <input type="password" class="login-input" id="loginSenha"
-        placeholder="Digite sua senha"
-        onkeydown="if(event.key==='Enter')tentarLogin()">
+    <p class="section-label">Usuário</p>
+    <div class="users-grid">
+      <div class="user-card" onclick="selectUser(this, 'Leonardo', 'prevencaoboascompras')">
+        <div class="avatar" style="background:#3a7dd8;">L</div>
+        <p class="user-name">Leonardo</p>
+        <p class="user-email">prevencaoboascompras</p>
+      </div>
+      <div class="user-card" onclick="selectUser(this, 'Wagner', 'wagner.boascompras')">
+        <div class="avatar" style="background:#8e44ad;">WG</div>
+        <p class="user-name">Wagner</p>
+        <p class="user-email">wagner.boascompras</p>
+      </div>
     </div>
 
-    <button class="login-btn" id="loginBtn" onclick="tentarLogin()">Entrar</button>
-    <div class="login-error" id="loginErro">Usuário ou senha incorretos.</div>
-    <div class="login-footer">Acesso exclusivo para gestores autorizados</div>
+    <p class="hint" id="hint">Entrando como <span id="selected-name"></span></p>
+
+    <div class="password-section" id="pass-section">
+      <p class="section-label">Senha</p>
+      <input class="password-input" type="password" placeholder="Digite sua senha" id="senha-input" />
+    </div>
+
+    <button class="btn-entrar" id="btn-entrar" onclick="handleLogin()">Entrar</button>
+
+    <p class="footer-note">Acesso exclusivo para gestores autorizados</p>
   </div>
 </div>
 
 <script>
+  let chosen = null;
+
+  function selectUser(el, name, email) {
+    document.querySelectorAll('.user-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    chosen = { name, email };
+    document.getElementById('selected-name').textContent = name;
+    document.getElementById('hint').classList.add('visible');
+    document.getElementById('pass-section').classList.add('visible');
+    document.getElementById('btn-entrar').classList.add('visible');
+    document.getElementById('senha-input').focus();
+  }
+
+  function handleLogin() {
+    const senha = document.getElementById('senha-input').value;
+    if (!senha) {
+      document.getElementById('senha-input').style.borderColor = '#ff4444';
+      return;
+    }
+    document.getElementById('senha-input').style.borderColor = '#e05555';
+    sendPrompt('Usuário "' + chosen.name + '" tentou fazer login no AURA Vencimentos.');
+  }
+</script>
+
 // Hashes SHA-256 das senhas (as senhas originais não ficam no código)
 var _USUARIOS = {
   'leonardo': '06c117bb812639e8f80c10b64953df8b099fd534b2fcae74f49f735b93fedba4',
