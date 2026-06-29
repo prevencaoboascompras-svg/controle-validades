@@ -1504,9 +1504,22 @@ function toggleTheme() {
     <div class="filters">
       <select id="fSetor" onchange="setorAtivo=this.value;_multiStatusFilter=null;renderTable();atualizarSetorGridDestaque()">
         <option value="">Todos os setores</option>
-        <option>Acougue</option><option>Bebidas</option><option>Congelados</option>
-        <option>FLV</option><option>Frios</option><option>Laticinios</option>
-        <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
+        <option value="">Todos os setores</option>
+<option>Açougue</option>
+<option>Bazar</option>
+<option>Bebidas</option>
+<option>Congelados</option>
+<option>Frios</option>
+<option>Horti</option>
+<option>Laticínios</option>
+<option>Limpeza</option>
+<option>Outros</option>
+<option>Padaria</option>
+<option>Perfumaria</option>
+<option>Pet</option>
+<option>Pilhas/Baterias</option>
+<option>Seca</option>
+<option>Seca doce</option>
       </select>
       <select id="fStatus" onchange="_multiStatusFilter=null;renderTable()">
         <option value="">Todos os status</option>
@@ -1620,9 +1633,21 @@ function toggleTheme() {
           <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Setor</label>
           <select id="antFiltroSetor" onchange="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
             <option value="">Todos os setores</option>
-            <option>Acougue</option><option>Bebidas</option><option>Congelados</option>
-            <option>FLV</option><option>Frios</option><option>Laticinios</option>
-            <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
+<option>Açougue</option>
+<option>Bazar</option>
+<option>Bebidas</option>
+<option>Congelados</option>
+<option>Frios</option>
+<option>Horti</option>
+<option>Laticínios</option>
+<option>Limpeza</option>
+<option>Outros</option>
+<option>Padaria</option>
+<option>Perfumaria</option>
+<option>Pet</option>
+<option>Pilhas/Baterias</option>
+<option>Seca</option>
+<option>Seca doce</option>
           </select>
         </div>
         <div>
@@ -1793,9 +1818,22 @@ function toggleTheme() {
         <input type="text" id="estoqueBusca" placeholder="Buscar produto..." oninput="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:0">
         <select id="estoqueSetor" onchange="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
           <option value="">Todos os setores</option>
-          <option>Acougue</option><option>Bebidas</option><option>Congelados</option>
-          <option>FLV</option><option>Frios</option><option>Laticinios</option>
-          <option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
+          <option value="">Todos os setores</option>
+<option>Açougue</option>
+<option>Bazar</option>
+<option>Bebidas</option>
+<option>Congelados</option>
+<option>Frios</option>
+<option>Horti</option>
+<option>Laticínios</option>
+<option>Limpeza</option>
+<option>Outros</option>
+<option>Padaria</option>
+<option>Perfumaria</option>
+<option>Pet</option>
+<option>Pilhas/Baterias</option>
+<option>Seca</option>
+<option>Seca doce</option>
         </select>
       </div>
     </div>
@@ -2230,7 +2268,22 @@ function toggleTheme() {
       </div>
       <div class="form-row"><label>Setor</label>
         <select id="fSetorM" onkeydown="if(event.key==='Enter'){event.preventDefault();addManual();}">
-          <option>Acougue</option><option>Bebidas</option><option>Congelados</option><option>FLV</option><option>Frios</option><option>Laticinios</option><option>Outros</option><option>Pet</option><option>Seca</option><option>Seca doce</option>
+          <option value="">Todos os setores</option>
+<option>Açougue</option>
+<option>Bazar</option>
+<option>Bebidas</option>
+<option>Congelados</option>
+<option>Frios</option>
+<option>Horti</option>
+<option>Laticínios</option>
+<option>Limpeza</option>
+<option>Outros</option>
+<option>Padaria</option>
+<option>Perfumaria</option>
+<option>Pet</option>
+<option>Pilhas/Baterias</option>
+<option>Seca</option>
+<option>Seca doce</option>
         </select>
       </div>
     </div>
@@ -2324,16 +2377,48 @@ function normalizeSetor(s){
   var lower=norm.toLowerCase();
   // Mapa para nomes canônicos (mesmo dos <option> nos selects)
   var map={
-    'acougue':'Acougue','acougues':'Acougue',
-    'bebidas':'Bebidas','bebida':'Bebidas',
-    'congelados':'Congelados','congelado':'Congelados',
-    'flv':'FLV',
-    'frios':'Frios','frio':'Frios',
-    'laticinios':'Laticinios','laticionio':'Laticinios',
-    'outros':'Outros','outro':'Outros',
-    'pet':'Pet',
-    'seca':'Seca',
-    'seca doce':'Seca doce','secos':'Seca'
+   'acougue':'Açougue',
+'acougues':'Açougue',
+
+'bebidas':'Bebidas',
+'bebida':'Bebidas',
+
+'bazar':'Bazar',
+
+'congelados':'Congelados',
+'congelado':'Congelados',
+
+'frios':'Frios',
+'frio':'Frios',
+
+'horti':'Horti',
+'flv':'Horti',
+
+'laticinios':'Laticínios',
+'laticionio':'Laticínios',
+'laticínio':'Laticínios',
+'laticinios':'Laticínios',
+
+'limpeza':'Limpeza',
+
+'outros':'Outros',
+'outro':'Outros',
+
+'padaria':'Padaria',
+
+'perfumaria':'Perfumaria',
+
+'pet':'Pet',
+
+'pilhas':'Pilhas/Baterias',
+'pilha':'Pilhas/Baterias',
+'baterias':'Pilhas/Baterias',
+'bateria':'Pilhas/Baterias',
+'pilhas/baterias':'Pilhas/Baterias',
+
+'seca':'Seca',
+'seca doce':'Seca doce',
+'secos':'Seca'
   };
   return map[lower]||(norm.charAt(0).toUpperCase()+norm.slice(1));
 }
