@@ -6409,12 +6409,12 @@ function sincronizarTarefasCompleto(){
         var id=cellStr(c[0]);
         if(!id)continue;
         tarefasSheets.push({
-          id:id,produto:cellStr(c[1]),cod:cellStr(c[2]),descricao:cellStr(c[3]),
-          email:cellStr(c[4]),nomeColaborador:cellStr(c[5]),
-          status:cellStr(c[6])||'pendente',
-          quantidadeConfirmada:c[7]?(cellStr(c[7])?parseInt(cellStr(c[7])):null):null,
-          criadoEm:cellStr(c[8]),confirmadoEm:cellStr(c[9])||null,
-          criadoPor:cellStr(c[10])||'gestor'
+          id:id,produto:cellStr(c[1]),cod:cellStr(c[2]),validade:cellStr(c[3]),descricao:cellStr(c[4]),
+          email:cellStr(c[5]),nomeColaborador:cellStr(c[6]),
+          status:cellStr(c[7])||'pendente',
+          quantidadeConfirmada:c[8]?(cellStr(c[8])?parseInt(cellStr(c[8])):null):null,
+          criadoEm:cellStr(c[9]),confirmadoEm:cellStr(c[10])||null,
+          criadoPor:cellStr(c[11])||'gestor'
         });
       }
       // Sheets tem prioridade — mescla com local
