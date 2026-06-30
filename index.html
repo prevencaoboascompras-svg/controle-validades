@@ -3639,34 +3639,40 @@ function atualizarSetorGridDestaque(){
 
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-// ── Velocímetro / Tanque de validade ──────────────────────────────────────
-// Quanto MAIS LONGE do vencimento (mais dias restantes), MAIS CHEIO e MAIS VERDE.
-// Quanto MAIS PERTO (ou vencido), MAIS VAZIO e MAIS VERMELHO.
+// ── Velocímetro de validade ────────────────────────────────────────────────
+// Arco com 4 zonas coloridas (verde→amarelo→laranja→vermelho) + ponteiro.
+// Quanto MAIS LONGE do vencimento, ponteiro mais à ESQUERDA (zona verde).
+// Quanto MAIS PERTO (ou vencido), ponteiro mais à DIREITA (zona vermelha).
 function speedometerSVG(days, s){
-  var MAX_DAYS=15; // a partir de 15 dias já considera "tanque cheio"
+  var MAX_DAYS=15;
   var clampedDays=days===null?0:Math.max(0,Math.min(MAX_DAYS,days));
-  var pct=clampedDays/MAX_DAYS; // 0 = vazio (vencido) ... 1 = cheio (longe do vencimento)
+  var needleAngle=330-(clampedDays/MAX_DAYS)*120;
   var rad=function(deg){return deg*Math.PI/180;};
   var cx=44,cy=44,r=32;
-  var startAngle=210, endAngle=330; // arco de 120°, esquerda (cheio) → direita (vazio)
+  var zones=[
+    {from:210,to:240,color:'#34d399'}, // ok (longe do vencimento)
+    {from:240,to:265,color:'#fbbf24'}, // atencao
+    {from:265,to:295,color:'#f97316'}, // urgente
+    {from:295,to:330,color:'#ef4444'}  // critico/vencido (perto/vencido)
+  ];
   function arcPath(from,to,radius){
     var x1=cx+radius*Math.cos(rad(from));
     var y1=cy+radius*Math.sin(rad(from));
     var x2=cx+radius*Math.cos(rad(to));
     var y2=cy+radius*Math.sin(rad(to));
-    var largeArc=(to-from)>180?1:0;
-    return 'M '+x1+' '+y1+' A '+radius+' '+radius+' 0 '+largeArc+' 1 '+x2+' '+y2;
+    return 'M '+x1+' '+y1+' A '+radius+' '+radius+' 0 0 1 '+x2+' '+y2;
   }
-  // cor do preenchimento de acordo com o status (mesma paleta usada nos badges)
-  var corMap={vencido:'#ef4444',critico:'#ef4444',urgente:'#f97316',atencao:'#fbbf24',ok:'#34d399'};
-  var cor=corMap[s]||'#34d399';
-  // o preenchimento cresce a partir do início do arco conforme os dias aumentam
-  var fillEnd=startAngle+pct*(endAngle-startAngle); // pct=1 (longe do vencimento) → fillEnd=330 (tanque TODO cheio) | pct=0 (vencido) → fillEnd=210 (vazio)
-  var trackSVG='<path d="'+arcPath(startAngle,endAngle,r)+'" stroke="rgba(255,255,255,.12)" stroke-width="5" fill="none" stroke-linecap="round"/>';
-  var fillSVG=pct>0?'<path d="'+arcPath(startAngle,fillEnd,r)+'" stroke="'+cor+'" stroke-width="5" fill="none" stroke-linecap="round"/>':'';
+  var arcsSVG=zones.map(function(z){
+    return '<path d="'+arcPath(z.from,z.to,r)+'" stroke="'+z.color+'" stroke-width="5" fill="none" stroke-linecap="round"/>';
+  }).join('');
+  var trackSVG='<path d="'+arcPath(210,330,r)+'" stroke="#333" stroke-width="5" fill="none"/>';
+  var nx=cx+22*Math.cos(rad(needleAngle));
+  var ny=cy+22*Math.sin(rad(needleAngle));
+  var needleSVG='<line x1="'+cx+'" y1="'+cy+'" x2="'+nx+'" y2="'+ny+'" stroke="white" stroke-width="2" stroke-linecap="round"/>'
+    +'<circle cx="'+cx+'" cy="'+cy+'" r="4" fill="white"/>';
   var daysLabel=days===null?'?':days<=0?'<tspan fill="#ef4444">Venc.</tspan>':(days+'d');
   var centerLabel='<text x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-size="9" fill="#aaa">'+daysLabel+'</text>';
-  return '<svg width="88" height="70" viewBox="0 0 88 70" xmlns="http://www.w3.org/2000/svg">'+trackSVG+fillSVG+centerLabel+'</svg>';
+  return '<svg width="88" height="70" viewBox="0 0 88 70" xmlns="http://www.w3.org/2000/svg">'+trackSVG+arcsSVG+needleSVG+centerLabel+'</svg>';
 }
 
 
