@@ -1816,7 +1816,7 @@ function toggleTheme() {
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;width:100%">
         <input type="text" id="estoqueBusca" placeholder="Buscar produto..." oninput="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:0">
-        <select id="estoqueSetor" onchange="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+        <select id="estoqueSetor" onchange="setorAtivo=this.value;atualizarSetorGridDestaque();renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
           <option value="">Todos os setores</option>
           <option value="">Todos os setores</option>
 <option>Açougue</option>
@@ -3641,6 +3641,7 @@ function filtrarSetor(setor){
   // re-renderiza a aba em que o usuário está agora, sem trocar de aba
   switch(currentTabName){
     case 'validades': renderTable(); break;
+    case 'estoque': renderEstoque(); break;
     case 'promocoes': renderPromos(); break;
     case 'encartes':
       renderEncartesAtivos();
@@ -6779,7 +6780,9 @@ function renderEstoque() {
   if (!container) return;
   
   var busca = (document.getElementById('estoqueBusca').value || '').toLowerCase();
-  var setor = document.getElementById('estoqueSetor').value;
+  var selEstoque = document.getElementById('estoqueSetor');
+  if (setorAtivo && selEstoque) selEstoque.value = setorAtivo;
+  var setor = setorAtivo || (selEstoque ? selEstoque.value : '');
   
   var grupos = {};
   products.forEach(function(p) {
