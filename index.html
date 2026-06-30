@@ -727,10 +727,36 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 /* Section divider label */
 .dash-divider-label {
   font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--muted); margin: 24px 0 12px; display: flex; align-items: center; gap: 8px;
+  color: var(--muted); margin: 0 0 10px; display: flex; align-items: center; gap: 8px;
 }
 .dash-divider-label::after {
   content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* Setor sticky wrapper — fica fixo no topo do conteúdo em todas as abas */
+#setorStickyWrap {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--bg3);
+  padding: 14px 0 12px;
+  margin: -24px -32px 16px;
+  padding-left: 32px;
+  padding-right: 32px;
+  border-bottom: 1px solid transparent;
+  transition: border-color .15s, box-shadow .15s;
+}
+#setorStickyWrap.is-stuck {
+  border-bottom-color: var(--border);
+  box-shadow: 0 8px 16px -8px rgba(0,0,0,.35);
+}
+#dashSetorGrid {
+  gap: 8px !important;
+  grid-template-columns: repeat(auto-fill,minmax(132px,1fr)) !important;
+}
+#dashSetorGrid .dash-hero-card { padding: 10px 12px !important; }
+@media (max-width: 700px) {
+  #setorStickyWrap { margin: -16px -16px 14px; padding-left: 16px; padding-right: 16px; }
 }
 
 /* Responsive */
@@ -1341,8 +1367,10 @@ function toggleTheme() {
     </div>
   </div>
 
-  <div class="dash-divider-label">Por setor</div>
-  <div id="dashSetorGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:24px">
+  <div id="setorStickyWrap">
+    <div class="dash-divider-label">Por setor</div>
+    <div id="dashSetorGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
+    </div>
   </div>
 
   <div class="metrics" id="metrics"></div>
@@ -1875,6 +1903,16 @@ function toggleTheme() {
 </div><!-- /.app -->
   </div><!-- /.aura-content -->
 </div><!-- /.aura-main -->
+<script>
+(function(){
+  var scroller = document.querySelector('.aura-content');
+  var wrap = document.getElementById('setorStickyWrap');
+  if (!scroller || !wrap) return;
+  scroller.addEventListener('scroll', function(){
+    wrap.classList.toggle('is-stuck', scroller.scrollTop > 4);
+  }, { passive: true });
+})();
+</script>
 </div><!-- /.aura-shell -->
 
 <!-- MODAL EDITAR NEGOCIAÇÃO -->
