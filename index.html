@@ -6980,15 +6980,30 @@ function renderEstoque() {
   if (setorAtivo && selEstoque) selEstoque.value = setorAtivo;
   var setor = setorAtivo || (selEstoque ? selEstoque.value : '');
 
-  var lista = products.filter(function(p) {
+  var listaFiltrada = products.filter(function(p) {
     var nomeNorm = normNome(p.nome || '');
     if (!nomeNorm) return false;
     if (busca && !nomeNorm.toLowerCase().includes(busca) && !(p.cod || '').toLowerCase().includes(busca)) return false;
     if (setor && p.setor !== setor) return false;
     return true;
-  }).sort(function(a, b) {
-    var da = daysDiff(a.validade); da = da === null ? 99999 : da;
-    var db = daysDiff(b.validade); db = db === null ? 99999 : db;
+  });
+
+  // Agrupa por código de barras — cada produto vira um único card,
+  // somando as quantidades de todos os lotes/validades.
+  var gruposMap = {};
+  var gruposOrdem = [];
+  listaFiltrada.forEach(function(p, i) {
+    var chave = (p.cod || '').trim() || ('__semcod_' + i);
+    if (!gruposMap[chave]) {
+      gruposMap[chave] = { cod: (p.cod || '').trim(), lotes: [] };
+      gruposOrdem.push(chave);
+    }
+    gruposMap[chave].lotes.push(p);
+  });
+
+  var lista = gruposOrdem.map(function(chave) { return gruposMap[chave]; }).sort(function(a, b) {
+    var da = Math.min.apply(null, a.lotes.map(function(p) { var d = daysDiff(p.validade); return d === null ? 99999 : d; }));
+    var db = Math.min.apply(null, b.lotes.map(function(p) { var d = daysDiff(p.validade); return d === null ? 99999 : d; }));
     return da - db;
   });
 
@@ -6997,23 +7012,31 @@ function renderEstoque() {
     return;
   }
 
-  container.innerHTML = lista.map(function(p) {
+  container.innerHTML = lista.map(function(grupo) {
+    var lotes = grupo.lotes.slice().sort(function(a, b) {
+      var da = daysDiff(a.validade); da = da === null ? 99999 : da;
+      var db = daysDiff(b.validade); db = db === null ? 99999 : db;
+      return da - db;
+    });
+    var p = lotes[0]; // lote mais próximo do vencimento representa o card
+    var idx = products.indexOf(p);
     var days = daysDiff(p.validade);
     var s = statusFromDays(days);
-    var idx = products.indexOf(p);
     var hdrCls = 'urg-card-header status-' + (days === null ? 'none' : s);
     var badgeSt = 'status-' + (days === null ? 'none' : s);
     var barrasBusca = (p.cod || '').replace(/[^0-9]/g, '');
     var fornProd = p.fornecedor || bancoFornecedor[barrasBusca] || bancoFornecedorNome[normNome(p.nome || '')] || '—';
     var venceCor = days === null ? 'var(--tx2)' : days <= 0 ? '#ef4444' : days <= 3 ? '#f97316' : days <= 7 ? '#fbbf24' : 'var(--tx)';
     var venceTxt = days === null ? 'Sem data' : days <= 0 ? 'Vencido' : days === 1 ? 'Amanhã' : 'Faltam ' + days + 'd';
+    var totalQtde = lotes.reduce(function(s, p) { return s + (Number(p.qtde) || 0); }, 0);
+    var multiLote = lotes.length > 1;
 
-    return '<div class="urg-card" onclick="abrirProdutoModal(\'' + escHtml(p.cod || '') + '\')" style="cursor:pointer">'
+    return '<div class="urg-card" onclick="abrirProdutoModal(\'' + escHtml(grupo.cod || '') + '\')" style="cursor:pointer">'
       + '<div class="' + hdrCls + '">'
-      +   (p.qtde ? '<span class="val-card-qtde-badge ' + badgeSt + '" title="' + p.qtde + ' unidades">' + p.qtde + '</span>' : '')
+      +   (totalQtde ? '<span class="val-card-qtde-badge ' + badgeSt + '" title="' + totalQtde + ' unidades">' + totalQtde + '</span>' : '')
       +   '<div style="min-width:0;flex:1">'
       +     '<div class="urg-card-nome">' + escHtml(cleanNome(p.nome || '—')) + '</div>'
-      +     '<div class="urg-card-cod">' + (p.cod || '') + '</div>'
+      +     '<div class="urg-card-cod">' + (p.cod || '') + (multiLote ? ' · ' + lotes.length + ' lotes' : '') + '</div>'
       +   '</div>'
       +   badge(days === null ? 'sem-data' : s)
       + '</div>'
@@ -7021,17 +7044,17 @@ function renderEstoque() {
       +   '<div class="urg-card-mid">'
       +     '<div class="urg-speedo-wrap">' + speedometerSVG(days, s) + '<span class="urg-speedo-lbl">Validade</span></div>'
       +     '<div class="urg-card-info">'
-      +       '<div class="urg-info-field"><span class="urg-info-lbl">Vence em</span><span class="urg-info-val" style="color:' + venceCor + '">' + venceTxt + '</span></div>'
+      +       '<div class="urg-info-field"><span class="urg-info-lbl">' + (multiLote ? 'Lote mais próximo' : 'Vence em') + '</span><span class="urg-info-val" style="color:' + venceCor + '">' + venceTxt + '</span></div>'
       +       '<div class="urg-info-field"><span class="urg-info-lbl">Data</span><span class="urg-info-val">' + (p.validade ? fmtDataExtenso(p.validade) : '—') + '</span></div>'
       +       '<div class="urg-info-field"><span class="urg-info-lbl">Setor</span><span class="urg-info-val">' + escHtml(p.setor || '—') + '</span></div>'
-      +       '<div class="urg-info-field"><span class="urg-info-lbl">Qtde</span><span class="urg-info-val">' + escHtml(p.qtde || '—') + '</span></div>'
+      +       '<div class="urg-info-field"><span class="urg-info-lbl">Qtde total</span><span class="urg-info-val">' + escHtml(totalQtde || '—') + '</span></div>'
       +     '</div>'
       +   '</div>'
       +   '<div class="urg-card-forn" title="' + escHtml(fornProd) + '"><i class="ti ti-truck-delivery" style="opacity:.6"></i> ' + escHtml(fornProd) + '</div>'
       + '</div>'
       + '<div class="urg-card-foot">'
       +   '<button class="abtn" style="border-color:var(--amber);color:var(--amber)" onclick="event.stopPropagation();openTarefaModal(' + idx + ')"><i class="ti ti-clipboard-check"></i> Conferir</button>'
-      +   '<button class="abtn encarte" onclick="event.stopPropagation();abrirEncarteDoProduto(\'' + escHtml(p.cod || '') + '\')"><i class="ti ti-tag"></i> Gerar Encarte</button>'
+      +   '<button class="abtn encarte" onclick="event.stopPropagation();abrirEncarteDoProduto(\'' + escHtml(grupo.cod || '') + '\')"><i class="ti ti-tag"></i> Gerar Encarte</button>'
       + '</div>'
       + '</div>';
   }).join('');
