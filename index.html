@@ -1243,11 +1243,6 @@ function tentarLogin() {
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       <span>Estoque</span>
     </button>
-    <button onclick="auraNav(this,'promocoes')">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"/><path d="M7 7h.01"/></svg>
-      <span>Promoções</span>
-      <span class="sb-nav-badge" id="asBadgePromo" style="display:none">0</span>
-    </button>
     <button onclick="auraNav(this,'encartes')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
       <span>Encartes</span>
@@ -1384,7 +1379,6 @@ function toggleTheme() {
   </div>
   <div class="tabs">
     <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
-    <div class="tab" onclick="goTab('promocoes')"><i class="ti ti-tag"></i> Promocoes</div>
     <div class="tab" onclick="goTab('encartes')"><i class="ti ti-photo-check"></i> Encartes <span id="encBadge" style="display:none;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório <span id="negBadge" style="display:none;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('modalidades')"><i class="ti ti-truck-delivery"></i> Modalidades</div>
