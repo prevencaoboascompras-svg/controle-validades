@@ -6688,17 +6688,41 @@ function abrirProdutoModal(cod){
     return '<option value="'+escHtml(s)+'"'+(s===setorAtual?' selected':'')+'>'+escHtml(s)+'</option>';
   }).join('');
 
-  document.getElementById('pmLotes').innerHTML=lotes.map(function(p){
+  var lotesOrdenados=lotes.slice().sort(function(a,b){
+    var da=daysDiff(a.validade);da=da===null?99999:da;
+    var db=daysDiff(b.validade);db=db===null?99999:db;
+    return da-db;
+  });
+  document.getElementById('pmLotes').innerHTML=lotesOrdenados.map(function(p){
     var days=daysDiff(p.validade);
     var s=days===null?'sem-data':statusFromDays(days);
     return '<div style="display:flex;justify-content:space-between;align-items:center;border:1px solid var(--bds);border-radius:var(--r);padding:6px 10px;font-size:12.5px">'
       +'<span>'+(p.validade?fmtDataExtenso(p.validade):'Sem data')+'</span>'
       +badge(s)
-      +'<span>'+(p.qtde||0)+' un</span>'
+      +'<span><b>'+(p.qtde||0)+'</b> un</span>'
       +'</div>';
   }).join('');
 
   document.getElementById('produtoModal').classList.add('open');
+}
+
+// Chamado pelo botão "Gerar Encarte" dentro do modal de produto.
+// Localiza o lote mais relevante (mais próximo do vencimento) deste código de barras
+// e abre o modal de encarte já preenchido com os dados desse produto.
+function abrirEncarteDoProduto(cod){
+  cod=(cod||'').trim();
+  if(!cod)return;
+  var lotes=products.filter(function(p){return(p.cod||'').trim()===cod;});
+  if(!lotes.length){mostrarToast('Produto não encontrado.','warn');return;}
+  var lotesOrdenados=lotes.slice().sort(function(a,b){
+    var da=daysDiff(a.validade);da=da===null?99999:da;
+    var db=daysDiff(b.validade);db=db===null?99999:db;
+    return da-db;
+  });
+  var idx=products.indexOf(lotesOrdenados[0]);
+  if(idx<0){mostrarToast('Produto não encontrado.','warn');return;}
+  closeModal('produtoModal');
+  openEncarteModal(idx);
 }
 
 function openTarefaModal(prodIdx) {
@@ -7007,6 +7031,7 @@ function renderEstoque() {
       + '</div>'
       + '<div class="urg-card-foot">'
       +   '<button class="abtn" style="border-color:var(--amber);color:var(--amber)" onclick="event.stopPropagation();openTarefaModal(' + idx + ')"><i class="ti ti-clipboard-check"></i> Conferir</button>'
+      +   '<button class="abtn encarte" onclick="event.stopPropagation();abrirEncarteDoProduto(\'' + escHtml(p.cod || '') + '\')"><i class="ti ti-tag"></i> Gerar Encarte</button>'
       + '</div>'
       + '</div>';
   }).join('');
