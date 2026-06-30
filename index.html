@@ -409,7 +409,7 @@ html, body { background: var(--bg); color: var(--fg); }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
 
 /* Layout shell */
-.aura-shell { display: flex; min-height: 100vh; }
+.aura-shell { display: flex; height: 100vh; overflow: hidden; }
 
 /* Main area */
 .aura-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -495,7 +495,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sa
 html.light .theme-toggle .theme-knob { transform: translateX(26px); }
 
 /* Content wrapper */
-.aura-content { flex: 1; overflow-y: auto; padding: 24px 32px; }
+.aura-content { flex: 1; overflow-y: auto; padding: 12px 32px 24px; }
 
 /* Cards */
 .metric, .rel-card, .ecard, .cfg {
@@ -739,10 +739,8 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   top: 0;
   z-index: 30;
   background: var(--bg3);
-  padding: 14px 0 12px;
-  margin: -24px -32px 16px;
-  padding-left: 32px;
-  padding-right: 32px;
+  margin: 0 -32px 14px;
+  padding: 10px 32px 10px;
   border-bottom: 1px solid transparent;
   transition: border-color .15s, box-shadow .15s;
 }
@@ -756,7 +754,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 }
 #dashSetorGrid .dash-hero-card { padding: 10px 12px !important; }
 @media (max-width: 700px) {
-  #setorStickyWrap { margin: -16px -16px 14px; padding-left: 16px; padding-right: 16px; }
+  #setorStickyWrap { margin: 0 -16px 12px; padding: 8px 16px 8px; }
 }
 
 /* Responsive */
