@@ -2376,6 +2376,10 @@ function toggleTheme() {
         <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Código de barras</label>
         <input type="text" id="tarefaCod" placeholder="Opcional" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
       </div>
+      <div id="tarefaValidadeWrap" style="display:none">
+        <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Lote (validade)</label>
+        <select id="tarefaValidade" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none"></select>
+      </div>
       <div>
         <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Descrição (opcional)</label>
         <textarea id="tarefaDescricao" placeholder="Ex: Conferir se ainda tem no corredor 3..." style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;min-height:50px;resize:vertical;font-family:inherit"></textarea>
@@ -2390,6 +2394,52 @@ function toggleTheme() {
     <div class="smodal-foot">
       <button class="btn" onclick="closeModal('tarefaModal')">Cancelar</button>
       <button class="btn btn-green" onclick="criarTarefa()"><i class="ti ti-send"></i> Atribuir tarefa</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal de produto agrupado (card clicável de Estoque) -->
+<div class="modal-ov" id="produtoModal">
+  <div class="smodal" style="width:560px;max-height:88vh;overflow-y:auto">
+    <h3 id="pmNome"><i class="ti ti-package"></i> Produto</h3>
+    <div id="pmCod" style="font-family:monospace;font-size:11px;color:var(--tx2);margin-bottom:14px"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+      <div class="rel-card-sm">
+        <div style="font-size:10px;color:var(--tx2);text-transform:uppercase">Custo Gerencial</div>
+        <div id="pmCusto" style="font-size:16px;font-weight:700"></div>
+      </div>
+      <div class="rel-card-sm">
+        <div style="font-size:10px;color:var(--tx2);text-transform:uppercase">Valor de Venda</div>
+        <div id="pmVenda" style="font-size:16px;font-weight:700"></div>
+      </div>
+      <div class="rel-card-sm">
+        <div style="font-size:10px;color:var(--tx2);text-transform:uppercase">Estoque Total</div>
+        <div id="pmTotal" style="font-size:16px;font-weight:700;color:var(--green)"></div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Setor</label>
+      <select id="pmSetor" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none" onchange="salvarSetorCorrigido(window._pmCodAtual,this.value)"></select>
+      <div style="font-size:10.5px;color:var(--tx2);margin-top:4px">Define o setor correto para este código de barras. Será aplicado automaticamente nas próximas sincronizações, mesmo se o fornecedor lançar em outro setor.</div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:7px">Lotes por validade</label>
+      <div id="pmLotes" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+
+    <div class="smodal-foot" style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" onclick="closeModal('produtoModal')">Fechar</button>
+      <button class="btn abtn encarte" onclick="abrirEncarteDoProduto(window._pmCodAtual)"><i class="ti ti-tag"></i> Gerar Encarte</button>
+      <div style="position:relative">
+        <button class="btn btn-green" onclick="toggleTarefaMenu()"><i class="ti ti-clipboard-check"></i> Tarefa <i class="ti ti-chevron-down"></i></button>
+        <div id="pmTarefaMenu" style="display:none;position:absolute;bottom:100%;left:0;margin-bottom:6px;background:var(--bg);border:1px solid var(--bds);border-radius:var(--r);box-shadow:0 6px 20px rgba(0,0,0,.25);min-width:220px;z-index:50">
+          <button class="btn" style="width:100%;justify-content:flex-start;border:none;border-radius:0" onclick="abrirTarefaProduto(window._pmCodAtual,'lote')"><i class="ti ti-calendar-event"></i> Venda rápida (lote)</button>
+          <button class="btn" style="width:100%;justify-content:flex-start;border:none;border-radius:0" onclick="abrirTarefaProduto(window._pmCodAtual,'inventario')"><i class="ti ti-list-check"></i> Inventário (total)</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
