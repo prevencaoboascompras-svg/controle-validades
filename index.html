@@ -3640,20 +3640,20 @@ function atualizarSetorGridDestaque(){
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // ── Velocímetro de validade ────────────────────────────────────────────────
-// Arco com 4 zonas coloridas (verde→amarelo→laranja→vermelho) + ponteiro.
-// Quanto MAIS LONGE do vencimento, ponteiro mais à ESQUERDA (zona verde).
-// Quanto MAIS PERTO (ou vencido), ponteiro mais à DIREITA (zona vermelha).
+// Arco com 4 zonas coloridas: vermelho (esquerda) → laranja → amarelo → verde (direita).
+// Quanto MAIS LONGE do vencimento (cheio), ponteiro mais à DIREITA (zona verde).
+// Quanto MAIS PERTO ou VENCIDO (vazio), ponteiro mais à ESQUERDA (zona vermelha).
 function speedometerSVG(days, s){
   var MAX_DAYS=15;
   var clampedDays=days===null?0:Math.max(0,Math.min(MAX_DAYS,days));
-  var needleAngle=330-(clampedDays/MAX_DAYS)*120;
+  var needleAngle=210+(clampedDays/MAX_DAYS)*120;
   var rad=function(deg){return deg*Math.PI/180;};
   var cx=44,cy=44,r=32;
   var zones=[
-    {from:210,to:240,color:'#34d399'}, // ok (longe do vencimento)
-    {from:240,to:265,color:'#fbbf24'}, // atencao
-    {from:265,to:295,color:'#f97316'}, // urgente
-    {from:295,to:330,color:'#ef4444'}  // critico/vencido (perto/vencido)
+    {from:210,to:240,color:'#ef4444'}, // critico/vencido (perto/vazio)
+    {from:240,to:265,color:'#f97316'}, // urgente
+    {from:265,to:295,color:'#fbbf24'}, // atencao
+    {from:295,to:330,color:'#34d399'}  // ok (longe do vencimento/cheio)
   ];
   function arcPath(from,to,radius){
     var x1=cx+radius*Math.cos(rad(from));
