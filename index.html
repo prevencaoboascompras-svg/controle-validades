@@ -6729,10 +6729,23 @@ function renderTarefas() {
 }
 
 function cancelarTarefa(id) {
-  var tarefas = getTarefas().filter(function(t) { return t.id !== id; });
-  saveTarefas(tarefas);
+  var tarefas = getTarefas();
+  var t = tarefas.find(function(x) { return x.id === id; });
+  var restantes = tarefas.filter(function(x) { return x.id !== id; });
+  saveTarefas(restantes);
+
+  if (t && t.cod) {
+    var aindaReferenciado = restantes.some(function(x) { return x.cod === t.cod && x.status === 'pendente'; });
+    if (!aindaReferenciado) {
+      var promoAtivas = getPromoAtivas().filter(function(c) { return c !== t.cod; });
+      savePromoAtivas(promoAtivas);
+      renderTable();
+      renderPromos();
+    }
+  }
+
   renderTarefas();
-  mostrarToast('Tarefa cancelada', 'ok');
+  mostrarToast('Tarefa cancelada — produto voltou para a lista de pendentes', 'ok');
 }
 
 function abrirTransferirModal(id) {
