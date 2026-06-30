@@ -2810,8 +2810,13 @@ var PROMO_ENC_KEY='boascompras_encerradas';
 var promoFiltro='todas';
 var mostrarEncerradas=false;
 
-function getEncerradas(){try{return JSON.parse(localStorage.getItem(PROMO_ENC_KEY)||'[]');}catch(e){return[];}}
-function saveEncerradas(arr){localStorage.setItem(PROMO_ENC_KEY,JSON.stringify(arr));}
+var _encerradas=JSON.parse(localStorage.getItem(PROMO_ENC_KEY)||'[]');
+function getEncerradas(){return _encerradas;}
+function saveEncerradas(arr){
+  _encerradas=arr;
+  localStorage.setItem(PROMO_ENC_KEY,JSON.stringify(arr));
+  _gasPost({action:'salvarEncerradas',dados:arr});
+}
 
 function setPromoFiltro(f){
   promoFiltro=f;
@@ -4364,8 +4369,13 @@ var ENC_KEY='boascompras_encartes_ativos';
 var encLayout=2;
 var encSelecionados=[];
 
-function getEncartesAtivos(){try{return JSON.parse(localStorage.getItem(ENC_KEY)||'[]');}catch(e){return[];}}
-function saveEncartesAtivos(arr){localStorage.setItem(ENC_KEY,JSON.stringify(arr));}
+var _encartesAtivos=JSON.parse(localStorage.getItem(ENC_KEY)||'[]');
+function getEncartesAtivos(){return _encartesAtivos;}
+function saveEncartesAtivos(arr){
+  _encartesAtivos=arr;
+  localStorage.setItem(ENC_KEY,JSON.stringify(arr));
+  _gasPost({action:'salvarEncartes',dados:arr});
+}
 
 // ── Exportar / Importar backup de encartes ────────────────────────────────────
 function exportarEncartesJSON(){
@@ -4666,15 +4676,16 @@ var MODALIDADES_KEY='boascompras_modalidades';
 var PROCEDIMENTOS_PADRAO=['CONTATO','DESCARTE','LOTE + QTD','NF DEVOLUÇÃO','REGISTRO E DESCARTE','TROCA - (AVARIADOS)','TROCA / DESCONTO','TROCA P/ TROCA','RELATORIO + FOTO','NF DEVOLUÇÃO + BOLETO OU PIX','FOTO LOTE + QTD + DESCRIÇÃO'];
 var MODALIDADES_SEED = [{"fornecedor": "AMBEV (CDD)", "procedimento": "TROCA P/ TROCA", "mix": "PESI , GUARANÁ , ANTARTICA , BUDWEISER", "contato": "51 9 9268-4831 - GERMANO", "obs": ""}, {"fornecedor": "BARÃO", "procedimento": "CONTATO", "mix": "ERVA MATE , CHÁ , PUDIM", "contato": "51 9 9402-7927 - VINÍCIUS", "obs": ""}, {"fornecedor": "BEM GAÚCHO", "procedimento": "CONTATO", "mix": "ARROZ , SAL", "contato": "", "obs": ""}, {"fornecedor": "BOM PRINCÍPIO", "procedimento": "CONTATO", "mix": "GELEIA, CONSERVAS", "contato": "", "obs": ""}, {"fornecedor": "BROKER ZAFFALON", "procedimento": "CONTATO", "mix": "MERCEARIA NESTLE", "contato": "", "obs": ""}, {"fornecedor": "FABIANO ZAFFALON", "procedimento": "CONTATO", "mix": "YOKI, ISABELA, YPE", "contato": "", "obs": ""}, {"fornecedor": "ZAFFALON E CIA LTDA", "procedimento": "RELATORIO + FOTO", "mix": "ARROZINA, KNORR, CREMOGEMA, HELLMANNS, ARISCO, SURF", "contato": "51 9 85234384 -FRANCIELI", "obs": ""}, {"fornecedor": "BÚFALO", "procedimento": "CONTATO", "mix": "VODKA , COCKTAIL , DESTILADOS, ENERGETICO", "contato": "", "obs": ""}, {"fornecedor": "CAMAQUÃ", "procedimento": "REGISTRO E DESCARTE", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "CAMIL", "procedimento": "CONTATO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "CELARE", "procedimento": "CONTATO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "DIPAM", "procedimento": "TROCA P/ TROCA", "mix": "", "contato": "51 9 8961-4987 - JASON", "obs": ""}, {"fornecedor": "DISTRIBUIDORA 95", "procedimento": "CONTATO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "ELMA CHIPS", "procedimento": "TROCA / DESCONTO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "FARIAS", "procedimento": "TROCA P/ TROCA", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "FRITZ E FRIDA", "procedimento": "REGISTRO E DESCARTE", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "SUPER SCHWALM", "procedimento": "REGISTRO E DESCARTE", "mix": "FRUKI, AGUA DA PEDRA, BELLA VISTA, ELEV, SUCO COM TEM", "contato": "51 9 8059-6552 ALEXANDRE  (BAIXINHO)", "obs": ""}, {"fornecedor": "NESTLÉ", "procedimento": "NF DEVOLUÇÃO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "PIA", "procedimento": "DESCARTE", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "PONCHE VERDE", "procedimento": "CONTATO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "SARANDI", "procedimento": "REGISTRO E DESCARTE", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "SPALD (COCA)", "procedimento": "TROCA - (AVARIADOS)", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "STA CLARA", "procedimento": "DESCARTE", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "STO ANTONIO", "procedimento": "NF DEVOLUÇÃO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "TAURA", "procedimento": "CONTATO", "mix": "", "contato": "", "obs": ""}, {"fornecedor": "ZAGONEL", "procedimento": "TROCA P/ TROCA", "mix": "ROSQUINHA  ZAGONEL, POLVILHO 80G", "contato": "51 9691-4794 - MARLON", "obs": ""}, {"fornecedor": "WS (PULLMAN)", "procedimento": "TROCA P/ TROCA", "mix": "", "contato": "51 9609-1155 - DEIVID", "obs": ""}, {"fornecedor": "UNIDASUL", "procedimento": "FOTO LOTE + QTD + DESCRIÇÃO", "mix": "", "contato": "51 9 9760-2188 - QUEIROZ", "obs": ""}, {"fornecedor": "SENAR", "procedimento": "REGISTRO E DESCARTE", "mix": "", "contato": "51 9 9742-2287 - VALDINEI", "obs": ""}, {"fornecedor": "MDA", "procedimento": "TROCA P/ TROCA", "mix": "BATATA PALHA DEUTCHIPS", "contato": "", "obs": ""}, {"fornecedor": "PRONTO DOCE", "procedimento": "TROCA P/ TROCA", "mix": "", "contato": "51 9953-0948 - LUCIANO", "obs": "51 9 9953-0948 - JAIRO"}, {"fornecedor": "MORBENE", "procedimento": "TROCA P/ TROCA", "mix": "VELA REGINA AZUL 07", "contato": "51 981029297 - MILENE", "obs": ""}, {"fornecedor": "KEM", "procedimento": "TROCA P/ TROCA", "mix": "PAO DE ALHO", "contato": "51 9 8945-3572 - TAIS", "obs": ""}, {"fornecedor": "LACTALIS", "procedimento": "REGISTRO E DESCARTE", "mix": "ELEGÊ", "contato": "51 9 9956-0970 - NILSON", "obs": ""}, {"fornecedor": "R A FIGUEIREDO", "procedimento": "REGISTRO E DESCARTE", "mix": "IOGURTE NESTLÉ", "contato": "51 9 9234-8733 - ODAIR", "obs": ""}, {"fornecedor": "AGROINDUSTRIAL PRADENSE", "procedimento": "TROCA P/ TROCA", "mix": "VINHO PRIMO FIOR, VINHO ORIGINI, BRILHA SUL, GAITEIRO, TAURA, FERMENTO GOOD INSTANT", "contato": "51 9 9739-9259 - MARCIO", "obs": ""}, {"fornecedor": "PARATI", "procedimento": "NF DEVOLUÇÃO", "mix": "LAMEN, BISCOITOS", "contato": "51 9 9788-9707", "obs": "(OU DESCONTO EM NOTA)"}, {"fornecedor": "ERVATEIRA FRAZON LTDA", "procedimento": "TROCA P/ TROCA", "mix": "ERVA MATE AMIZADE", "contato": "51 9 8022-6407 - EDSON", "obs": ""}, {"fornecedor": "CREIMPOL", "procedimento": "NF DEVOLUÇÃO", "mix": "NUTELLA, FERRERO, CHA LEAO", "contato": "51 9 9694-9233 - JONI ALEXANDRE", "obs": "CONCLUÍDO - EM HAVER (NUTELLA)"}, {"fornecedor": "MEGAX", "procedimento": "TROCA P/ TROCA", "mix": "LACTA, HALLS", "contato": "51 9 9221-3837 - MATEUS", "obs": "NO PRÓXIMO PEDIDO | NOTA DE DEV. RECOLHE  NO PROXIMO PEDIDO"}, {"fornecedor": "DELICIAS DA VOVO", "procedimento": "NF DEVOLUÇÃO", "mix": "LINHA DELICIAS DA VOVO", "contato": "51 9 80208389 - HENRIQUE", "obs": "RESOLVIDO (VAO RECOLHER)"}, {"fornecedor": "SCATOLIN", "procedimento": "TROCA P/ TROCA", "mix": "LINHA SCATOLIN, MASSA DE PASTEL, NHOQUE,", "contato": "", "obs": ""}, {"fornecedor": "ERVATEIRA FRAZON LTD", "procedimento": "NF DEVOLUÇÃO + BOLETO OU PIX", "mix": "DOMELY", "contato": "51 9 994238776 - Deivid", "obs": "PODE DESCARTAR"}, {"fornecedor": "PETRY", "procedimento": "NF DEVOLUÇÃO + BOLETO OU PIX", "mix": "PEPINO, AZEITONA", "contato": "", "obs": "RECOLHE NA ENTREGA DO PEDIDO"}, {"fornecedor": "MOINHO - MATRIZ", "procedimento": "NF DEVOLUÇÃO + BOLETO OU PIX", "mix": "PANFACIL", "contato": "", "obs": ""}];
 
-function getModalidades(){
-  try{
-    var raw=localStorage.getItem(MODALIDADES_KEY);
-    if(raw)return JSON.parse(raw);
-    saveModalidades(MODALIDADES_SEED);
-    return JSON.parse(JSON.stringify(MODALIDADES_SEED));
-  }catch(e){return JSON.parse(JSON.stringify(MODALIDADES_SEED));}
+var _modalidades=(function(){
+  try{var r=localStorage.getItem(MODALIDADES_KEY);return r?JSON.parse(r):JSON.parse(JSON.stringify(MODALIDADES_SEED));}
+  catch(e){return JSON.parse(JSON.stringify(MODALIDADES_SEED));}
+})();
+function getModalidades(){return _modalidades;}
+function saveModalidades(arr){
+  _modalidades=arr;
+  localStorage.setItem(MODALIDADES_KEY,JSON.stringify(arr));
+  _gasPost({action:'salvarModalidades',dados:arr});
 }
-function saveModalidades(arr){localStorage.setItem(MODALIDADES_KEY,JSON.stringify(arr));}
 
 function normForn(s){
   return String(s||'').toUpperCase().replace(/[^A-Z0-9À-Ú]/g,' ').replace(/\s+/g,' ').trim();
@@ -4962,10 +4973,20 @@ var _resolucaoSelecionada=null;
 var _encerrandoPromoCod=null;
 var _encerrandoPromoNome=null;
 
-function getNegociacoes(){try{return JSON.parse(localStorage.getItem(NEG_KEY)||'[]');}catch(e){return[];}}
-function saveNegociacoes(arr){localStorage.setItem(NEG_KEY,JSON.stringify(arr));}
-function getResolvidos(){try{return JSON.parse(localStorage.getItem(RESOLVIDOS_KEY)||'[]');}catch(e){return[];}}
-function saveResolvidos(arr){localStorage.setItem(RESOLVIDOS_KEY,JSON.stringify(arr));}
+var _negociacoes=JSON.parse(localStorage.getItem(NEG_KEY)||'[]');
+var _resolvidos=JSON.parse(localStorage.getItem(RESOLVIDOS_KEY)||'[]');
+function getNegociacoes(){return _negociacoes;}
+function saveNegociacoes(arr){
+  _negociacoes=arr;
+  localStorage.setItem(NEG_KEY,JSON.stringify(arr));
+  _gasPost({action:'salvarNegociacoes',dados:arr});
+}
+function getResolvidos(){return _resolvidos;}
+function saveResolvidos(arr){
+  _resolvidos=arr;
+  localStorage.setItem(RESOLVIDOS_KEY,JSON.stringify(arr));
+  _gasPost({action:'salvarResolvidos',dados:arr});
+}
 
 function openResolvidoModal(idx){
   _resolvidoIdx=idx;
@@ -5490,8 +5511,13 @@ function excluirNeg(idx) {
 var BIB_KEY = 'boascompras_biblioteca_v1';
 var _encTabAtual = 'ativos';
 
-function getBiblioteca(){try{return JSON.parse(localStorage.getItem(BIB_KEY)||'[]');}catch(e){return[];}}
-function saveBiblioteca(arr){localStorage.setItem(BIB_KEY,JSON.stringify(arr));}
+var _biblioteca=JSON.parse(localStorage.getItem(BIB_KEY)||'[]');
+function getBiblioteca(){return _biblioteca;}
+function saveBiblioteca(arr){
+  _biblioteca=arr;
+  localStorage.setItem(BIB_KEY,JSON.stringify(arr));
+  _gasPost({action:'salvarBiblioteca',dados:arr});
+}
 
 function goEncTab(tab){
   _encTabAtual = tab;
@@ -5683,7 +5709,86 @@ atualizarBibBadge();
 
 document.getElementById('cfgBox').style.display='none';
 var _cfg=loadCfg();
-if(_cfg.id){setDot('loading','Reconectando...');syncAll();sincronizarTarefasCompleto();}
+// ═══ CAMADA DE NUVEM — lê/escreve nas abas da planilha via GAS ═══
+
+function _gasPost(body){
+  var cfg=loadCfg();
+  if(!cfg.url)return;
+  fetch(cfg.url,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=UTF-8'},
+    body:JSON.stringify(body)
+  }).catch(function(){});
+}
+
+function _gasGet(action,extra){
+  var cfg=loadCfg();
+  if(!cfg.url)return Promise.resolve({ok:false});
+  var url=cfg.url+'?action='+action+(extra||'');
+  return fetch(url).then(function(r){return r.json();}).catch(function(){return{ok:false};});
+}
+
+function cloudLoad(){
+  var acoes=[
+    {a:'buscarEncartes',   fn:function(d){_encartesAtivos=d;localStorage.setItem(ENC_KEY,JSON.stringify(d));atualizarBadge();renderEncartesAtivos&&renderEncartesAtivos();}},
+    {a:'buscarNegociacoes',fn:function(d){_negociacoes=d;localStorage.setItem(NEG_KEY,JSON.stringify(d));atualizarNegBadge&&atualizarNegBadge();renderNegociacoes&&renderNegociacoes();}},
+    {a:'buscarResolvidos', fn:function(d){_resolvidos=d;localStorage.setItem(RESOLVIDOS_KEY,JSON.stringify(d));}},
+    {a:'buscarEncerradas', fn:function(d){_encerradas=d;localStorage.setItem(PROMO_ENC_KEY,JSON.stringify(d));renderPromos&&renderPromos();}},
+    {a:'buscarBiblioteca', fn:function(d){_biblioteca=d;localStorage.setItem(BIB_KEY,JSON.stringify(d));atualizarBibBadge&&atualizarBibBadge();}},
+    {a:'buscarModalidades',fn:function(d){if(d&&d.length){_modalidades=d;localStorage.setItem(MODALIDADES_KEY,JSON.stringify(d));renderModalidades&&renderModalidades();}}},
+    {a:'buscarPromoAtivas',fn:function(d){_promoAtivas=d;localStorage.setItem('boascompras_promo_ativas',JSON.stringify(d));}}
+  ];
+  acoes.forEach(function(item){
+    _gasGet(item.a).then(function(res){
+      if(res&&res.ok&&res.dados)item.fn(res.dados);
+    });
+  });
+}
+
+// Migração única: sobe dados locais que ainda não estão na nuvem
+function migarDadosLocaisParaNuvem(){
+  var cfg=loadCfg();
+  if(!cfg.url||localStorage.getItem('_aura_migrado_v1'))return;
+  _gasGet('buscarEncartes').then(function(r){
+    if(r&&r.ok&&r.dados&&r.dados.length===0&&_encartesAtivos.length>0){
+      _gasPost({action:'salvarEncartes',dados:_encartesAtivos});
+    }
+  });
+  _gasGet('buscarNegociacoes').then(function(r){
+    if(r&&r.ok&&r.dados&&r.dados.length===0&&_negociacoes.length>0){
+      _gasPost({action:'salvarNegociacoes',dados:_negociacoes});
+    }
+  });
+  _gasGet('buscarResolvidos').then(function(r){
+    if(r&&r.ok&&r.dados&&r.dados.length===0&&_resolvidos.length>0){
+      _gasPost({action:'salvarResolvidos',dados:_resolvidos});
+    }
+  });
+  _gasGet('buscarEncerradas').then(function(r){
+    if(r&&r.ok&&r.dados&&r.dados.length===0&&_encerradas.length>0){
+      _gasPost({action:'salvarEncerradas',dados:_encerradas});
+    }
+  });
+  _gasGet('buscarBiblioteca').then(function(r){
+    if(r&&r.ok&&r.dados&&r.dados.length===0&&_biblioteca.length>0){
+      _gasPost({action:'salvarBiblioteca',dados:_biblioteca});
+    }
+  });
+  _gasGet('buscarModalidades').then(function(r){
+    if(r&&r.ok&&r.dados&&r.dados.length===0&&_modalidades.length>0){
+      _gasPost({action:'salvarModalidades',dados:_modalidades});
+    }
+  });
+  _gasGet('buscarPromoAtivas').then(function(r){
+    if(r&&r.ok&&r.dados&&r.dados.length===0&&_promoAtivas.length>0){
+      _gasPost({action:'salvarPromoAtivas',dados:_promoAtivas});
+    }
+  });
+  localStorage.setItem('_aura_migrado_v1','1');
+  mostrarToast('Dados locais migrados para a nuvem!','ok');
+}
+
+if(_cfg.id){setDot('loading','Reconectando...');syncAll();sincronizarTarefasCompleto();cloudLoad();setTimeout(migarDadosLocaisParaNuvem,3000);}
 else refresh();
 
 // ── ANTECIPAÇÃO DE ENCARTES ──────────────────────────────────────────────
@@ -6428,7 +6533,13 @@ function sincronizarTarefasCompleto(){
     }catch(e){console.warn('sincronizarTarefasCompleto erro:',e);}
   }).catch(function(){});
 }
-function getPromoAtivas() { try { return JSON.parse(localStorage.getItem('boascompras_promo_ativas') || '[]'); } catch(e) { return []; } }
+var _promoAtivas=JSON.parse(localStorage.getItem('boascompras_promo_ativas')||'[]');
+function getPromoAtivas(){return _promoAtivas;}
+function savePromoAtivas(arr){
+  _promoAtivas=arr;
+  localStorage.setItem('boascompras_promo_ativas',JSON.stringify(arr));
+  _gasPost({action:'salvarPromoAtivas',dados:arr});
+}
 
 function openTarefaModal(prodIdx) {
   var modal = document.getElementById('tarefaModal');
@@ -6483,7 +6594,7 @@ function criarTarefa() {
     var promoAtivas = getPromoAtivas();
     if (!promoAtivas.includes(cod)) {
       promoAtivas.push(cod);
-      localStorage.setItem('boascompras_promo_ativas', JSON.stringify(promoAtivas));
+      savePromoAtivas(promoAtivas);
     }
     renderTable();
     renderPromos();
