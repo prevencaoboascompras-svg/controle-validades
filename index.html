@@ -2798,6 +2798,18 @@ function setDot(t,m){var d=document.getElementById('dot'),tx=document.getElement
 function daysDiff(v){if(!v)return null;var p=v.split('-');if(p.length!==3)return null;var d=new Date(+p[0],+p[1]-1,+p[2]);return Math.floor((d-TODAY)/86400000);}
 function statusFromDays(d){if(d===null)return'sem-data';if(d<=0)return'vencido';if(d<=3)return'critico';if(d<=7)return'urgente';if(d<=15)return'atencao';return'ok';}
 function badge(s){var m={vencido:['b-danger','Vencido'],critico:['b-danger','Critico'],urgente:['b-warn','Urgente'],atencao:['b-warn','Atencao'],ok:['b-ok','OK'],'sem-data':['b-gray','Sem data']};var cl=m[s]||['b-gray','?'];return'<span class="badge '+cl[0]+'">'+cl[1]+'</span>';}
+// Gera o badge circular de quantidade (canto superior esquerdo dos cards) calculando
+// a largura conforme o número de dígitos, para números grandes (ex: 600) não tamparem o título.
+// Retorna {html, headerPadLeft} — headerPadLeft deve ser aplicado ao padding-left do header do card.
+function qtdeBadge(qtde, statusClass, titulo){
+  qtde = qtde || 0;
+  if(!qtde) return {html:'', headerPadLeft:14};
+  var digitos = String(qtde).length;
+  var fontSize = digitos>=4?13:digitos===3?14:16;
+  var padLeft = digitos<=2?48:digitos===3?58:70;
+  var html = '<span class="val-card-qtde-badge '+statusClass+'" style="font-size:'+fontSize+'px" title="'+(titulo||(qtde+' unidades'))+'">'+qtde+'</span>';
+  return {html:html, headerPadLeft:padLeft};
+}
 function barColor(s){return{vencido:'#E24B4A',critico:'#E24B4A',urgente:'#BA7517',atencao:'#EF9F27',ok:'#1D9E75','sem-data':'#888'}[s]||'#888';}
 function fmtDataExtenso(validade){
   if(!validade) return '--';
@@ -2873,9 +2885,10 @@ function renderTable(){
     var badgeSt='status-'+(days===null?'none':s);
     var venceCor=days===null?'var(--tx2)':days<=0?'#ef4444':days<=3?'#f97316':days<=7?'#fbbf24':'var(--tx)';
     var venceTxt=days===null?'Sem data':days<0?'Vencido há '+Math.abs(days)+'d':days===0?'Vence hoje':days===1?'Amanhã':'Faltam '+days+'d';
+    var qb=qtdeBadge(p.qtde,badgeSt,p.qtde+' unidades a vencer');
     return '<div class="'+cardCls+'">'
-      +'<div class="'+hdrCls+'">'
-        +(p.qtde?'<span class="val-card-qtde-badge '+badgeSt+'" title="'+p.qtde+' unidades a vencer">'+p.qtde+'</span>':'')
+      +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px">'
+        +qb.html
         +'<div style="min-width:0;flex:1">'
           +'<div class="urg-card-nome">'+escHtml(cleanNome(p.nome||'--'))+'</div>'
           +'<div class="urg-card-cod">'+(p.cod||'--')+'</div>'
@@ -3332,9 +3345,10 @@ function renderDashboard(){
       var idx=products.indexOf(p);
       var fornProd=p.fornecedor||bancoFornecedor[(p.cod||'').replace(/[^0-9]/g,'')]||'—';
       var urgBadgeSt='status-'+(s==='critico'||s==='vencido'?s:'critico');
+      var qb=qtdeBadge(p.qtde,urgBadgeSt,p.qtde+' unidades a vencer');
       return '<div class="urg-card">'
-        +'<div class="'+hdrCls+'">'
-          +(p.qtde?'<span class="val-card-qtde-badge '+urgBadgeSt+'" title="'+p.qtde+' unidades a vencer">'+p.qtde+'</span>':'')
+        +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px">'
+          +qb.html
           +'<div style="min-width:0;flex:1">'
             +'<div class="urg-card-nome">'+escHtml(cleanNome(p.nome||'—'))+'</div>'
             +'<div class="urg-card-cod">'+(p.cod||'')+'</div>'
@@ -7030,10 +7044,11 @@ function renderEstoque() {
     var venceTxt = days === null ? 'Sem data' : days <= 0 ? 'Vencido' : days === 1 ? 'Amanhã' : 'Faltam ' + days + 'd';
     var totalQtde = lotes.reduce(function(s, p) { return s + (Number(p.qtde) || 0); }, 0);
     var multiLote = lotes.length > 1;
+    var qb = qtdeBadge(totalQtde, badgeSt, totalQtde + ' unidades');
 
     return '<div class="urg-card" onclick="abrirProdutoModal(\'' + escHtml(grupo.cod || '') + '\')" style="cursor:pointer">'
-      + '<div class="' + hdrCls + '">'
-      +   (totalQtde ? '<span class="val-card-qtde-badge ' + badgeSt + '" title="' + totalQtde + ' unidades">' + totalQtde + '</span>' : '')
+      + '<div class="' + hdrCls + '" style="padding-left:' + qb.headerPadLeft + 'px">'
+      +   qb.html
       +   '<div style="min-width:0;flex:1">'
       +     '<div class="urg-card-nome">' + escHtml(cleanNome(p.nome || '—')) + '</div>'
       +     '<div class="urg-card-cod">' + (p.cod || '') + (multiLote ? ' · ' + lotes.length + ' lotes' : '') + '</div>'
