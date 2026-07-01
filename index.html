@@ -2607,7 +2607,10 @@ function parseDate(v){
   var dd=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if(dd)return dd[3]+'-'+dd[2].padStart(2,'0')+'-'+dd[1].padStart(2,'0');
   if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.substring(0,10);
-  if(!isNaN(v)&&Number(v)>1000){var d=new Date((Number(v)-25569)*86400000);return d.toISOString().substring(0,10);}
+  if(!isNaN(v)&&Number(v)>1000){
+    var d=new Date((Number(v)-25569)*86400000);
+    if(!isNaN(d.getTime())) return d.toISOString().substring(0,10);
+  }
   return s.substring(0,10);
 }
 
@@ -3556,6 +3559,7 @@ async function renderUltimasColetas(forceRefresh) {
       var hoje = new Date(); hoje.setHours(0,0,0,0);
 
       rows.forEach(function(row) {
+        try {
         var c = row.c || [];
         var ean = String((c[ciEan]&&c[ciEan].f)||(c[ciEan]&&c[ciEan].v)||'').replace(/[^0-9]/g,'').trim();
         if (!ean) return;
@@ -3569,7 +3573,7 @@ async function renderUltimasColetas(forceRefresh) {
         var dias = null;
         if (valStr) {
           var dv = new Date(valStr + 'T00:00:00');
-          dias = Math.round((dv - hoje) / 86400000);
+          if (!isNaN(dv.getTime())) dias = Math.round((dv - hoje) / 86400000);
         }
 
         // nome do produto pelo banco (EAN → nome)
@@ -3581,11 +3585,16 @@ async function renderUltimasColetas(forceRefresh) {
           var dm = String(ts).match(/Date\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/);
           if (dm) tsDate = new Date(+dm[1], +dm[2], +dm[3], +dm[4], +dm[5], +dm[6]);
           else if (!isNaN(ts)) tsDate = new Date((Number(ts)-25569)*86400000);
+          if (tsDate && isNaN(tsDate.getTime())) tsDate = null;
         }
 
         var email = String((c[ciEmail]&&c[ciEmail].f)||(c[ciEmail]&&c[ciEmail].v)||'').trim().toLowerCase();
         var nomeColeta = _ucResolveNome(email);
         _ucDados.push({ ean: ean, nome: nome, setor: setor, qtde: qtde, dias: dias, valStr: valStr, ts: tsDate, email: email, nomeColeta: nomeColeta });
+        } catch(errLinha) {
+          // Uma linha com dado inesperado não pode derrubar a lista inteira.
+          console.warn('Coleta ignorada (dado inválido na linha):', errLinha);
+        }
       });
 
       // Preencher select de setores
