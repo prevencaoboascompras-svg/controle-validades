@@ -618,6 +618,8 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .dash-hero-num {
   font-size: 54px; font-weight: 800; line-height: 1;
   letter-spacing: -2px; color: var(--fg);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
 }
 .dash-hero-num.clr-red   { color: #f87171; }
 .dash-hero-num.clr-amber { color: #fbbf24; }
@@ -772,7 +774,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .dash-hero.dash-hero-2col { grid-template-columns: 1fr 1fr; }
   .dash-tiles { grid-template-columns: repeat(2, 1fr); }
   .dash-mini-row { grid-template-columns: 1fr; }
-  .dash-hero-num { font-size: 36px; letter-spacing: -1px; }
+  .dash-hero-num { font-size: clamp(20px, 5.4vw, 36px); letter-spacing: -0.5px; }
   .dash-hero-icon { width: 40px; height: 40px; top: 12px; right: 12px; }
   .dash-hero-icon svg { width: 20px; height: 20px; }
   .dash-hero-card { padding: 14px 14px; }
@@ -2582,7 +2584,7 @@ function toggleCfg(){
   if(show){var c=loadCfg();document.getElementById('cId').value=c.id||'';document.getElementById('cAba').value=c.aba||'2025';document.getElementById('cIdBanco').value=c.idBanco||'';document.getElementById('cAbaBanco').value=c.abaBanco||'BANCO DE DADOS';document.getElementById('cAbaResp').value=c.abaResp||'Respostas ao formulario 1';}
 }
 
-function sheetsURL(id,aba){return'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&sheet='+encodeURIComponent(aba);}
+function sheetsURL(id,aba){return'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&headers=1&sheet='+encodeURIComponent(aba);}
 async function fetchSheet(id,aba){
   var r=await fetch(sheetsURL(id,aba));
   if(!r.ok)throw new Error('HTTP '+r.status);
