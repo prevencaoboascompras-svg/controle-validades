@@ -2618,6 +2618,27 @@ var bancoFornecedorNome={}; // índice: nome normalizado → fornecedor (fallbac
 
 // Normaliza nome de produto removendo quantidades "(NUN)", "{N}" e espaços extras
 function normNome(n){return n.replace(/\s*\(.*?\)\s*/g,'').replace(/\s*\{.*?\}/g,'').replace(/\s+/g,' ').trim().toUpperCase();}
+
+// Normaliza texto de busca: minusculas, sem acento, junta numero+unidade ("1 kg" -> "1kg")
+function normBuscaTxt(s){
+  return (s||'').toString().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/(\d+)\s+(kg|g|gr|ml|l|lt|un|und|cx|pct)\b/g,'$1$2')
+    .replace(/\s+/g,' ').trim();
+}
+
+// Compara nome/codigo de um produto com o termo buscado.
+// Aceita as palavras em qualquer ordem: "arroz 1kg" acha qualquer arroz de 1kg, de qualquer marca.
+function matchBusca(nome, cod, busca){
+  var termo = normBuscaTxt(busca);
+  if(!termo) return true;
+  var nomeN = normBuscaTxt(nome);
+  var codN = (cod||'').toString().toLowerCase();
+  if(nomeN.indexOf(termo)!==-1 || codN.indexOf(termo)!==-1) return true;
+  var tokens = termo.split(' ').filter(Boolean);
+  if(tokens.length<=1) return false;
+  return tokens.every(function(tok){ return nomeN.indexOf(tok)!==-1 || codN.indexOf(tok)!==-1; });
+}
 function cleanNome(n){return String(n).replace(/\s*\(\d+[^)]*\)\s*/g,' ').replace(/\s*\{\d+\}\s*/g,' ').replace(/\s+/g,' ').trim();}
 
 async function loadBanco(cfg){
@@ -2845,7 +2866,7 @@ function renderTable(){
         if(s!==status)return false;
       }
     }
-    if(busca&&!(p.nome||'').toLowerCase().includes(busca)&&!(p.cod||'').toLowerCase().includes(busca))return false;
+    if(busca&&!matchBusca(p.nome,p.cod,busca))return false;
     if(!mostrarResolvidos&&resolvidos.includes(produtoChave(p)))return false;
     return true;
   });
@@ -6997,7 +7018,7 @@ function renderEstoque() {
   var listaFiltrada = products.filter(function(p) {
     var nomeNorm = normNome(p.nome || '');
     if (!nomeNorm) return false;
-    if (busca && !nomeNorm.toLowerCase().includes(busca) && !(p.cod || '').toLowerCase().includes(busca)) return false;
+    if (busca && !matchBusca(nomeNorm, p.cod, busca)) return false;
     if (setor && p.setor !== setor) return false;
     return true;
   });
