@@ -2742,8 +2742,10 @@ async function syncAll(){
     }
     if(!hCells.length)throw new Error('Cabecalho nao encontrado. Aba: "'+cfg.aba+'"');
     function colIdx(kws){for(var ki=0;ki<kws.length;ki++){var idx=hCells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().includes(kws[ki].toUpperCase());});if(idx>=0)return idx;}return -1;}
-    var ci={setor:colIdx(['SETOR']),produto:colIdx(['PRODUTO']),validade:colIdx(['VALIDADE']),status:colIdx(['STATUS']),custo:colIdx(['CUSTO']),venda:colIdx(['VALOR VENDA','VENDA']),precodia:colIdx(['DO DIA','PRECO DO DIA']),pct:colIdx(['% REAL','REAL DE DESCONTO']),valordesc:colIdx(['VALOR DO DESCONTO','VALOR DO DESC']),codBarra:colIdx(['COD.BARRAS','COD. BARRAS','CODIGO','BARRAS','EAN','GTIN','COD'])};
+    var ci={setor:colIdx(['SETOR']),produto:colIdx(['PRODUTO']),validade:colIdx(['VALIDADE','VENCIMENTO','VENCE','DT VENC','DATA VENC','DT VALIDADE','DATA VALIDADE']),status:colIdx(['STATUS']),custo:colIdx(['CUSTO']),venda:colIdx(['VALOR VENDA','VENDA']),precodia:colIdx(['DO DIA','PRECO DO DIA']),pct:colIdx(['% REAL','REAL DE DESCONTO']),valordesc:colIdx(['VALOR DO DESCONTO','VALOR DO DESC']),codBarra:colIdx(['COD.BARRAS','COD. BARRAS','CODIGO','BARRAS','EAN','GTIN','COD'])};
     console.log('Cols:',ci);
+    console.log('Cabecalho real da aba (validades):',hCells.map(function(c){return String((c&&c.f)||(c&&c.v)||'');}));
+    if(ci.validade<0)console.warn('VALIDADE: coluna nao encontrada no cabecalho acima — confira o nome exato da coluna na planilha e adicione a palavra-chave correspondente em ci.validade.');
 
     // Índice invertido: nome normalizado -> cod (para cruzamento por nome)
     var bancoNomeIdx={};
