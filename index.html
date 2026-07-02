@@ -1331,9 +1331,8 @@ function toggleTheme() {
       if (ab) { if (antCount>0){ ab.textContent=antCount; ab.style.display='inline-flex'; } else { ab.style.display='none'; } }
     } catch(e){}
     // Sync bar
-    var st = document.getElementById('syncTime');
-    var bar = document.getElementById('auraSyncBar');
-    if (st && bar && st.textContent) bar.textContent = st.textContent;
+    // (removido: linha antiga apagava os filhos de #auraSyncBar via textContent,
+    // destruindo #dot e #stText e quebrando o sync)
   }, 1500);
 })();
 </script>
@@ -2819,7 +2818,7 @@ async function syncAll(){
   }catch(e){setDot('err','Erro: '+e.message);console.error(e);}
   finally{btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Sincronizar';}
 }
-function setDot(t,m){var d=document.getElementById('dot'),tx=document.getElementById('stText');d.className='dot'+(t==='ok'?' ok':t==='err'?' err':t==='loading'?' loading':'');tx.innerHTML=m;}
+function setDot(t,m){var d=document.getElementById('dot'),tx=document.getElementById('stText');if(d)d.className='dot'+(t==='ok'?' ok':t==='err'?' err':t==='loading'?' loading':'');if(tx)tx.innerHTML=m;}
 
 function daysDiff(v){if(!v)return null;var p=v.split('-');if(p.length!==3)return null;var d=new Date(+p[0],+p[1]-1,+p[2]);return Math.floor((d-TODAY)/86400000);}
 function statusFromDays(d){if(d===null)return'sem-data';if(d<=0)return'vencido';if(d<=3)return'critico';if(d<=7)return'urgente';if(d<=15)return'atencao';return'ok';}
@@ -5882,7 +5881,7 @@ function _gasGet(action,extra){
 function cloudLoad(){
   var acoes=[
     {a:'buscarEncartes',   fn:function(d){_encartesAtivos=d;localStorage.setItem(ENC_KEY,JSON.stringify(d));atualizarBadge();renderEncartesAtivos&&renderEncartesAtivos();}},
-    {a:'buscarNegociacoes',fn:function(d){_negociacoes=d;localStorage.setItem(NEG_KEY,JSON.stringify(d));atualizarNegBadge&&atualizarNegBadge();renderNegociacoes&&renderNegociacoes();}},
+    {a:'buscarNegociacoes',fn:function(d){_negociacoes=d;localStorage.setItem(NEG_KEY,JSON.stringify(d));atualizarNegBadge&&atualizarNegBadge();typeof renderNegociacoes==='function'&&renderNegociacoes();}},
     {a:'buscarResolvidos', fn:function(d){_resolvidos=d;localStorage.setItem(RESOLVIDOS_KEY,JSON.stringify(d));}},
     {a:'buscarEncerradas', fn:function(d){_encerradas=d;localStorage.setItem(PROMO_ENC_KEY,JSON.stringify(d));renderPromos&&renderPromos();}},
     {a:'buscarBiblioteca', fn:function(d){_biblioteca=d;localStorage.setItem(BIB_KEY,JSON.stringify(d));atualizarBibBadge&&atualizarBibBadge();}},
