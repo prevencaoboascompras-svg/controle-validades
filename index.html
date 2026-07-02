@@ -1330,10 +1330,7 @@ function toggleTheme() {
       var ab = document.getElementById('asBadgeAnt');
       if (ab) { if (antCount>0){ ab.textContent=antCount; ab.style.display='inline-flex'; } else { ab.style.display='none'; } }
     } catch(e){}
-    // Sync bar
-    var st = document.getElementById('syncTime');
-    var bar = document.getElementById('auraSyncBar');
-    if (st && bar && st.textContent) bar.textContent = st.textContent;
+    // Sync bar — removido: substituir bar.textContent apagava os filhos (#dot, #stText, #syncTime, botão Configurar)
   }, 1500);
 })();
 </script>
@@ -2731,20 +2728,32 @@ async function syncAll(){
     var rows=rawRows(table);
     if(!rows.length)throw new Error('Nenhuma linha');
     var HKW=['PRODUTO','SETOR','VALIDADE','STATUS','VENDA','DESCONTO','CUSTO'];
-    var hIdx=-1,hCells=[];
+    function scoreCells(cellArr){
+      return HKW.filter(function(k){
+        return cellArr.some(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().includes(k);});
+      }).length;
+    }
     var colLabels=table.cols.map(function(c){return{v:c.label||'',f:c.label||''};});
-    if(HKW.filter(function(k){return colLabels.some(function(c){return String(c.v).toUpperCase().includes(k);});}).length>=3){hIdx=-1;hCells=colLabels;}
-    if(!hCells.length){
-      for(var i=0;i<Math.min(10,rows.length);i++){
-        var cells=rows[i].c||[];
-        var txt=cells.map(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase();}).join('|');
-        if(HKW.filter(function(k){return txt.includes(k);}).length>=2){hIdx=i;hCells=cells;break;}
-      }
+    var scoreMeta=scoreCells(colLabels);
+    var bestRowIdx=-1,bestRowScore=0,bestRowCells=[];
+    for(var i=0;i<Math.min(10,rows.length);i++){
+      var cellsProbe=rows[i].c||[];
+      var sc=scoreCells(cellsProbe);
+      if(sc>bestRowScore){bestRowScore=sc;bestRowIdx=i;bestRowCells=cellsProbe;}
+    }
+    var hIdx=-1,hCells=[];
+    if(scoreMeta>=3&&scoreMeta>=bestRowScore){
+      hIdx=-1;hCells=colLabels;
+      console.log('Cabecalho via table.cols (headers=1), score='+scoreMeta);
+    }else if(bestRowScore>=2){
+      hIdx=bestRowIdx;hCells=bestRowCells;
+      console.log('Cabecalho via varredura de conteudo, linha '+bestRowIdx+', score='+bestRowScore);
     }
     if(!hCells.length)throw new Error('Cabecalho nao encontrado. Aba: "'+cfg.aba+'"');
     function colIdx(kws){for(var ki=0;ki<kws.length;ki++){var idx=hCells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().includes(kws[ki].toUpperCase());});if(idx>=0)return idx;}return -1;}
-    var ci={setor:colIdx(['SETOR']),produto:colIdx(['PRODUTO']),validade:colIdx(['VALIDADE']),status:colIdx(['STATUS']),custo:colIdx(['CUSTO']),venda:colIdx(['VALOR VENDA','VENDA']),precodia:colIdx(['DO DIA','PRECO DO DIA']),pct:colIdx(['% REAL','REAL DE DESCONTO']),valordesc:colIdx(['VALOR DO DESCONTO','VALOR DO DESC']),codBarra:colIdx(['COD.BARRAS','COD. BARRAS','CODIGO','BARRAS','EAN','GTIN','COD'])};
+    var ci={setor:colIdx(['SETOR']),produto:colIdx(['PRODUTO']),validade:colIdx(['VALIDADE','VENCIMENTO']),status:colIdx(['STATUS']),custo:colIdx(['CUSTO']),venda:colIdx(['VALOR VENDA','VENDA']),precodia:colIdx(['DO DIA','PRECO DO DIA']),pct:colIdx(['% REAL','REAL DE DESCONTO']),valordesc:colIdx(['VALOR DO DESCONTO','VALOR DO DESC']),codBarra:colIdx(['COD.BARRAS','COD. BARRAS','CODIGO','BARRAS','EAN','GTIN','COD'])};
     console.log('Cols:',ci);
+    if(ci.validade<0)console.warn('VALIDADE nao encontrada! Cabecalhos vistos:',hCells.map(function(c){return(c&&c.f)||(c&&c.v)||'';}).filter(Boolean));
 
     // Índice invertido: nome normalizado -> cod (para cruzamento por nome)
     var bancoNomeIdx={};
