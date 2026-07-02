@@ -2581,9 +2581,9 @@ function toggleCfg(){
   if(show){var c=loadCfg();document.getElementById('cId').value=c.id||'';document.getElementById('cAba').value=c.aba||'2025';document.getElementById('cIdBanco').value=c.idBanco||'';document.getElementById('cAbaBanco').value=c.abaBanco||'BANCO DE DADOS';document.getElementById('cAbaResp').value=c.abaResp||'Respostas ao formulario 1';}
 }
 
-function sheetsURL(id,aba){return'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&headers=1&sheet='+encodeURIComponent(aba);}
-async function fetchSheet(id,aba){
-  var r=await fetch(sheetsURL(id,aba));
+function sheetsURL(id,aba,headerRows){return'https://docs.google.com/spreadsheets/d/'+id+'/gviz/tq?tqx=out:json&headers='+(headerRows||1)+'&sheet='+encodeURIComponent(aba);}
+async function fetchSheet(id,aba,headerRows){
+  var r=await fetch(sheetsURL(id,aba,headerRows));
   if(!r.ok)throw new Error('HTTP '+r.status);
   var t=await r.text();
   var j=JSON.parse(t.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
@@ -2724,7 +2724,7 @@ async function syncAll(){
   setDot('loading','Sincronizando...');
   try{
     await loadBanco(cfg);
-    var table=await fetchSheet(cfg.id,cfg.aba);
+    var table=await fetchSheet(cfg.id,cfg.aba,2);
     var rows=rawRows(table);
     if(!rows.length)throw new Error('Nenhuma linha');
     var HKW=['PRODUTO','SETOR','VALIDADE','STATUS','VENDA','DESCONTO','CUSTO'];
