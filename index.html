@@ -364,13 +364,16 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
 .enc-tab.active{color:var(--tx);border-bottom-color:var(--green)}
 .enc-tab:hover:not(.active){color:var(--tx)}
 /* ── Impressão ── */
+@page{size:A4 portrait;margin:0}
 @media print{
+  html,body{margin:0!important;padding:0!important}
   body>*{display:none!important}
-  #printArea{display:grid!important;position:fixed!important;inset:0!important;padding:8mm!important;background:#fff!important;box-sizing:border-box!important}
+  #printArea{display:grid!important;position:fixed!important;inset:0!important;width:210mm!important;height:297mm!important;padding:8mm!important;background:#fff!important;box-sizing:border-box!important;overflow:hidden!important}
   #printArea.lay2{grid-template-columns:1fr 1fr;gap:6mm}
   #printArea.lay4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:5mm}
   #printArea.lay6{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:4mm}
   #printArea.lay9{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:3mm}
+  #printArea>*{min-width:0!important;min-height:0!important;overflow:hidden!important}
   #printArea img{width:100%;height:100%;object-fit:contain;display:block}
 }
 
@@ -1070,6 +1073,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
       </div>
       <input type="password" class="login-input" id="loginSenha"
         placeholder="Digite sua senha"
+        autocomplete="off"
         onkeydown="if(event.key==='Enter')tentarLogin()">
       <button class="login-btn" id="loginBtn" onclick="tentarLogin()" type="button">Entrar</button>
     </div>
@@ -1102,8 +1106,18 @@ function selecionarUsuario(usuario) {
   // Exibe campo de senha
   document.getElementById('loginSenhaWrap').classList.add('visible');
   document.getElementById('loginErro').classList.remove('show');
-  document.getElementById('loginSenha').value = '';
-  setTimeout(function(){ document.getElementById('loginSenha').focus(); }, 320);
+  var campoSenha = document.getElementById('loginSenha');
+  campoSenha.value = '';
+  // Teclado numérico apenas para usuários com senha só de números (ex: Leonardo)
+  var _SENHAS_NUMERICAS = ['leonardo'];
+  if (_SENHAS_NUMERICAS.indexOf(usuario) !== -1) {
+    campoSenha.setAttribute('inputmode', 'numeric');
+    campoSenha.setAttribute('pattern', '[0-9]*');
+  } else {
+    campoSenha.setAttribute('inputmode', 'text');
+    campoSenha.removeAttribute('pattern');
+  }
+  setTimeout(function(){ campoSenha.focus(); }, 320);
 }
 
 // SHA-256 síncrono em JS puro — funciona em qualquer navegador/dispositivo
