@@ -1918,6 +1918,17 @@ function toggleTheme() {
       <button class="promo-filter-btn" id="tf_pendentes" onclick="filtrarTarefas('pendentes')">Pendentes</button>
       <button class="promo-filter-btn" id="tf_concluidas" onclick="filtrarTarefas('concluidas')">Concluídas</button>
     </div>
+    <div id="tarefasBulkBar" style="display:none;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;user-select:none">
+        <input type="checkbox" id="tarefasSelecionarTodasChk" onchange="toggleSelecionarTodasTarefas(this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)">
+        Selecionar todas
+      </label>
+      <span id="tarefasSelecionadasCount" style="font-size:12px;color:var(--tx2)"></span>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-sm" style="color:var(--blue);border-color:var(--blue)" onclick="abrirTransferirModalMultiplo(Array.from(window._tarefasSelecionadas||[]))"><i class="ti ti-arrows-exchange"></i> Transferir selecionadas</button>
+        <button class="btn btn-sm" onclick="limparSelecaoTarefas()">Cancelar seleção</button>
+      </div>
+    </div>
     <div id="tarefasGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
   </div>
   <div id="sec-ajuda" class="sec">
@@ -6718,10 +6729,83 @@ function sincronizarTarefasCompleto(){
       tarefasSheets.forEach(function(t){mapaLocal[t.id]=t;});
       saveTarefas(Object.values(mapaLocal));
       renderTarefas();
+      // Tarefas confirmadas com 0 unidades: baixa automática do estoque/pendências
+      processarTarefasConcluidasZero();
       // Agora tenta reenviar o que ficou offline
       reenviarFilaTarefas();
     }catch(e){console.warn('sincronizarTarefasCompleto erro:',e);}
   }).catch(function(){});
+}
+
+// ═══ Baixa automática de estoque quando tarefa é confirmada com 0 unidades ═══
+var TAREFAS_ZERO_KEY='boascompras_tarefas_zero_processadas';
+function getTarefasZeroProcessadas(){try{return JSON.parse(localStorage.getItem(TAREFAS_ZERO_KEY)||'[]');}catch(e){return[];}}
+function saveTarefasZeroProcessadas(arr){localStorage.setItem(TAREFAS_ZERO_KEY,JSON.stringify(arr));}
+
+function processarTarefasConcluidasZero(){
+  var tarefas=getTarefas();
+  var jaProcessadas=getTarefasZeroProcessadas();
+  var alvo=tarefas.filter(function(t){
+    return t.status==='concluida'
+      && t.quantidadeConfirmada!==null && t.quantidadeConfirmada!==undefined
+      && parseInt(t.quantidadeConfirmada)===0
+      && t.cod
+      && jaProcessadas.indexOf(t.id)===-1;
+  });
+  if(!alvo.length)return;
+
+  var resolvidos=getResolvidos();
+  var promoAtivas=getPromoAtivas();
+  var negs=getNegociacoes();
+  var houveMudanca=false;
+
+  alvo.forEach(function(t){
+    // Encontra o(s) lote(s) do produto no banco atual (mesmo código de barras)
+    var lotes=products.filter(function(p){
+      if((p.cod||'')!==t.cod)return false;
+      if(t.validade)return (p.validade||'')===t.validade;
+      return true;
+    });
+    if(!lotes.length){
+      // Produto pode já ter sido removido da base — ainda assim marca a tarefa como processada
+      jaProcessadas.push(t.id);
+      return;
+    }
+
+    lotes.forEach(function(p){
+      var chave=produtoChave(p);
+      if(!resolvidos.includes(chave)){resolvidos.push(chave);houveMudanca=true;}
+      var qtdeLote=p.qtde||1;
+      var custo=p.custo||0;
+      negs.unshift({
+        id:Date.now()+Math.floor(Math.random()*1000),
+        data:new Date().toISOString().substring(0,10),
+        cod:p.cod,nome:p.nome,setor:p.setor,
+        precoNormal:p.precoNormal||0,custo:custo,fornecedor:p.fornecedor||'',
+        obs:'Confirmado sem estoque em loja por '+(t.nomeColaborador||'colaborador')+' (tarefa '+t.id+')',
+        loteId:'lote-'+Date.now(),qtdeTotal:qtdeLote,
+        qtde:qtdeLote,precoPraticado:custo,
+        valorTotal:custo>0?custo*qtdeLote:0,
+        valorDesc:0,tipo:'descarte'
+      });
+      houveMudanca=true;
+    });
+
+    if(!promoAtivas.includes(t.cod)){promoAtivas.push(t.cod);houveMudanca=true;}
+    jaProcessadas.push(t.id);
+  });
+
+  saveTarefasZeroProcessadas(jaProcessadas);
+  if(houveMudanca){
+    saveResolvidos(resolvidos);
+    savePromoAtivas(promoAtivas);
+    saveNegociacoes(negs);
+    renderTable();
+    renderPromos();
+    if(typeof renderRelatorio==='function')renderRelatorio();
+    if(typeof atualizarNegBadge==='function')atualizarNegBadge();
+    mostrarToast(alvo.length>1?alvo.length+' produtos baixados do estoque (0 un. confirmado)':'Produto baixado do estoque — 0 un. confirmado','warn');
+  }
 }
 var _promoAtivas=JSON.parse(localStorage.getItem('boascompras_promo_ativas')||'[]');
 function getPromoAtivas(){return _promoAtivas;}
@@ -6885,6 +6969,12 @@ function renderTarefas() {
   if (!container) return;
   var tarefas = getTarefas();
   var filtro = window._tarefasFiltro || 'todas';
+  var selecionadas = window._tarefasSelecionadas || (window._tarefasSelecionadas = new Set());
+  // remove da seleção tarefas que não existem mais ou que deixaram de ser pendentes
+  Array.from(selecionadas).forEach(function(id) {
+    var ainda = tarefas.some(function(t) { return t.id === id && t.status === 'pendente'; });
+    if (!ainda) selecionadas.delete(id);
+  });
   
   var filtered = tarefas.filter(function(t) {
     if (filtro === 'pendentes') return t.status === 'pendente';
@@ -6918,6 +7008,7 @@ function renderTarefas() {
     return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;transition:border-color .15s">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
       +   '<div style="display:flex;align-items:center;gap:8px">'
+      +     (isPend ? '<input type="checkbox" class="tarefaChk" data-id="' + t.id + '" ' + (selecionadas.has(t.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + t.id + '\',this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)" title="Selecionar tarefa">' : '')
       +     '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + (isPend ? 'rgba(245,158,11,.15)' : 'rgba(16,185,129,.15)') + ';color:' + statusColor + '"><i class="ti ' + statusIcon + '"></i> ' + statusText + '</span>'
       +     '<span style="font-size:11px;color:var(--muted)">' + dataFmt + '</span>'
       +   '</div>'
@@ -6938,6 +7029,8 @@ function renderTarefas() {
       + '</div>';
   }).join('');
   
+  atualizarTarefasBulkBar();
+  
   var pendCount = tarefas.filter(function(t) { return t.status === 'pendente'; }).length;
   var badge = document.getElementById('asBadgeTarefas');
   if (badge) {
@@ -6946,11 +7039,52 @@ function renderTarefas() {
   }
 }
 
+// ═══ Seleção múltipla de tarefas (delegar/transferir em lote) ═══
+function toggleSelecaoTarefa(id, checked) {
+  var sel = window._tarefasSelecionadas || (window._tarefasSelecionadas = new Set());
+  if (checked) sel.add(id); else sel.delete(id);
+  atualizarTarefasBulkBar();
+}
+
+function toggleSelecionarTodasTarefas(checked) {
+  var sel = window._tarefasSelecionadas || (window._tarefasSelecionadas = new Set());
+  var filtro = window._tarefasFiltro || 'todas';
+  var visiveisPendentes = filtro === 'concluidas' ? [] : getTarefas().filter(function(t) { return t.status === 'pendente'; });
+  visiveisPendentes.forEach(function(t) {
+    if (checked) sel.add(t.id); else sel.delete(t.id);
+  });
+  renderTarefas();
+}
+
+function limparSelecaoTarefas() {
+  window._tarefasSelecionadas = new Set();
+  renderTarefas();
+}
+
+function atualizarTarefasBulkBar() {
+  var sel = window._tarefasSelecionadas || (window._tarefasSelecionadas = new Set());
+  var bar = document.getElementById('tarefasBulkBar');
+  if (!bar) return;
+  var count = document.getElementById('tarefasSelecionadasCount');
+  if (sel.size > 0) {
+    bar.style.display = 'flex';
+    if (count) count.textContent = sel.size + (sel.size > 1 ? ' tarefas selecionadas' : ' tarefa selecionada');
+  } else {
+    bar.style.display = 'none';
+  }
+  var chkTodas = document.getElementById('tarefasSelecionarTodasChk');
+  if (chkTodas) {
+    var pendentes = getTarefas().filter(function(t) { return t.status === 'pendente'; });
+    chkTodas.checked = pendentes.length > 0 && pendentes.every(function(t) { return sel.has(t.id); });
+  }
+}
+
 function cancelarTarefa(id) {
   var tarefas = getTarefas();
   var t = tarefas.find(function(x) { return x.id === id; });
   var restantes = tarefas.filter(function(x) { return x.id !== id; });
   saveTarefas(restantes);
+  if (window._tarefasSelecionadas) window._tarefasSelecionadas.delete(id);
 
   if (t && t.cod) {
     var aindaReferenciado = restantes.some(function(x) { return x.cod === t.cod && x.status === 'pendente'; });
@@ -6967,19 +7101,36 @@ function cancelarTarefa(id) {
 }
 
 function abrirTransferirModal(id) {
-  var tarefas = getTarefas();
-  var t = tarefas.find(function(x) { return x.id === id; });
-  if (!t) return;
+  abrirTransferirModalMultiplo([id]);
+}
 
-  document.getElementById('transferirTarefaId').value = id;
-  document.getElementById('transferirProdNome').textContent = t.produto + (t.cod ? ' — ' + t.cod : '');
-  document.getElementById('transferirAtualColab').querySelector('span').textContent = 'Atual: ' + t.nomeColaborador;
+function abrirTransferirModalMultiplo(ids) {
+  ids = (ids || []).filter(Boolean);
+  if (!ids.length) { mostrarToast('Selecione ao menos uma tarefa para transferir', 'err'); return; }
+
+  var tarefas = getTarefas();
+  var selecionadas = tarefas.filter(function(t) { return ids.indexOf(t.id) > -1 && t.status === 'pendente'; });
+  if (!selecionadas.length) { mostrarToast('Nenhuma tarefa pendente selecionada', 'err'); return; }
+
+  window._transferirIds = selecionadas.map(function(t) { return t.id; });
+  document.getElementById('transferirTarefaId').value = window._transferirIds.join(',');
   document.getElementById('transferirMotivo').value = '';
+
+  var atualColabRow = document.getElementById('transferirAtualColab');
+  if (selecionadas.length === 1) {
+    var t = selecionadas[0];
+    document.getElementById('transferirProdNome').textContent = t.produto + (t.cod ? ' — ' + t.cod : '');
+    atualColabRow.style.display = 'flex';
+    atualColabRow.querySelector('span').textContent = 'Atual: ' + t.nomeColaborador;
+  } else {
+    document.getElementById('transferirProdNome').textContent = selecionadas.length + ' tarefas selecionadas';
+    atualColabRow.style.display = 'none';
+  }
 
   var sel = document.getElementById('transferirNovoColab');
   sel.innerHTML = '<option value="">Selecione o colaborador...</option>';
   COLABORADORES.forEach(function(c) {
-    if (c.email === t.email) return;
+    if (selecionadas.length === 1 && c.email === selecionadas[0].email) return;
     sel.innerHTML += '<option value="' + c.email + '">' + c.nome + (c.email ? ' (' + c.email + ')' : '') + '</option>';
   });
 
@@ -6987,45 +7138,58 @@ function abrirTransferirModal(id) {
 }
 
 function confirmarTransferencia() {
-  var id = document.getElementById('transferirTarefaId').value;
+  var ids = window._transferirIds || (document.getElementById('transferirTarefaId').value || '').split(',').filter(Boolean);
   var novoEmail = document.getElementById('transferirNovoColab').value;
   var motivo = document.getElementById('transferirMotivo').value.trim();
 
   if (!novoEmail) { mostrarToast('Selecione o novo colaborador', 'err'); return; }
+  if (!ids.length) return;
 
   var novoColab = COLABORADORES.find(function(c) { return c.email === novoEmail; });
   var nomeNovo = novoColab ? novoColab.nome : novoEmail;
 
   var tarefas = getTarefas();
-  var t = tarefas.find(function(x) { return x.id === id; });
-  if (!t) return;
+  var transferidas = [];
 
-  var nomeAnterior = t.nomeColaborador;
-  t.emailAnterior = t.email;
-  t.nomeAnterior = nomeAnterior;
-  t.email = novoEmail;
-  t.nomeColaborador = nomeNovo;
-  t.transferidoEm = new Date().toISOString();
-  t.motivoTransferencia = motivo || null;
-  if (motivo) t.descricao = (t.descricao ? t.descricao + ' | ' : '') + 'Transferido de ' + nomeAnterior + ': ' + motivo;
-  else t.descricao = (t.descricao ? t.descricao + ' | ' : '') + 'Transferido de ' + nomeAnterior;
+  ids.forEach(function(id) {
+    var t = tarefas.find(function(x) { return x.id === id; });
+    if (!t) return;
+    var nomeAnterior = t.nomeColaborador;
+    t.emailAnterior = t.email;
+    t.nomeAnterior = nomeAnterior;
+    t.email = novoEmail;
+    t.nomeColaborador = nomeNovo;
+    t.transferidoEm = new Date().toISOString();
+    t.motivoTransferencia = motivo || null;
+    if (motivo) t.descricao = (t.descricao ? t.descricao + ' | ' : '') + 'Transferido de ' + nomeAnterior + ': ' + motivo;
+    else t.descricao = (t.descricao ? t.descricao + ' | ' : '') + 'Transferido de ' + nomeAnterior;
+    transferidas.push(t);
+  });
+
+  if (!transferidas.length) return;
 
   saveTarefas(tarefas);
 
   var cfg = loadCfg();
   if (cfg.url) {
-    fetch(cfg.url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-      body: JSON.stringify({ action: 'transferirTarefa', tarefa: t })
-    }).catch(function() {
-      mostrarToast('Transferência salva localmente — sem conexão ao Sheets', 'warn');
+    transferidas.forEach(function(t) {
+      fetch(cfg.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify({ action: 'transferirTarefa', tarefa: t })
+      }).catch(function() {
+        mostrarToast('Transferência salva localmente — sem conexão ao Sheets', 'warn');
+      });
     });
   }
 
+  window._transferirIds = [];
   closeModal('transferirModal');
+  if (window._tarefasSelecionadas) {
+    transferidas.forEach(function(t) { window._tarefasSelecionadas.delete(t.id); });
+  }
   renderTarefas();
-  mostrarToast('Tarefa transferida para ' + nomeNovo, 'ok');
+  mostrarToast(transferidas.length > 1 ? transferidas.length + ' tarefas transferidas para ' + nomeNovo : 'Tarefa transferida para ' + nomeNovo, 'ok');
 }
 
 function filtrarTarefas(filtro) {
