@@ -2782,8 +2782,14 @@ async function syncAll(){
       }
     }
     if(!hCells.length)throw new Error('Cabecalho nao encontrado. Aba: "'+cfg.aba+'"');
-    function colIdx(kws){for(var ki=0;ki<kws.length;ki++){var idx=hCells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().includes(kws[ki].toUpperCase());});if(idx>=0)return idx;}return -1;}
-    var ci={setor:colIdx(['SETOR']),produto:colIdx(['PRODUTO']),validade:colIdx(['VALIDADE','VENCIMENTO','VENCE','DT VENC','DATA VENC','DT VALIDADE','DATA VALIDADE']),status:colIdx(['STATUS']),custo:colIdx(['CUSTO']),venda:colIdx(['VALOR VENDA','VENDA']),precodia:colIdx(['DO DIA','PRECO DO DIA']),pct:colIdx(['% REAL','REAL DE DESCONTO']),valordesc:colIdx(['VALOR DO DESCONTO','VALOR DO DESC']),codBarra:colIdx(['COD.BARRAS','COD. BARRAS','CODIGO','BARRAS','EAN','GTIN','COD'])};
+    function colIdx(kws){for(var ki=0;ki<kws.length;ki++){var idx=hCells.findIndex(function(c){return String((c&&c.f)||(c&&c.v)||'').toUpperCase().replace(/\s+/g,' ').trim().includes(kws[ki].toUpperCase());});if(idx>=0)return idx;}return -1;}
+    var ci={setor:colIdx(['SETOR']),produto:colIdx(['PRODUTO']),validade:colIdx(['VALIDADE','VENCIMENTO','VENCE','DT VENC','DATA VENC','DT VALIDADE','DATA VALIDADE']),status:colIdx(['STATUS']),custo:colIdx(['CUSTO']),venda:colIdx(['VALOR VENDA','VENDA']),precodia:colIdx(['DO DIA','PRECO DO DIA']),pct:colIdx(['% REAL','REAL DE DESCONTO']),valordesc:colIdx(['VALOR DO DESCONTO','VALOR DO DESC']),codBarra:colIdx(['COD.BARRAS','COD. BARRAS','CODIGO','BARRAS','EAN','GTIN','COD']),
+      // Coluna de quantidade REAL do lote (a que o app atualiza ao confirmar tarefas).
+      // Prioriza "QTD TROCA" (nome usado na planilha atual) antes de termos genéricos
+      // como "QUANTIDADE", que poderiam casar com a coluna errada (ex: "QTD INICIAL",
+      // que é só o valor de referência do primeiro lançamento, não o estoque atual).
+      qtde:colIdx(['QTD TROCA','QTD ATUAL','QTD REAL','QUANTIDADE ATUAL','QUANTIDADE REAL'])};
+    if(ci.qtde<0)console.warn('QTDE: coluna "QTD TROCA" nao encontrada — usando fallback de extrair numero do nome do produto (menos confiavel).');
     console.log('Cols:',ci);
     console.log('Cabecalho real da aba (validades):',hCells.map(function(c){return String((c&&c.f)||(c&&c.v)||'');}));
     if(ci.validade<0)console.warn('VALIDADE: coluna nao encontrada no cabecalho acima — confira o nome exato da coluna na planilha e adicione a palavra-chave correspondente em ci.validade.');
@@ -2850,7 +2856,17 @@ async function syncAll(){
       var custoBanco=cod?bancoCusto[cod]||0:0;
       // Custo: preferir o da planilha principal se existir, senão usar o do banco
       var custoFinal=cellNum(cells[ci.custo])||custoBanco;
-      sheetsData.push({cod:cod,nome:nome,setor:cellStr(cells[ci.setor]),validade:validade,status:status,qtde:(function(n){var m=n.match(/\{(\d+)\}/);return m?parseInt(m[1]):1;})(nome),custo:custoFinal,fornecedor:fornBanco,precoNormal:cellNum(cells[ci.venda]),precoPromo:cellNum(cells[ci.precodia]),pctDesc:cellNum(cells[ci.pct]),valorDesc:cellNum(cells[ci.valordesc]),src:'sheets'});
+      // Quantidade: prioriza o valor NUMÉRICO da coluna QTD TROCA (é o que o app
+      // atualiza de verdade ao confirmar tarefas). Só cai no "{n}" extraído do nome
+      // se a coluna não foi detectada nesta planilha — mantém compatibilidade com
+      // layouts antigos, mas evita o card ficar preso ao texto desatualizado.
+      // cellNum() sempre retorna 0 pra célula vazia/inválida (nunca null/NaN),
+      // então só confiamos na coluna quando o valor é > 0 — evita que linhas
+      // antigas/manuais (ex: acima de CFG.LINHA_ESCRITA) sem essa coluna
+      // preenchida virem "0 unidades" por engano em vez de cair no fallback.
+      var qtdeColuna=ci.qtde>=0?cellNum(cells[ci.qtde]):0;
+      var qtdeFinal=qtdeColuna>0?qtdeColuna:(function(n){var m=n.match(/\{(\d+)\}/);return m?parseInt(m[1]):1;})(nome);
+      sheetsData.push({cod:cod,nome:nome,setor:cellStr(cells[ci.setor]),validade:validade,status:status,qtde:qtdeFinal,custo:custoFinal,fornecedor:fornBanco,precoNormal:cellNum(cells[ci.venda]),precoPromo:cellNum(cells[ci.precodia]),pctDesc:cellNum(cells[ci.pct]),valorDesc:cellNum(cells[ci.valordesc]),src:'sheets'});
     }
     products=sheetsData.concat(local);
     aplicarSetorCorrigido();
