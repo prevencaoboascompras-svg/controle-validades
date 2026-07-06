@@ -6893,6 +6893,11 @@ function openTarefaModal(prodIdx) {
   document.getElementById('tarefaCod').value = p ? (p.cod || '') : '';
   document.getElementById('tarefaDescricao').value = '';
   
+  preencherLotesValidade(p ? p.cod : '');
+  
+  var codInput = document.getElementById('tarefaCod');
+  codInput.oninput = function() { preencherLotesValidade(this.value.trim()); };
+  
   var sel = document.getElementById('tarefaColaborador');
   sel.innerHTML = '<option value="">Selecione o colaborador...</option>';
   COLABORADORES.forEach(function(c) {
@@ -6900,6 +6905,36 @@ function openTarefaModal(prodIdx) {
   });
   
   modal.classList.add('open');
+}
+
+function preencherLotesValidade(cod) {
+  var wrap = document.getElementById('tarefaValidadeWrap');
+  var sel = document.getElementById('tarefaValidade');
+  sel.innerHTML = '';
+  if (!cod) { wrap.style.display = 'none'; return; }
+  
+  var lotes = (typeof products !== 'undefined' ? products : []).filter(function(prod) {
+    return prod.cod && String(prod.cod).trim() === String(cod).trim() && prod.validade;
+  });
+  
+  // remove duplicados de mesma validade
+  var vistos = {};
+  lotes = lotes.filter(function(prod) {
+    var key = String(prod.validade);
+    if (vistos[key]) return false;
+    vistos[key] = true;
+    return true;
+  }).sort(function(a, b) { return (daysDiff(a.validade) || 9999) - (daysDiff(b.validade) || 9999); });
+  
+  if (!lotes.length) { wrap.style.display = 'none'; return; }
+  
+  lotes.forEach(function(prod) {
+    var opt = document.createElement('option');
+    opt.value = prod.validade;
+    opt.textContent = fmtDataExtenso(prod.validade) + (prod.qtde ? ' — ' + prod.qtde + ' un.' : '');
+    sel.appendChild(opt);
+  });
+  wrap.style.display = lotes.length ? 'block' : 'none';
 }
 
 function criarTarefa() {
@@ -6913,6 +6948,9 @@ function criarTarefa() {
   
   var colab = COLABORADORES.find(function(c) { return c.email === email; });
   
+  var validadeWrap = document.getElementById('tarefaValidadeWrap');
+  var validadeSelecionada = (validadeWrap.style.display !== 'none' && document.getElementById('tarefaValidade').value) || null;
+  
   var tarefa = {
     id: 'T' + Date.now(),
     produto: produto,
@@ -6922,6 +6960,7 @@ function criarTarefa() {
     nomeColaborador: colab ? colab.nome : email,
     status: 'pendente',
     quantidadeConfirmada: null,
+    validade: validadeSelecionada,
     criadoEm: new Date().toISOString(),
     confirmadoEm: null,
     criadoPor: 'gestor'
@@ -7004,13 +7043,25 @@ function renderTarefas() {
     if (t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
       qtdeInfo = '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:600"><i class="ti ti-package"></i> Quantidade confirmada: <b>' + t.quantidadeConfirmada + ' un.</b></div>';
     }
+
+    var qtdeBadge = '';
+    if (t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
+      qtdeBadge = '<span style="position:absolute;top:-8px;right:-8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);border:2px solid var(--surface)">' + t.quantidadeConfirmada + '</span>';
+    }
+
+    var validadeInfo = '';
+    if (t.validade) {
+      var dv = daysDiff(t.validade);
+      var corVal = (dv !== null && dv <= 3) ? 'var(--red)' : (dv !== null && dv <= 7 ? 'var(--amber)' : 'var(--tx2)');
+      validadeInfo = '<div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,.1);color:' + corVal + ';margin-bottom:6px"><i class="ti ti-calendar-exclamation"></i> Validade: ' + fmtDataExtenso(t.validade) + '</div>';
+    }
     
-    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;transition:border-color .15s">'
+    return '<div style="position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;transition:border-color .15s">'
+      + qtdeBadge
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
       +   '<div style="display:flex;align-items:center;gap:8px">'
       +     (isPend ? '<input type="checkbox" class="tarefaChk" data-id="' + t.id + '" ' + (selecionadas.has(t.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + t.id + '\',this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)" title="Selecionar tarefa">' : '')
       +     '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + (isPend ? 'rgba(245,158,11,.15)' : 'rgba(16,185,129,.15)') + ';color:' + statusColor + '"><i class="ti ' + statusIcon + '"></i> ' + statusText + '</span>'
-      +     '<span style="font-size:11px;color:var(--muted)">' + dataFmt + '</span>'
       +   '</div>'
       +   (isPend ? '<div style="display:flex;gap:6px">'
       +     '<button class="btn btn-sm" style="color:var(--blue);border-color:var(--blue);font-size:11px;padding:3px 8px" onclick="abrirTransferirModal(\'' + t.id + '\')" title="Transferir para outro colaborador"><i class="ti ti-arrows-exchange"></i> Transferir</button>'
@@ -7019,13 +7070,17 @@ function renderTarefas() {
       + '</div>'
       + '<div style="font-size:14px;font-weight:600;margin-bottom:4px">' + escHtml(t.produto) + '</div>'
       + (t.cod ? '<div style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:6px">' + t.cod + '</div>' : '')
-      + (t.descricao ? '<div style="font-size:12px;color:var(--tx2);margin-bottom:6px;line-height:1.4">' + escHtml(t.descricao) + '</div>' : '')
+      + validadeInfo
+      + (t.descricao ? '<div style="font-size:12px;color:var(--tx2);margin-bottom:6px;line-height:1.4"><i class="ti ti-arrows-exchange" style="font-size:12px;opacity:.7"></i> ' + escHtml(t.descricao) + '</div>' : '')
       + '<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)">'
       +   '<i class="ti ti-user" style="font-size:14px"></i> '
       +   '<span style="font-weight:600">' + escHtml(t.nomeColaborador) + '</span>'
       + '</div>'
       + qtdeInfo
-      + (t.confirmadoEm ? '<div style="font-size:10px;color:var(--muted);margin-top:6px">Confirmado em ' + new Date(t.confirmadoEm).toLocaleString('pt-BR') + '</div>' : '')
+      + '<div style="font-size:10px;color:var(--muted);margin-top:6px;display:flex;flex-direction:column;gap:2px">'
+      +   '<span>Enviado em: ' + dataFmt + '</span>'
+      +   (t.confirmadoEm ? '<span>Concluído em: ' + new Date(t.confirmadoEm).toLocaleString('pt-BR') + '</span>' : '')
+      + '</div>'
       + '</div>';
   }).join('');
   
