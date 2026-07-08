@@ -6843,6 +6843,44 @@ function salvarSetorCorrigido(cod,setor){
   mostrarToast('Setor definido como '+setor,'ok');
 }
 
+// Edita o Estoque de UM lote específico (código de barras + validade), direto
+// da tela de produto agrupado. Diferente de salvarSetorCorrigido, aqui a gente
+// PRECISA da resposta do servidor (não é fire-and-forget): se o lote não for
+// encontrado na planilha (código+validade não bate com nenhuma linha), o
+// usuário precisa ver o erro em vez de achar que salvou.
+function salvarEstoqueLote(cod,validade,inputEl){
+  cod=(cod||'').trim();
+  if(!cod||!validade){mostrarToast('Lote sem validade definida, não é possível salvar.','warn');return;}
+  var novoEstoque=parseInt(inputEl.value,10);
+  if(isNaN(novoEstoque)||novoEstoque<0){mostrarToast('Valor de estoque inválido.','warn');return;}
+
+  var cfg=loadCfg();
+  if(!cfg.url){mostrarToast('Configure a URL do sistema antes de editar o estoque.','warn');return;}
+
+  inputEl.disabled=true;
+  fetch(cfg.url,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=UTF-8'},
+    body:JSON.stringify({action:'atualizarEstoque',ean:cod,validade:validade,novoEstoque:novoEstoque})
+  }).then(function(r){return r.json();}).then(function(res){
+    inputEl.disabled=false;
+    if(res&&res.ok){
+      var lote=products.find(function(p){return(p.cod||'').trim()===cod&&p.validade===validade;});
+      if(lote)lote.qtde=novoEstoque;
+      saveProd();
+      mostrarToast('Estoque do lote atualizado.','ok');
+      abrirProdutoModal(cod);
+      renderEstoque();
+      typeof renderDashboard==='function'&&renderDashboard();
+    }else{
+      mostrarToast('Não foi possível atualizar: '+(res&&res.erro?res.erro:'lote não encontrado.'),'warn');
+    }
+  }).catch(function(){
+    inputEl.disabled=false;
+    mostrarToast('Erro de conexão ao atualizar o estoque.','warn');
+  });
+}
+
 // Abre o modal de produto agrupado (clique no card de Estoque), populando custo/venda/estoque/lotes/setor
 function abrirProdutoModal(cod){
   cod=(cod||'').trim();
@@ -6873,10 +6911,15 @@ function abrirProdutoModal(cod){
   document.getElementById('pmLotes').innerHTML=lotesOrdenados.map(function(p){
     var days=daysDiff(p.validade);
     var s=days===null?'sem-data':statusFromDays(days);
-    return '<div style="display:flex;justify-content:space-between;align-items:center;border:1px solid var(--bds);border-radius:var(--r);padding:6px 10px;font-size:12.5px">'
+    var validadeAttr=escHtml(p.validade||'');
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--bds);border-radius:var(--r);padding:6px 10px;font-size:12.5px">'
       +'<span>'+(p.validade?fmtDataExtenso(p.validade):'Sem data')+'</span>'
       +badge(s)
-      +'<span><b>'+(p.qtde||0)+'</b> un</span>'
+      +'<span style="display:flex;align-items:center;gap:5px">'
+        +'<input type="number" min="0" value="'+(p.qtde||0)+'" data-validade="'+validadeAttr+'" class="lote-estoque-input" style="width:64px;font-size:12.5px;padding:4px 6px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;text-align:right" onkeydown="if(event.key===\'Enter\'){this.nextElementSibling.click();}">'
+        +'<span style="font-size:11px;color:var(--tx2)">un</span>'
+        +'<button class="btn btn-sm" title="Salvar estoque deste lote" onclick="salvarEstoqueLote(window._pmCodAtual,\''+validadeAttr+'\',this.previousElementSibling.previousElementSibling)"><i class="ti ti-device-floppy"></i></button>'
+      +'</span>'
       +'</div>';
   }).join('');
 
