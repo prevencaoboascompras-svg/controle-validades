@@ -359,7 +359,7 @@ code{background:var(--bg2);padding:1px 5px;border-radius:4px;font-size:12px;font
 .mod-section-lbl::after{content:'';flex:1;height:1px;background:var(--bd)}
 .mod-section-lbl.ok{color:var(--green)}
 .mod-section-lbl.pend{color:var(--amber)}
-@media(max-width:600px){.mod-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.mod-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .enc-tab{font-size:13px;font-weight:500;padding:9px 18px;cursor:pointer;color:var(--tx2);border-bottom:3px solid transparent;margin-bottom:-2px;display:flex;align-items:center;gap:6px;transition:color .15s;background:none;border-top:none;border-left:none;border-right:none}
 .enc-tab.active{color:var(--tx);border-bottom-color:var(--green)}
 .enc-tab:hover:not(.active){color:var(--tx)}
@@ -850,11 +850,11 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   /* Status row */
   .status-row { gap: 6px; font-size: 12px; flex-wrap: wrap; margin-bottom: 12px; }
 
-  /* Métricas do topo (barra cinza) */
-  .metrics { grid-template-columns: repeat(3, 1fr) !important; gap: 7px !important; margin-bottom: 14px; }
-  .metric { padding: 10px 10px !important; }
-  .metric-val { font-size: 22px !important; }
-  .metric-lbl { font-size: 9px !important; }
+  /* Métricas do topo (barra cinza) — 7 cards, 4 por linha (sobra 1 vazio na 2ª linha, ok) */
+  .metrics { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; gap: 6px !important; margin-bottom: 14px; }
+  .metric { padding: 7px 6px !important; min-width: 0 !important; }
+  .metric-val { font-size: 15px !important; }
+  .metric-lbl { font-size: 6.5px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* Tabs de navegação — scroll horizontal */
   .tabs { overflow-x: auto; flex-wrap: nowrap !important; gap: 0; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 1px; }
@@ -965,9 +965,17 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   #estoqueGrid,
   #tarefasGrid,
   .rel-cards-row {
-    grid-template-columns: repeat(2, 1fr) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 6px !important;
   }
+
+  /* minmax(0,1fr) impede o grid de "esticar" a coluna quando o conteúdo
+     do card (código de barras, nome de setor, fornecedor) é mais longo —
+     sem isso, o card vaza pra fora e a segunda coluna corta na tela. */
+  .val-card, .urg-card, .mod-card { min-width: 0 !important; }
+  .val-card-hdr-cod, .urg-card-cod,
+  .urg-card-forn, .val-card-forn, .val-card-forn-row,
+  .urg-info-val, .val-card-field-val { overflow-wrap: anywhere !important; white-space: normal !important; }
 
   /* Cards ficam mais baixos/horizontais com 2 por linha — reduz textos/paddings/gauge.
      Padrão de fonte único usado em todos os cards de item do sistema:
@@ -995,9 +1003,24 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   /* Velocímetro/gauge — bem menor, na horizontal ao lado dos dados */
   .val-card-bar, .urg-card-mid { gap: 4px !important; }
   .val-card-bar svg, .urg-card-mid svg,
-  .val-card-bar canvas, .urg-card-mid canvas { width: 34px !important; height: 22px !important; }
-  .urg-card-info { grid-template-columns: 1fr 1fr !important; gap: 1px 4px !important; }
+  .val-card-bar canvas, .urg-card-mid canvas { width: 34px !important; height: 22px !important; flex-shrink: 0 !important; }
+  .urg-card-info { grid-template-columns: 1fr 1fr !important; gap: 1px 4px !important; min-width: 0 !important; }
   .urg-card-info div, .urg-card-info span { font-size: 6.5px !important; }
+
+  /* Modalidades — mesmo padrão compacto dos cards de Vencidos & Críticos,
+     pra parar de ficar "embolado" com 2 por linha */
+  .mod-card-hd { padding: 6px 6px !important; gap: 6px !important; }
+  .mod-card-hdicon { width: 22px !important; height: 22px !important; border-radius: 6px !important; }
+  .mod-card-hdicon i { font-size: 11px !important; }
+  .mod-card-hdname { font-size: 8px !important; line-height: 1.15 !important; }
+  .mod-card-hdproc { font-size: 6px !important; padding: 1px 5px !important; margin-top: 3px !important; }
+  .mod-card-body { padding: 6px !important; }
+  .mod-info-row { gap: 4px !important; margin-bottom: 4px !important; font-size: 6.5px !important; }
+  .mod-info-ic { font-size: 8px !important; }
+  .mod-info-lbl { font-size: 5.5px !important; margin-right: 2px !important; }
+  .mod-info-val { font-size: 6.5px !important; line-height: 1.2 !important; }
+  .mod-card-foot { padding: 5px 6px !important; gap: 4px !important; flex-wrap: wrap !important; }
+  .mod-card-foot .btn { font-size: 7px !important; padding: 3px 5px !important; }
 
   .ecard-body { grid-template-columns: 1fr !important; }
   .ecard-imgcol { border-right: none !important; border-bottom: 1px solid var(--bd); padding: 5px !important; }
@@ -1034,15 +1057,25 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   #sec-antecipacao [style*="padding:12px"] { padding: 10px !important; }
   #sec-antecipacao [style*="gap:10px"] { gap: 8px !important; }
 
-  /* Antecipação - Cards mobile */
-  #sec-antecipacao [data-ant-mes] { padding: 10px !important; margin-bottom: 8px !important; }
-  #sec-antecipacao [data-ant-mes] > div:first-child { font-size: 12px !important; margin-bottom: 5px !important; padding-left: 24px !important; padding-right: 30px !important; }
-  #sec-antecipacao [data-ant-mes] [style*="position:absolute;top:10px;right:10px"] { min-width: 28px !important; height: 28px !important; font-size: 12px !important; padding: 0 7px !important; }
-  #sec-antecipacao [data-ant-mes] [style*="position:absolute;top:10px;left:10px"] { width: 18px !important; height: 18px !important; }
-  #sec-antecipacao [data-ant-mes] [style*="display:grid;grid-template-columns:1fr 1fr"] { gap: 6px !important; }
-  #sec-antecipacao [data-ant-mes] [style*="font-size:13px;font-weight:700"] { font-size: 12px !important; }
-  #sec-antecipacao [data-ant-mes] [style*="font-size:11px"] { font-size: 10px !important; }
-  #sec-antecipacao [data-ant-mes] span[style*="padding:2px 7px"] { padding: 2px 5px !important; }
+  /* Antecipação - Grid de cards do mês: força 2 por linha (o auto-fill com
+     minmax(310px) não cabe 2 colunas em tela de iPhone, ficava 1 por linha) */
+  .ant-mes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; padding: 8px !important; }
+
+  /* Antecipação - Cards de produto mobile — mesmo padrão compacto do Vencidos & Críticos */
+  .ant-prod-card { padding: 6px !important; min-width: 0 !important; }
+  .ant-prod-body { padding-left: 20px !important; padding-right: 26px !important; }
+  .ant-prod-name { font-size: 8px !important; margin-bottom: 4px !important; }
+  .ant-prod-badges { gap: 3px !important; margin-bottom: 4px !important; }
+  .ant-prod-badges span { font-size: 6.5px !important; padding: 1px 4px !important; }
+  .ant-prod-fields { gap: 2px 4px !important; font-size: 6.5px !important; }
+  .ant-prod-fields span { font-size: 5.5px !important; }
+  .ant-prod-fields div div { font-size: 8px !important; }
+  .ant-prod-tags { gap: 2px !important; margin-top: 4px !important; }
+  .ant-prod-tags span { font-size: 5.5px !important; padding: 1px 3px !important; }
+  .ant-prod-forn { font-size: 6px !important; margin-top: 3px !important; }
+  .ant-prod-qtybadge { min-width: 18px !important; height: 18px !important; font-size: 8px !important; padding: 0 5px !important; top: 5px !important; right: 5px !important; }
+  .ant-prod-check { width: 14px !important; height: 14px !important; top: 5px !important; left: 5px !important; }
+  .ant-prod-check svg { width: 9px !important; height: 9px !important; }
 
   /* Relatório — filtros e tabela */
   #sec-relatorio .filters, #sec-relatorio [style*="display:flex"][style*="gap:8px"] { flex-wrap: wrap !important; }
@@ -4653,6 +4686,12 @@ function goTab(name){
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('active');
+  // Na aba Dashboard, o próprio dashboard já mostra os totais (dash-tiles) e o alerta
+  // (dashAlertBar) — esconde a barra de métricas e o banner globais pra não duplicar.
+  var metricsEl=document.getElementById('metrics');
+  var alertEl=document.getElementById('alertBanner');
+  if(metricsEl) metricsEl.style.display = (name==='dashboard') ? 'none' : '';
+  if(alertEl) alertEl.style.display = (name==='dashboard') ? 'none' : (alertEl.classList.contains('show') ? '' : 'none');
   if(name==='relatorio'){
     var selFiltro=document.getElementById('filtroNegTipo');
     if(selFiltro)selFiltro.value='sobras';
@@ -6288,7 +6327,7 @@ function renderAntecipacao() {
     html += '</div>';
 
     // Grid de cards
-    html += '<div style="padding:12px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px">';
+    html += '<div class="ant-mes-grid" style="padding:12px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px">';
     prods.forEach(function(p) {
       var chave = produtoChaveAnt(p);
       var sel = !!antSelecionados[chave];
@@ -6312,22 +6351,22 @@ function renderAntecipacao() {
       }
       var corQtd = corBadge(qtd);
 
-      html += '<div data-ant-mes="'+ym+'" data-ant-chave="'+chave.replace(/"/g,'&quot;')+'" style="background:var(--surface-2);border:1px solid '+(sel?'var(--green)':'var(--border)')+';border-radius:var(--rl);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;position:relative" onclick="toggleAntSel(event, \''+chave.replace(/'/g,"\\'")+'\', \''+ym+'\')" title="Clique para '+(sel?'remover da':'adicionar à')+' lista do encarte">';
+      html += '<div class="ant-prod-card" data-ant-mes="'+ym+'" data-ant-chave="'+chave.replace(/"/g,'&quot;')+'" style="background:var(--surface-2);border:1px solid '+(sel?'var(--green)':'var(--border)')+';border-radius:var(--rl);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;position:relative" onclick="toggleAntSel(event, \''+chave.replace(/'/g,"\\'")+'\', \''+ym+'\')" title="Clique para '+(sel?'remover da':'adicionar à')+' lista do encarte">';
       
       // Badge de quantidade (canto superior direito)
-      html += '<div style="position:absolute;top:10px;right:10px;min-width:32px;height:32px;padding:0 9px;border-radius:999px;background:'+corQtd.bg+';border:2px solid '+corQtd.border+';box-shadow:'+corQtd.shadow+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:'+corQtd.txt+';letter-spacing:-.5px" title="'+qtd+' unidade'+(qtd>1?'s':'')+' a vencer">'+qtd+'</div>';
+      html += '<div class="ant-prod-qtybadge" style="position:absolute;top:10px;right:10px;min-width:32px;height:32px;padding:0 9px;border-radius:999px;background:'+corQtd.bg+';border:2px solid '+corQtd.border+';box-shadow:'+corQtd.shadow+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:'+corQtd.txt+';letter-spacing:-.5px" title="'+qtd+' unidade'+(qtd>1?'s':'')+' a vencer">'+qtd+'</div>';
 
       // Checkbox visual
-      html += '<div style="position:absolute;top:10px;left:10px;width:20px;height:20px;border-radius:5px;border:2px solid '+(sel?'var(--green)':'var(--bds)')+';background:'+(sel?'var(--green)':'transparent')+';display:flex;align-items:center;justify-content:center;transition:all .15s">';
+      html += '<div class="ant-prod-check" style="position:absolute;top:10px;left:10px;width:20px;height:20px;border-radius:5px;border:2px solid '+(sel?'var(--green)':'var(--bds)')+';background:'+(sel?'var(--green)':'transparent')+';display:flex;align-items:center;justify-content:center;transition:all .15s">';
       if (sel) html += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       html += '</div>';
 
       // Conteúdo do card
-      html += '<div style="padding-left:28px;padding-right:36px">';
-      html += '<div style="font-size:13px;font-weight:700;color:var(--fg);line-height:1.3;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+nomeLimpo+'">'+nomeLimpo+'</div>';
+      html += '<div class="ant-prod-body" style="padding-left:28px;padding-right:36px">';
+      html += '<div class="ant-prod-name" style="font-size:13px;font-weight:700;color:var(--fg);line-height:1.3;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+nomeLimpo+'">'+nomeLimpo+'</div>';
       
       // Linha de info: vencimento + dias
-      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
+      html += '<div class="ant-prod-badges" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
       html += '<span style="font-size:11px;color:var(--muted);background:var(--surface);padding:2px 7px;border-radius:4px;font-weight:600">'+valFmt+'</span>';
       html += '<span style="font-size:11px;font-weight:700;color:'+(days<=3?'#f87171':days<=7?'#fb923c':days<=15?'#fbbf24':'#34d399')+'">'+
         (days===0?'Hoje':days<=3?days+'d':days+'d')+'</span>';
@@ -6335,7 +6374,7 @@ function renderAntecipacao() {
       html += '</div>';
 
       // Dados do produto em grid
-      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:11px">';
+      html += '<div class="ant-prod-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:11px">';
       html += '<div><span style="color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em">Preço</span><div style="font-weight:700;color:var(--fg)">'+fmtR(preco)+'</div></div>';
       if (precoPromo > 0) {
         html += '<div><span style="color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em">Promo</span><div style="font-weight:700;color:var(--green)">'+fmtR(precoPromo)+'</div></div>';
@@ -6345,7 +6384,7 @@ function renderAntecipacao() {
       html += '</div>';
 
       // Barra de indicadores de potencial
-      html += '<div style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap">';
+      html += '<div class="ant-prod-tags" style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap">';
       if (qtd >= 5) html += '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(52,211,153,.15);color:#34d399;white-space:nowrap">VOLUME</span>';
       if (preco >= 20) html += '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(59,130,246,.15);color:#60a5fa;white-space:nowrap">TICKET ALTO</span>';
       if (pct >= 10) html += '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(245,158,11,.15);color:#fbbf24;white-space:nowrap">'+fmtPct(pct)+' OFF</span>';
@@ -6354,7 +6393,7 @@ function renderAntecipacao() {
 
       // Fornecedor (se disponível)
       if (forn && forn !== '--') {
-        html += '<div style="font-size:10px;color:var(--muted);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+forn+'"><i class="ti ti-truck-delivery" style="opacity:.5"></i> '+forn+'</div>';
+        html += '<div class="ant-prod-forn" style="font-size:10px;color:var(--muted);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+forn+'"><i class="ti ti-truck-delivery" style="opacity:.5"></i> '+forn+'</div>';
       }
 
       html += '</div>'; // padding-left
