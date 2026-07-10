@@ -180,7 +180,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 
 .val-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 @media (max-width:700px){.val-grid{grid-template-columns:1fr 1fr;gap:8px}}
-.val-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:visible;transition:opacity .2s,border-color .15s;display:flex;flex-direction:column;padding:0}
+.val-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:visible;min-width:0;transition:opacity .2s,border-color .15s;display:flex;flex-direction:column;padding:0}
 .val-card-header{padding:11px 14px 11px 48px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;position:relative;overflow:visible}
 .val-card-header.status-vencido{background:linear-gradient(135deg,#7f1d1d,#991b1b);border-radius:var(--rl) var(--rl) 0 0}
 .val-card-header.status-critico{background:linear-gradient(135deg,#92190c,#b91c1c);border-radius:var(--rl) var(--rl) 0 0}
