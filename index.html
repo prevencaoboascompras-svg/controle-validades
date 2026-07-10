@@ -913,12 +913,68 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .encarte-controls { padding: 14px !important; }
   .encarte-preview { padding: 12px !important; }
 
-  /* Setor grid — 3 colunas no mobile (melhor aproveitamento em iPhone) */
-  #dashSetorGrid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
-  #dashSetorGrid .dash-hero-card { padding: 8px 9px !important; }
-  #dashSetorGrid .dash-hero-label { font-size: 9px !important; margin-bottom: 4px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #dashSetorGrid .dash-hero-num { font-size: 20px !important; }
-  #dashSetorGrid .dash-hero-sub { font-size: 9px !important; margin-top: 4px !important; }
+  /* Setor grid — 4 colunas no mobile (melhor aproveitamento em iPhone) */
+  #dashSetorGrid { grid-template-columns: repeat(4, 1fr) !important; gap: 5px !important; }
+  #dashSetorGrid .dash-hero-card { padding: 6px 6px !important; }
+  #dashSetorGrid .dash-hero-label { font-size: 7.5px !important; margin-bottom: 3px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #dashSetorGrid .dash-hero-num { font-size: 15px !important; }
+  #dashSetorGrid .dash-hero-sub { font-size: 7.5px !important; margin-top: 3px !important; }
+
+  /* ── 4 CARDS POR LINHA EM TODA A APLICAÇÃO (iPhone) ───────────── */
+  .dash-tiles { grid-template-columns: repeat(4, 1fr) !important; gap: 5px !important; }
+  .dash-tile { padding: 7px 6px !important; }
+  .dash-tile-num { font-size: 16px !important; }
+  .dash-tile-lbl { font-size: 7.5px !important; }
+  .dash-tile-sub { font-size: 7px !important; }
+
+  .dash-mini-row { grid-template-columns: repeat(4, 1fr) !important; gap: 5px !important; }
+  .dash-mini { padding: 7px 6px !important; }
+  .dash-mini-val { font-size: 12px !important; }
+  .dash-mini-lbl { font-size: 7.5px !important; }
+
+  .val-grid,
+  .promo-grid,
+  .enc-grid,
+  .bib-grid,
+  .mod-grid,
+  #dashUrgentGrid,
+  #ucGrid,
+  #estoqueGrid,
+  #tarefasGrid,
+  .rel-cards-row {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  /* Cards ficam bem mais estreitos com 4 por linha — reduz textos/paddings */
+  .val-card-header,
+  .urg-card-header { padding: 7px 6px 7px 30px !important; }
+  .val-card-qtde-badge { min-width: 22px !important; height: 22px !important; font-size: 10px !important; top: 5px !important; left: 5px !important; padding: 0 5px !important; }
+  .val-card-hdr-nome, .urg-card-nome { font-size: 9px !important; line-height: 1.2 !important; }
+  .val-card-hdr-cod, .urg-card-cod { font-size: 8px !important; }
+  .val-card-hdr-data { font-size: 13px !important; }
+  .val-card-body, .urg-card-body { padding: 7px 6px !important; gap: 6px !important; }
+  .val-card-title { font-size: 10px !important; }
+  .val-card-cod { font-size: 8px !important; }
+  .val-card-meta { font-size: 8.5px !important; gap: 4px 6px !important; margin-bottom: 6px !important; }
+  .val-card-price-normal { font-size: 9px !important; }
+  .val-card-price-promo { font-size: 13px !important; }
+  .val-card-pct { font-size: 8.5px !important; }
+  .val-card-fields { grid-template-columns: 1fr !important; gap: 4px !important; padding: 6px 0 !important; margin-bottom: 6px !important; }
+  .val-card-field-lbl { font-size: 7.5px !important; }
+  .val-card-field-val { font-size: 9.5px !important; }
+  .val-card-forn-row, .val-card-forn, .urg-card-forn { font-size: 8px !important; max-width: none !important; }
+  .val-card-foot, .urg-card-foot { padding: 7px 6px !important; flex-wrap: wrap !important; }
+  .val-card-actions .btn, .val-card-foot .btn, .urg-card-foot .btn { font-size: 9px !important; padding: 4px 6px !important; }
+
+  .ecard-body { grid-template-columns: 1fr !important; }
+  .ecard-imgcol { border-right: none !important; border-bottom: 1px solid var(--bd); padding: 8px !important; }
+  .ecard-imgbox { width: 60px !important; height: 60px !important; }
+  .ecard-title { font-size: 11px !important; }
+  .ecard-fields { padding: 8px !important; gap: 5px !important; }
+
+  .promo-card-header { padding: 7px 6px 7px 34px !important; }
+  .promo-card-body { padding: 7px 8px !important; }
 
   /* Configuração */
   .cfg { padding: 16px !important; }
