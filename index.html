@@ -859,34 +859,45 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .filters input[type=text] { width: 100% !important; min-width: unset !important; box-sizing: border-box; }
   .filters label { font-size: 12px; }
 
-  /* Dashboard hero — números menores */
-  .dash-hero-num { font-size: 36px !important; letter-spacing: -1px !important; }
-  .dash-hero-label { font-size: 10px !important; margin-bottom: 8px !important; }
-  .dash-hero-sub { font-size: 11px !important; margin-top: 6px !important; }
-  .dash-hero-icon { width: 40px !important; height: 40px !important; top: 14px !important; right: 14px !important; }
-  .dash-hero-attention .dha-count { font-size: 24px !important; }
-  .dash-hero-attention .dha-label { font-size: 12px !important; }
-  .dash-hero-attention .dha-sub   { font-size: 11px !important; }
+  /* Dashboard hero — Monitorados / Atenção / Valor em risco / Perda evitada
+     viram cards pequenos e quadrados, no mesmo padrão dos setores */
+  .dash-hero { gap: 5px !important; margin-bottom: 6px !important; }
+  .dash-hero.dash-hero-2col { grid-template-columns: repeat(2, 1fr) !important; }
+  .dash-hero-card { padding: 7px 6px !important; border-radius: 8px !important; }
+  .dash-hero-num { font-size: 17px !important; letter-spacing: -0.5px !important; }
+  .dash-hero-label { font-size: 6.5px !important; margin-bottom: 3px !important; gap: 3px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dash-hero-label svg { width: 8px !important; height: 8px !important; }
+  .dash-hero-sub { font-size: 6.5px !important; margin-top: 3px !important; line-height: 1.2 !important; }
+  .dash-hero-icon { width: 22px !important; height: 22px !important; top: 6px !important; right: 6px !important; }
+  .dash-hero-icon svg { width: 12px !important; height: 12px !important; }
+  .dash-hero-attention { gap: 6px !important; }
+  .dash-hero-attention .dha-icon { width: 22px !important; height: 22px !important; }
+  .dash-hero-attention .dha-icon svg { width: 12px !important; height: 12px !important; }
+  .dash-hero-attention .dha-count { font-size: 14px !important; }
+  .dash-hero-attention .dha-label { font-size: 6.5px !important; margin-top: 1px !important; }
+  .dash-hero-attention .dha-sub   { display: none !important; }
+  .dash-trend { font-size: 8px !important; margin-top: 3px !important; }
 
-  /* KPI Tiles — 3 por linha (melhor aproveitamento em iPhone) */
-  .dash-tiles { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; margin-bottom: 14px !important; }
-  .dash-hero { margin-bottom: 14px !important; }
-  .dash-mini-row { margin-bottom: 16px !important; }
-  .dash-tile { padding: 9px 8px !important; }
-  .dash-tile-num { font-size: 20px !important; }
-  .dash-tile-lbl { font-size: 9px !important; }
-  .dash-tile-sub { font-size: 8px !important; }
+  /* KPI Tiles (Status dos produtos) — pequenos como os setores */
+  .dash-hero { margin-bottom: 6px !important; }
+  .dash-mini-row { margin-bottom: 6px !important; }
+  .dash-tiles { grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; margin-bottom: 6px !important; }
+  .dash-tile { padding: 5px 4px !important; border-radius: 8px !important; }
+  .dash-tile-num { font-size: 13px !important; line-height: 1.1 !important; }
+  .dash-tile-lbl { font-size: 6px !important; }
+  .dash-tile-sub { font-size: 5.5px !important; }
 
-  /* Mini KPI row — 2 por linha, mais compacto */
-  .dash-mini-row { grid-template-columns: 1fr 1fr !important; gap: 7px !important; }
-  .dash-mini { padding: 10px 11px !important; }
-  .dash-mini-val { font-size: 15px !important; }
-  .dash-mini-lbl { font-size: 9px !important; }
+  /* Resumo financeiro — mesmo padrão pequeno */
+  .dash-mini-row { grid-template-columns: repeat(2, 1fr) !important; gap: 4px !important; }
+  .dash-mini { padding: 5px 4px !important; border-radius: 8px !important; }
+  .dash-mini-val { font-size: 11px !important; line-height: 1.1 !important; }
+  .dash-mini-lbl { font-size: 6px !important; }
 
   /* Alert bar */
-  .dash-alertbar { padding: 9px 12px !important; flex-wrap: wrap; gap: 8px; }
-  .dash-alertbar .dab-txt { font-size: 12px !important; }
-  .dash-alertbar .dab-detail { font-size: 11px !important; }
+  .dash-alertbar { padding: 6px 8px !important; flex-wrap: wrap; gap: 5px !important; }
+  .dash-alertbar .dab-txt { font-size: 10px !important; }
+  .dash-alertbar .dab-detail { font-size: 9px !important; }
+  .dash-divider-label { font-size: 9px !important; margin: 10px 0 6px !important; }
 
   /* Botões de ação nas tabelas */
   .abtn { font-size: 10px !important; padding: 3px 7px !important; }
@@ -913,25 +924,16 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .encarte-controls { padding: 14px !important; }
   .encarte-preview { padding: 12px !important; }
 
-  /* Setor grid — 4 colunas no mobile (melhor aproveitamento em iPhone) */
-  #dashSetorGrid { grid-template-columns: repeat(4, 1fr) !important; gap: 5px !important; }
-  #dashSetorGrid .dash-hero-card { padding: 6px 5px !important; }
-  #dashSetorGrid .dash-hero-label { font-size: 7px !important; margin-bottom: 3px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #dashSetorGrid .dash-hero-num { font-size: 14px !important; line-height: 1.1 !important; }
-  #dashSetorGrid .dash-hero-sub { font-size: 7px !important; margin-top: 3px !important; }
+  /* Setor grid — bem pequeno, 5 por linha, pra caber os 13 setores em poucas linhas */
+  #dashSetorGrid { grid-template-columns: repeat(5, 1fr) !important; gap: 4px !important; }
+  #dashSetorGrid .dash-hero-card { padding: 5px 4px !important; border-radius: 7px !important; }
+  #dashSetorGrid .dash-hero-label { font-size: 6px !important; margin-bottom: 2px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #dashSetorGrid .dash-hero-num { font-size: 12px !important; line-height: 1.1 !important; }
+  #dashSetorGrid .dash-hero-sub { font-size: 6px !important; margin-top: 2px !important; }
 
-  /* ── 4 CARDS POR LINHA EM TODA A APLICAÇÃO (iPhone) ───────────── */
-  .dash-tiles { grid-template-columns: repeat(4, 1fr) !important; gap: 5px !important; }
-  .dash-tile { padding: 6px 5px !important; }
-  .dash-tile-num { font-size: 14px !important; line-height: 1.1 !important; }
-  .dash-tile-lbl { font-size: 7px !important; }
-  .dash-tile-sub { font-size: 6.5px !important; }
-
-  .dash-mini-row { grid-template-columns: repeat(4, 1fr) !important; gap: 5px !important; }
-  .dash-mini { padding: 6px 5px !important; }
-  .dash-mini-val { font-size: 11px !important; line-height: 1.1 !important; }
-  .dash-mini-lbl { font-size: 7px !important; }
-
+  /* ── Cards de produto (Validades / Estoque / Itens urgentes) ──
+     2 por linha, formato baixo/horizontal em vez de retângulo vertical.
+     A fonte acompanha o tamanho reduzido do card. */
   .val-grid,
   .promo-grid,
   .enc-grid,
@@ -942,48 +944,48 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   #estoqueGrid,
   #tarefasGrid,
   .rel-cards-row {
-    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-columns: repeat(2, 1fr) !important;
     gap: 6px !important;
   }
 
-  /* Cards ficam bem mais estreitos com 4 por linha — reduz textos/paddings.
+  /* Cards ficam mais baixos/horizontais com 2 por linha — reduz textos/paddings/gauge.
      Padrão de fonte único usado em todos os cards de item do sistema:
-     título 8.5px · rótulo 7px · valor/dado 9px · número grande 12px */
+     título 8px · rótulo 6.5px · valor/dado 7.5px · número grande 11px */
   .val-card-header,
-  .urg-card-header { padding: 6px 5px 6px 26px !important; }
-  .val-card-qtde-badge { min-width: 18px !important; height: 18px !important; font-size: 9px !important; top: 4px !important; left: 4px !important; padding: 0 4px !important; }
-  .val-card-hdr-nome, .urg-card-nome { font-size: 8.5px !important; line-height: 1.15 !important; }
-  .val-card-hdr-cod, .urg-card-cod { font-size: 7px !important; }
-  .val-card-hdr-data { font-size: 11px !important; }
-  .val-card-body, .urg-card-body { padding: 6px 5px !important; gap: 5px !important; }
-  .val-card-title { font-size: 8.5px !important; line-height: 1.15 !important; }
-  .val-card-cod { font-size: 7px !important; }
-  .val-card-meta { font-size: 7px !important; gap: 3px 5px !important; margin-bottom: 5px !important; }
-  .val-card-price-normal { font-size: 7.5px !important; }
-  .val-card-price-promo { font-size: 11px !important; }
-  .val-card-pct { font-size: 7px !important; }
-  .val-card-fields { grid-template-columns: 1fr !important; gap: 3px !important; padding: 5px 0 !important; margin-bottom: 5px !important; }
-  .val-card-field-lbl { font-size: 6.5px !important; }
-  .val-card-field-val { font-size: 8.5px !important; }
-  .val-card-forn-row, .val-card-forn, .urg-card-forn { font-size: 7px !important; max-width: none !important; }
-  .val-card-foot, .urg-card-foot { padding: 6px 5px !important; flex-wrap: wrap !important; gap: 4px !important; }
-  .val-card-actions .btn, .val-card-foot .btn, .urg-card-foot .btn { font-size: 8px !important; padding: 3px 5px !important; }
+  .urg-card-header { padding: 5px 5px 5px 24px !important; min-height: 0 !important; }
+  .val-card-qtde-badge { min-width: 16px !important; height: 16px !important; font-size: 8px !important; top: 4px !important; left: 4px !important; padding: 0 4px !important; }
+  .val-card-hdr-nome, .urg-card-nome { font-size: 8px !important; line-height: 1.1 !important; }
+  .val-card-hdr-cod, .urg-card-cod { font-size: 6.5px !important; }
+  .val-card-hdr-data { font-size: 10px !important; }
+  .val-card-body, .urg-card-body { padding: 5px !important; gap: 4px !important; }
+  .val-card-title { font-size: 8px !important; line-height: 1.1 !important; }
+  .val-card-cod { font-size: 6.5px !important; }
+  .val-card-meta { font-size: 6.5px !important; gap: 2px 4px !important; margin-bottom: 3px !important; }
+  .val-card-price-normal { font-size: 7px !important; }
+  .val-card-price-promo { font-size: 10px !important; }
+  .val-card-pct { font-size: 6.5px !important; }
+  .val-card-fields { grid-template-columns: 1fr 1fr !important; gap: 2px 5px !important; padding: 4px 0 !important; margin-bottom: 3px !important; }
+  .val-card-field-lbl { font-size: 6px !important; }
+  .val-card-field-val { font-size: 7.5px !important; }
+  .val-card-forn-row, .val-card-forn, .urg-card-forn { font-size: 6.5px !important; max-width: none !important; }
+  .val-card-foot, .urg-card-foot { padding: 5px !important; flex-wrap: wrap !important; gap: 3px !important; }
+  .val-card-actions .btn, .val-card-foot .btn, .urg-card-foot .btn { font-size: 7px !important; padding: 3px 4px !important; }
 
-  /* Velocímetro/gauge dentro dos cards (Validades e Itens urgentes) */
-  .val-card-bar, .urg-card-mid { gap: 6px !important; }
+  /* Velocímetro/gauge — bem menor, na horizontal ao lado dos dados */
+  .val-card-bar, .urg-card-mid { gap: 4px !important; }
   .val-card-bar svg, .urg-card-mid svg,
-  .val-card-bar canvas, .urg-card-mid canvas { width: 46px !important; height: 30px !important; }
-  .urg-card-info { grid-template-columns: 1fr !important; gap: 2px !important; }
-  .urg-card-info div, .urg-card-info span { font-size: 7.5px !important; }
+  .val-card-bar canvas, .urg-card-mid canvas { width: 34px !important; height: 22px !important; }
+  .urg-card-info { grid-template-columns: 1fr 1fr !important; gap: 1px 4px !important; }
+  .urg-card-info div, .urg-card-info span { font-size: 6.5px !important; }
 
   .ecard-body { grid-template-columns: 1fr !important; }
-  .ecard-imgcol { border-right: none !important; border-bottom: 1px solid var(--bd); padding: 6px !important; }
-  .ecard-imgbox { width: 50px !important; height: 50px !important; }
-  .ecard-title { font-size: 9.5px !important; }
-  .ecard-fields { padding: 6px !important; gap: 4px !important; }
+  .ecard-imgcol { border-right: none !important; border-bottom: 1px solid var(--bd); padding: 5px !important; }
+  .ecard-imgbox { width: 42px !important; height: 42px !important; }
+  .ecard-title { font-size: 8.5px !important; }
+  .ecard-fields { padding: 5px !important; gap: 3px !important; }
 
-  .promo-card-header { padding: 6px 5px 6px 30px !important; }
-  .promo-card-body { padding: 6px 7px !important; }
+  .promo-card-header { padding: 5px 5px 5px 26px !important; }
+  .promo-card-body { padding: 5px 6px !important; }
 
   /* Configuração */
   .cfg { padding: 16px !important; }
@@ -991,10 +993,11 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .cfg-hint { font-size: 11px !important; }
 
   /* Divider label */
-  .dash-divider-label { font-size: 10px !important; margin: 16px 0 9px !important; }
-
   /* View all button */
-  .dash-view-all { font-size: 11px !important; padding: 5px 10px !important; }
+  .dash-view-all { font-size: 9px !important; padding: 4px 8px !important; }
+  .dash-section-hd { margin-bottom: 6px !important; }
+  .dash-section-title { font-size: 11px !important; }
+  .dash-section-sub { font-size: 9px !important; margin-top: 1px !important; }
 
   /* Antecipação - Filtros mobile */
   #sec-antecipacao > div:nth-child(2) { padding: 10px 12px !important; }
