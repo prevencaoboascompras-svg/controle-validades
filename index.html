@@ -608,6 +608,9 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .dash-hero.dash-hero-2col {
   grid-template-columns: 1fr 1fr;
 }
+.dash-hero.dash-hero-4col {
+  grid-template-columns: repeat(4, 1fr);
+}
 .dash-hero-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -776,7 +779,13 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   gap: 8px !important;
   grid-template-columns: repeat(auto-fill,minmax(132px,1fr)) !important;
 }
-#dashSetorGrid .dash-hero-card { padding: 10px 12px !important; }
+#dashSetorGrid .dash-hero-card { padding: 10px 12px !important; cursor: pointer; }
+.dash-setor-card { display: flex; flex-direction: column; }
+.dash-setor-card .dsc-icon { margin-bottom: 6px; }
+.dash-setor-card .dsc-nome { font-size: 12px; font-weight: 600; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-setor-card .dsc-total { font-size: 22px; font-weight: 800; line-height: 1; }
+.dash-setor-card .dsc-status { font-size: 10px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dash-setor-card .dsc-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
 @media (max-width: 700px) {
   #setorStickyWrap { margin: 0 -16px 12px; padding: 8px 16px 8px; }
 }
@@ -785,12 +794,15 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 @media (max-width: 1100px) {
   .dash-hero { grid-template-columns: 1fr 1fr; }
   .dash-hero-card:last-child { grid-column: 1 / -1; }
+  .dash-hero.dash-hero-4col { grid-template-columns: repeat(2, 1fr); }
+  .dash-hero.dash-hero-4col .dash-hero-card:last-child { grid-column: auto; }
   .dash-tiles { grid-template-columns: repeat(4, 1fr); }
   .dash-mini-row { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 700px) {
   .dash-hero { grid-template-columns: 1fr; }
   .dash-hero.dash-hero-2col { grid-template-columns: 1fr 1fr; }
+  .dash-hero.dash-hero-4col { grid-template-columns: repeat(2, 1fr); }
   .dash-tiles { grid-template-columns: repeat(2, 1fr); }
   .dash-mini-row { grid-template-columns: 1fr; }
   .dash-hero-num { font-size: clamp(20px, 5.4vw, 36px); letter-spacing: -0.5px; }
@@ -860,43 +872,49 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .filters label { font-size: 12px; }
 
   /* Dashboard hero — Monitorados / Atenção / Valor em risco / Perda evitada
-     viram cards pequenos e quadrados, no mesmo padrão dos setores */
-  .dash-hero { gap: 5px !important; margin-bottom: 6px !important; }
-  .dash-hero.dash-hero-2col { grid-template-columns: repeat(2, 1fr) !important; }
-  .dash-hero-card { padding: 7px 6px !important; border-radius: 8px !important; }
-  .dash-hero-num { font-size: 17px !important; letter-spacing: -0.5px !important; }
-  .dash-hero-label { font-size: 6.5px !important; margin-bottom: 3px !important; gap: 3px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .dash-hero-label svg { width: 8px !important; height: 8px !important; }
-  .dash-hero-sub { font-size: 6.5px !important; margin-top: 3px !important; line-height: 1.2 !important; }
-  .dash-hero-icon { width: 22px !important; height: 22px !important; top: 6px !important; right: 6px !important; }
-  .dash-hero-icon svg { width: 12px !important; height: 12px !important; }
-  .dash-hero-attention { gap: 6px !important; }
-  .dash-hero-attention .dha-icon { width: 22px !important; height: 22px !important; }
-  .dash-hero-attention .dha-icon svg { width: 12px !important; height: 12px !important; }
-  .dash-hero-attention .dha-count { font-size: 14px !important; }
-  .dash-hero-attention .dha-label { font-size: 6.5px !important; margin-top: 1px !important; }
+     ficam os 4 juntos, na mesma linha, no mesmo padrão pequeno dos setores */
+  .dash-hero { gap: 4px !important; margin-bottom: 6px !important; }
+  .dash-hero.dash-hero-4col { grid-template-columns: repeat(4, 1fr) !important; }
+  .dash-hero-card { padding: 6px 5px !important; border-radius: 8px !important; }
+  .dash-hero-num { font-size: 14px !important; letter-spacing: -0.3px !important; }
+  .dash-hero-label { font-size: 6px !important; margin-bottom: 2px !important; gap: 2px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dash-hero-label svg { width: 7px !important; height: 7px !important; }
+  .dash-hero-sub { font-size: 5.5px !important; margin-top: 2px !important; line-height: 1.15 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dash-hero-icon { width: 18px !important; height: 18px !important; top: 5px !important; right: 5px !important; }
+  .dash-hero-icon svg { width: 10px !important; height: 10px !important; }
+  .dash-hero-attention { gap: 4px !important; }
+  .dash-hero-attention .dha-icon { width: 18px !important; height: 18px !important; flex-shrink: 0; }
+  .dash-hero-attention .dha-icon svg { width: 10px !important; height: 10px !important; }
+  .dash-hero-attention .dha-count { font-size: 12px !important; white-space: nowrap; }
+  .dash-hero-attention .dha-label { font-size: 5.5px !important; margin-top: 1px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .dash-hero-attention .dha-sub   { display: none !important; }
   .dash-trend { font-size: 8px !important; margin-top: 3px !important; }
 
-  /* KPI Tiles (Status dos produtos) — pequenos como os setores */
-  .dash-hero { margin-bottom: 6px !important; }
+  /* KPI Tiles (Status dos produtos) — 4 por linha, texto ajustado pra não cortar */
   .dash-mini-row { margin-bottom: 6px !important; }
   .dash-tiles { grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; margin-bottom: 6px !important; }
-  .dash-tile { padding: 5px 4px !important; border-radius: 8px !important; }
+  .dash-tile { padding: 6px 5px !important; border-radius: 8px !important; overflow: hidden; }
+  .dash-tile-hd { align-items: center !important; }
+  .dash-tile-hd svg { width: 12px !important; height: 12px !important; flex-shrink: 0; }
   .dash-tile-num { font-size: 13px !important; line-height: 1.1 !important; }
-  .dash-tile-lbl { font-size: 6px !important; }
-  .dash-tile-sub { font-size: 5.5px !important; }
+  .dash-tile-lbl { font-size: 6.2px !important; margin-top: 3px !important; line-height: 1.15 !important; white-space: normal; overflow-wrap: break-word; }
+  .dash-tile-sub { font-size: 5.3px !important; line-height: 1.15 !important; white-space: normal; overflow-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-  /* Resumo financeiro — mesmo padrão pequeno */
-  .dash-mini-row { grid-template-columns: repeat(2, 1fr) !important; gap: 4px !important; }
-  .dash-mini { padding: 5px 4px !important; border-radius: 8px !important; }
-  .dash-mini-val { font-size: 11px !important; line-height: 1.1 !important; }
-  .dash-mini-lbl { font-size: 6px !important; }
+  /* Resumo financeiro — 4 por linha, textos curtos/clampados pra caber */
+  .dash-mini-row { grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; }
+  .dash-mini { padding: 6px 5px !important; border-radius: 8px !important; flex-direction: column !important; align-items: flex-start !important; overflow: hidden; }
+  .dash-mini-val { font-size: 10.5px !important; line-height: 1.15 !important; }
+  .dash-mini-lbl { font-size: 5.8px !important; margin-bottom: 3px !important; line-height: 1.15 !important; white-space: normal; overflow-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .dash-mini-sub { display: none !important; }
+  .dash-mini svg { display: none !important; }
 
-  /* Alert bar */
-  .dash-alertbar { padding: 6px 8px !important; flex-wrap: wrap; gap: 5px !important; }
-  .dash-alertbar .dab-txt { font-size: 10px !important; }
-  .dash-alertbar .dab-detail { font-size: 9px !important; }
+  /* Alert bar — vira uma linha única bem fina */
+  .dash-alertbar { padding: 4px 8px !important; flex-wrap: nowrap !important; gap: 6px !important; align-items: center !important; }
+  .dash-alertbar .dab-left { gap: 5px !important; overflow: hidden; flex: 1 1 auto; min-width: 0; }
+  .dash-alertbar svg { width: 12px !important; height: 12px !important; flex-shrink: 0; }
+  .dash-alertbar .dab-txt { font-size: 9px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dash-alertbar .dab-detail { display: none !important; }
+  #dashAlertBtn { font-size: 8.5px !important; padding: 2px 7px !important; flex-shrink: 0; white-space: nowrap; }
   .dash-divider-label { font-size: 9px !important; margin: 10px 0 6px !important; }
 
   /* Botões de ação nas tabelas */
@@ -924,12 +942,15 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .encarte-controls { padding: 14px !important; }
   .encarte-preview { padding: 12px !important; }
 
-  /* Setor grid — bem pequeno, 5 por linha, pra caber os 13 setores em poucas linhas */
+  /* Setor grid — bem pequeno, 5 por linha, com ícone, pra caber os 13 setores em poucas linhas */
   #dashSetorGrid { grid-template-columns: repeat(5, 1fr) !important; gap: 4px !important; }
-  #dashSetorGrid .dash-hero-card { padding: 5px 4px !important; border-radius: 7px !important; }
-  #dashSetorGrid .dash-hero-label { font-size: 6px !important; margin-bottom: 2px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #dashSetorGrid .dash-hero-num { font-size: 12px !important; line-height: 1.1 !important; }
-  #dashSetorGrid .dash-hero-sub { font-size: 6px !important; margin-top: 2px !important; }
+  #dashSetorGrid .dash-hero-card { padding: 4px 3px !important; border-radius: 7px !important; }
+  .dash-setor-card .dsc-icon { margin-bottom: 2px !important; }
+  .dash-setor-card .dsc-icon svg { width: 10px !important; height: 10px !important; }
+  .dash-setor-card .dsc-nome { font-size: 5.5px !important; margin-bottom: 2px !important; }
+  .dash-setor-card .dsc-total { font-size: 11px !important; line-height: 1.1 !important; }
+  .dash-setor-card .dsc-status { font-size: 5px !important; margin-top: 1px !important; }
+  .dash-setor-card .dsc-bar { height: 3px !important; margin-top: 3px !important; }
 
   /* ── Cards de produto (Validades / Estoque / Itens urgentes) ──
      2 por linha, formato baixo/horizontal em vez de retângulo vertical.
@@ -1494,8 +1515,8 @@ function toggleTheme() {
 
   <div id="sec-dashboard" class="sec active">
 
-    <!-- Hero Row -->
-    <div class="dash-hero dash-hero-2col">
+    <!-- Hero Row: os 4 cards de totais juntos, lado a lado -->
+    <div class="dash-hero dash-hero-4col">
       <!-- Card 1: Total -->
       <div class="dash-hero-card card-red clickable" onclick="filtrarTudo()" title="Ver todos os produtos">
         <div class="dash-hero-label">Produtos monitorados</div>
@@ -1520,10 +1541,7 @@ function toggleTheme() {
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Hero Row 2: destaque lado a lado -->
-    <div class="dash-hero dash-hero-2col">
       <!-- Card 3: Valor em risco -->
       <div class="dash-hero-card card-red clickable" onclick="filtrarRisco()" title="Ver produtos em risco de vencimento">
         <div class="dash-hero-label">
@@ -1562,7 +1580,7 @@ function toggleTheme() {
         <span class="dab-txt" id="dashAlertTxt"></span>
         <span class="dab-detail" id="dashAlertDetail"></span>
       </div>
-      <button class="dab-btn" onclick="filtrarMetrica('vencido')">Ver críticos</button>
+      <button class="dab-btn" id="dashAlertBtn" onclick="filtrarMetrica('vencido')">Ver críticos</button>
     </div>
 
     <!-- KPI Tiles -->
@@ -3540,21 +3558,22 @@ function renderDashboard(){
   // ── Setor breakdown ──
   var setorKeys=Object.keys(setorMap).sort();
   var colorMap={vencido:'#f87171',critico:'#fb923c',urgente:'#fbbf24',atencao:'#facc15',ok:'#34d399'};
+  // Ícone genérico por setor (mesmo ícone, cor varia pelo status) — ajuda a identificar
+  // visualmente o card mesmo com o nome cortado/reduzido no mobile.
+  var setorIconSvg='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M4 9v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/></svg>';
   document.getElementById('dashSetorGrid').innerHTML=setorKeys.map(function(s){
     var sm=setorMap[s];
     var urgCnt=sm.vencido+sm.critico+sm.urgente;
     var pct=sm.total>0?Math.round((sm.ok/sm.total)*100):0;
     var barColor=pct>=80?'#34d399':pct>=50?'#fbbf24':'#f87171';
-    return '<div class="dash-hero-card" data-setor="'+escHtml(s)+'" style="padding:14px 16px;cursor:pointer" onclick="filtrarSetor(\''+s+'\')" title="Filtrar por '+s+'">'
-      +'<div style="font-size:12px;font-weight:600;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+escHtml(s)+'</div>'
-      +'<div style="font-size:22px;font-weight:800;line-height:1">'+sm.total+'</div>'
-      +'<div style="font-size:10px;color:var(--muted);margin-top:2px">'
-        +(urgCnt>0?'<span style="color:#f87171">'+urgCnt+' urgente(s)</span>':''+'<span style="color:#34d399">'+(urgCnt===0?'Tudo ok':'')+'</span>')
+    return '<div class="dash-hero-card dash-setor-card" data-setor="'+escHtml(s)+'" onclick="filtrarSetor(\''+s+'\')" title="Filtrar por '+s+'">'
+      +'<div class="dsc-icon" style="color:'+barColor+'">'+setorIconSvg+'</div>'
+      +'<div class="dsc-nome" title="'+escHtml(s)+'">'+escHtml(s)+'</div>'
+      +'<div class="dsc-total">'+sm.total+'</div>'
+      +'<div class="dsc-status">'
+        +(urgCnt>0?'<span style="color:#f87171">'+urgCnt+' urg.</span>':'<span style="color:#34d399">Tudo ok</span>')
       +'</div>'
-      +'<div style="height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden">'
-        +'<div style="height:100%;width:'+pct+'%;background:'+barColor+';border-radius:2px;transition:width .4s"></div>'
-      +'</div>'
-      +'<div style="font-size:10px;color:var(--muted);margin-top:3px">'+pct+'% OK</div>'
+      +'<div class="dsc-bar"><div style="height:100%;width:'+pct+'%;background:'+barColor+';border-radius:2px"></div></div>'
       +'</div>';
   }).join('');
   atualizarSetorGridDestaque();
