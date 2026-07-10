@@ -253,7 +253,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
   .val-card-actions .aura-btn{font-size:11px;padding:5px 8px}
   .val-card-foot{padding-top:7px}
 }
-.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:20px}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
 .modal-ov.open{display:flex}
 .modal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);width:960px;max-width:98vw;max-height:96vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.25)}
 .modal-head{padding:16px 22px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -269,9 +269,9 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .modal-foot{padding:14px 22px;border-top:1px solid var(--bd);display:flex;gap:10px;justify-content:flex-end;flex-shrink:0}
 #encarteCanvas{border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.2);max-width:100%;height:auto}
 .canvas-hint{font-size:12px;color:var(--tx2);text-align:center}
-.smodal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:28px;width:480px;max-width:100%;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.smodal{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:28px;width:480px;max-width:100%;max-height:calc(100vh - 40px);overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
 .smodal h3{font-size:16px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:8px}
-.smodal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid var(--bd)}
+.smodal-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:18px;padding-bottom:2px;border-top:1px solid var(--bd);position:sticky;bottom:0;background:var(--surface,var(--bg))}
 .help-box{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:20px 24px;margin-bottom:16px}
 .help-box h4{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .steps{counter-reset:s}
@@ -868,18 +868,20 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .dash-hero-attention .dha-label { font-size: 12px !important; }
   .dash-hero-attention .dha-sub   { font-size: 11px !important; }
 
-  /* KPI Tiles — 2 por linha */
-  .dash-tiles { grid-template-columns: repeat(2, 1fr) !important; gap: 7px !important; }
-  .dash-tile { padding: 11px 10px !important; }
-  .dash-tile-num { font-size: 24px !important; }
-  .dash-tile-lbl { font-size: 10px !important; }
-  .dash-tile-sub { font-size: 9px !important; }
+  /* KPI Tiles — 3 por linha (melhor aproveitamento em iPhone) */
+  .dash-tiles { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; margin-bottom: 14px !important; }
+  .dash-hero { margin-bottom: 14px !important; }
+  .dash-mini-row { margin-bottom: 16px !important; }
+  .dash-tile { padding: 9px 8px !important; }
+  .dash-tile-num { font-size: 20px !important; }
+  .dash-tile-lbl { font-size: 9px !important; }
+  .dash-tile-sub { font-size: 8px !important; }
 
-  /* Mini KPI row */
-  .dash-mini-row { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-  .dash-mini { padding: 12px 13px !important; }
-  .dash-mini-val { font-size: 16px !important; }
-  .dash-mini-lbl { font-size: 10px !important; }
+  /* Mini KPI row — 2 por linha, mais compacto */
+  .dash-mini-row { grid-template-columns: 1fr 1fr !important; gap: 7px !important; }
+  .dash-mini { padding: 10px 11px !important; }
+  .dash-mini-val { font-size: 15px !important; }
+  .dash-mini-lbl { font-size: 9px !important; }
 
   /* Alert bar */
   .dash-alertbar { padding: 9px 12px !important; flex-wrap: wrap; gap: 8px; }
@@ -898,7 +900,9 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .bib-search { width: 100% !important; min-width: unset !important; box-sizing: border-box; }
 
   /* Modais pequenos */
-  .smodal { padding: 16px !important; width: calc(100vw - 24px) !important; }
+  .smodal { padding: 16px !important; width: calc(100vw - 24px) !important; max-height: calc(100vh - 24px) !important; }
+  .modal-ov { align-items: flex-start !important; padding: 12px 12px 40px !important; }
+  .modal { max-height: calc(100vh - 24px) !important; }
 
   /* Rodapés de modal — botões podem quebrar linha em telas estreitas */
   .modal-foot, .smodal-foot { flex-wrap: wrap !important; justify-content: stretch !important; }
@@ -909,8 +913,12 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .encarte-controls { padding: 14px !important; }
   .encarte-preview { padding: 12px !important; }
 
-  /* Setor grid — 2 colunas no mobile */
-  #dashSetorGrid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  /* Setor grid — 3 colunas no mobile (melhor aproveitamento em iPhone) */
+  #dashSetorGrid { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
+  #dashSetorGrid .dash-hero-card { padding: 8px 9px !important; }
+  #dashSetorGrid .dash-hero-label { font-size: 9px !important; margin-bottom: 4px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #dashSetorGrid .dash-hero-num { font-size: 20px !important; }
+  #dashSetorGrid .dash-hero-sub { font-size: 9px !important; margin-top: 4px !important; }
 
   /* Configuração */
   .cfg { padding: 16px !important; }
