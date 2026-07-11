@@ -801,13 +801,18 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   gap: 8px !important;
   grid-template-columns: repeat(auto-fill,minmax(132px,1fr)) !important;
 }
-#dashSetorGrid .dash-hero-card { padding: 10px 12px !important; cursor: pointer; }
-.dash-setor-card { display: flex; flex-direction: column; }
+#dashSetorGrid .dash-hero-card { padding: 10px 8px !important; cursor: pointer; min-width: 0; }
+.dash-setor-card { display: flex; flex-direction: column; min-width: 0; }
 .dash-setor-card .dsc-icon { margin-bottom: 6px; font-size: 15px; line-height: 1; }
 .dash-setor-card .dsc-nome { font-size: 12px; font-weight: 600; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dash-setor-card .dsc-total { font-size: 22px; font-weight: 800; line-height: 1; }
 .dash-setor-card .dsc-status { font-size: 10px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dash-setor-card .dsc-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+@media (max-width: 900px) and (min-width: 701px) {
+  .dash-setor-card .dsc-nome { font-size: 10px !important; }
+  .dash-setor-card .dsc-total { font-size: 17px !important; }
+  #dashSetorGrid .dash-hero-card { padding: 8px 5px !important; }
+}
 @media (max-width: 700px) {
   #setorStickyWrap { margin: 0 -16px 12px; padding: 8px 16px 8px; }
 }
@@ -1597,64 +1602,6 @@ function toggleTheme() {
   </div>
 
   <div id="sec-dashboard" class="sec active">
-
-    <!-- Hero Row: os 4 cards de totais juntos, lado a lado -->
-    <div class="dash-hero dash-hero-4col">
-      <!-- Card 1: Total -->
-      <div class="dash-hero-card card-red clickable" onclick="filtrarTudo()" title="Ver todos os produtos">
-        <div class="dash-hero-label">Produtos monitorados</div>
-        <div class="dash-hero-num" id="dTotal">—</div>
-        <div class="dash-hero-sub" id="dTotalSub">Aguardando sincronização</div>
-        <div class="dash-hero-icon" style="background:rgba(239,68,68,.18)">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-        </div>
-      </div>
-
-      <!-- Card 2: Atenção -->
-      <div class="dash-hero-card card-amber clickable" onclick="filtrarAtencaoGeral()" title="Ver todos os itens que precisam de atenção">
-        <div class="dash-hero-label">Itens que precisam de atenção</div>
-        <div class="dash-hero-attention">
-          <div class="dha-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          </div>
-          <div>
-            <div class="dha-count"><span id="dAlerta">—</span> produtos</div>
-            <div class="dha-label">precisam de atenção</div>
-            <div class="dha-sub" id="dAlertaSub">Verifique os itens vencidos ou críticos e tome as ações necessárias.</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 3: Valor em risco -->
-      <div class="dash-hero-card card-red clickable" onclick="filtrarRisco()" title="Ver produtos em risco de vencimento">
-        <div class="dash-hero-label">
-          Valor em risco
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="dash-hero-num clr-red" id="dValorRisco">—</div>
-        <div class="dash-hero-sub">Produtos próximos do vencimento</div>
-        <div class="dash-trend up" id="dTrend" style="display:none">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
-          <span id="dTrendTxt"></span>
-        </div>
-        <div class="dash-hero-icon" style="background:rgba(239,68,68,.18)">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
-        </div>
-      </div>
-
-      <!-- Card 4: Perda evitada -->
-      <div class="dash-hero-card card-emerald clickable" onclick="auraNav(document.getElementById('navAjuda'),'ajuda')" title="Produtos encerrados/resolvidos no sistema" id="cardPerdaEvitada">
-        <div class="dash-hero-label">
-          Perda evitada
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        </div>
-        <div class="dash-hero-num clr-emr" id="dPerdaEvitada">—</div>
-        <div class="dash-hero-sub">Produtos encerrados/resolvidos no sistema</div>
-        <div class="dash-hero-icon" style="background:rgba(16,185,129,.18)">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-      </div>
-    </div>
 
     <!-- KPI Tiles -->
     <div class="dash-divider-label">Status dos produtos</div>
@@ -3403,11 +3350,6 @@ function fmtBRL(n){
 
 function renderDashboard(){
   if(!products||!products.length){
-    document.getElementById('dTotal').textContent='0';
-    document.getElementById('dTotalSub').textContent='Nenhum produto carregado';
-    document.getElementById('dAlerta').textContent='0';
-    document.getElementById('dValorRisco').textContent='R$ 0,00';
-    document.getElementById('dPerdaEvitada').textContent='R$ 0,00';
     document.getElementById('dashTiles').innerHTML='';
     document.getElementById('dashMini').innerHTML='';
     return;
@@ -3475,15 +3417,6 @@ function renderDashboard(){
   var total=products.length;
   var eficiencia=total>0?(Math.max(0,total-c.vencido)/total*100):0;
 
-  // ── Hero cards ──
-  document.getElementById('dTotal').textContent=total;
-  document.getElementById('dTotalSub').textContent='Total de registros carregados';
-  document.getElementById('dAlerta').textContent=alerta;
-  document.getElementById('dAlertaSub').textContent=
-    c.urgente+' vencem em até 7 dias · Críticos: '+c.critico;
-  document.getElementById('dValorRisco').textContent=fmtBRL(valorRisco);
-  document.getElementById('dPerdaEvitada').textContent=fmtBRL(valorPerdaEvitada);
-
   // ── KPI Tiles ──
   var tiles=[
     {lbl:'Vencidos',val:c.vencido,sub:'Ação imediata',cls:'dt-red',filt:'vencido',
@@ -3534,7 +3467,15 @@ function renderDashboard(){
   }).join('');
 
   // ── Setor breakdown ──
-  var setorKeys=Object.keys(setorMap).sort();
+  // Ordena pela lista canônica (garante que setores relacionados, como
+  // "Seca" e "Seca doce", fiquem sempre lado a lado na grade) — setores
+  // fora da lista canônica (nomes não padronizados) vão pro final, em ordem alfabética.
+  var setorKeys=Object.keys(setorMap).sort(function(a,b){
+    var ia=SETORES_CANONICOS.indexOf(a); if(ia<0)ia=999;
+    var ib=SETORES_CANONICOS.indexOf(b); if(ib<0)ib=999;
+    if(ia!==ib)return ia-ib;
+    return a.localeCompare(b);
+  });
   var colorMap={vencido:'#f87171',critico:'#fb923c',urgente:'#fbbf24',atencao:'#facc15',ok:'#34d399'};
   // Mesmos ícones usados no sistema de Coletas, um por setor (Tabler Icons)
   var SETOR_ICON = {
@@ -3554,6 +3495,7 @@ function renderDashboard(){
     'Seca':'ti-shopping-cart',
     'Seca doce':'ti-candy'
   };
+  document.getElementById('dashSetorGrid').style.gridTemplateColumns='repeat('+setorKeys.length+', minmax(0,1fr))';
   document.getElementById('dashSetorGrid').innerHTML=setorKeys.map(function(s){
     var sm=setorMap[s];
     var urgCnt=sm.vencido+sm.critico+sm.urgente;
