@@ -205,6 +205,28 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .val-card.resolvido{opacity:.65}
 .urg-card.faded{opacity:.55}
 .urg-card.resolvido{opacity:.65}
+
+.uc-card{background:var(--surface2);border:1px solid var(--border);border-top:3px solid #666;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .2s;min-width:0}
+.uc-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.3)}
+.uc-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.uc-card-nome{font-size:14px;font-weight:600;color:var(--text);line-height:1.4;flex:1;min-width:0;word-break:break-word}
+.uc-card-badge{border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid transparent}
+.uc-card-tags{display:flex;gap:6px;flex-wrap:wrap}
+.uc-card-tag{background:var(--surface3,#1e1e2e);color:var(--muted);border-radius:4px;padding:3px 8px;font-size:11px}
+.uc-card-tag.mono{font-family:monospace;overflow-wrap:anywhere}
+.uc-card-val{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.uc-card-val-lbl{font-size:12px;color:var(--muted)}
+.uc-card-val-dias{font-size:12px;font-weight:700;white-space:nowrap}
+.uc-card-qtde{font-size:13px;border-top:1px solid var(--border);padding-top:10px;margin-top:2px}
+.uc-card-qtde-lbl{color:var(--muted);font-size:11px}
+.uc-card-colab{display:flex;align-items:center;gap:7px;border-top:1px solid var(--border);padding-top:8px;margin-top:2px}
+.uc-card-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.uc-card-avatar.has-name{background:#D4001A22;border:1px solid #D4001A55;color:#D4001A;font-size:12px}
+.uc-card-avatar.no-name{background:#ffffff11;border:1px solid var(--border);color:var(--muted);font-size:11px}
+.uc-card-colab-name{font-size:13px;color:var(--text);font-weight:600;flex:1;min-width:0;overflow-wrap:anywhere}
+.uc-card-cadastro-btn{background:transparent;border:1px dashed #D4001A66;color:#D4001A;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;flex:1;text-align:left;min-width:0;overflow-wrap:anywhere}
+.uc-card-sememail{font-size:10px;color:var(--muted)}
+.uc-card-ts{font-size:11px;color:var(--muted);padding-left:36px}
 .val-card-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
 .val-card-title{font-size:13px;font-weight:600;color:var(--tx);line-height:1.3}
 .val-card-cod{font-family:monospace;font-size:10px;color:var(--tx2);margin-top:2px;display:flex;align-items:center;gap:6px}
@@ -971,7 +993,21 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   /* minmax(0,1fr) impede o grid de "esticar" a coluna quando o conteúdo
      do card (código de barras, nome de setor, fornecedor) é mais longo —
      sem isso, o card vaza pra fora e a segunda coluna corta na tela. */
-  .val-card, .urg-card, .mod-card { min-width: 0 !important; }
+  .val-card, .urg-card, .mod-card, .uc-card { min-width: 0 !important; }
+  .uc-card { padding: 5px !important; gap: 4px !important; }
+  .uc-card-nome { font-size: 8px !important; line-height: 1.1 !important; }
+  .uc-card-badge { font-size: 6.5px !important; padding: 1px 5px !important; }
+  .uc-card-tags { gap: 3px !important; }
+  .uc-card-tag { font-size: 6.5px !important; padding: 1px 5px !important; }
+  .uc-card-val-lbl, .uc-card-val-dias { font-size: 6.5px !important; }
+  .uc-card-qtde { font-size: 7.5px !important; padding-top: 5px !important; margin-top: 1px !important; }
+  .uc-card-qtde-lbl { font-size: 6.5px !important; }
+  .uc-card-colab { padding-top: 5px !important; margin-top: 1px !important; gap: 4px !important; }
+  .uc-card-avatar { width: 16px !important; height: 16px !important; font-size: 7px !important; }
+  .uc-card-colab-name { font-size: 7.5px !important; }
+  .uc-card-cadastro-btn { font-size: 6.5px !important; padding: 2px 4px !important; }
+  .uc-card-sememail { font-size: 6.5px !important; }
+  .uc-card-ts { font-size: 6px !important; padding-left: 20px !important; }
   .val-card-hdr-cod, .urg-card-cod,
   .urg-card-forn, .val-card-forn, .val-card-forn-row,
   .urg-info-val, .val-card-field-val { overflow-wrap: anywhere !important; white-space: normal !important; }
@@ -1552,10 +1588,6 @@ function toggleTheme() {
   </div>
 
   <div class="metrics" id="metrics"></div>
-  <div class="alert" id="alertBanner">
-    <div class="alert-left"><i class="ti ti-alert-triangle" style="font-size:18px;flex-shrink:0"></i><span id="alertTxt"></span></div>
-    <span class="alert-sync" id="syncTimeAlert"></span>
-  </div>
   <div class="tabs">
     <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
     <div class="tab" onclick="goTab('encartes')"><i class="ti ti-photo-check"></i> Encartes <span id="encBadge" style="display:none;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
@@ -1624,16 +1656,6 @@ function toggleTheme() {
       </div>
     </div>
 
-    <!-- Alert Bar -->
-    <div class="dash-alertbar" id="dashAlertBar" style="display:none">
-      <div class="dab-left">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        <span class="dab-txt" id="dashAlertTxt"></span>
-        <span class="dab-detail" id="dashAlertDetail"></span>
-      </div>
-      <button class="dab-btn" id="dashAlertBtn" onclick="filtrarMetrica('vencido')">Ver críticos</button>
-    </div>
-
     <!-- KPI Tiles -->
     <div class="dash-divider-label">Status dos produtos</div>
     <div class="dash-tiles" id="dashTiles">
@@ -1644,22 +1666,6 @@ function toggleTheme() {
     <div class="dash-divider-label">Resumo financeiro</div>
     <div class="dash-mini-row" id="dashMini">
       <!-- renderDashboard() populates this -->
-    </div>
-
-    <!-- Urgent table -->
-    <div class="dash-divider-label">Itens urgentes</div>
-    <div class="dash-section-hd">
-      <div>
-        <div class="dash-section-title">Vencidos &amp; Críticos</div>
-        <div class="dash-section-sub">Produtos que exigem ação imediata (vencidos ou críticos ≤ 3 dias)</div>
-      </div>
-      <button class="dash-view-all" onclick="auraNav(document.querySelector('#auraNav button:nth-child(2)'), 'validades')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        Ver todos
-      </button>
-    </div>
-    <div id="dashUrgentGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:24px">
-      <div id="dashUrgentTbody" style="display:contents"></div>
     </div>
 
     <!-- ══════════════════════════════════════════════
@@ -3402,10 +3408,8 @@ function renderDashboard(){
     document.getElementById('dAlerta').textContent='0';
     document.getElementById('dValorRisco').textContent='R$ 0,00';
     document.getElementById('dPerdaEvitada').textContent='R$ 0,00';
-    document.getElementById('dashAlertBar').style.display='none';
     document.getElementById('dashTiles').innerHTML='';
     document.getElementById('dashMini').innerHTML='';
-    document.getElementById('dashUrgentTbody').innerHTML='<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--muted)">Nenhum produto carregado.</td></tr>';
     return;
   }
 
@@ -3480,17 +3484,6 @@ function renderDashboard(){
   document.getElementById('dValorRisco').textContent=fmtBRL(valorRisco);
   document.getElementById('dPerdaEvitada').textContent=fmtBRL(valorPerdaEvitada);
 
-  // ── Alert bar ──
-  var bar=document.getElementById('dashAlertBar');
-  if(alerta>0){
-    bar.style.display='flex';
-    document.getElementById('dashAlertTxt').textContent=alerta+' produto(s) exigem ação imediata!';
-    document.getElementById('dashAlertDetail').textContent=
-      (c.urgente)+ ' vencem em até 7 dias  ·  Valor em risco: '+fmtBRL(valorRisco);
-  } else {
-    bar.style.display='none';
-  }
-
   // ── KPI Tiles ──
   var tiles=[
     {lbl:'Vencidos',val:c.vencido,sub:'Ação imediata',cls:'dt-red',filt:'vencido',
@@ -3539,72 +3532,6 @@ function renderDashboard(){
       +m.icon
       +'</div>';
   }).join('');
-
-  // ── Urgent table ──
-  var urgent=products.filter(function(p){
-    var s=statusFromDays(daysDiff(p.validade));
-    return s==='vencido'||s==='critico';
-  }).sort(function(a,b){
-    return (daysDiff(a.validade)||0)-(daysDiff(b.validade)||0);
-  }).slice(0,15);
-
-  function statusBadge(p){
-    var d=daysDiff(p.validade);
-    var s=statusFromDays(d);
-    var map={vencido:{cls:'b-danger',lbl:'Vencido'},critico:{cls:'b-danger',lbl:'Crítico'},urgente:{cls:'b-warn',lbl:'Urgente'},atencao:{cls:'b-warn',lbl:'Atenção'},ok:{cls:'b-ok',lbl:'OK'}};
-    var m=map[s]||{cls:'b-gray',lbl:s};
-    return '<span class="badge '+m.cls+'">'+m.lbl+'</span>';
-  }
-  function daysBadge(p){
-    var d=daysDiff(p.validade);
-    if(d===null)return'—';
-    var cls=d<0?'badge-red':d<=3?'badge-red':d<=7?'badge-amber':'badge-emerald';
-    return '<span class="badge-status '+cls+'">'+(d<0?d+'d':'+'+d+'d')+'</span>';
-  }
-
-  // speedometerSVG agora é função global (ver fim do arquivo)
-
-  document.getElementById('dashUrgentTbody').innerHTML=
-    urgent.length===0
-    ?'<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">Nenhum produto vencido ou crítico.</div>'
-    :urgent.map(function(p){
-      var days=daysDiff(p.validade);
-      var s=statusFromDays(days);
-      var hdrCls='urg-card-header status-'+(s==='critico'||s==='vencido'?s:'critico');
-      var idx=products.indexOf(p);
-      var fornProd=p.fornecedor||bancoFornecedor[(p.cod||'').replace(/[^0-9]/g,'')]||'—';
-      var urgBadgeSt='status-'+(s==='critico'||s==='vencido'?s:'critico');
-      var qb=qtdeBadge(p.qtde,urgBadgeSt,p.qtde+' unidades a vencer');
-      return '<div class="urg-card">'
-        +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px">'
-          +qb.html
-          +'<div style="min-width:0;flex:1">'
-            +'<div class="urg-card-nome">'+escHtml(cleanNome(p.nome||'—'))+'</div>'
-            +'<div class="urg-card-cod">'+(p.cod||'')+'</div>'
-          +'</div>'
-          +badge(s)
-        +'</div>'
-        +'<div class="urg-card-body">'
-          +'<div class="urg-card-mid">'
-            +'<div class="urg-speedo-wrap">'+speedometerSVG(days,s)+'<span class="urg-speedo-lbl">Validade</span></div>'
-            +'<div class="urg-card-info">'
-              +'<div class="urg-info-field"><span class="urg-info-lbl">Vence em</span><span class="urg-info-val" style="color:'+(days<=0?'#ef4444':days<=3?'#f97316':'#fbbf24')+'">'+(days<=0?'Vencido':days===1?'Amanhã':'Faltam '+days+'d')+'</span></div>'
-              +'<div class="urg-info-field"><span class="urg-info-lbl">Data</span><span class="urg-info-val">'+fmtDataExtenso(p.validade||'')+'</span></div>'
-              +'<div class="urg-info-field"><span class="urg-info-lbl">Setor</span><span class="urg-info-val">'+escHtml(p.setor||'—')+'</span></div>'
-              +'<div class="urg-info-field"><span class="urg-info-lbl">Qtde</span><span class="urg-info-val">'+escHtml(p.qtde||'—')+'</span></div>'
-              +(p.precoPromo?'<div class="urg-info-field"><span class="urg-info-lbl">Promoção</span><span class="urg-info-val" style="color:#34d399">'+fmtR(p.precoPromo)+'</span></div>':'')
-              +(p.pctDesc?'<div class="urg-info-field"><span class="urg-info-lbl">Desconto</span><span class="urg-info-val" style="color:#fbbf24">'+fmtPct(p.pctDesc)+'</span></div>':'')
-            +'</div>'
-          +'</div>'
-          +'<div class="urg-card-forn"><i class="ti ti-truck-delivery" style="opacity:.6"></i> '+escHtml(fornProd)+'</div>'
-        +'</div>'
-        +'<div class="urg-card-foot">'
-          +'<button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>'
-          +'<button class="abtn" onclick="openResolvidoModal('+idx+')" style="border-color:var(--green);color:var(--green)"><i class="ti ti-circle-check"></i> Resolvido</button>'
-        +'</div>'
-      +'</div>';
-        +'</tr>';
-    }).join('');
 
   // ── Setor breakdown ──
   var setorKeys=Object.keys(setorMap).sort();
@@ -3919,39 +3846,39 @@ function _ucFiltrar() {
     var nomeExib = d.nomeColeta || null;
     var avatarLetter = nomeExib ? nomeExib.trim()[0].toUpperCase() : '?';
     var coletaHTML = nomeExib
-      ? '<div style="display:flex;align-items:center;gap:7px;border-top:1px solid var(--border);padding-top:8px;margin-top:2px">'
-          +'<div style="width:28px;height:28px;border-radius:50%;background:#D4001A22;border:1px solid #D4001A55;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#D4001A;flex-shrink:0">'+escHtml(avatarLetter)+'</div>'
-          +'<span style="font-size:13px;color:var(--text);font-weight:600;flex:1">'+escHtml(nomeExib)+'</span>'
+      ? '<div class="uc-card-colab">'
+          +'<div class="uc-card-avatar has-name">'+escHtml(avatarLetter)+'</div>'
+          +'<span class="uc-card-colab-name">'+escHtml(nomeExib)+'</span>'
           +'</div>'
-          +'<div style="font-size:11px;color:var(--muted);padding-left:36px">🕒 '+escHtml(tsTxt)+'</div>'
+          +'<div class="uc-card-ts">🕒 '+escHtml(tsTxt)+'</div>'
         +'</div>'
-      : '<div style="display:flex;align-items:center;gap:7px;border-top:1px solid var(--border);padding-top:8px;margin-top:2px">'
-          +'<div style="width:28px;height:28px;border-radius:50%;background:#ffffff11;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);flex-shrink:0">?</div>'
+      : '<div class="uc-card-colab">'
+          +'<div class="uc-card-avatar no-name">?</div>'
           +(d.email
-            ? '<button onclick="_ucAbrirCadastroUser(\'' + (d.email||'').replace(/'/g,"\\'") + '\')" style="background:transparent;border:1px dashed #D4001A66;color:#D4001A;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;flex:1;text-align:left">✏️ '+escHtml(d.email)+' — cadastrar nome</button>'
-            : '<span style="font-size:10px;color:var(--muted)">Sem e-mail</span>')
+            ? '<button class="uc-card-cadastro-btn" onclick="_ucAbrirCadastroUser(\'' + (d.email||'').replace(/'/g,"\\'") + '\')">✏️ '+escHtml(d.email)+' — cadastrar nome</button>'
+            : '<span class="uc-card-sememail">Sem e-mail</span>')
           +'</div>'
-          +'<div style="font-size:11px;color:var(--muted);padding-left:36px">🕒 '+escHtml(tsTxt)+'</div>'
+          +'<div class="uc-card-ts">🕒 '+escHtml(tsTxt)+'</div>'
         +'</div>';
-    return '<div style="background:var(--surface2);border:1px solid var(--border);border-top:3px solid '+cor+';border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .2s" onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.3)\'" onmouseout="this.style.boxShadow=\'none\'">'
+    return '<div class="uc-card" style="border-top-color:'+cor+'">'
       // Header: nome produto + badge status
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
-        +'<div style="font-size:14px;font-weight:600;color:var(--text);line-height:1.4;flex:1;min-width:0">'+escHtml(cleanNome(d.nome))+'</div>'
-        +'<span style="background:'+cor+'22;color:'+cor+';border:1px solid '+cor+'44;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap">'+lbl+'</span>'
+      +'<div class="uc-card-top">'
+        +'<div class="uc-card-nome">'+escHtml(cleanNome(d.nome))+'</div>'
+        +'<span class="uc-card-badge" style="background:'+cor+'22;color:'+cor+';border-color:'+cor+'44">'+lbl+'</span>'
       +'</div>'
       // EAN + Setor
-      +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
-        +'<span style="background:var(--surface3,#1e1e2e);color:var(--muted);border-radius:4px;padding:3px 8px;font-size:11px;font-family:monospace">'+escHtml(d.ean)+'</span>'
-        +(d.setor?'<span style="background:var(--surface3,#1e1e2e);color:var(--muted);border-radius:4px;padding:3px 8px;font-size:11px">'+escHtml(d.setor)+'</span>':'')
+      +'<div class="uc-card-tags">'
+        +'<span class="uc-card-tag mono">'+escHtml(d.ean)+'</span>'
+        +(d.setor?'<span class="uc-card-tag">'+escHtml(d.setor)+'</span>':'')
       +'</div>'
       // Validade + dias
-      +'<div style="display:flex;justify-content:space-between;align-items:center">'
-        +'<div style="font-size:12px;color:var(--muted)">📅 Vence: <strong style="color:var(--text)">'+(d.valStr?d.valStr.split('-').reverse().join('/'):'—')+'</strong></div>'
-        +'<div style="font-size:12px;font-weight:700;color:'+cor+'">'+escHtml(diasTxt)+'</div>'
+      +'<div class="uc-card-val">'
+        +'<div class="uc-card-val-lbl">📅 Vence: <strong style="color:var(--text)">'+(d.valStr?d.valStr.split('-').reverse().join('/'):'—')+'</strong></div>'
+        +'<div class="uc-card-val-dias" style="color:'+cor+'">'+escHtml(diasTxt)+'</div>'
       +'</div>'
       // Quantidade
-      +'<div style="font-size:13px;border-top:1px solid var(--border);padding-top:10px;margin-top:2px">'
-        +'📦 <strong style="color:'+qtdeColor+'">'+d.qtde+'</strong> <span style="color:var(--muted);font-size:11px">un. coletadas</span>'
+      +'<div class="uc-card-qtde">'
+        +'📦 <strong style="color:'+qtdeColor+'">'+d.qtde+'</strong> <span class="uc-card-qtde-lbl">un. coletadas</span>'
       +'</div>'
       // Colaborador + horário
       +coletaHTML
@@ -4047,8 +3974,6 @@ function renderMetrics(){
   var aguarda=products.filter(function(p){return(p.status||'').toLowerCase().includes('aguard');}).length;
   products.forEach(function(p){var s=statusFromDays(daysDiff(p.validade));if(s in c)c[s]++;});
   var al=c.vencido+c.critico;
-  document.getElementById('alertBanner').classList.toggle('show',al>0);
-  document.getElementById('alertTxt').textContent=al+' produto(s) vencido(s) ou critico(s). Verifique e acione promocoes.';
   function mc(lbl,val,cls,filt){
     var color=cls==='danger'?'var(--red)':cls==='warn'?'var(--amber)':cls==='ok'?'var(--green)':cls==='info'?'var(--blue)':'var(--tx)';
     var style=filt?'cursor:pointer;transition:border-color .15s;':'';
@@ -4720,12 +4645,10 @@ function goTab(name){
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('active');
-  // Na aba Dashboard, o próprio dashboard já mostra os totais (dash-tiles) e o alerta
-  // (dashAlertBar) — esconde a barra de métricas e o banner globais pra não duplicar.
+  // Na aba Dashboard, o próprio dashboard já mostra os totais (dash-tiles).
+  // Esconde a barra de métricas global pra não duplicar.
   var metricsEl=document.getElementById('metrics');
-  var alertEl=document.getElementById('alertBanner');
   if(metricsEl) metricsEl.style.display = (name==='dashboard') ? 'none' : '';
-  if(alertEl) alertEl.style.display = (name==='dashboard') ? 'none' : (alertEl.classList.contains('show') ? '' : 'none');
   if(name==='relatorio'){
     var selFiltro=document.getElementById('filtroNegTipo');
     if(selFiltro)selFiltro.value='sobras';
