@@ -729,8 +729,9 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 }
 .dash-tile:hover { border-color: var(--bds); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.18); }
 .dash-tile.active-filter { transform: translateY(-1px); box-shadow: 0 0 0 2px currentColor; }
-.dash-tile-hd { display: flex; align-items: flex-start; justify-content: space-between; }
-.dash-tile-num { font-size: 32px; font-weight: 800; line-height: 1; }
+.dash-tile-hd { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; }
+.dash-tile-num { font-size: 32px; font-weight: 800; line-height: 1; min-width: 0; }
+.dash-tile-num-cur { font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dash-tile-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-top: 6px; }
 .dash-tile-sub { font-size: 10px; color: var(--muted); margin-top: 3px; }
 .dt-red    { --tc: #f87171; } .dt-orange { --tc: #fb923c; } .dt-amber { --tc: #fbbf24; }
@@ -799,7 +800,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 }
 #dashSetorGrid {
   gap: 8px !important;
-  grid-template-columns: repeat(auto-fill,minmax(132px,1fr)) !important;
+  grid-template-columns: repeat(auto-fill,minmax(132px,1fr));
 }
 #dashSetorGrid .dash-hero-card { padding: 10px 8px !important; cursor: pointer; min-width: 0; }
 .dash-setor-card { display: flex; flex-direction: column; min-width: 0; }
@@ -1592,7 +1593,7 @@ function toggleTheme() {
     </div>
   </div>
 
-  <div class="metrics" id="metrics"></div>
+  <div class="metrics" id="metrics" style="display:none"></div>
   <div class="tabs">
     <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
     <div class="tab" onclick="goTab('encartes')"><i class="ti ti-photo-check"></i> Encartes <span id="encBadge" style="display:none;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
@@ -3431,16 +3432,17 @@ function renderDashboard(){
       icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>'},
     {lbl:'Aguardando',val:aguarda,sub:'Em acompanhamento',cls:'dt-gray',filt:'aguardando',
       icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'},
-    {lbl:'Estoque Monitorado',val:fmtBRL(valorEstoqueMonitorado).replace('R$ ','R$'),sub:'Valor total em acompanhamento ativo',cls:'dt-gray',filt:null,
+    {lbl:'Estoque Monitorado',val:fmtBRL(valorEstoqueMonitorado).replace('R$ ','R$'),sub:'Valor total em acompanhamento ativo',cls:'dt-gray',filt:null,cur:true,
       icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>'},
-    {lbl:'Perda Evitada',val:fmtBRL(valorPerdaEvitada).replace('R$ ','R$'),sub:'Produtos encerrados/resolvidos no sistema',cls:'dt-teal',filt:null,
+    {lbl:'Perda Evitada',val:fmtBRL(valorPerdaEvitada).replace('R$ ','R$'),sub:'Produtos encerrados/resolvidos no sistema',cls:'dt-teal',filt:null,cur:true,
       icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'},
   ];
 
   document.getElementById('dashTiles').innerHTML=tiles.map(function(t){
     var click=t.filt?'onclick="filtrarMetrica(\'' + t.filt + '\');auraNav(document.querySelector(\'#auraNav button:nth-child(2)\'),\'validades\')"':'';
+    var numCls='dash-tile-num'+(t.cur?' dash-tile-num-cur':'');
     return '<div class="dash-tile '+t.cls+' dash-tile-ring" '+click+' title="'+(t.filt?'Filtrar: '+t.lbl:t.lbl)+'">'
-      +'<div class="dash-tile-hd"><div class="dash-tile-num">'+t.val+'</div>'+t.icon+'</div>'
+      +'<div class="dash-tile-hd"><div class="'+numCls+'">'+t.val+'</div>'+t.icon+'</div>'
       +'<div class="dash-tile-lbl">'+t.lbl+'</div>'
       +'<div class="dash-tile-sub">'+t.sub+'</div>'
       +'</div>';
