@@ -2986,12 +2986,17 @@ function badge(s){var m={vencido:['b-danger','Vencido'],critico:['b-danger','Cri
 // Retorna {html, headerPadLeft} — headerPadLeft deve ser aplicado ao padding-left do header do card.
 function qtdeBadge(qtde, statusClass, titulo){
   qtde = qtde || 0;
-  if(!qtde) return {html:'', headerPadLeft:14};
+  if(!qtde) return {html:'', headerPadLeft:14, headerPadLeftMobile:10};
   var digitos = String(qtde).length;
-  var fontSize = digitos>=4?13:digitos===3?14:16;
-  var padLeft = digitos<=2?48:digitos===3?58:70;
+  var fontSize = digitos>=5?11:digitos===4?13:digitos===3?14:16;
+  var padLeft = digitos>=5?86:digitos===4?70:digitos===3?58:48;
+  // Padding equivalente pro layout compacto de 2-colunas no mobile — o badge
+  // continua crescendo em largura conforme a quantidade de dígitos, então o
+  // espaço reservado pro texto do produto também precisa crescer junto,
+  // senão o número grande cobre o começo do nome (bug reportado).
+  var padLeftMobile = digitos>=5?54:digitos===4?44:digitos===3?34:24;
   var html = '<span class="val-card-qtde-badge '+statusClass+'" style="font-size:'+fontSize+'px" title="'+(titulo||(qtde+' unidades'))+'">'+qtde+'</span>';
-  return {html:html, headerPadLeft:padLeft};
+  return {html:html, headerPadLeft:padLeft, headerPadLeftMobile:padLeftMobile};
 }
 function barColor(s){return{vencido:'#E24B4A',critico:'#E24B4A',urgente:'#BA7517',atencao:'#EF9F27',ok:'#1D9E75','sem-data':'#888'}[s]||'#888';}
 function fmtDataExtenso(validade){
@@ -3070,7 +3075,7 @@ function renderTable(){
     var venceTxt=days===null?'Sem data':days<0?'Vencido há '+Math.abs(days)+'d':days===0?'Vence hoje':days===1?'Amanhã':'Faltam '+days+'d';
     var qb=qtdeBadge(p.qtde,badgeSt,p.qtde+' unidades a vencer');
     return '<div class="'+cardCls+'">'
-      +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px">'
+      +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px;--qb-pad-m:'+qb.headerPadLeftMobile+'px">'
         +qb.html
         +'<div style="min-width:0;flex:1">'
           +'<div class="urg-card-nome">'+escHtml(cleanNome(p.nome||'--'))+'</div>'
