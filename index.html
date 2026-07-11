@@ -781,7 +781,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 }
 #dashSetorGrid .dash-hero-card { padding: 10px 12px !important; cursor: pointer; }
 .dash-setor-card { display: flex; flex-direction: column; }
-.dash-setor-card .dsc-icon { margin-bottom: 6px; }
+.dash-setor-card .dsc-icon { margin-bottom: 6px; font-size: 15px; line-height: 1; }
 .dash-setor-card .dsc-nome { font-size: 12px; font-weight: 600; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dash-setor-card .dsc-total { font-size: 22px; font-weight: 800; line-height: 1; }
 .dash-setor-card .dsc-status { font-size: 10px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -945,8 +945,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   /* Setor grid — bem pequeno, 5 por linha, com ícone, pra caber os 13 setores em poucas linhas */
   #dashSetorGrid { grid-template-columns: repeat(5, 1fr) !important; gap: 4px !important; }
   #dashSetorGrid .dash-hero-card { padding: 4px 3px !important; border-radius: 7px !important; }
-  .dash-setor-card .dsc-icon { margin-bottom: 2px !important; }
-  .dash-setor-card .dsc-icon svg { width: 10px !important; height: 10px !important; }
+  .dash-setor-card .dsc-icon { margin-bottom: 2px !important; font-size: 10px !important; }
   .dash-setor-card .dsc-nome { font-size: 5.5px !important; margin-bottom: 2px !important; }
   .dash-setor-card .dsc-total { font-size: 11px !important; line-height: 1.1 !important; }
   .dash-setor-card .dsc-status { font-size: 5px !important; margin-top: 1px !important; }
@@ -1021,6 +1020,25 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .mod-info-val { font-size: 6.5px !important; line-height: 1.2 !important; }
   .mod-card-foot { padding: 5px 6px !important; gap: 4px !important; flex-wrap: wrap !important; }
   .mod-card-foot .btn { font-size: 7px !important; padding: 3px 5px !important; }
+
+  /* Tarefas — mesmo padrão compacto dos cards de Vencidos & Críticos */
+  .tarefa-card { padding: 6px 6px !important; min-width: 0 !important; }
+  .tarefa-card-top { margin-bottom: 4px !important; flex-wrap: wrap !important; gap: 4px !important; }
+  .tarefa-status-badge { font-size: 6.5px !important; padding: 2px 6px !important; gap: 3px !important; }
+  .tarefa-status-badge i { font-size: 8px !important; }
+  .tarefaChk { width: 12px !important; height: 12px !important; }
+  .tarefa-card-actions { gap: 3px !important; }
+  .tarefa-card-actions .btn { font-size: 6px !important; padding: 2px 4px !important; }
+  .tarefa-card-nome { font-size: 8px !important; line-height: 1.15 !important; margin-bottom: 3px !important; }
+  .tarefa-card-cod { font-size: 6px !important; margin-bottom: 3px !important; }
+  .tarefa-validade-info { font-size: 6px !important; padding: 2px 5px !important; gap: 3px !important; margin-bottom: 3px !important; }
+  .tarefa-validade-info i { font-size: 8px !important; }
+  .tarefa-card-desc { font-size: 6.5px !important; margin-bottom: 3px !important; line-height: 1.25 !important; }
+  .tarefa-card-desc i { font-size: 7px !important; }
+  .tarefa-card-colab { font-size: 6.5px !important; gap: 3px !important; }
+  .tarefa-card-colab i { font-size: 8px !important; }
+  .tarefa-qtde-badge { min-width: 15px !important; height: 15px !important; font-size: 7px !important; top: -5px !important; right: -5px !important; }
+  .tarefa-card-foot { font-size: 5.5px !important; margin-top: 4px !important; gap: 1px !important; }
 
   .ecard-body { grid-template-columns: 1fr !important; }
   .ecard-imgcol { border-right: none !important; border-bottom: 1px solid var(--bd); padding: 5px !important; }
@@ -3591,16 +3609,32 @@ function renderDashboard(){
   // ── Setor breakdown ──
   var setorKeys=Object.keys(setorMap).sort();
   var colorMap={vencido:'#f87171',critico:'#fb923c',urgente:'#fbbf24',atencao:'#facc15',ok:'#34d399'};
-  // Ícone genérico por setor (mesmo ícone, cor varia pelo status) — ajuda a identificar
-  // visualmente o card mesmo com o nome cortado/reduzido no mobile.
-  var setorIconSvg='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5"/><path d="M3 9a2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0 2 2 0 0 0 4 0"/><path d="M4 9v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/></svg>';
+  // Mesmos ícones usados no sistema de Coletas, um por setor (Tabler Icons)
+  var SETOR_ICON = {
+    'Açougue':'ti-meat', 'Acougue':'ti-meat',
+    'Bazar':'ti-home',
+    'Bebidas':'ti-beer',
+    'Congelados':'ti-snowflake',
+    'Frios':'ti-cheese',
+    'Horti':'ti-leaf', 'FLV':'ti-leaf',
+    'Laticínios':'ti-milk', 'Laticinios':'ti-milk',
+    'Limpeza':'ti-soap',
+    'Outros':'ti-package',
+    'Padaria':'ti-bread',
+    'Perfumaria':'ti-spray',
+    'Pet':'ti-paw',
+    'Pilhas/Baterias':'ti-battery', 'Pilhas':'ti-battery', 'Baterias':'ti-battery',
+    'Seca':'ti-shopping-cart',
+    'Seca doce':'ti-candy'
+  };
   document.getElementById('dashSetorGrid').innerHTML=setorKeys.map(function(s){
     var sm=setorMap[s];
     var urgCnt=sm.vencido+sm.critico+sm.urgente;
     var pct=sm.total>0?Math.round((sm.ok/sm.total)*100):0;
     var barColor=pct>=80?'#34d399':pct>=50?'#fbbf24':'#f87171';
+    var iconClass = SETOR_ICON[s] || 'ti-package';
     return '<div class="dash-hero-card dash-setor-card" data-setor="'+escHtml(s)+'" onclick="filtrarSetor(\''+s+'\')" title="Filtrar por '+s+'">'
-      +'<div class="dsc-icon" style="color:'+barColor+'">'+setorIconSvg+'</div>'
+      +'<div class="dsc-icon" style="color:'+barColor+'"><i class="ti '+iconClass+'"></i></div>'
       +'<div class="dsc-nome" title="'+escHtml(s)+'">'+escHtml(s)+'</div>'
       +'<div class="dsc-total">'+sm.total+'</div>'
       +'<div class="dsc-status">'
@@ -7239,38 +7273,38 @@ function renderTarefas() {
 
     var qtdeBadge = '';
     if (t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
-      qtdeBadge = '<span style="position:absolute;top:-8px;right:-8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);border:2px solid var(--surface)">' + t.quantidadeConfirmada + '</span>';
+      qtdeBadge = '<span class="tarefa-qtde-badge" style="position:absolute;top:-8px;right:-8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);border:2px solid var(--surface)">' + t.quantidadeConfirmada + '</span>';
     }
 
     var validadeInfo = '';
     if (t.validade) {
       var dv = daysDiff(t.validade);
       var corVal = (dv !== null && dv <= 3) ? 'var(--red)' : (dv !== null && dv <= 7 ? 'var(--amber)' : 'var(--tx2)');
-      validadeInfo = '<div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,.1);color:' + corVal + ';margin-bottom:6px"><i class="ti ti-calendar-exclamation"></i> Validade: ' + fmtDataExtenso(t.validade) + '</div>';
+      validadeInfo = '<div class="tarefa-validade-info" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,.1);color:' + corVal + ';margin-bottom:6px"><i class="ti ti-calendar-exclamation"></i> Validade: ' + fmtDataExtenso(t.validade) + '</div>';
     }
     
-    return '<div style="position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;transition:border-color .15s">'
+    return '<div class="tarefa-card" style="position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;transition:border-color .15s">'
       + qtdeBadge
-      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      + '<div class="tarefa-card-top" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
       +   '<div style="display:flex;align-items:center;gap:8px">'
       +     (isPend ? '<input type="checkbox" class="tarefaChk" data-id="' + t.id + '" ' + (selecionadas.has(t.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + t.id + '\',this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)" title="Selecionar tarefa">' : '')
-      +     '<span style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + (isPend ? 'rgba(245,158,11,.15)' : 'rgba(16,185,129,.15)') + ';color:' + statusColor + '"><i class="ti ' + statusIcon + '"></i> ' + statusText + '</span>'
+      +     '<span class="tarefa-status-badge" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + (isPend ? 'rgba(245,158,11,.15)' : 'rgba(16,185,129,.15)') + ';color:' + statusColor + '"><i class="ti ' + statusIcon + '"></i> ' + statusText + '</span>'
       +   '</div>'
-      +   (isPend ? '<div style="display:flex;gap:6px">'
+      +   (isPend ? '<div class="tarefa-card-actions" style="display:flex;gap:6px">'
       +     '<button class="btn btn-sm" style="color:var(--blue);border-color:var(--blue);font-size:11px;padding:3px 8px" onclick="abrirTransferirModal(\'' + t.id + '\')" title="Transferir para outro colaborador"><i class="ti ti-arrows-exchange"></i> Transferir</button>'
       +     '<button class="btn btn-sm" style="color:var(--red);border-color:var(--red);font-size:11px;padding:3px 8px" onclick="cancelarTarefa(\'' + t.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button>'
       +   '</div>' : '')
       + '</div>'
-      + '<div style="font-size:14px;font-weight:600;margin-bottom:4px">' + escHtml(t.produto) + '</div>'
-      + (t.cod ? '<div style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:6px">' + t.cod + '</div>' : '')
+      + '<div class="tarefa-card-nome" style="font-size:14px;font-weight:600;margin-bottom:4px">' + escHtml(t.produto) + '</div>'
+      + (t.cod ? '<div class="tarefa-card-cod" style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:6px">' + t.cod + '</div>' : '')
       + validadeInfo
-      + (t.descricao ? '<div style="font-size:12px;color:var(--tx2);margin-bottom:6px;line-height:1.4"><i class="ti ti-arrows-exchange" style="font-size:12px;opacity:.7"></i> ' + escHtml(t.descricao) + '</div>' : '')
-      + '<div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)">'
+      + (t.descricao ? '<div class="tarefa-card-desc" style="font-size:12px;color:var(--tx2);margin-bottom:6px;line-height:1.4"><i class="ti ti-arrows-exchange" style="font-size:12px;opacity:.7"></i> ' + escHtml(t.descricao) + '</div>' : '')
+      + '<div class="tarefa-card-colab" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)">'
       +   '<i class="ti ti-user" style="font-size:14px"></i> '
       +   '<span style="font-weight:600">' + escHtml(t.nomeColaborador) + '</span>'
       + '</div>'
       + qtdeInfo
-      + '<div style="font-size:10px;color:var(--muted);margin-top:6px;display:flex;flex-direction:column;gap:2px">'
+      + '<div class="tarefa-card-foot" style="font-size:10px;color:var(--muted);margin-top:6px;display:flex;flex-direction:column;gap:2px">'
       +   '<span>Enviado em: ' + dataFmt + '</span>'
       +   (t.confirmadoEm ? '<span>Concluído em: ' + new Date(t.confirmadoEm).toLocaleString('pt-BR') + '</span>' : '')
       + '</div>'
