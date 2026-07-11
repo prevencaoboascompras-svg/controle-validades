@@ -821,7 +821,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 /* Responsive */
 @media (max-width: 1100px) {
   .dash-hero { grid-template-columns: 1fr 1fr; }
-  .dash-hero-card:last-child { grid-column: 1 / -1; }
+  .dash-hero > .dash-hero-card:last-child { grid-column: 1 / -1; }
   .dash-hero.dash-hero-4col { grid-template-columns: repeat(2, 1fr); }
   .dash-hero.dash-hero-4col .dash-hero-card:last-child { grid-column: auto; }
   .dash-tiles { grid-template-columns: repeat(4, 1fr); }
@@ -1107,7 +1107,8 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   #sec-antecipacao > div:nth-child(2) { padding: 10px 12px !important; }
   #sec-antecipacao > div:nth-child(2) > div:first-child { flex-direction: column; align-items: flex-start !important; gap: 6px !important; margin-bottom: 8px !important; }
   #sec-antecipacao > div:nth-child(2) > div:nth-child(2),
-  #sec-antecipacao > div:nth-child(2) > div:nth-child(3) { grid-template-columns: 1fr !important; gap: 8px !important; }
+  #sec-antecipacao > div:nth-child(2) > div:nth-child(3) { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  #sec-antecipacao > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) { grid-column: 1 / -1 !important; }
   #sec-antecipacao input[type="text"],
   #sec-antecipacao input[type="number"],
   #sec-antecipacao input[type="date"],
@@ -1144,14 +1145,58 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   /* Estoque — select largura total */
   #sec-estoque select { flex: 1; min-width: 0; }
 }
+/* ═══ Scanner de código de barras (busca por câmera) ═══ */
+.btn-scan{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;flex-shrink:0;border:1px solid var(--bds,var(--bd));border-radius:var(--r);background:var(--bg);color:var(--tx);cursor:pointer;font-size:16px}
+.btn-scan:hover{border-color:var(--green);color:var(--green)}
+#scanModalOv{display:none;position:fixed;inset:0;background:#000;z-index:99998;}
+#scanModalOv.open{display:flex;flex-direction:column}
+#scanModalTop{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#111;color:#fff;flex-shrink:0}
+#scanModalTop b{font-size:14px}
+#scanModalClose{background:rgba(255,255,255,.12);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer}
+#scanModalBody{position:relative;flex:1;overflow:hidden;background:#000}
+#scanView{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}
+#scanView video{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important;position:absolute;inset:0}
+.scan-corner{position:absolute;width:34px;height:34px;border-color:#34d399;border-style:solid;opacity:.9}
+.scan-corner.tl{top:18%;left:10%;border-width:3px 0 0 3px}
+.scan-corner.tr{top:18%;right:10%;border-width:3px 3px 0 0}
+.scan-corner.bl{bottom:18%;left:10%;border-width:0 0 3px 3px}
+.scan-corner.br{bottom:18%;right:10%;border-width:0 3px 3px 0}
+#scanLaser{display:none;position:absolute;left:10%;right:10%;top:18%;height:2px;background:#34d399;box-shadow:0 0 8px #34d399;animation:scanLaserMove 1.6s ease-in-out infinite}
+@keyframes scanLaserMove{0%{top:18%}50%{top:78%}100%{top:18%}}
+.scan-state{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;text-align:center;padding:20px}
+.scan-state i{font-size:40px;opacity:.7}
+.scan-state-btn{background:#34d399;color:#06281c;border:none;padding:10px 20px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}
 </style>
 </head>
 <body>
 
 <!-- ══════════════════════════════════════════════
-     TELA DE LOGIN
+     SCANNER DE CÓDIGO DE BARRAS (busca por câmera)
 ══════════════════════════════════════════════ -->
-<style>
+<div id="scanModalOv">
+  <div id="scanModalTop">
+    <b><i class="ti ti-barcode"></i> Ler código de barras</b>
+    <button id="scanModalClose" onclick="fecharScannerAura()"><i class="ti ti-x"></i></button>
+  </div>
+  <div id="scanModalBody">
+    <div id="scanView"></div>
+    <div class="scan-corner tl"></div>
+    <div class="scan-corner tr"></div>
+    <div class="scan-corner bl"></div>
+    <div class="scan-corner br"></div>
+    <div id="scanLaser"></div>
+    <div class="scan-state" id="scanStateIdle">
+      <i class="ti ti-camera"></i>
+      <div>Toque para ativar a câmera<br>e ler o código de barras</div>
+      <button class="scan-state-btn" onclick="iniciarScannerAura()">Ativar câmera</button>
+    </div>
+    <div class="scan-state" id="scanStateErro" style="display:none">
+      <i class="ti ti-ban"></i>
+      <div id="scanErroMsg">Câmera indisponível</div>
+      <button class="scan-state-btn" onclick="iniciarScannerAura()">Tentar novamente</button>
+    </div>
+  </div>
+</div>
 #loginScreen{
   position:fixed;inset:0;z-index:9999;
   background:linear-gradient(135deg,#1a1a1a 0%,#2a0a0a 100%);
@@ -1667,7 +1712,7 @@ function toggleTheme() {
 
   <div id="sec-validades" class="sec">
     <div class="filters">
-      <select id="fSetor" onchange="setorAtivo=this.value;_multiStatusFilter=null;renderTable();atualizarSetorGridDestaque()">
+      <select id="fSetor" onchange="setorAtivo=this.value;_multiStatusFilter=null;renderTable();atualizarSetorGridDestaque()" style="display:none">
         <option value="">Todos os setores</option>
         <option value="">Todos os setores</option>
 <option>Açougue</option>
@@ -1686,7 +1731,7 @@ function toggleTheme() {
 <option>Seca</option>
 <option>Seca doce</option>
       </select>
-      <select id="fStatus" onchange="_multiStatusFilter=null;renderTable()">
+      <select id="fStatus" onchange="_multiStatusFilter=null;renderTable()" style="display:none">
         <option value="">Todos os status</option>
         <option value="vencido">Vencido</option>
         <option value="critico">Critico (3d)</option>
@@ -1696,6 +1741,7 @@ function toggleTheme() {
         <option value="aguardando">Aguardando</option>
       </select>
       <input type="text" id="fBusca" placeholder="Buscar produto ou código..." oninput="renderTable()">
+      <button type="button" class="btn-scan" onclick="abrirScannerAura('fBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
       <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);cursor:pointer;white-space:nowrap">
         <input type="checkbox" id="chkMostrarResolvidos" onchange="renderTable()" style="accent-color:var(--green)" checked>
         Mostrar resolvidos
@@ -1739,7 +1785,8 @@ function toggleTheme() {
         <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-photo-check" style="color:var(--green)"></i> Encartes gerados</div>
         <p style="font-size:12px;color:var(--tx2)">Marque um ou mais para imprimir juntos em uma folha A4.</p>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="encBusca" placeholder="Buscar encarte por nome..." oninput="renderEncartesAtivos()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;min-width:220px">
         <button class="btn" onclick="exportarEncartesJSON()" title="Baixar backup JSON"><i class="ti ti-download"></i> Exportar JSON</button>
         <button class="btn" onclick="exportarEncartesCSV()" title="Baixar planilha CSV"><i class="ti ti-file-spreadsheet"></i> Exportar CSV</button>
         <label class="btn" style="cursor:pointer" title="Restaurar backup JSON"><i class="ti ti-upload"></i> Importar JSON<input type="file" accept=".json" style="display:none" onchange="importarEncartesJSON(this)"></label>
@@ -1817,7 +1864,10 @@ function toggleTheme() {
         </div>
         <div>
           <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Buscar produto</label>
-          <input type="text" id="antFiltroBusca" placeholder="Digite nome ou código..." oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
+          <div style="position:relative">
+            <input type="text" id="antFiltroBusca" placeholder="Digite nome ou código..." oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 34px 7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none;box-sizing:border-box">
+            <button type="button" onclick="abrirScannerAura('antFiltroBusca')" title="Buscar por código de barras (câmera)" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);width:26px;height:26px;background:transparent;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-barcode"></i></button>
+          </div>
         </div>
         <div>
           <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Validade de</label>
@@ -1923,6 +1973,7 @@ function toggleTheme() {
           <option value="lote_qtd">Lote + qtde</option>
         </select>
         <input type="text" id="filtroNegBusca" placeholder="Buscar produto..." oninput="renderRelatorio()" style="font-size:12px;padding:5px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);flex:1;min-width:0">
+        <button type="button" class="btn-scan" onclick="abrirScannerAura('filtroNegBusca')" title="Buscar por código de barras (câmera)" style="width:28px;height:28px"><i class="ti ti-barcode"></i></button>
       </div>
       <div class="twrap">
         <table style="min-width:700px">
@@ -1981,7 +2032,8 @@ function toggleTheme() {
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;width:100%">
         <input type="text" id="estoqueBusca" placeholder="Buscar produto..." oninput="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:0">
-        <select id="estoqueSetor" onchange="setorAtivo=this.value;atualizarSetorGridDestaque();renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
+        <button type="button" class="btn-scan" onclick="abrirScannerAura('estoqueBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
+        <select id="estoqueSetor" onchange="setorAtivo=this.value;atualizarSetorGridDestaque();renderEstoque()" style="display:none;font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
           <option value="">Todos os setores</option>
           <option value="">Todos os setores</option>
 <option>Açougue</option>
@@ -2012,7 +2064,9 @@ function toggleTheme() {
       </div>
       <button class="btn btn-green" onclick="openTarefaModal()"><i class="ti ti-plus"></i> Nova tarefa</button>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+      <input type="text" id="tarefasBusca" placeholder="Buscar por produto, código ou colaborador..." oninput="renderTarefas()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:220px">
+      <button type="button" class="btn-scan" onclick="abrirScannerAura('tarefasBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
       <button class="promo-filter-btn active" id="tf_todas" onclick="filtrarTarefas('todas')">Todas</button>
       <button class="promo-filter-btn" id="tf_pendentes" onclick="filtrarTarefas('pendentes')">Pendentes</button>
       <button class="promo-filter-btn" id="tf_concluidas" onclick="filtrarTarefas('concluidas')">Concluídas</button>
@@ -4732,6 +4786,11 @@ function encDescPct(de,por){
 
 function renderEncartesAtivos(){
   var arr=getEncartesAtivos();
+  var buscaEl=document.getElementById('encBusca');
+  var busca=buscaEl?buscaEl.value.trim().toLowerCase():'';
+  if(busca){
+    arr=arr.filter(function(e){return (e.nome||'').toLowerCase().indexOf(busca)>-1;});
+  }
   var grid=document.getElementById('encGrid');
   encSelecionados=[];
   document.getElementById('printBar').style.display='none';
@@ -7115,10 +7174,20 @@ function renderTarefas() {
   });
   
   var filtered = tarefas.filter(function(t) {
-    if (filtro === 'pendentes') return t.status === 'pendente';
-    if (filtro === 'concluidas') return t.status === 'concluida';
+    if (filtro === 'pendentes' && t.status !== 'pendente') return false;
+    if (filtro === 'concluidas' && t.status !== 'concluida') return false;
     return true;
   });
+
+  var buscaEl = document.getElementById('tarefasBusca');
+  var busca = buscaEl ? buscaEl.value.trim().toLowerCase() : '';
+  if (busca) {
+    filtered = filtered.filter(function(t) {
+      return ((t.produto||'').toLowerCase().indexOf(busca)>-1)
+        || ((t.cod||'').toLowerCase().indexOf(busca)>-1)
+        || ((t.nomeColaborador||'').toLowerCase().indexOf(busca)>-1);
+    });
+  }
   
   filtered.sort(function(a, b) {
     if (a.status !== b.status) return a.status === 'pendente' ? -1 : 1;
@@ -7463,5 +7532,230 @@ function renderEstoque() {
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<!-- === Carrega ZXing (self-hosted, com fallback CDN) - mesmo padrao do coleta-validades === -->
+<script>
+(function() {
+  var fontes = [
+    'zxing-browser.min.js',
+    'https://unpkg.com/@zxing/browser@0.1.5/umd/index.min.js',
+    'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/index.min.js'
+  ];
+  var idx = 0;
+  function tryNext() {
+    if (idx >= fontes.length) { console.warn('ZXing nao carregou - busca por camera ficara limitada ao BarcodeDetector nativo'); return; }
+    var s = document.createElement('script');
+    s.src = fontes[idx++];
+    s.onerror = function() { tryNext(); };
+    document.head.appendChild(s);
+  }
+  tryNext();
+})();
+</script>
+
+<!-- === Logica do scanner de codigo de barras (busca por camera) ===
+     Adaptado do coleta-validades: motor duplo BarcodeDetector nativo
+     (Android) + ZXing (iOS Safari - o BarcodeDetector do WebKit tem bug
+     conhecido e nunca retorna resultado real). -->
+<script>
+var _auraScanAtivo = false;
+var _auraScanMotor = null;
+var _auraScanStream = null;
+var _auraScanVideoEl = null;
+var _auraScanNativeLoop = null;
+var _auraScanZxingReader = null;
+var _auraScanTargetInput = null;
+
+function _auraIsIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function _auraIsInAppBrowser() {
+  var ua = navigator.userAgent || '';
+  return /FBAN|FBAV|Instagram|WhatsApp|Line\/|MicroMessenger|TikTok/i.test(ua);
+}
+function _auraPatchVideoIOS(videoEl) {
+  if (!videoEl) return;
+  videoEl.setAttribute('playsinline', '');
+  videoEl.setAttribute('webkit-playsinline', '');
+  videoEl.setAttribute('muted', '');
+  videoEl.muted = true;
+  videoEl.playsInline = true;
+}
+function _auraApplyFocus(stream) {
+  if (!stream || !stream.getVideoTracks || !stream.getVideoTracks().length) return;
+  var track = stream.getVideoTracks()[0];
+  var caps = {};
+  try { caps = track.getCapabilities ? track.getCapabilities() : {}; } catch(e) {}
+  var advanced = [];
+  if (caps.focusMode && caps.focusMode.indexOf && caps.focusMode.indexOf('continuous') >= 0) advanced.push({ focusMode: 'continuous' });
+  if (caps.focusDistance !== undefined) advanced.push({ focusDistance: caps.focusDistance.min || 0 });
+  if (caps.zoom) advanced.push({ zoom: Math.min(caps.zoom.max, Math.max(caps.zoom.min, 1.5)) });
+  if (advanced.length) track.applyConstraints({ advanced: advanced }).catch(function(){});
+}
+
+function abrirScannerAura(inputId) {
+  _auraScanTargetInput = inputId;
+  document.getElementById('scanModalOv').classList.add('open');
+  document.getElementById('scanStateIdle').style.display = 'flex';
+  document.getElementById('scanStateErro').style.display = 'none';
+  iniciarScannerAura();
+}
+
+function fecharScannerAura() {
+  pararScannerAura();
+  document.getElementById('scanModalOv').classList.remove('open');
+}
+
+async function iniciarScannerAura() {
+  document.getElementById('scanStateIdle').style.display = 'none';
+  document.getElementById('scanStateErro').style.display = 'none';
+
+  if (_auraIsInAppBrowser()) {
+    _auraMostrarErro('Camera bloqueada pelo navegador do app (WhatsApp/Instagram/etc). Abra no Safari/Chrome.');
+    return;
+  }
+  if (_auraScanAtivo) return;
+
+  if (typeof BarcodeDetector !== 'undefined' && !_auraIsIOS()) {
+    try {
+      var stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 } } });
+      _auraScanStream = stream;
+      _auraApplyFocus(stream);
+
+      var wrap = document.getElementById('scanView');
+      wrap.innerHTML = '';
+      var vid = document.createElement('video');
+      vid.setAttribute('playsinline', ''); vid.setAttribute('autoplay', ''); vid.setAttribute('muted', '');
+      vid.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+      wrap.appendChild(vid);
+      _auraScanVideoEl = vid;
+      vid.srcObject = stream;
+      await vid.play().catch(function(){});
+
+      var formatos = ['ean_13','ean_8','code_128','code_39','upc_a','upc_e','itf'];
+      var supported = await BarcodeDetector.getSupportedFormats().catch(function(){ return formatos; });
+      var usarFmts = formatos.filter(function(f){ return supported.includes(f); });
+      if (!usarFmts.length) usarFmts = formatos;
+      var detector = new BarcodeDetector({ formats: usarFmts });
+      _auraScanMotor = 'native';
+      _auraScanAtivo = true;
+      document.getElementById('scanLaser').style.display = 'block';
+
+      var canvas = document.createElement('canvas');
+      var ctx = canvas.getContext('2d');
+      var loop = async function() {
+        if (!_auraScanAtivo || _auraScanMotor !== 'native') return;
+        if (vid.readyState >= 2) {
+          canvas.width = vid.videoWidth || 640;
+          canvas.height = vid.videoHeight || 480;
+          ctx.drawImage(vid, 0, 0);
+          try {
+            var results = await detector.detect(canvas);
+            if (results && results.length > 0) { _auraOnScanSuccess(results[0].rawValue); return; }
+          } catch(e) {}
+        }
+        _auraScanNativeLoop = requestAnimationFrame(loop);
+      };
+      _auraScanNativeLoop = requestAnimationFrame(loop);
+      return;
+    } catch(e) {
+      if (_auraScanStream) { _auraScanStream.getTracks().forEach(function(t){ t.stop(); }); _auraScanStream = null; }
+    }
+  }
+
+  if (typeof ZXingBrowser === 'undefined' || !ZXingBrowser.BrowserMultiFormatReader) {
+    var wait = 0;
+    var iv = setInterval(function() {
+      wait += 200;
+      if (typeof ZXingBrowser !== 'undefined' && ZXingBrowser.BrowserMultiFormatReader) { clearInterval(iv); iniciarScannerAura(); }
+      else if (wait >= 3000) { clearInterval(iv); _auraMostrarErro('Scanner nao suportado neste navegador. Digite o codigo manualmente.'); }
+    }, 200);
+    return;
+  }
+
+  var wrap2 = document.getElementById('scanView');
+  wrap2.innerHTML = '<video id="aura-zxing-video" playsinline muted autoplay style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;"></video>';
+  var videoEl = document.getElementById('aura-zxing-video');
+  _auraPatchVideoIOS(videoEl);
+
+  _auraScanZxingReader = new ZXingBrowser.BrowserMultiFormatReader();
+  _auraScanZxingReader.timeBetweenScansMillis = 150;
+  try {
+    if (ZXingBrowser.BarcodeFormat) {
+      var bf = ZXingBrowser.BarcodeFormat;
+      var fmtsDesejados = [bf.EAN_13, bf.EAN_8, bf.UPC_A, bf.UPC_E, bf.CODE_128, bf.CODE_39, bf.ITF].filter(function(f){ return f !== undefined; });
+      if (fmtsDesejados.length) _auraScanZxingReader.possibleFormats = fmtsDesejados;
+    }
+  } catch(e) {}
+
+  try {
+    var zxStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 } }, audio: false });
+    _auraScanStream = zxStream;
+    videoEl.srcObject = zxStream;
+    await videoEl.play().catch(function(){});
+    _auraApplyFocus(zxStream);
+
+    await _auraScanZxingReader.decodeFromStream(zxStream, videoEl, function(result, error) {
+      if (result && _auraScanAtivo) {
+        setTimeout(function() { _auraOnScanSuccess(result.getText()); }, 200);
+      }
+    });
+
+    _auraScanMotor = 'zxing';
+    _auraScanAtivo = true;
+    document.getElementById('scanLaser').style.display = 'block';
+  } catch(err) {
+    console.error('Erro ao iniciar camera (AURA scan):', err);
+    var msg = 'Camera nao disponivel';
+    if (/[Pp]ermission|[Nn]ot[Aa]llowed|[Dd]enied/.test(String(err))) msg = 'Permissao de camera negada - va em Ajustes > Safari > Camera e permita o acesso';
+    else if (/[Nn]ot[Ff]ound|[Dd]evices/.test(String(err))) msg = 'Camera nao encontrada neste dispositivo';
+    else if (/[Nn]ot[Rr]eadable|[Tt]rackStart/.test(String(err))) msg = 'Camera em uso por outro app';
+    _auraMostrarErro(msg);
+    if (_auraScanStream) { _auraScanStream.getTracks().forEach(function(t){ t.stop(); }); _auraScanStream = null; }
+  }
+}
+
+function pararScannerAura() {
+  _auraScanAtivo = false;
+  document.getElementById('scanLaser').style.display = 'none';
+  if (_auraScanNativeLoop) { cancelAnimationFrame(_auraScanNativeLoop); _auraScanNativeLoop = null; }
+  if (_auraScanZxingReader) {
+    try {
+      _auraScanZxingReader.reset();
+      var zv = document.getElementById('aura-zxing-video');
+      if (zv && zv.srcObject) { zv.srcObject.getTracks().forEach(function(t){ t.stop(); }); zv.srcObject = null; }
+    } catch(e) {}
+    _auraScanZxingReader = null;
+  }
+  if (_auraScanStream) { _auraScanStream.getTracks().forEach(function(t){ t.stop(); }); _auraScanStream = null; }
+  if (_auraScanVideoEl) { _auraScanVideoEl.srcObject = null; _auraScanVideoEl = null; }
+  _auraScanMotor = null;
+  document.getElementById('scanView').innerHTML = '';
+  document.getElementById('scanStateIdle').style.display = 'flex';
+  document.getElementById('scanStateErro').style.display = 'none';
+}
+
+function _auraMostrarErro(msg) {
+  document.getElementById('scanErroMsg').textContent = msg;
+  document.getElementById('scanStateErro').style.display = 'flex';
+  document.getElementById('scanLaser').style.display = 'none';
+  _auraScanAtivo = false;
+}
+
+function _auraOnScanSuccess(code) {
+  if (!code) return;
+  code = String(code).trim();
+  if (code.length === 13 && code.charAt(0) === '0') code = code.substring(1);
+  if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+  var input = _auraScanTargetInput ? document.getElementById(_auraScanTargetInput) : null;
+  if (input) {
+    input.value = code;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  fecharScannerAura();
+}
+</script>
+
 </body>
 </html>
