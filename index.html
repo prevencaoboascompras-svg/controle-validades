@@ -1082,11 +1082,24 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .tarefa-qtde-badge { min-width: 15px !important; height: 15px !important; font-size: 7px !important; top: -5px !important; right: -5px !important; }
   .tarefa-card-foot { font-size: 5.5px !important; margin-top: 4px !important; gap: 1px !important; }
 
-  .ecard-body { grid-template-columns: 1fr !important; }
-  .ecard-imgcol { border-right: none !important; border-bottom: 1px solid var(--bd); padding: 5px !important; }
-  .ecard-imgbox { width: 42px !important; height: 42px !important; }
+  .ecard-body { grid-template-columns: 62px 1fr !important; }
+  .ecard-imgcol { border-right: 1px solid var(--bd) !important; border-bottom: none !important; padding: 6px 4px !important; gap: 4px !important; }
+  .ecard-imgbox { width: 50px !important; height: 50px !important; }
+  .ecard-imgbtn { font-size: 8.5px !important; white-space: normal !important; text-align: center !important; line-height: 1.2 !important; }
   .ecard-title { font-size: 8.5px !important; }
-  .ecard-fields { padding: 5px !important; gap: 3px !important; }
+  .ecard-fields { padding: 6px 8px !important; gap: 5px !important; }
+
+  /* Campos do encarte: viram grid de 2 colunas (rótulo | campo) em vez de
+     flex-wrap, que quebrava as linhas de forma feia (ex: "Preço Oferta"
+     pulava sozinho pra próxima linha, desperdiçando espaço) */
+  .ef-row { display: grid !important; grid-template-columns: auto 1fr !important; align-items: center !important; gap: 5px 8px !important; }
+  .ef-label { font-size: 10px !important; min-width: 0 !important; }
+  .ef-input, .ef-select { font-size: 12px !important; height: 28px !important; flex: none !important; width: 100% !important; }
+  .ef-pgroup { min-width: 0 !important; width: 100% !important; }
+  .ef-pgroup .ef-input { max-width: none !important; }
+  .ef-pct { grid-column: 2; justify-self: start; }
+  .ef-toggle-row { gap: 6px 10px !important; }
+  .ef-toggle { font-size: 10px !important; }
 
   .promo-card-header { padding: 5px 5px 5px 26px !important; }
   .promo-card-body { padding: 5px 6px !important; }
@@ -1108,7 +1121,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   #sec-antecipacao > div:nth-child(2) > div:first-child { flex-direction: column; align-items: flex-start !important; gap: 6px !important; margin-bottom: 8px !important; }
   #sec-antecipacao > div:nth-child(2) > div:nth-child(2),
   #sec-antecipacao > div:nth-child(2) > div:nth-child(3) { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-  #sec-antecipacao > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) { grid-column: 1 / -1 !important; }
+  #sec-antecipacao > div:nth-child(2) > div:nth-child(3) > div:nth-child(5) { grid-column: 1 / -1 !important; }
   #sec-antecipacao input[type="text"],
   #sec-antecipacao input[type="number"],
   #sec-antecipacao input[type="date"],
