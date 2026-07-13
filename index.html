@@ -2360,6 +2360,7 @@ function toggleTheme() {
     <div class="modal-body">
       <div class="encarte-controls">
         <div class="form-row"><label>Produto</label><input type="text" id="eProduto" placeholder="Nome do produto" oninput="drawEncarte()"></div>
+        <div class="form-row"><label>Código de barras</label><input type="text" id="eCod" placeholder="7896436103414" oninput="drawEncarte()" style="font-family:monospace"></div>
         <div class="form-row-2">
           <div class="form-row"><label>Preco normal (DE)</label><input type="text" id="eDe" placeholder="R$ 18,99" oninput="onDeChange()"></div>
           <div class="form-row"><label>Preco promocao (POR)</label><input type="text" id="ePor" placeholder="R$ 12,10" oninput="onPorChange()"></div>
@@ -4345,9 +4346,42 @@ function carregarImagemUrl(url){
 
 function loadFoto(input){
   if(!input.files[0])return;
+  var file=input.files[0];
   var r=new FileReader();
-  r.onload=function(e){var img=new Image();img.onload=function(){fotoImg=img;drawEncarte();};img.src=e.target.result;};
-  r.readAsDataURL(input.files[0]);
+  r.onload=function(e){
+    var img=new Image();
+    img.onload=function(){fotoImg=img;drawEncarte();};
+    img.src=e.target.result;
+    // Upload automático pro banco de imagens (Drive), usando o código
+    // de barras do produto como nome do arquivo. Não bloqueia o preview.
+    enviarImagemProdutoParaDrive(e.target.result, file.type);
+  };
+  r.readAsDataURL(file);
+}
+
+function enviarImagemProdutoParaDrive(dataUrl, mimeType){
+  var cod=(document.getElementById('eCod').value||'').trim();
+  var st=document.getElementById('fotoStatus');
+  if(!cod){
+    if(st) st.textContent='⚠️ Sem código de barras — imagem não foi salva no banco de produtos.';
+    return;
+  }
+  var base64=String(dataUrl).split(',')[1]||'';
+  if(!base64) return;
+  var cfg=loadCfg();
+  if(st) st.textContent='📤 Salvando imagem no banco de produtos...';
+  fetch(cfg.url,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=UTF-8'},
+    body:JSON.stringify({action:'salvarImagemProduto',codigoBarras:cod,imagemBase64:base64,mimeType:mimeType||'image/jpeg',tipo:'produto'})
+  })
+  .then(function(r){return r.json();})
+  .then(function(res){
+    if(st) st.textContent = res && res.ok ? '✅ Imagem salva no banco de produtos (' + cod + ')' : '❌ Erro ao salvar: '+(res&&res.erro||'desconhecido');
+  })
+  .catch(function(err){
+    if(st) st.textContent='❌ Erro de conexão ao salvar imagem: '+err.message;
+  });
 }
 
 async function ensureFonts(){
@@ -4508,6 +4542,13 @@ async function drawEncarte(){
     ctx.textAlign='left';ctx.textBaseline='middle';
     ctx.fillText('Validade: '+validade, 30, 1245);
   }
+  var codBarrasTxt=(document.getElementById('eCod').value||'').trim();
+  if(codBarrasTxt){
+    ctx.fillStyle='#000000';
+    ctx.font='normal 20px '+fonte;
+    ctx.textAlign='right';ctx.textBaseline='middle';
+    ctx.fillText('Cod: '+codBarrasTxt, W-30, 1245);
+  }
 }
 
 async function downloadEncarte(){
@@ -4539,6 +4580,7 @@ function openEncarteModal(idx){
   if(idx!==null&&idx!==undefined){
     var p=products[idx];
     document.getElementById('eProduto').value=p.nome||'';
+    document.getElementById('eCod').value=p.cod||'';
     document.getElementById('eDe').value=p.precoNormal?fmtR(p.precoNormal):'';
     _custoProduto=p.custo||null;
     var porSugerido='';
@@ -4556,7 +4598,7 @@ function openEncarteModal(idx){
     document.getElementById('ePct').value=p.pctDesc?pct.toFixed(0)+'%':'';
     document.getElementById('eValidade').value=fmt(p.validade);
   }else{
-    ['eProduto','eDe','ePor','ePct','eValidade'].forEach(function(id){document.getElementById(id).value='';});
+    ['eProduto','eCod','eDe','ePor','ePct','eValidade'].forEach(function(id){document.getElementById(id).value='';});
     _custoProduto=null;
   }
   document.getElementById('eUnidade').value='CADA';
