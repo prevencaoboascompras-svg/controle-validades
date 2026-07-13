@@ -7294,18 +7294,31 @@ function renderTarefas() {
         || ((t.nomeColaborador||'').toLowerCase().indexOf(busca)>-1);
     });
   }
-  
-  filtered.sort(function(a, b) {
-    if (a.status !== b.status) return a.status === 'pendente' ? -1 : 1;
-    return new Date(b.criadoEm) - new Date(a.criadoEm);
-  });
-  
-  if (!filtered.length) {
+
+  // Tarefas concluídas confirmadas com 0 unidades: não representam mais um risco de
+  // perda, então saem da visão principal e vão para um bloco recolhido no final.
+  var ehZero = function(t) { return t.status === 'concluida' && Number(t.quantidadeConfirmada) === 0; };
+  var zeradas = filtered.filter(ehZero);
+  filtered = filtered.filter(function(t) { return !ehZero(t); });
+
+  // Ordena sempre por proximidade de vencimento (quem não tem validade cadastrada vai pro final).
+  var ordenarPorValidade = function(a, b) {
+    var da = a.validade ? new Date(a.validade + 'T00:00:00') : null;
+    var db = b.validade ? new Date(b.validade + 'T00:00:00') : null;
+    if (!da && !db) return new Date(b.criadoEm) - new Date(a.criadoEm);
+    if (!da) return 1;
+    if (!db) return -1;
+    return da - db;
+  };
+  filtered.sort(ordenarPorValidade);
+  zeradas.sort(ordenarPorValidade);
+
+  if (!filtered.length && !zeradas.length) {
     container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:13px"><i class="ti ti-clipboard-check" style="font-size:36px;display:block;margin-bottom:10px;opacity:.4"></i>Nenhuma tarefa ' + (filtro !== 'todas' ? filtro : 'ainda') + '</div>';
     return;
   }
-  
-  container.innerHTML = filtered.map(function(t) {
+
+  var renderCard = function(t) {
     var dataCriacao = new Date(t.criadoEm);
     var dataFmt = dataCriacao.toLocaleDateString('pt-BR') + ' ' + dataCriacao.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
     var isPend = t.status === 'pendente';
@@ -7356,8 +7369,25 @@ function renderTarefas() {
       +   (t.confirmadoEm ? '<span>Concluído em: ' + new Date(t.confirmadoEm).toLocaleString('pt-BR') + '</span>' : '')
       + '</div>'
       + '</div>';
-  }).join('');
-  
+  };
+
+  var html = filtered.map(renderCard).join('');
+
+  if (zeradas.length) {
+    var zeroCardsHtml = zeradas.map(renderCard).join('');
+    html += '<div style="grid-column:1/-1;margin-top:10px">'
+      +   '<button type="button" onclick="var b=document.getElementById(\'tarefasZeradasBox\');var i=document.getElementById(\'tarefasZeradasIcon\');var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'grid\';i.style.transform=open?\'rotate(0deg)\':\'rotate(90deg)\';" style="width:100%;text-align:left;background:none;border:1px dashed var(--border);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">'
+      +     '<i id="tarefasZeradasIcon" class="ti ti-chevron-right" style="transition:transform .15s"></i> '
+      +     'Confirmadas sem quantidade (0 un.) — ' + zeradas.length + ' <span style="opacity:.7">(nada a fazer aqui)</span>'
+      +   '</button>'
+      +   '<div id="tarefasZeradasBox" style="display:none;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:10px;opacity:.55">'
+      +     zeroCardsHtml
+      +   '</div>'
+      + '</div>';
+  }
+
+  container.innerHTML = html;
+
   atualizarTarefasBulkBar();
   
   var pendCount = tarefas.filter(function(t) { return t.status === 'pendente'; }).length;
