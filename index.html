@@ -4249,8 +4249,13 @@ async function buscarFotoDrive(codigoBarras, tipo){
   if(!cod) return false;
   try{
     var r = await _gasGet('buscarImagemProduto', '&codigoBarras='+encodeURIComponent(cod)+'&tipo='+encodeURIComponent(tipo||'produto'));
-    if(r && r.ok && r.encontrado && r.url){
-      var ok = await carregarImagemUrl(r.url);
+    // Correção CORS: o backend agora manda a imagem em base64 (data URL)
+    // em vez de uma URL do Drive, porque drive.google.com não manda
+    // cabeçalhos CORS e o carregamento com crossOrigin='anonymous' falhava
+    // mesmo com a imagem existindo. Data URL não sofre bloqueio de CORS.
+    if(r && r.ok && r.encontrado && r.base64){
+      var dataUrl = 'data:'+(r.mimeType||'image/jpeg')+';base64,'+r.base64;
+      var ok = await carregarImagemUrl(dataUrl);
       if(ok !== false) return true;
     }
   }catch(e){
