@@ -4241,11 +4241,40 @@ async function buscarFotoGoogleCSE(query){
   }
 }
 
-// Orquestra TODAS as fontes, sempre dando a primeira chance ao Google
-// (fundo branco). EAN e nome "puro" só entram como tentativas adicionais
-// quando a tentativa anterior não encontrar nada.
+// Consulta o banco de imagens no Drive (via Code.gs) antes de qualquer
+// busca externa. Retorna true se achou e carregou a imagem, false caso
+// contrário (nunca lança erro — se o Drive falhar, cai pro resto da cascata).
+async function buscarFotoDrive(codigoBarras, tipo){
+  var cod = String(codigoBarras||'').trim();
+  if(!cod) return false;
+  try{
+    var r = await _gasGet('buscarImagemProduto', '&codigoBarras='+encodeURIComponent(cod)+'&tipo='+encodeURIComponent(tipo||'produto'));
+    if(r && r.ok && r.encontrado && r.url){
+      var ok = await carregarImagemUrl(r.url);
+      if(ok !== false) return true;
+    }
+  }catch(e){
+    console.warn('buscarFotoDrive exception:', e);
+  }
+  return false;
+}
+
+// Orquestra TODAS as fontes. Ordem: 1) banco de imagens no Drive (já
+// salvo anteriormente) → 2) Google CSE (fundo branco) → 3) Open Food
+// Facts → 4) em branco (upload manual). EAN e nome "puro" só entram
+// como tentativas adicionais quando a tentativa anterior não encontrar nada.
 async function buscarFotoCompleta(ean, nomeProduto){
   var nomeLimpo = (nomeProduto||'').replace(/\s*\(\d+.*$/,'').replace(/\s*\{.*$/,'').trim();
+
+  // 0ª tentativa — Banco de imagens no Drive, pelo código de barras
+  if(ean){
+    setFotoStatus('Verificando banco de imagens (Drive)...','var(--amber)');
+    var dr = await buscarFotoDrive(ean, 'produto');
+    if(dr === true){
+      setFotoStatus('✓ Foto encontrada (banco de imagens)','var(--green)');
+      return true;
+    }
+  }
 
   // 1ª tentativa — Google CSE pelo NOME do produto (fundo branco)
   if(nomeLimpo){
