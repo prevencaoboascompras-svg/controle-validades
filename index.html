@@ -1119,9 +1119,9 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   /* Antecipação - Filtros mobile */
   #sec-antecipacao > div:nth-child(2) { padding: 10px 12px !important; }
   #sec-antecipacao > div:nth-child(2) > div:first-child { flex-direction: column; align-items: flex-start !important; gap: 6px !important; margin-bottom: 8px !important; }
-  #sec-antecipacao > div:nth-child(2) > div:nth-child(2),
-  #sec-antecipacao > div:nth-child(2) > div:nth-child(3) { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-  #sec-antecipacao > div:nth-child(2) > div:nth-child(3) > div:nth-child(5) { grid-column: 1 / -1 !important; }
+  #antFiltrosBody > div:nth-child(1),
+  #antFiltrosBody > div:nth-child(2) { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  #antFiltrosBody > div:nth-child(2) > div:nth-child(5) { grid-column: 1 / -1 !important; }
   #sec-antecipacao input[type="text"],
   #sec-antecipacao input[type="number"],
   #sec-antecipacao input[type="date"],
@@ -1846,13 +1846,18 @@ function toggleTheme() {
 
     <!-- Filtros -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-        <i class="ti ti-filter" style="color:var(--muted);font-size:14px"></i>
-        <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Filtros de busca</span>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:0;flex-wrap:wrap">
+        <div id="antFiltrosToggle" onclick="antToggleFiltros()" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
+          <i class="ti ti-filter" style="color:var(--muted);font-size:14px"></i>
+          <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Filtros de busca</span>
+          <i id="antFiltrosChevron" class="ti ti-chevron-down" style="color:var(--muted);font-size:14px;transition:transform .15s"></i>
+        </div>
         <div style="flex:1"></div>
         <div id="antSelCount" style="font-size:12px;font-weight:600;color:var(--green);white-space:nowrap">0 selecionado(s)</div>
         <button class="btn btn-sm" onclick="antLimparFiltros()"><i class="ti ti-eraser"></i> Limpar filtros</button>
       </div>
+
+      <div id="antFiltrosBody" style="display:none;margin-top:10px">
 
       <!-- Linha 1: Setor + Busca produto + Validade De/Até -->
       <div style="display:grid;grid-template-columns:minmax(140px,180px) 1fr minmax(120px,150px) minmax(120px,150px);gap:10px;align-items:end;margin-bottom:10px">
@@ -1934,6 +1939,8 @@ function toggleTheme() {
         <button class="btn btn-sm" onclick="antAtalhoData('30d')">Próx. 30 dias</button>
         <button class="btn btn-sm" onclick="antAtalhoData('60d')">Próx. 60 dias</button>
         <button class="btn btn-sm" onclick="antAtalhoData('90d')">Próx. 90 dias</button>
+      </div>
+
       </div>
     </div>
 
@@ -6541,6 +6548,14 @@ function antSelecionarMes() {
   if (count > 0) mostrarToast(count + ' produtos de ' + mesLabel(ym) + ' selecionados!','ok');
   else mostrarToast('Nenhum produto encontrado para esse mês.','warn');
   renderAntecipacao();
+}
+
+function antToggleFiltros() {
+  var body = document.getElementById('antFiltrosBody');
+  var chevron = document.getElementById('antFiltrosChevron');
+  var aberto = body.style.display !== 'none';
+  body.style.display = aberto ? 'none' : '';
+  if (chevron) chevron.style.transform = aberto ? '' : 'rotate(180deg)';
 }
 
 function antLimparSelecao() {
