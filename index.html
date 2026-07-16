@@ -4507,7 +4507,7 @@ async function drawEncarte(){
 
   // ── FOTO — area ampliada ──
   if(fotoImg){
-    var fX=15,fY=685,fW=575,fH=575;
+    var fX=15,fY=685,fW=460,fH=460;
     var ratio=Math.min(fW/fotoImg.width,fH/fotoImg.height);
     var fw=fotoImg.width*ratio,fh=fotoImg.height*ratio;
     ctx.drawImage(fotoImg,fX+(fW-fw)/2,fY+(fH-fh)/2,fw,fh);
@@ -4627,21 +4627,21 @@ async function drawEncarte(){
   ctx.font='900 '+porFs+'px '+fonte;
   ctx.fillText(por||'0,00',porX+rsPorW,porBaseY);
 
-  // ── VALIDADE — centralizada dentro da area branca, logo acima do rodape ──
-  // Area branca termina y=1250, rodape comeca y=1251
-  // Validade fica em y=1225 (dentro da branca, com folga)
+  // ── VALIDADE — centralizada dentro da area branca, ANTES da faixa amarela ──
+  // A faixa amarela "ESCOLHA INTELIGENTE" comeca em y=1162 no template real.
+  // Validade fica em y=1130 (dentro da area branca, com folga acima da faixa)
   if(validade){
     ctx.fillStyle='#000000';
     ctx.font='normal 20px '+fonte;
     ctx.textAlign='left';ctx.textBaseline='middle';
-    ctx.fillText('Validade: '+validade, 30, 1245);
+    ctx.fillText('Validade: '+validade, 30, 1130);
   }
   var codBarrasTxt=(document.getElementById('eCod').value||'').trim();
   if(codBarrasTxt){
     ctx.fillStyle='#000000';
     ctx.font='normal 20px '+fonte;
     ctx.textAlign='right';ctx.textBaseline='middle';
-    ctx.fillText('Cod: '+codBarrasTxt, W-30, 1245);
+    ctx.fillText('Cod: '+codBarrasTxt, W-30, 1130);
   }
 }
 
