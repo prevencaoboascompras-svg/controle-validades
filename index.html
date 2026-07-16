@@ -4581,8 +4581,8 @@ async function drawEncarte(){
   ctx.fillText(de||'0,00',deX+rsDeW,deBaseY);
 
   // ── SELO "POR" — faixa amarela com rotulo "POR" + caixa vermelha com preco e unidade no canto ──
-  var porCX=790, porCY=955;
-  var porFs=130;
+  var porCX=790, porCY=985;
+  var porFs=140;
   var rsPorFs,porValW,rsPorW;
   while(porFs>36){
     rsPorFs=Math.round(porFs*0.36);
@@ -4590,19 +4590,19 @@ async function drawEncarte(){
     rsPorW=ctx.measureText('R$').width+8;
     ctx.font='900 '+porFs+'px '+fonte;
     porValW=ctx.measureText(por||'0,00').width;
-    if(rsPorW+porValW<=380)break;
+    if(rsPorW+porValW<=320)break;
     porFs-=6;
   }
   var porTextW=rsPorW+porValW;
-  var porBoxW=Math.max(260,Math.min(460,porTextW+80));
-  var porBoxH=Math.min(Math.max(porFs*1.1,130),175);
-  var tabH=64,tabW=porBoxW*0.7;
+  var porBoxW=Math.max(280,Math.min(380,porTextW+70));
+  var porBoxH=Math.min(Math.max(porBoxW*0.85,porFs*1.35),200);
+  var tabH=68,tabW=porBoxW*0.78;
   var tabY=porCY-porBoxH/2-tabH+16;
-  // faixa amarela com o rotulo "POR"
+  // faixa amarela com o rotulo "POR" - mais destacada
   ctx.fillStyle='#FFD600';
-  roundRect(porCX-tabW/2, tabY, tabW, tabH, 16); ctx.fill();
+  roundRect(porCX-tabW/2, tabY, tabW, tabH, 18); ctx.fill();
   ctx.fillStyle='#000000';
-  ctx.font='900 46px '+fonte;
+  ctx.font='900 56px '+fonte;
   ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillText('POR',porCX,tabY+tabH/2+2);
   // caixa vermelha
@@ -4619,8 +4619,8 @@ async function drawEncarte(){
   }
   // preco no canto inferior esquerdo da caixa vermelha
   ctx.fillStyle=corValor;
-  var porX=porCX-porBoxW/2+24;
-  var porBaseY=porCY+porBoxH/2-22;
+  var porX=porCX-porTextW/2;
+  var porBaseY=porCY+porBoxH*0.28;
   ctx.textBaseline='alphabetic';ctx.textAlign='left';
   ctx.font='bold '+rsPorFs+'px Arial,sans-serif';
   ctx.fillText('R$',porX,porBaseY-porFs*0.1);
