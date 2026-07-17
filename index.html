@@ -4517,50 +4517,62 @@ async function drawEncarte(){
   // Centro: x=90, y=826 (mesmo centro vertical da caixa DE)
   if(pct){
     var pctNum=pct.replace(/[^0-9,.]/g,'');
-    var cx=105, cy=826, r=88;
+    var cx=105, cy=826, r=79;
     // Sombra sutil
     ctx.shadowColor='rgba(0,0,0,0.3)';
-    ctx.shadowBlur=10;
+    ctx.shadowBlur=9;
     // Circulo externo amarelo
     ctx.fillStyle='#FFD600';
     ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
     // Circulo interno vermelho
     ctx.fillStyle='#E8000D';
-    ctx.beginPath();ctx.arc(cx,cy,r-8,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,r-7,0,Math.PI*2);ctx.fill();
     ctx.shadowBlur=0;ctx.shadowColor='transparent';
     // Numero grande
     ctx.fillStyle='#FFD600';
     ctx.textAlign='center';ctx.textBaseline='middle';
-    var pctFs=58;
+    var pctFs=52;
     ctx.font='900 '+pctFs+'px '+fonte;
-    while(ctx.measureText(pctNum+'%').width>130&&pctFs>24){pctFs-=3;ctx.font='900 '+pctFs+'px '+fonte;}
-    ctx.fillText(pctNum+'%',cx,cy-12);
+    while(ctx.measureText(pctNum+'%').width>117&&pctFs>22){pctFs-=3;ctx.font='900 '+pctFs+'px '+fonte;}
+    ctx.fillText(pctNum+'%',cx,cy-11);
     // Label OFF
     ctx.fillStyle='#ffffff';
-    ctx.font='900 28px '+fonte;
-    ctx.fillText('OFF',cx,cy+30);
+    ctx.font='900 25px '+fonte;
+    ctx.fillText('OFF',cx,cy+27);
   }
 
+  // ── SELOS "DE" e "POR" — badges fixos, quadrados, alinhados a direita e ──
+  // centralizados verticalmente no espaco entre a descricao do produto (y=670)  ──
+  // e o rodape amarelo, sem sobrepor a linha de Validade/Cod (y=1130) ──
+  var badgeCX=850;
+  var deBoxW=230, deBoxH=150, deTabW=180, deTabH=60;
+  var porBoxW=340, porBoxH=150, tabW=265, tabH=60;
+  var gapBadges=26, groupTop=690;
+
+  var deTabY=groupTop;
+  var deBoxTop=deTabY+deTabH-16;
+  var deCX=badgeCX, deCY=deBoxTop+deBoxH/2;
+  var deBoxBottom=deBoxTop+deBoxH;
+
+  var tabY=deBoxBottom+gapBadges;
+  var porBoxTop=tabY+tabH-16;
+  var porCX=badgeCX, porCY=porBoxTop+porBoxH/2;
+
   // ── SELO "DE" — faixa amarela com rotulo "DE" + caixa preta com o preco riscado ──
-  var deCX=792, deCY=770;
-  var deFs=54;
-  ctx.font='900 '+deFs+'px '+fonte;
-  var rsDeFs=Math.round(deFs*0.4);
-  var deValW,rsDeW;
+  // fonte com respiro minimo dentro da caixa fixa, priorizando o maior tamanho possivel
+  var deFs=deBoxH-55;
+  var rsDeFs,deValW,rsDeW;
+  var deMaxW=deBoxW-26;
   while(deFs>26){
     rsDeFs=Math.round(deFs*0.4);
     ctx.font='bold '+rsDeFs+'px Arial,sans-serif';
     rsDeW=ctx.measureText('R$').width+6;
     ctx.font='900 '+deFs+'px '+fonte;
     deValW=ctx.measureText(de||'0,00').width;
-    if(rsDeW+deValW<=320)break;
+    if(rsDeW+deValW<=deMaxW)break;
     deFs-=3;
   }
   var deTextW=rsDeW+deValW;
-  var deBoxW=Math.max(210,Math.min(380,deTextW+60));
-  var deBoxH=deFs*1.5;
-  var deTabW=deBoxW*0.8, deTabH=62;
-  var deTabY=deCY-deBoxH/2-deTabH+16;
   // faixa amarela com o rotulo "DE"
   ctx.fillStyle='#FFD600';
   roundRect(deCX-deTabW/2, deTabY, deTabW, deTabH, 14); ctx.fill();
@@ -4568,12 +4580,12 @@ async function drawEncarte(){
   ctx.font='900 42px '+fonte;
   ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillText('DE',deCX,deTabY+deTabH/2+2);
-  // caixa preta
+  // caixa preta (mais quadrada)
   ctx.fillStyle='#000000';
-  roundRect(deCX-deBoxW/2, deCY-deBoxH/2, deBoxW, deBoxH, 16); ctx.fill();
+  roundRect(deCX-deBoxW/2, deCY-deBoxH/2, deBoxW, deBoxH, 18); ctx.fill();
   ctx.fillStyle=corValor;
   var deX=deCX-deTextW/2;
-  var deBaseY=deCY+deFs*0.38;
+  var deBaseY=deCY+deFs*0.35;
   ctx.textBaseline='alphabetic';ctx.textAlign='left';
   ctx.font='bold '+rsDeFs+'px Arial,sans-serif';
   ctx.fillText('R$',deX,deBaseY-deFs*0.08);
@@ -4581,23 +4593,20 @@ async function drawEncarte(){
   ctx.fillText(de||'0,00',deX+rsDeW,deBaseY);
 
   // ── SELO "POR" — faixa amarela com rotulo "POR" + caixa vermelha com preco e unidade no canto ──
-  var porCX=790, porCY=985;
-  var porFs=140;
+  // Caixa com tamanho FIXO — apenas a fonte do preco se adapta, com respiro minimo pra maximizar destaque
+  var porFs=porBoxH-58;
   var rsPorFs,porValW,rsPorW;
-  while(porFs>36){
+  var porMaxW=porBoxW-38;
+  while(porFs>32){
     rsPorFs=Math.round(porFs*0.36);
     ctx.font='bold '+rsPorFs+'px Arial,sans-serif';
     rsPorW=ctx.measureText('R$').width+8;
     ctx.font='900 '+porFs+'px '+fonte;
     porValW=ctx.measureText(por||'0,00').width;
-    if(rsPorW+porValW<=320)break;
-    porFs-=6;
+    if(rsPorW+porValW<=porMaxW)break;
+    porFs-=4;
   }
   var porTextW=rsPorW+porValW;
-  var porBoxW=Math.max(280,Math.min(380,porTextW+70));
-  var porBoxH=Math.min(Math.max(porBoxW*0.85,porFs*1.35),200);
-  var tabH=68,tabW=porBoxW*0.78;
-  var tabY=porCY-porBoxH/2-tabH+16;
   // faixa amarela com o rotulo "POR" - mais destacada
   ctx.fillStyle='#FFD600';
   roundRect(porCX-tabW/2, tabY, tabW, tabH, 18); ctx.fill();
@@ -4611,16 +4620,16 @@ async function drawEncarte(){
   // unidade ("CADA", "PC C/2" etc.) no canto superior direito da caixa vermelha
   if(unidade){
     ctx.fillStyle=corUnidade||'#FFD600';
-    var uFs=26;
+    var uFs=34;
     ctx.font='900 '+uFs+'px '+fonte;
-    while(ctx.measureText(unidade).width>porBoxW*0.4&&uFs>14){uFs-=2;ctx.font='900 '+uFs+'px '+fonte;}
+    while(ctx.measureText(unidade).width>porBoxW*0.48&&uFs>16){uFs-=2;ctx.font='900 '+uFs+'px '+fonte;}
     ctx.textAlign='right';ctx.textBaseline='top';
-    ctx.fillText(unidade,porCX+porBoxW/2-18,porCY-porBoxH/2+12);
+    ctx.fillText(unidade,porCX+porBoxW/2-16,porCY-porBoxH/2+12);
   }
   // preco no canto inferior esquerdo da caixa vermelha
   ctx.fillStyle=corValor;
   var porX=porCX-porTextW/2;
-  var porBaseY=porCY+porBoxH*0.28;
+  var porBaseY=porCY+porBoxH*0.32;
   ctx.textBaseline='alphabetic';ctx.textAlign='left';
   ctx.font='bold '+rsPorFs+'px Arial,sans-serif';
   ctx.fillText('R$',porX,porBaseY-porFs*0.1);
