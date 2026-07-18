@@ -4545,9 +4545,9 @@ async function drawEncarte(){
   // centralizados verticalmente no espaco entre a descricao do produto (y=670)  ──
   // e o rodape amarelo, sem sobrepor a linha de Validade/Cod (y=1130) ──
   var badgeCX=850;
-  var deBoxW=230, deBoxH=150, deTabW=180, deTabH=60;
-  var porBoxW=340, porBoxH=150, tabW=265, tabH=60;
-  var gapBadges=26, groupTop=690;
+  var deBoxW=235, deBoxH=115, deTabW=190, deTabH=58;
+  var porBoxW=335, porBoxH=215, tabW=260, tabH=58;
+  var gapBadges=14, groupTop=690;
 
   var deTabY=groupTop;
   var deBoxTop=deTabY+deTabH-16;
@@ -4593,10 +4593,11 @@ async function drawEncarte(){
   ctx.fillText(de||'0,00',deX+rsDeW,deBaseY);
 
   // ── SELO "POR" — faixa amarela com rotulo "POR" + caixa vermelha com preco e unidade no canto ──
-  // Caixa com tamanho FIXO — apenas a fonte do preco se adapta, com respiro minimo pra maximizar destaque
-  var porFs=porBoxH-58;
+  // Caixa com parte de baixo alongada so pra dar espaco extra a fonte do preco — a unidade
+  // fica ancorada no topo (nao e afetada) e o preco usa quase todo o respiro lateral/inferior
+  var porFs=porBoxH-22;
   var rsPorFs,porValW,rsPorW;
-  var porMaxW=porBoxW-38;
+  var porMaxW=porBoxW-10;
   while(porFs>32){
     rsPorFs=Math.round(porFs*0.36);
     ctx.font='bold '+rsPorFs+'px Arial,sans-serif';
@@ -4626,10 +4627,10 @@ async function drawEncarte(){
     ctx.textAlign='right';ctx.textBaseline='top';
     ctx.fillText(unidade,porCX+porBoxW/2-16,porCY-porBoxH/2+12);
   }
-  // preco no canto inferior esquerdo da caixa vermelha
+  // preco no canto inferior esquerdo da caixa vermelha — branco, como no print
   ctx.fillStyle=corValor;
   var porX=porCX-porTextW/2;
-  var porBaseY=porCY+porBoxH*0.32;
+  var porBaseY=porCY+porBoxH*0.34;
   ctx.textBaseline='alphabetic';ctx.textAlign='left';
   ctx.font='bold '+rsPorFs+'px Arial,sans-serif';
   ctx.fillText('R$',porX,porBaseY-porFs*0.1);
