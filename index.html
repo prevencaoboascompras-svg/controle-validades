@@ -4284,14 +4284,56 @@ async function buscarFotoDrive(codigoBarras, tipo){
   return false;
 }
 
-// Orquestra TODAS as fontes. Ordem: 1) banco de imagens no Drive (já
-// salvo anteriormente) → 2) Google CSE (fundo branco) → 3) Open Food
-// Facts → 4) em branco (upload manual). EAN e nome "puro" só entram
-// como tentativas adicionais quando a tentativa anterior não encontrar nada.
+// Catálogo público Bluesoft Cosmos — indexado pelo EAN/código de barras.
+// Mesma fonte usada no Arsenal de Ofertas.
+async function buscarFotoCosmos(ean){
+  var cod = String(ean||'').trim().replace(/[^0-9]/g,'');
+  if(!cod || !/^\d{8,14}$/.test(cod)) return false;
+  try{
+    var ok = await carregarImagemUrl('https://cdn-cosmos.bluesoft.com.br/products/'+cod);
+    return ok !== false;
+  }catch(e){
+    console.warn('buscarFotoCosmos exception:', e);
+    return false;
+  }
+}
+
+// Openverse (banco de imagens livres/CC) — mesma fonte usada no Arsenal
+// de Ofertas, usada como reforço quando o Google CSE não encontra nada
+// (ex.: cota esgotada ou sem resultado).
+async function buscarFotoOpenverse(query){
+  query = String(query||'').trim();
+  if(!query) return false;
+  try{
+    var url = 'https://api.openverse.engineering/v1/images/?mature=false&page_size=12&q='+encodeURIComponent(query);
+    var r = await fetch(url,{cache:'no-store'});
+    if(!r.ok) return false;
+    var j = await r.json();
+    var items = j.results||[];
+    for(var i=0;i<items.length;i++){
+      var links=[items[i].thumbnail,items[i].thumbnail_url,items[i].url].filter(Boolean);
+      for(var li=0;li<links.length;li++){
+        var ok = await carregarImagemUrl(links[li]);
+        if(ok !== false) return true;
+      }
+    }
+  }catch(e){
+    console.warn('buscarFotoOpenverse exception:', e);
+  }
+  return false;
+}
+
+// Orquestra TODAS as fontes, na mesma ordem do Arsenal de Ofertas:
+// 1) banco de imagens no Drive (já salvo anteriormente)
+// 2) Bluesoft Cosmos (catálogo público por EAN)
+// 3) Google CSE (fundo branco, por nome e por código de barras)
+// 4) Openverse (reforço quando o Google não encontra nada)
+// 5) Open Food Facts (por EAN e por nome)
+// 6) em branco (upload manual)
 async function buscarFotoCompleta(ean, nomeProduto){
   var nomeLimpo = (nomeProduto||'').replace(/\s*\(\d+.*$/,'').replace(/\s*\{.*$/,'').trim();
 
-  // 0ª tentativa — Banco de imagens no Drive, pelo código de barras
+  // 1ª tentativa — Banco de imagens no Drive, pelo código de barras
   if(ean){
     setFotoStatus('Verificando banco de imagens (Drive)...','var(--amber)');
     var dr = await buscarFotoDrive(ean, 'produto');
@@ -4301,7 +4343,17 @@ async function buscarFotoCompleta(ean, nomeProduto){
     }
   }
 
-  // 1ª tentativa — Google CSE pelo NOME do produto (fundo branco)
+  // 2ª tentativa — Bluesoft Cosmos, pelo código de barras
+  if(ean){
+    setFotoStatus('Buscando no catálogo Bluesoft Cosmos...','var(--amber)');
+    var cs = await buscarFotoCosmos(ean);
+    if(cs === true){
+      setFotoStatus('✓ Foto encontrada (Cosmos)','var(--green)');
+      return true;
+    }
+  }
+
+  // 3ª tentativa — Google CSE pelo NOME do produto (fundo branco)
   if(nomeLimpo){
     setFotoStatus('Buscando foto (fundo branco)...','var(--amber)');
     var g1 = await buscarFotoGoogleCSE(nomeLimpo + ' fundo branco produto embalagem');
@@ -4311,7 +4363,7 @@ async function buscarFotoCompleta(ean, nomeProduto){
     }
   }
 
-  // 2ª tentativa — Google CSE pelo CÓDIGO DE BARRAS (alguns produtos têm a
+  // 4ª tentativa — Google CSE pelo CÓDIGO DE BARRAS (alguns produtos têm a
   // foto indexada em sites de varejo associada ao EAN)
   if(ean){
     setFotoStatus('Tentando buscar pelo código de barras (Google)...','var(--amber)');
@@ -4322,9 +4374,29 @@ async function buscarFotoCompleta(ean, nomeProduto){
     }
   }
 
-  // 3ª tentativa — Open Food Facts pelo EAN exato
+  // 5ª tentativa — Openverse pelo nome (reforço quando o Google não achou)
+  if(nomeLimpo){
+    setFotoStatus('Google não achou. Tentando Openverse...','var(--amber)');
+    var ov1 = await buscarFotoOpenverse(nomeLimpo);
+    if(ov1 === true){
+      setFotoStatus('✓ Foto encontrada (Openverse): "'+nomeLimpo+'"','var(--green)');
+      return true;
+    }
+  }
+
+  // 6ª tentativa — Openverse pelo código de barras
   if(ean){
-    setFotoStatus('Google não achou. Tentando Open Food Facts (código de barras)...','var(--amber)');
+    setFotoStatus('Tentando Openverse pelo código de barras...','var(--amber)');
+    var ov2 = await buscarFotoOpenverse(ean);
+    if(ov2 === true){
+      setFotoStatus('✓ Foto encontrada (Openverse, por código de barras)','var(--green)');
+      return true;
+    }
+  }
+
+  // 7ª tentativa — Open Food Facts pelo EAN exato
+  if(ean){
+    setFotoStatus('Tentando Open Food Facts (código de barras)...','var(--amber)');
     try{
       var res=await fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json?fields=image_url,image_front_url,product_name');
       var data=await res.json();
@@ -4341,7 +4413,7 @@ async function buscarFotoCompleta(ean, nomeProduto){
     }catch(e){}
   }
 
-  // 4ª tentativa — Open Food Facts pelo nome
+  // 8ª tentativa — Open Food Facts pelo nome
   if(nomeLimpo){
     setFotoStatus('Tentando Open Food Facts (nome)...','var(--amber)');
     try{
