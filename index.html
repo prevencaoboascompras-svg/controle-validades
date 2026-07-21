@@ -4305,7 +4305,7 @@ async function buscarFotoOpenverse(query){
   query = String(query||'').trim();
   if(!query) return false;
   try{
-    var url = 'https://api.openverse.engineering/v1/images/?mature=false&page_size=12&q='+encodeURIComponent(query);
+    var url = 'https://api.openverse.org/v1/images/?mature=false&page_size=12&q='+encodeURIComponent(query);
     var r = await fetch(url,{cache:'no-store'});
     if(!r.ok) return false;
     var j = await r.json();
@@ -4417,7 +4417,7 @@ async function buscarFotoCompleta(ean, nomeProduto){
   if(nomeLimpo){
     setFotoStatus('Tentando Open Food Facts (nome)...','var(--amber)');
     try{
-      var res2=await fetch('https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(nomeLimpo)+'&search_simple=1&action=process&json=1&page_size=5&fields=image_front_url,image_url,product_name');
+      var res2=await fetch('https://world.openfoodfacts.org/api/v2/search?search_terms='+encodeURIComponent(nomeLimpo)+'&page_size=5&fields=image_front_url,image_url,product_name');
       var data2=await res2.json();
       if(data2.products&&data2.products.length>0){
         for(var i=0;i<data2.products.length;i++){
@@ -4458,8 +4458,9 @@ function carregarImagemUrl(url){
     img.crossOrigin='anonymous';
     img.onload=function(){fotoImg=img;drawEncarte();resolve(true);};
     img.onerror=function(){
-      // Fallback: proxy CORS via allorigins
-      var proxyUrl='https://api.allorigins.win/raw?url='+encodeURIComponent(url);
+      // Fallback: proxy CORS via images.weserv.nl (mesmo proxy do Arsenal
+      // de Ofertas — allorigins estava bloqueando/derrubando as imagens)
+      var proxyUrl='https://images.weserv.nl/?url='+encodeURIComponent(url.replace(/^https?:\/\//i,''))+'&output=png';
       var img2=new Image();
       img2.crossOrigin='anonymous';
       img2.onload=function(){fotoImg=img2;drawEncarte();resolve(true);};
