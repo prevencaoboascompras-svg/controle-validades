@@ -4579,23 +4579,21 @@ async function drawEncarte(){
   for(var ni=0;ni<nLines.length;ni++)ctx.fillText(nLines[ni],W/2,nomeStartY+ni*lh);
 
   // ── FOTO — cartão branco adaptativo ao formato real da imagem (mesmo
-  // raciocínio do Arsenal de Ofertas): em vez de uma caixa vazia de
-  // tamanho fixo (que sobrava espaço em branco quando a foto não era
-  // quadrada), o cartão se ajusta à proporção da imagem, com padding e
-  // sombra, sem cortar nem esticar a foto ──
+  // raciocínio do Arsenal de Ofertas): o cartão se ajusta à proporção da
+  // imagem, mas SEM nunca ultrapassar a área reservada (fX,fY,maxW,maxH) —
+  // o encaixe é calculado já descontando o padding, então card nunca
+  // invade o rodapé nem fica maior que a área disponível ──
   if(fotoImg){
     var maxW=460,maxH=460,fX=15,fY=685,pad=16,fR=20;
-    var areaCX=fX+maxW/2, areaTopY=fY;
+    var innerMaxW=maxW-pad*2, innerMaxH=maxH-pad*2;
     var imgAspect=fotoImg.width/fotoImg.height;
-    var boxAspect=maxW/maxH;
+    var boxAspect=innerMaxW/innerMaxH;
     var fw,fh;
-    if(imgAspect>boxAspect){ fw=maxW; fh=maxW/imgAspect; }
-    else{ fh=maxH; fw=maxH*imgAspect; }
-    fw=Math.max(fw,220); fh=Math.max(fh,220);
+    if(imgAspect>boxAspect){ fw=innerMaxW; fh=innerMaxW/imgAspect; }
+    else{ fh=innerMaxH; fw=innerMaxH*imgAspect; }
     var cardW=fw+pad*2, cardH=fh+pad*2;
-    if(cardW>maxW+pad*2) cardW=maxW+pad*2;
-    if(cardH>maxH+pad*2) cardH=maxH+pad*2;
-    var cardX=areaCX-cardW/2, cardY=areaTopY+(maxH-(cardH-pad*2))/2;
+    var areaCX=fX+maxW/2;
+    var cardX=areaCX-cardW/2, cardY=fY+(maxH-cardH)/2;
     ctx.save();
     ctx.shadowColor='rgba(0,0,0,0.14)';
     ctx.shadowBlur=14;
@@ -4606,7 +4604,7 @@ async function drawEncarte(){
     ctx.save();
     ctx.imageSmoothingEnabled=true;
     if('imageSmoothingQuality' in ctx) ctx.imageSmoothingQuality='high';
-    ctx.drawImage(fotoImg,cardX+pad,cardY+pad,cardW-pad*2,cardH-pad*2);
+    ctx.drawImage(fotoImg,cardX+pad,cardY+pad,fw,fh);
     ctx.restore();
   }
 
