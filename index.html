@@ -4578,12 +4578,36 @@ async function drawEncarte(){
   var nomeStartY=nomeCY-(nLines.length*lh)/2+fs*0.5;
   for(var ni=0;ni<nLines.length;ni++)ctx.fillText(nLines[ni],W/2,nomeStartY+ni*lh);
 
-  // ── FOTO — area ampliada ──
+  // ── FOTO — cartão branco adaptativo ao formato real da imagem (mesmo
+  // raciocínio do Arsenal de Ofertas): em vez de uma caixa vazia de
+  // tamanho fixo (que sobrava espaço em branco quando a foto não era
+  // quadrada), o cartão se ajusta à proporção da imagem, com padding e
+  // sombra, sem cortar nem esticar a foto ──
   if(fotoImg){
-    var fX=15,fY=685,fW=460,fH=460;
-    var ratio=Math.min(fW/fotoImg.width,fH/fotoImg.height);
-    var fw=fotoImg.width*ratio,fh=fotoImg.height*ratio;
-    ctx.drawImage(fotoImg,fX+(fW-fw)/2,fY+(fH-fh)/2,fw,fh);
+    var maxW=460,maxH=460,fX=15,fY=685,pad=16,fR=20;
+    var areaCX=fX+maxW/2, areaTopY=fY;
+    var imgAspect=fotoImg.width/fotoImg.height;
+    var boxAspect=maxW/maxH;
+    var fw,fh;
+    if(imgAspect>boxAspect){ fw=maxW; fh=maxW/imgAspect; }
+    else{ fh=maxH; fw=maxH*imgAspect; }
+    fw=Math.max(fw,220); fh=Math.max(fh,220);
+    var cardW=fw+pad*2, cardH=fh+pad*2;
+    if(cardW>maxW+pad*2) cardW=maxW+pad*2;
+    if(cardH>maxH+pad*2) cardH=maxH+pad*2;
+    var cardX=areaCX-cardW/2, cardY=areaTopY+(maxH-(cardH-pad*2))/2;
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,0.14)';
+    ctx.shadowBlur=14;
+    ctx.fillStyle='#FFFFFF';
+    roundRect(cardX,cardY,cardW,cardH,fR);
+    ctx.fill();
+    ctx.restore();
+    ctx.save();
+    ctx.imageSmoothingEnabled=true;
+    if('imageSmoothingQuality' in ctx) ctx.imageSmoothingQuality='high';
+    ctx.drawImage(fotoImg,cardX+pad,cardY+pad,cardW-pad*2,cardH-pad*2);
+    ctx.restore();
   }
 
   // ── % DESCONTO — circulo lado esquerdo, altura da caixa DE ──
