@@ -4584,7 +4584,7 @@ async function drawEncarte(){
   // o encaixe é calculado já descontando o padding, então card nunca
   // invade o rodapé nem fica maior que a área disponível ──
   if(fotoImg){
-    var maxW=460,maxH=460,fX=15,fY=685,pad=16,fR=20;
+    var maxW=460,maxH=460,fX=45,fY=685,pad=16,fR=20;
     var innerMaxW=maxW-pad*2, innerMaxH=maxH-pad*2;
     var imgAspect=fotoImg.width/fotoImg.height;
     var boxAspect=innerMaxW/innerMaxH;
@@ -4612,7 +4612,7 @@ async function drawEncarte(){
   // Centro: x=90, y=826 (mesmo centro vertical da caixa DE)
   if(pct){
     var pctNum=pct.replace(/[^0-9,.]/g,'');
-    var cx=105, cy=826, r=79;
+    var cx=135, cy=826, r=79;
     // Sombra sutil
     ctx.shadowColor='rgba(0,0,0,0.3)';
     ctx.shadowBlur=9;
