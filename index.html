@@ -3202,7 +3202,12 @@ function renderTable(){
     var badgeSt='status-'+(days===null?'none':s);
     var venceCor=days===null?'var(--tx2)':days<=0?'#ef4444':days<=3?'#f97316':days<=7?'#fbbf24':'var(--tx)';
     var venceTxt=days===null?'Sem data':days<0?'Vencido há '+Math.abs(days)+'d':days===0?'Vence hoje':days===1?'Amanhã':'Faltam '+days+'d';
+    var venceTxtExtenso=days===null?'Sem data':days<0?'Vencido há '+Math.abs(days)+' dias':days===0?'Vence hoje':days===1?'Vence amanhã':'Faltam '+days+' dias';
     var qb=qtdeBadge(p.qtde,badgeSt,p.qtde+' unidades a vencer');
+    var thumbCod=(p.cod||'').replace(/[^0-9]/g,'');
+    var photoBoxHtml=thumbCod
+      ?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+thumbCod+'"><img src="https://cdn-cosmos.bluesoft.com.br/products/'+thumbCod+'" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\''+thumbCod+'\')"></div></div>'
+      :'<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
     return '<div class="'+cardCls+'">'
       +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px;--qb-pad-m:'+qb.headerPadLeftMobile+'px">'
         +qb.html
@@ -3214,14 +3219,19 @@ function renderTable(){
       +'</div>'
       +'<div class="urg-card-body">'
         +'<div class="urg-card-mid">'
-          +'<div class="urg-speedo-wrap">'+speedometerSVG(days,s)+'<span class="urg-speedo-lbl">Validade</span></div>'
+          +photoBoxHtml
           +'<div class="urg-card-info">'
-            +'<div class="urg-info-field"><span class="urg-info-lbl">Vence em</span><span class="urg-info-val" style="color:'+venceCor+'">'+venceTxt+'</span></div>'
-            +'<div class="urg-info-field"><span class="urg-info-lbl">Data</span><span class="urg-info-val">'+(p.validade?fmtDataExtenso(p.validade):'--')+'</span></div>'
             +'<div class="urg-info-field"><span class="urg-info-lbl">Setor</span><span class="urg-info-val">'+escHtml(p.setor||'--')+'</span></div>'
             +'<div class="urg-info-field"><span class="urg-info-lbl">Qtde</span><span class="urg-info-val">'+escHtml(p.qtde||'--')+'</span></div>'
             +(p.precoPromo?'<div class="urg-info-field"><span class="urg-info-lbl">Promoção</span><span class="urg-info-val" style="color:var(--green)">'+fmtR(p.precoPromo)+'</span></div>':'')
             +(p.pctDesc?'<div class="urg-info-field"><span class="urg-info-lbl">Desconto</span><span class="urg-info-val" style="color:var(--amber)">'+fmtPct(p.pctDesc)+'</span></div>':'')
+          +'</div>'
+          +'<div class="urg-card-right">'
+            +speedometerSVG(days,s)
+            +'<div class="urg-card-right-extenso" style="color:'+venceCor+'">'+venceTxtExtenso+'</div>'
+            +'<div class="urg-card-right-stats">'
+              +'<div><span class="urg-stat-lbl">Data</span><div class="urg-stat-val" style="font-weight:700;color:'+venceCor+'">'+(p.validade?fmtDataExtenso(p.validade):'--')+'</div></div>'
+            +'</div>'
           +'</div>'
         +'</div>'
         +'<div class="urg-card-forn" title="'+escHtml(fornProd)+'"><i class="ti ti-truck-delivery" style="opacity:.6"></i> '+escHtml(fornProd)+'</div>'
