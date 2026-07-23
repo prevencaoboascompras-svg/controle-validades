@@ -81,7 +81,18 @@ html,body{overflow-x:hidden;max-width:100%}
 .urg-thumb{width:34px;height:34px;flex-shrink:0;border-radius:7px;border:1px solid var(--bd);background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-right:8px}
 .urg-thumb img{width:100%;height:100%;object-fit:contain}
 .urg-thumb-empty{color:var(--tx2);font-size:14px;opacity:.5}
-@media(max-width:640px){.urg-thumb{width:22px;height:22px;border-radius:5px;margin-right:5px}.urg-thumb-empty{font-size:10px}}
+.urg-photobox{position:relative;width:96px;height:96px;flex-shrink:0;border-radius:10px;border:1px solid var(--bd);background:#fff;overflow:visible}
+.urg-photobox-imgwrap{width:100%;height:100%;border-radius:10px;overflow:hidden;background:#fff}
+.urg-photobox-imgwrap img{width:100%;height:100%;object-fit:contain;display:block}
+.urg-photobox-empty{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--tx2);font-size:26px;opacity:.4}
+.urg-photobox-gauge{position:absolute;bottom:-8px;right:-8px;width:48px;pointer-events:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+.urg-photobox-gauge svg{width:100%;height:auto;display:block}
+@media(max-width:640px){
+  .urg-thumb{width:22px;height:22px;border-radius:5px;margin-right:5px}
+  .urg-thumb-empty{font-size:10px}
+  .urg-photobox{width:64px;height:64px}
+  .urg-photobox-gauge{width:32px;bottom:-6px;right:-6px}
+}
 /* Encarte cards QR-Ofertas style */
 .ecard{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);margin-bottom:12px;overflow:hidden;transition:border-color .15s}
 .ecard:hover{border-color:var(--bds)}
@@ -7722,23 +7733,31 @@ function sincronizarTarefas(){sincronizarTarefasCompleto();}
 // Quando a foto do catálogo público (Cosmos) não existe para o código de
 // barras, tenta o banco de imagens salvo no próprio sistema (Drive, mesma
 // fonte usada no Encarte). Se nada for encontrado, mostra um ícone vazio.
-var _auraEstoqueThumbTentado = {};
+var _auraEstoqueThumbCache = {};
 async function _auraEstoqueThumbFallback(imgEl, cod) {
-  if (_auraEstoqueThumbTentado[cod]) { _auraEstoqueThumbShowEmpty(imgEl); return; }
-  _auraEstoqueThumbTentado[cod] = true;
   imgEl.onerror = null;
-  try {
-    var r = await _gasGet('buscarImagemProduto', '&codigoBarras=' + encodeURIComponent(cod) + '&tipo=produto');
-    if (r && r.ok && r.encontrado && r.base64) {
-      imgEl.src = 'data:' + (r.mimeType || 'image/jpeg') + ';base64,' + r.base64;
-      return;
-    }
-  } catch (e) {}
-  _auraEstoqueThumbShowEmpty(imgEl);
+  if (!_auraEstoqueThumbCache[cod]) {
+    _auraEstoqueThumbCache[cod] = (async function() {
+      try {
+        var r = await _gasGet('buscarImagemProduto', '&codigoBarras=' + encodeURIComponent(cod) + '&tipo=produto');
+        if (r && r.ok && r.encontrado && r.base64) {
+          return 'data:' + (r.mimeType || 'image/jpeg') + ';base64,' + r.base64;
+        }
+      } catch (e) {}
+      return null;
+    })();
+  }
+  var dataUrl = await _auraEstoqueThumbCache[cod];
+  if (dataUrl) imgEl.src = dataUrl;
+  else _auraEstoqueThumbShowEmpty(imgEl);
 }
 function _auraEstoqueThumbShowEmpty(imgEl) {
-  var box = imgEl.closest('.urg-thumb');
-  if (box) { box.classList.add('urg-thumb-empty'); box.innerHTML = '<i class="ti ti-photo-off"></i>'; }
+  var box = imgEl.closest('.urg-thumb') || imgEl.closest('.urg-photobox-imgwrap');
+  if (box) {
+    box.classList.add('urg-thumb-empty');
+    box.classList.add('urg-photobox-empty');
+    box.innerHTML = '<i class="ti ti-photo-off"></i>';
+  }
 }
 
 // ═══ ESTOQUE AGRUPADO ═══
@@ -7804,14 +7823,13 @@ function renderEstoque() {
     var qb = qtdeBadge(totalQtde, badgeSt, totalQtde + ' unidades');
 
     var thumbCod = (grupo.cod || '').replace(/[^0-9]/g, '');
-    var thumbHtml = thumbCod
-      ? '<div class="urg-thumb" id="urgThumb_' + thumbCod + '"><img src="https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\'' + thumbCod + '\')"></div>'
-      : '<div class="urg-thumb urg-thumb-empty"><i class="ti ti-photo-off"></i></div>';
+    var photoBoxHtml = thumbCod
+      ? '<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_' + thumbCod + '"><img src="https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\'' + thumbCod + '\')"></div><div class="urg-photobox-gauge">' + speedometerSVG(days, s) + '</div></div>'
+      : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div><div class="urg-photobox-gauge">' + speedometerSVG(days, s) + '</div></div>';
 
     return '<div class="urg-card" onclick="abrirProdutoModal(\'' + escHtml(grupo.cod || '') + '\')" style="cursor:pointer">'
       + '<div class="' + hdrCls + '" style="padding-left:' + qb.headerPadLeft + 'px">'
       +   qb.html
-      +   thumbHtml
       +   '<div style="min-width:0;flex:1">'
       +     '<div class="urg-card-nome">' + escHtml(cleanNome(p.nome || '—')) + '</div>'
       +     '<div class="urg-card-cod">' + (p.cod || '') + (multiLote ? ' · ' + lotes.length + ' lotes' : '') + '</div>'
@@ -7820,7 +7838,7 @@ function renderEstoque() {
       + '</div>'
       + '<div class="urg-card-body">'
       +   '<div class="urg-card-mid">'
-      +     '<div class="urg-speedo-wrap">' + speedometerSVG(days, s) + '<span class="urg-speedo-lbl">Validade</span></div>'
+      +     photoBoxHtml
       +     '<div class="urg-card-info">'
       +       '<div class="urg-info-field"><span class="urg-info-lbl">' + (multiLote ? 'Lote mais próximo' : 'Vence em') + '</span><span class="urg-info-val" style="color:' + venceCor + '">' + venceTxt + '</span></div>'
       +       '<div class="urg-info-field"><span class="urg-info-lbl">Data</span><span class="urg-info-val">' + (p.validade ? fmtDataExtenso(p.validade) : '—') + '</span></div>'
