@@ -220,6 +220,19 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .val-card.resolvido{opacity:.65}
 .urg-card.faded{opacity:.55}
 .urg-card.resolvido{opacity:.65}
+/* Modal de produto — foto grande à esquerda + informações à direita */
+.pm-top{display:flex;gap:18px;margin-bottom:16px}
+.pm-photobox{width:180px;height:180px;flex-shrink:0;border-radius:var(--rl);border:1px solid var(--bd);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pm-photobox img{width:100%;height:100%;object-fit:contain}
+.pm-photobox-empty{color:var(--tx2);font-size:40px;opacity:.4}
+.pm-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
+.pm-nome{font-size:16px;font-weight:700;line-height:1.3}
+.pm-cod{font-family:monospace;font-size:12px;color:var(--tx2);display:flex;align-items:center;gap:6px}
+.pm-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:560px){
+  .pm-top{flex-direction:column}
+  .pm-photobox{width:100%;height:150px}
+}
 
 .uc-card{background:var(--surface2);border:1px solid var(--border);border-top:3px solid #666;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .2s;min-width:0}
 .uc-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.3)}
@@ -2633,22 +2646,29 @@ function toggleTheme() {
 
 <!-- modal de produto agrupado (card clicável de Estoque) -->
 <div class="modal-ov" id="produtoModal">
-  <div class="smodal" style="width:560px;max-height:88vh;overflow-y:auto">
-    <h3 id="pmNome"><i class="ti ti-package"></i> Produto</h3>
-    <div id="pmCod" style="font-family:monospace;font-size:11px;color:var(--tx2);margin-bottom:14px"></div>
+  <div class="smodal" style="width:680px;max-height:88vh;overflow-y:auto">
 
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
-      <div class="rel-card-sm">
-        <div style="font-size:10px;color:var(--tx2);text-transform:uppercase">Custo Gerencial</div>
-        <div id="pmCusto" style="font-size:16px;font-weight:700"></div>
+    <div class="pm-top">
+      <div class="pm-photobox" id="pmPhotoBox">
+        <img id="pmFoto" alt="" loading="lazy">
       </div>
-      <div class="rel-card-sm">
-        <div style="font-size:10px;color:var(--tx2);text-transform:uppercase">Valor de Venda</div>
-        <div id="pmVenda" style="font-size:16px;font-weight:700"></div>
-      </div>
-      <div class="rel-card-sm">
-        <div style="font-size:10px;color:var(--tx2);text-transform:uppercase">Estoque Total</div>
-        <div id="pmTotal" style="font-size:16px;font-weight:700;color:var(--green)"></div>
+      <div class="pm-info">
+        <h3 id="pmNome" class="pm-nome"><i class="ti ti-package"></i> Produto</h3>
+        <div id="pmCod" class="pm-cod"></div>
+        <div class="pm-stats">
+          <div class="rel-card-sm">
+            <div style="font-size:10px;color:var(--tx2);text-transform:uppercase">Custo Gerencial</div>
+            <div id="pmCusto" style="font-size:16px;font-weight:700"></div>
+          </div>
+          <div class="rel-card-sm">
+            <div style="font-size:10px;color:var(--tx2);text-transform:uppercase">Valor de Venda</div>
+            <div id="pmVenda" style="font-size:16px;font-weight:700"></div>
+          </div>
+          <div class="rel-card-sm">
+            <div style="font-size:10px;color:var(--tx2);text-transform:uppercase">Estoque Total</div>
+            <div id="pmTotal" style="font-size:16px;font-weight:700;color:var(--green)"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -7256,7 +7276,37 @@ function abrirProdutoModal(cod){
   var principal=lotes[0];
 
   document.getElementById('pmNome').innerHTML='<i class="ti ti-package"></i> '+escHtml(cleanNome(principal.nome||'Produto'));
-  document.getElementById('pmCod').textContent=cod;
+  document.getElementById('pmCod').innerHTML='<i class="ti ti-barcode"></i> '+escHtml(cod);
+
+  var pmBarras=(cod||'').replace(/[^0-9]/g,'');
+  var pmBox=document.getElementById('pmPhotoBox');
+  var pmImg=document.getElementById('pmFoto');
+  pmBox.classList.remove('pm-photobox-empty-wrap');
+  pmBox.innerHTML='<img id="pmFoto" alt="" loading="lazy">';
+  pmImg=document.getElementById('pmFoto');
+  if(pmBarras){
+    pmImg.src='https://cdn-cosmos.bluesoft.com.br/products/'+pmBarras;
+    pmImg.onerror=function(){
+      var self=this;
+      (async function(){
+        if(!_auraEstoqueThumbCache[pmBarras]){
+          _auraEstoqueThumbCache[pmBarras]=(async function(){
+            try{
+              var r=await _gasGet('buscarImagemProduto','&codigoBarras='+encodeURIComponent(pmBarras)+'&tipo=produto');
+              if(r&&r.ok&&r.encontrado&&r.base64)return 'data:'+(r.mimeType||'image/jpeg')+';base64,'+r.base64;
+            }catch(e){}
+            return null;
+          })();
+        }
+        var dataUrl=await _auraEstoqueThumbCache[pmBarras];
+        if(dataUrl)self.src=dataUrl;
+        else pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';
+      })();
+    };
+  } else {
+    pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';
+  }
+
   document.getElementById('pmCusto').textContent=principal.custo?('R$ '+Number(principal.custo).toFixed(2).replace('.',',')):'--';
   document.getElementById('pmVenda').textContent=principal.precoNormal?('R$ '+Number(principal.precoNormal).toFixed(2).replace('.',',')):'--';
   var totalQtde=lotes.reduce(function(s,p){return s+(Number(p.qtde)||0);},0);
