@@ -203,6 +203,10 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .urg-stat-lbl{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);white-space:nowrap}
 .urg-stat-val{font-size:12.5px;font-weight:700;color:var(--tx);white-space:nowrap}
 .urg-card-forn{font-size:10.5px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-top:6px;border-top:1px solid var(--bd)}
+.urg-card-bip{font-size:10px;color:var(--tx2);display:flex;align-items:center;gap:5px;padding-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.urg-card-bip b{color:var(--tx);font-weight:600}
+.urg-card-bip i{opacity:.6;flex-shrink:0}
+@media(max-width:640px){.urg-card-bip{font-size:7px}}
 .urg-card-foot{display:flex;gap:6px;padding:10px 13px;border-top:1px solid var(--bd);background:var(--bg2)}
 
 .val-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
@@ -3143,6 +3147,7 @@ function fmtR(v){if(!v)return'--';return'R$ '+v.toFixed(2).replace('.',',');}
 function fmtPct(v){if(!v)return'--';var p=v<1?v*100:v;return p.toFixed(2).replace('.',',')+'%';}
 
 function renderTable(){
+  garantirDadosBipagem();
   var setor=document.getElementById('fSetor').value;
   var status=document.getElementById('fStatus').value;
   var busca=document.getElementById('fBusca').value.toLowerCase();
@@ -3235,6 +3240,7 @@ function renderTable(){
           +'</div>'
         +'</div>'
         +'<div class="urg-card-forn" title="'+escHtml(fornProd)+'"><i class="ti ti-truck-delivery" style="opacity:.6"></i> '+escHtml(fornProd)+'</div>'
+        +fmtBipagemHtml(buscarBipagem(p.cod,p.validade))
       +'</div>'
       +'<div class="urg-card-foot">'
         +(needsPromo?'<button class="abtn" style="border-color:var(--amber);color:var(--amber)" onclick="openTarefaModal('+idx+')" title="Sinalizar promoção ativa e atribuir tarefa"><i class="ti ti-tag"></i> Promoção</button><button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido
@@ -3733,16 +3739,42 @@ function _ucAbrirCadastroUser(email){
   var btnS=document.getElementById('ucUserBtnSalvar');
   if(btnS)btnS.addEventListener('click',function(){_ucSalvarUser(email);});
 }
-function _ucSalvarUser(email){
-  var input=document.getElementById('ucUserNomeInput');
-  if(!input)return;
-  var nome=input.value.trim();
-  if(!nome){input.focus();return;}
-  _ucSaveUser(email,nome);
-  var modal=document.getElementById('ucUserModal');if(modal)modal.remove();
-  mostrarToast('Usuário "'+nome+'" salvo!','ok');
-  _ucDados.forEach(function(d){if(d.email&&d.email.toLowerCase()===email.toLowerCase())d.nomeColeta=nome;});
-  _ucFiltrar();
+// Localiza a coleta (bipagem) mais recente de um lote específico (código de
+// barras + validade) na aba "Respostas ao formulário 1". Se não achar coleta
+// com aquela validade exata, cai para a coleta mais recente daquele código.
+function buscarBipagem(cod, validade) {
+  if (!cod || !_ucDados.length) return null;
+  var codN = (cod || '').replace(/[^0-9]/g, '');
+  var candidatos = _ucDados.filter(function(d) { return d.ean === codN; });
+  if (!candidatos.length) return null;
+  if (validade) {
+    var comValidade = candidatos.filter(function(d) { return d.valStr === validade; });
+    if (comValidade.length) candidatos = comValidade;
+  }
+  candidatos = candidatos.slice().sort(function(a, b) { return (b.ts ? b.ts.getTime() : 0) - (a.ts ? a.ts.getTime() : 0); });
+  return candidatos[0] || null;
+}
+// Monta o HTML da linha "Bipado por Fulano · 23/07 14:32" exibida nos cards
+// de Estoque e Validade. Retorna string vazia se não há coleta encontrada.
+function fmtBipagemHtml(bip) {
+  if (!bip) return '';
+  var quem = bip.nomeColeta || bip.email || 'Colaborador';
+  var quando = bip.ts
+    ? bip.ts.toLocaleDateString('pt-BR') + ' às ' + bip.ts.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})
+    : '';
+  return '<div class="urg-card-bip" title="' + escHtml(bip.email || '') + '"><i class="ti ti-scan"></i> Bipado por <b>' + escHtml(quem) + '</b>' + (quando ? ' · ' + quando : '') + '</div>';
+}
+// Garante que _ucDados esteja carregado (necessário para exibir quem bipou
+// nos cards de Estoque/Validade). Dispara o carregamento uma única vez e,
+// ao terminar, reexecuta a renderização das abas para exibir a informação.
+var _ucAutoLoadTriggered = false;
+function garantirDadosBipagem() {
+  if (_ucDados.length || _ucAutoLoadTriggered) return;
+  _ucAutoLoadTriggered = true;
+  renderUltimasColetas().then(function() {
+    if (typeof renderEstoque === 'function') renderEstoque();
+    if (typeof renderTable === 'function') renderTable();
+  }).catch(function() { _ucAutoLoadTriggered = false; });
 }
 
 async function renderUltimasColetas(forceRefresh) {
@@ -7839,6 +7871,7 @@ function _auraEstoqueThumbShowEmpty(imgEl) {
 
 // ═══ ESTOQUE AGRUPADO ═══
 function renderEstoque() {
+  garantirDadosBipagem();
   var container = document.getElementById('estoqueGrid');
   if (!container) return;
 
@@ -7931,6 +7964,7 @@ function renderEstoque() {
       +     '</div>'
       +   '</div>'
       +   '<div class="urg-card-forn" title="' + escHtml(fornProd) + '"><i class="ti ti-truck-delivery" style="opacity:.6"></i> ' + escHtml(fornProd) + '</div>'
+      +   fmtBipagemHtml(buscarBipagem(p.cod, p.validade))
       + '</div>'
       + '<div class="urg-card-foot">'
       +   '<button class="abtn" style="border-color:var(--amber);color:var(--amber)" onclick="event.stopPropagation();openTarefaModal(' + idx + ')"><i class="ti ti-clipboard-check"></i> Conferir</button>'
