@@ -7039,7 +7039,7 @@ function abrirRelatorioRetirada() {
         var valFmt = p.validade ? p.validade.split('-').reverse().join('/') : '--';
         var cod = (p.cod||'').replace(/[^0-9]/g,'');
         var fotoHtml = cod
-          ? '<div class="ret-foto"><img src="https://cdn-cosmos.bluesoft.com.br/products/'+cod+'" alt="" loading="lazy" onerror="this.onerror=null;this.parentNode.classList.add(\'ret-foto-vazia\');this.parentNode.innerHTML=\'<i class=&quot;ti ti-photo-off&quot;></i>\';"></div>'
+          ? '<div class="ret-foto" data-cod="'+cod+'"><div class="ret-foto-load"></div></div>'
           : '<div class="ret-foto ret-foto-vazia"><i class="ti ti-photo-off"></i></div>';
         return [
           '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.1);margin-bottom:12px">',
@@ -7082,6 +7082,8 @@ function abrirRelatorioRetirada() {
       '.ret-foto{width:56px;height:56px;flex-shrink:0;border-radius:8px;border:1px solid #e5e5ea;background:#fafafa;display:flex;align-items:center;justify-content:center;overflow:hidden}',
       '.ret-foto img{width:100%;height:100%;object-fit:contain;display:block}',
       '.ret-foto-vazia{color:#c7c7cc;font-size:20px}',
+      '.ret-foto-load{width:18px;height:18px;border-radius:50%;border:2px solid #e5e5ea;border-top-color:#b91c1c;animation:retspin .7s linear infinite}',
+      '@keyframes retspin{to{transform:rotate(360deg)}}',
       '.print-btn{display:block;margin:0 14px 14px;background:#b91c1c;color:#fff;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:800;text-align:center;cursor:pointer;width:calc(100% - 28px);letter-spacing:.02em}',
       '.rodape{text-align:center;font-size:11px;color:#bbb;padding:0 14px 24px}',
       '@media print{.print-btn,.topo{position:relative;box-shadow:none}.print-btn{display:none}}',
@@ -7105,6 +7107,37 @@ function abrirRelatorioRetirada() {
     '<div class="cards">',cardsHtml,'</div>',
     hoje.length > 0 ? '<button class="print-btn" onclick="window.print()">🖨️  Salvar como PDF</button>' : '',
     '<div class="rodape">AURA Vencimentos · '+new Date().toLocaleString('pt-BR')+'</div>',
+    '<script>',
+      'var RET_GAS_URL='+JSON.stringify(loadCfg().url||'')+';',
+      'function retFotoTestImg(url){return new Promise(function(res){var im=new Image();im.onload=function(){res(url);};im.onerror=function(){res(null);};im.src=url;});}',
+      'async function retFotoResolve(cod){',
+        'if(RET_GAS_URL){',
+          'try{',
+            'var r=await fetch(RET_GAS_URL+"?action=buscarImagemProduto&codigoBarras="+encodeURIComponent(cod)+"&tipo=produto");',
+            'var j=await r.json();',
+            'if(j&&j.ok&&j.encontrado&&j.base64){return "data:"+(j.mimeType||"image/jpeg")+";base64,"+j.base64;}',
+          '}catch(e){}',
+        '}',
+        'var cosmos=await retFotoTestImg("https://cdn-cosmos.bluesoft.com.br/products/"+cod);',
+        'if(cosmos)return cosmos;',
+        'try{',
+          'var r2=await fetch("https://world.openfoodfacts.org/api/v2/product/"+cod+".json?fields=image_url,image_front_url");',
+          'var j2=await r2.json();',
+          'if(j2&&j2.status===1&&j2.product){',
+            'var imgUrl=j2.product.image_front_url||j2.product.image_url;',
+            'if(imgUrl){var off=await retFotoTestImg(imgUrl);if(off)return off;}',
+          '}',
+        '}catch(e){}',
+        'return null;',
+      '}',
+      'document.querySelectorAll(".ret-foto[data-cod]").forEach(function(el){',
+        'var cod=el.getAttribute("data-cod");',
+        'retFotoResolve(cod).then(function(url){',
+          'if(url){el.innerHTML="<img src=\\""+url+"\\" alt=\\"\\">";}',
+          'else{el.classList.add("ret-foto-vazia");el.innerHTML="<i class=\\"ti ti-photo-off\\"></i>";}',
+        '});',
+      '});',
+    '</'+'script>',
     '</body></html>'
   ].join('');
 
