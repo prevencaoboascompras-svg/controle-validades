@@ -7266,6 +7266,20 @@ function sincronizarTarefasCompleto(){
 
 // ═══ Baixa automática de estoque quando tarefa é confirmada com 0 unidades ═══
 var TAREFAS_ZERO_KEY='boascompras_tarefas_zero_processadas';
+var TAREFAS_PRONTOS_IGNORADOS_KEY='boascompras_tarefas_prontos_ignorados';
+function getProntosIgnorados(){try{return JSON.parse(localStorage.getItem(TAREFAS_PRONTOS_IGNORADOS_KEY)||'[]');}catch(e){return[];}}
+function saveProntosIgnorados(arr){localStorage.setItem(TAREFAS_PRONTOS_IGNORADOS_KEY,JSON.stringify(arr));}
+function ignorarProntoEncarte(cod){
+  var arr=getProntosIgnorados();
+  if(arr.indexOf(cod)===-1)arr.push(cod);
+  saveProntosIgnorados(arr);
+  renderTarefasProntos();
+}
+function restaurarProntoEncarte(cod){
+  var arr=getProntosIgnorados().filter(function(c){return c!==cod;});
+  saveProntosIgnorados(arr);
+  renderTarefasProntos();
+}
 function getTarefasZeroProcessadas(){try{return JSON.parse(localStorage.getItem(TAREFAS_ZERO_KEY)||'[]');}catch(e){return[];}}
 function saveTarefasZeroProcessadas(arr){localStorage.setItem(TAREFAS_ZERO_KEY,JSON.stringify(arr));}
 
@@ -7761,7 +7775,8 @@ function renderTarefasProntos() {
     }
   });
 
-  var prontos = Object.keys(porCod).map(function(cod) {
+  var ignorados = getProntosIgnorados();
+  var prontosTodos = Object.keys(porCod).map(function(cod) {
     var t = porCod[cod];
     var idx = products.findIndex(function(p) { return (p.cod||'').trim() === cod; });
     if (idx === -1) return null; // produto não existe mais na base — sem estoque
@@ -7771,20 +7786,26 @@ function renderTarefasProntos() {
     return { t: t, idx: idx, estoqueTotal: estoqueTotal, cod: cod };
   }).filter(Boolean);
 
+  var prontos = prontosTodos.filter(function(item) { return ignorados.indexOf(item.cod) === -1; });
+  var prontosIgnorados = prontosTodos.filter(function(item) { return ignorados.indexOf(item.cod) > -1; });
+
   prontos.sort(function(a, b) { return new Date(b.t.confirmadoEm||b.t.criadoEm) - new Date(a.t.confirmadoEm||a.t.criadoEm); });
+  prontosIgnorados.sort(function(a, b) { return new Date(b.t.confirmadoEm||b.t.criadoEm) - new Date(a.t.confirmadoEm||a.t.criadoEm); });
 
-  if (!prontos.length) {
-    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px"><i class="ti ti-tag-off" style="font-size:36px;display:block;margin-bottom:10px;opacity:.4"></i>Nenhum produto pronto para encarte no momento<div style="font-size:11px;margin-top:4px;opacity:.8">Assim que uma tarefa for concluída e o produto ainda tiver estoque, ele aparece aqui</div></div>';
-    return;
-  }
-
-  container.innerHTML = prontos.map(function(item) {
+  var renderProntoRow = function(item, ignorado) {
     var p = products[item.idx];
     var nomeLimpo = cleanNome(p.nome || item.t.produto || '--');
     var thumbCod = (item.cod||'').replace(/[^0-9]/g,'');
     var fotoHtml = thumbCod
       ? '<div class="urg-photobox" style="width:56px;height:56px;flex-shrink:0"><div class="urg-photobox-imgwrap" id="urgPhotobox_pronto_' + item.cod + '"><img src="https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\'' + thumbCod + '\')"></div></div>'
       : '<div class="urg-photobox" style="width:56px;height:56px;flex-shrink:0"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
+
+    var acoes = ignorado
+      ? '<button class="btn btn-sm" style="flex-shrink:0" onclick="restaurarProntoEncarte(\'' + item.cod + '\')"><i class="ti ti-rotate"></i> Restaurar</button>'
+      : '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">'
+        + '<button class="btn btn-green btn-sm" onclick="openEncarteModal(' + item.idx + ')"><i class="ti ti-photo"></i> Encarte</button>'
+        + '<button class="btn btn-sm" style="color:var(--tx2)" onclick="ignorarProntoEncarte(\'' + item.cod + '\')"><i class="ti ti-x"></i> Ignorar</button>'
+      + '</div>';
 
     return '<div class="pronto-row">'
       + fotoHtml
@@ -7796,9 +7817,32 @@ function renderTarefasProntos() {
       +     '<span><i class="ti ti-circle-check" style="font-size:13px;color:var(--green)"></i> Tarefa concluída</span>'
       +   '</div>'
       + '</div>'
-      + '<button class="btn btn-green btn-sm" style="flex-shrink:0" onclick="openEncarteModal(' + item.idx + ')"><i class="ti ti-photo"></i> Encarte</button>'
+      + acoes
       + '</div>';
-  }).join('');
+  };
+
+  if (!prontos.length && !prontosIgnorados.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px"><i class="ti ti-tag-off" style="font-size:36px;display:block;margin-bottom:10px;opacity:.4"></i>Nenhum produto pronto para encarte no momento<div style="font-size:11px;margin-top:4px;opacity:.8">Assim que uma tarefa for concluída e o produto ainda tiver estoque, ele aparece aqui</div></div>';
+    return;
+  }
+
+  var html = prontos.length
+    ? prontos.map(function(item) { return renderProntoRow(item, false); }).join('')
+    : '<div style="text-align:center;padding:24px 20px;color:var(--muted);font-size:12px">Tudo resolvido por aqui ✅</div>';
+
+  if (prontosIgnorados.length) {
+    html += '<div style="margin-top:10px">'
+      +   '<button type="button" onclick="var b=document.getElementById(\'tarefasProntosIgnoradosBox\');var i=document.getElementById(\'tarefasProntosIgnoradosIcon\');var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'grid\';i.style.transform=open?\'rotate(0deg)\':\'rotate(90deg)\';" style="width:100%;text-align:left;background:none;border:1px dashed var(--border);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">'
+      +     '<i id="tarefasProntosIgnoradosIcon" class="ti ti-chevron-right" style="transition:transform .15s"></i> '
+      +     'Ignorados — ' + prontosIgnorados.length + ' <span style="opacity:.7">(clique pra restaurar)</span>'
+      +   '</button>'
+      +   '<div id="tarefasProntosIgnoradosBox" style="display:none;grid-template-columns:1fr;gap:10px;margin-top:10px;opacity:.6">'
+      +     prontosIgnorados.map(function(item) { return renderProntoRow(item, true); }).join('')
+      +   '</div>'
+      + '</div>';
+  }
+
+  container.innerHTML = html;
 }
 
 // ═══ Seleção múltipla de tarefas (delegar/transferir em lote) ═══
