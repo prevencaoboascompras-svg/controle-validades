@@ -60,6 +60,18 @@ html,body{overflow-x:hidden;max-width:100%}
 .alert .alert-left{display:flex;align-items:center;gap:10px;min-width:0}
 .alert .alert-sync{font-size:11px;opacity:.7;white-space:nowrap;flex-shrink:0;margin-left:auto}
 .tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--bd)}
+.tarefas-split{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:start}
+.tarefas-col{padding:0 18px}
+.tarefas-col:first-child{padding-left:0;border-right:1px solid var(--bd)}
+.tarefas-col:last-child{padding-right:0}
+.tarefas-col-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;margin-bottom:12px;color:var(--tx)}
+.tarefa-row{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:12px 14px}
+.pronto-row{display:flex;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:12px 14px}
+@media(max-width:900px){
+  .tarefas-split{grid-template-columns:1fr}
+  .tarefas-col:first-child{border-right:none;border-bottom:1px solid var(--bd);padding-bottom:20px;margin-bottom:20px}
+  .tarefas-col{padding-left:0;padding-right:0}
+}
 .tab{font-size:13px;font-weight:500;padding:10px 18px;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:7px;transition:color .15s}
 .tab.active{color:var(--tx);border-bottom-color:var(--green)}.tab:hover:not(.active){color:var(--tx)}
 /* Relatório redesign */
@@ -2135,25 +2147,35 @@ function toggleTheme() {
       </div>
       <button class="btn btn-green" onclick="openTarefaModal()"><i class="ti ti-plus"></i> Nova tarefa</button>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-      <input type="text" id="tarefasBusca" placeholder="Buscar por produto, código ou colaborador..." oninput="renderTarefas()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:220px">
-      <button type="button" class="btn-scan" onclick="abrirScannerAura('tarefasBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
-      <button class="promo-filter-btn active" id="tf_todas" onclick="filtrarTarefas('todas')">Todas</button>
-      <button class="promo-filter-btn" id="tf_pendentes" onclick="filtrarTarefas('pendentes')">Pendentes</button>
-      <button class="promo-filter-btn" id="tf_concluidas" onclick="filtrarTarefas('concluidas')">Concluídas</button>
-    </div>
-    <div id="tarefasBulkBar" style="display:none;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;flex-wrap:wrap">
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;user-select:none">
-        <input type="checkbox" id="tarefasSelecionarTodasChk" onchange="toggleSelecionarTodasTarefas(this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)">
-        Selecionar todas
-      </label>
-      <span id="tarefasSelecionadasCount" style="font-size:12px;color:var(--tx2)"></span>
-      <div style="margin-left:auto;display:flex;gap:8px">
-        <button class="btn btn-sm" style="color:var(--blue);border-color:var(--blue)" onclick="abrirTransferirModalMultiplo(Array.from(window._tarefasSelecionadas||[]))"><i class="ti ti-arrows-exchange"></i> Transferir selecionadas</button>
-        <button class="btn btn-sm" onclick="limparSelecaoTarefas()">Cancelar seleção</button>
+    <div class="tarefas-split">
+      <div class="tarefas-col">
+        <div class="tarefas-col-title"><i class="ti ti-clipboard-list"></i> Tarefas</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
+          <input type="text" id="tarefasBusca" placeholder="Buscar por produto, código ou colaborador..." oninput="renderTarefas()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:180px">
+          <button type="button" class="btn-scan" onclick="abrirScannerAura('tarefasBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
+          <button class="promo-filter-btn active" id="tf_todas" onclick="filtrarTarefas('todas')">Todas</button>
+          <button class="promo-filter-btn" id="tf_pendentes" onclick="filtrarTarefas('pendentes')">Pendentes</button>
+          <button class="promo-filter-btn" id="tf_concluidas" onclick="filtrarTarefas('concluidas')">Concluídas</button>
+        </div>
+        <div id="tarefasBulkBar" style="display:none;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;flex-wrap:wrap">
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;user-select:none">
+            <input type="checkbox" id="tarefasSelecionarTodasChk" onchange="toggleSelecionarTodasTarefas(this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)">
+            Selecionar todas
+          </label>
+          <span id="tarefasSelecionadasCount" style="font-size:12px;color:var(--tx2)"></span>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn btn-sm" style="color:var(--blue);border-color:var(--blue)" onclick="abrirTransferirModalMultiplo(Array.from(window._tarefasSelecionadas||[]))"><i class="ti ti-arrows-exchange"></i> Transferir selecionadas</button>
+            <button class="btn btn-sm" onclick="limparSelecaoTarefas()">Cancelar seleção</button>
+          </div>
+        </div>
+        <div id="tarefasGrid" style="display:grid;grid-template-columns:1fr;gap:10px"></div>
+      </div>
+      <div class="tarefas-col">
+        <div class="tarefas-col-title"><i class="ti ti-tag" style="color:var(--green)"></i> Prontos para encarte</div>
+        <p style="font-size:12px;color:var(--tx2);margin-bottom:14px">Produtos com tarefa <b>concluída</b> que ainda têm estoque — falta só criar a oferta.</p>
+        <div id="tarefasProntosGrid" style="display:grid;grid-template-columns:1fr;gap:10px"></div>
       </div>
     </div>
-    <div id="tarefasGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
   </div>
   <div id="sec-ajuda" class="sec">
     <div class="help-box">
@@ -7639,6 +7661,11 @@ function renderTarefas() {
     var statusColor = isPend ? 'var(--amber)' : 'var(--green)';
     var statusIcon = isPend ? 'ti-clock' : 'ti-circle-check';
     var statusText = isPend ? 'Pendente' : 'Concluída';
+
+    var thumbCod = (t.cod||'').replace(/[^0-9]/g,'');
+    var fotoHtml = thumbCod
+      ? '<div class="urg-photobox" style="width:56px;height:56px;flex-shrink:0"><div class="urg-photobox-imgwrap" id="urgPhotobox_tarefa_' + t.id + '"><img src="https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\'' + thumbCod + '\')"></div></div>'
+      : '<div class="urg-photobox" style="width:56px;height:56px;flex-shrink:0"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
     
     var qtdeInfo = '';
     if (t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
@@ -7657,14 +7684,16 @@ function renderTarefas() {
       validadeInfo = '<div class="tarefa-validade-info" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,.1);color:' + corVal + ';margin-bottom:6px"><i class="ti ti-calendar-exclamation"></i> Validade: ' + fmtDataExtenso(t.validade) + '</div>';
     }
     
-    return '<div class="tarefa-card" style="position:relative;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;transition:border-color .15s">'
+    return '<div class="tarefa-row" style="position:relative">'
       + qtdeBadge
-      + '<div class="tarefa-card-top" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      + fotoHtml
+      + '<div style="flex:1;min-width:0">'
+      + '<div class="tarefa-card-top" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px">'
       +   '<div style="display:flex;align-items:center;gap:8px">'
       +     (isPend ? '<input type="checkbox" class="tarefaChk" data-id="' + t.id + '" ' + (selecionadas.has(t.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + t.id + '\',this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)" title="Selecionar tarefa">' : '')
       +     '<span class="tarefa-status-badge" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + (isPend ? 'rgba(245,158,11,.15)' : 'rgba(16,185,129,.15)') + ';color:' + statusColor + '"><i class="ti ' + statusIcon + '"></i> ' + statusText + '</span>'
       +   '</div>'
-      +   (isPend ? '<div class="tarefa-card-actions" style="display:flex;gap:6px">'
+      +   (isPend ? '<div class="tarefa-card-actions" style="display:flex;gap:6px;flex-shrink:0">'
       +     '<button class="btn btn-sm" style="color:var(--blue);border-color:var(--blue);font-size:11px;padding:3px 8px" onclick="abrirTransferirModal(\'' + t.id + '\')" title="Transferir para outro colaborador"><i class="ti ti-arrows-exchange"></i> Transferir</button>'
       +     '<button class="btn btn-sm" style="color:var(--red);border-color:var(--red);font-size:11px;padding:3px 8px" onclick="cancelarTarefa(\'' + t.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button>'
       +   '</div>' : '')
@@ -7682,6 +7711,7 @@ function renderTarefas() {
       +   '<span>Enviado em: ' + dataFmt + '</span>'
       +   (t.confirmadoEm ? '<span>Concluído em: ' + new Date(t.confirmadoEm).toLocaleString('pt-BR') + '</span>' : '')
       + '</div>'
+      + '</div>'
       + '</div>';
   };
 
@@ -7694,7 +7724,7 @@ function renderTarefas() {
       +     '<i id="tarefasZeradasIcon" class="ti ti-chevron-right" style="transition:transform .15s"></i> '
       +     'Confirmadas sem quantidade (0 un.) — ' + zeradas.length + ' <span style="opacity:.7">(nada a fazer aqui)</span>'
       +   '</button>'
-      +   '<div id="tarefasZeradasBox" style="display:none;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:10px;opacity:.55">'
+      +   '<div id="tarefasZeradasBox" style="display:none;grid-template-columns:1fr;gap:10px;margin-top:10px;opacity:.55">'
       +     zeroCardsHtml
       +   '</div>'
       + '</div>';
@@ -7710,6 +7740,65 @@ function renderTarefas() {
     badge.textContent = pendCount;
     badge.style.display = pendCount > 0 ? 'inline-flex' : 'none';
   }
+
+  renderTarefasProntos();
+}
+
+// ═══ Coluna direita da aba Tarefas: produtos com tarefa concluída que ainda têm estoque ═══
+function renderTarefasProntos() {
+  var container = document.getElementById('tarefasProntosGrid');
+  if (!container) return;
+
+  var tarefas = getTarefas();
+  var concluidas = tarefas.filter(function(t) { return t.status === 'concluida' && t.cod; });
+
+  // Um card por produto (código de barras) — pega a tarefa concluída mais recente de cada um.
+  var porCod = {};
+  concluidas.forEach(function(t) {
+    var atual = porCod[t.cod];
+    if (!atual || new Date(t.confirmadoEm||t.criadoEm) > new Date(atual.confirmadoEm||atual.criadoEm)) {
+      porCod[t.cod] = t;
+    }
+  });
+
+  var prontos = Object.keys(porCod).map(function(cod) {
+    var t = porCod[cod];
+    var idx = products.findIndex(function(p) { return (p.cod||'').trim() === cod; });
+    if (idx === -1) return null; // produto não existe mais na base — sem estoque
+    var estoqueTotal = products.filter(function(p) { return (p.cod||'').trim() === cod; })
+      .reduce(function(s, p) { return s + (parseInt(p.qtde) || 1); }, 0);
+    if (estoqueTotal <= 0) return null;
+    return { t: t, idx: idx, estoqueTotal: estoqueTotal, cod: cod };
+  }).filter(Boolean);
+
+  prontos.sort(function(a, b) { return new Date(b.t.confirmadoEm||b.t.criadoEm) - new Date(a.t.confirmadoEm||a.t.criadoEm); });
+
+  if (!prontos.length) {
+    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:13px"><i class="ti ti-tag-off" style="font-size:36px;display:block;margin-bottom:10px;opacity:.4"></i>Nenhum produto pronto para encarte no momento<div style="font-size:11px;margin-top:4px;opacity:.8">Assim que uma tarefa for concluída e o produto ainda tiver estoque, ele aparece aqui</div></div>';
+    return;
+  }
+
+  container.innerHTML = prontos.map(function(item) {
+    var p = products[item.idx];
+    var nomeLimpo = cleanNome(p.nome || item.t.produto || '--');
+    var thumbCod = (item.cod||'').replace(/[^0-9]/g,'');
+    var fotoHtml = thumbCod
+      ? '<div class="urg-photobox" style="width:56px;height:56px;flex-shrink:0"><div class="urg-photobox-imgwrap" id="urgPhotobox_pronto_' + item.cod + '"><img src="https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\'' + thumbCod + '\')"></div></div>'
+      : '<div class="urg-photobox" style="width:56px;height:56px;flex-shrink:0"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
+
+    return '<div class="pronto-row">'
+      + fotoHtml
+      + '<div style="flex:1;min-width:0">'
+      +   '<div style="font-size:14px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(nomeLimpo) + '</div>'
+      +   (item.cod ? '<div style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:4px">' + item.cod + '</div>' : '')
+      +   '<div style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--tx2)">'
+      +     '<span><i class="ti ti-package" style="font-size:13px"></i> ' + item.estoqueTotal + ' em estoque</span>'
+      +     '<span><i class="ti ti-circle-check" style="font-size:13px;color:var(--green)"></i> Tarefa concluída</span>'
+      +   '</div>'
+      + '</div>'
+      + '<button class="btn btn-green btn-sm" style="flex-shrink:0" onclick="openEncarteModal(' + item.idx + ')"><i class="ti ti-photo"></i> Encarte</button>'
+      + '</div>';
+  }).join('');
 }
 
 // ═══ Seleção múltipla de tarefas (delegar/transferir em lote) ═══
