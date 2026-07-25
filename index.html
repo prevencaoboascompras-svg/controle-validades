@@ -7670,6 +7670,15 @@ function renderTarefas() {
     });
   }
 
+  // Lote já vencido: não representa mais uma ação possível (não dá mais tempo de
+  // agir), então some da lista — só ficam visíveis os lotes de hoje pra frente.
+  var ehVencida = function(t) {
+    if (!t.validade) return false;
+    var d = daysDiff(t.validade);
+    return d !== null && d < 0;
+  };
+  filtered = filtered.filter(function(t) { return !ehVencida(t); });
+
   // Tarefas concluídas confirmadas com 0 unidades: não representam mais um risco de
   // perda, então saem da visão principal e vão para um bloco recolhido no final.
   var ehZero = function(t) { return t.status === 'concluida' && Number(t.quantidadeConfirmada) === 0; };
@@ -7793,6 +7802,15 @@ function renderTarefasProntos() {
   var tarefas = getTarefas();
   var concluidas = tarefas.filter(function(t) { return t.status === 'concluida' && t.cod; });
 
+  // Lote já vencido: não faz mais sentido oferecer encarte pra ele (não dá mais
+  // tempo de agir) — considera só tarefas de lotes de hoje pra frente.
+  var ehVencidaTask = function(t) {
+    if (!t.validade) return false;
+    var d = daysDiff(t.validade);
+    return d !== null && d < 0;
+  };
+  concluidas = concluidas.filter(function(t) { return !ehVencidaTask(t); });
+
   // Um card por produto (código de barras) — pega a tarefa concluída mais recente de cada um.
   var porCod = {};
   concluidas.forEach(function(t) {
@@ -7820,10 +7838,16 @@ function renderTarefasProntos() {
 
   var prontosTodos = Object.keys(porCod).map(function(cod) {
     var t = porCod[cod];
-    var idx = products.findIndex(function(p) { return (p.cod||'').trim() === cod; });
-    if (idx === -1) return null; // produto não existe mais na base — sem estoque
-    var estoqueTotal = products.filter(function(p) { return (p.cod||'').trim() === cod; })
-      .reduce(function(s, p) { return s + (parseInt(p.qtde) || 1); }, 0);
+    // Considera só os lotes desse produto que ainda não venceram (hoje pra frente)
+    // pra somar estoque e escolher qual lote referenciar no encarte.
+    var lotesValidos = products.filter(function(p) {
+      if ((p.cod||'').trim() !== cod) return false;
+      var d = daysDiff(p.validade);
+      return d === null || d >= 0;
+    });
+    if (!lotesValidos.length) return null; // só sobrou lote vencido — sem estoque válido
+    var idx = products.indexOf(lotesValidos[0]);
+    var estoqueTotal = lotesValidos.reduce(function(s, p) { return s + (parseInt(p.qtde) || 1); }, 0);
     if (estoqueTotal <= 0) return null;
     return { t: t, idx: idx, estoqueTotal: estoqueTotal, cod: cod };
   }).filter(Boolean);
