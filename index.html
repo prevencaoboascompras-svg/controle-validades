@@ -7285,16 +7285,22 @@ function sincronizarTarefasCompleto(){
 // ═══ Baixa automática de estoque quando tarefa é confirmada com 0 unidades ═══
 var TAREFAS_ZERO_KEY='boascompras_tarefas_zero_processadas';
 var TAREFAS_PRONTOS_IGNORADOS_KEY='boascompras_tarefas_prontos_ignorados';
-function getProntosIgnorados(){try{return JSON.parse(localStorage.getItem(TAREFAS_PRONTOS_IGNORADOS_KEY)||'[]');}catch(e){return[];}}
+function getProntosIgnorados(){
+  try{
+    var arr=JSON.parse(localStorage.getItem(TAREFAS_PRONTOS_IGNORADOS_KEY)||'[]');
+    // Compatibilidade: versões antigas guardavam só o código (string)
+    return arr.map(function(it){return typeof it==='string'?{cod:it,motivo:'ignorado'}:it;});
+  }catch(e){return[];}
+}
 function saveProntosIgnorados(arr){localStorage.setItem(TAREFAS_PRONTOS_IGNORADOS_KEY,JSON.stringify(arr));}
-function ignorarProntoEncarte(cod){
-  var arr=getProntosIgnorados();
-  if(arr.indexOf(cod)===-1)arr.push(cod);
+function ignorarProntoEncarte(cod,motivo){
+  var arr=getProntosIgnorados().filter(function(it){return it.cod!==cod;});
+  arr.push({cod:cod,motivo:motivo||'ignorado',data:new Date().toISOString()});
   saveProntosIgnorados(arr);
   renderTarefasProntos();
 }
 function restaurarProntoEncarte(cod){
-  var arr=getProntosIgnorados().filter(function(c){return c!==cod;});
+  var arr=getProntosIgnorados().filter(function(it){return it.cod!==cod;});
   saveProntosIgnorados(arr);
   renderTarefasProntos();
 }
@@ -7695,8 +7701,9 @@ function renderTarefas() {
     var statusText = isPend ? 'Pendente' : 'Concluída';
 
     var thumbCod = (t.cod||'').replace(/[^0-9]/g,'');
+    var tarefaFotoId = 'tarefaFoto_' + t.id.replace(/[^a-zA-Z0-9]/g,'_');
     var fotoHtml = thumbCod
-      ? '<div class="urg-photobox" onclick="abrirFotoGrande(\'https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '\')"><div class="urg-photobox-imgwrap" id="urgPhotobox_tarefa_' + t.id + '"><img src="https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\'' + thumbCod + '\')"></div></div>'
+      ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + tarefaFotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + tarefaFotoId + '" data-cod="' + thumbCod + '" src="" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
     
     var qtdeInfo = '';
@@ -7763,6 +7770,7 @@ function renderTarefas() {
   }
 
   container.innerHTML = html;
+  resolverFotosTarefasArea(container);
 
   atualizarTarefasBulkBar();
   
@@ -7794,6 +7802,9 @@ function renderTarefasProntos() {
   });
 
   var ignorados = getProntosIgnorados();
+  var ignoradosMap = {};
+  ignorados.forEach(function(it){ ignoradosMap[it.cod] = it.motivo; });
+
   var prontosTodos = Object.keys(porCod).map(function(cod) {
     var t = porCod[cod];
     var idx = products.findIndex(function(p) { return (p.cod||'').trim() === cod; });
@@ -7804,8 +7815,8 @@ function renderTarefasProntos() {
     return { t: t, idx: idx, estoqueTotal: estoqueTotal, cod: cod };
   }).filter(Boolean);
 
-  var prontos = prontosTodos.filter(function(item) { return ignorados.indexOf(item.cod) === -1; });
-  var prontosIgnorados = prontosTodos.filter(function(item) { return ignorados.indexOf(item.cod) > -1; });
+  var prontos = prontosTodos.filter(function(item) { return !ignoradosMap[item.cod]; });
+  var prontosIgnorados = prontosTodos.filter(function(item) { return !!ignoradosMap[item.cod]; });
 
   prontos.sort(function(a, b) { return new Date(b.t.confirmadoEm||b.t.criadoEm) - new Date(a.t.confirmadoEm||a.t.criadoEm); });
   prontosIgnorados.sort(function(a, b) { return new Date(b.t.confirmadoEm||b.t.criadoEm) - new Date(a.t.confirmadoEm||a.t.criadoEm); });
@@ -7814,15 +7825,22 @@ function renderTarefasProntos() {
     var p = products[item.idx];
     var nomeLimpo = cleanNome(p.nome || item.t.produto || '--');
     var thumbCod = (item.cod||'').replace(/[^0-9]/g,'');
+    var fotoId = 'prontoFoto_' + item.cod.replace(/[^a-zA-Z0-9]/g,'_');
     var fotoHtml = thumbCod
-      ? '<div class="urg-photobox" onclick="abrirFotoGrande(\'https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '\')"><div class="urg-photobox-imgwrap" id="urgPhotobox_pronto_' + item.cod + '"><img src="https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\'' + thumbCod + '\')"></div></div>'
+      ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + fotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + fotoId + '" data-cod="' + thumbCod + '" src="" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
+
+    var motivo = ignoradosMap[item.cod];
+    var motivoTag = motivo === 'manual'
+      ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--amber)"><i class="ti ti-tag" style="font-size:13px"></i> Etiqueta manual aplicada</span>'
+      : '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2)"><i class="ti ti-eye-off" style="font-size:13px"></i> Ignorado</span>';
 
     var acoes = ignorado
       ? '<button class="btn btn-sm" style="flex-shrink:0" onclick="restaurarProntoEncarte(\'' + item.cod + '\')"><i class="ti ti-rotate"></i> Restaurar</button>'
       : '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">'
         + '<button class="btn btn-green btn-sm" onclick="openEncarteModal(' + item.idx + ')"><i class="ti ti-photo"></i> Encarte</button>'
-        + '<button class="btn btn-sm" style="color:var(--tx2)" onclick="ignorarProntoEncarte(\'' + item.cod + '\')"><i class="ti ti-x"></i> Ignorar</button>'
+        + '<button class="btn btn-sm" style="color:var(--amber);border-color:var(--amber)" onclick="ignorarProntoEncarte(\'' + item.cod + '\',\'manual\')" title="Já apliquei desconto com etiqueta manual, sem mexer no preço do sistema"><i class="ti ti-basket"></i> Carrinho</button>'
+        + '<button class="btn btn-sm" style="color:var(--tx2)" onclick="ignorarProntoEncarte(\'' + item.cod + '\',\'ignorado\')"><i class="ti ti-x"></i> Ignorar</button>'
       + '</div>';
 
     return '<div class="pronto-row">'
@@ -7830,9 +7848,9 @@ function renderTarefasProntos() {
       + '<div style="flex:1;min-width:0">'
       +   '<div style="font-size:14px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(nomeLimpo) + '</div>'
       +   (item.cod ? '<div style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:4px">' + item.cod + '</div>' : '')
-      +   '<div style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--tx2)">'
+      +   '<div style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--tx2);flex-wrap:wrap">'
       +     '<span><i class="ti ti-package" style="font-size:13px"></i> ' + item.estoqueTotal + ' em estoque</span>'
-      +     '<span><i class="ti ti-circle-check" style="font-size:13px;color:var(--green)"></i> Tarefa concluída</span>'
+      +     (ignorado ? motivoTag : '<span><i class="ti ti-circle-check" style="font-size:13px;color:var(--green)"></i> Tarefa concluída</span>')
       +   '</div>'
       + '</div>'
       + acoes
@@ -7861,6 +7879,7 @@ function renderTarefasProntos() {
   }
 
   container.innerHTML = html;
+  resolverFotosTarefasArea(container);
 }
 
 // ═══ Seleção múltipla de tarefas (delegar/transferir em lote) ═══
@@ -8040,12 +8059,70 @@ function sincronizarTarefas(){sincronizarTarefasCompleto();}
 // fonte usada no Encarte). Se nada for encontrado, mostra um ícone vazio.
 var _auraEstoqueThumbCache = {};
 function abrirFotoGrande(url) {
+  if (!url) return;
   document.getElementById('fotoLightboxImg').src = url;
   document.getElementById('fotoLightbox').classList.add('open');
 }
 function fecharFotoGrande() {
   document.getElementById('fotoLightbox').classList.remove('open');
   document.getElementById('fotoLightboxImg').src = '';
+}
+
+// ═══ Foto do produto na área de Tarefas: Drive > Cosmos > Open Food Facts ═══
+var _fotoTarefaChainCache = {};
+function _resolverFotoTarefaChain(cod) {
+  if (!cod) return Promise.resolve(null);
+  if (_fotoTarefaChainCache[cod]) return _fotoTarefaChainCache[cod];
+  _fotoTarefaChainCache[cod] = (async function() {
+    try {
+      var dr = await _gasGet('buscarImagemProduto', '&codigoBarras=' + encodeURIComponent(cod) + '&tipo=produto');
+      if (dr && dr.ok && dr.encontrado && dr.base64) {
+        return 'data:' + (dr.mimeType || 'image/jpeg') + ';base64,' + dr.base64;
+      }
+    } catch (e) {}
+    var cosmosUrl = 'https://cdn-cosmos.bluesoft.com.br/products/' + cod;
+    var okCosmos = await new Promise(function(res) {
+      var im = new Image();
+      im.onload = function() { res(cosmosUrl); };
+      im.onerror = function() { res(null); };
+      im.src = cosmosUrl;
+    });
+    if (okCosmos) return okCosmos;
+    try {
+      var r = await fetch('https://world.openfoodfacts.org/api/v2/product/' + cod + '.json?fields=image_url,image_front_url');
+      var j = await r.json();
+      if (j && j.status === 1 && j.product) {
+        var imgUrl = j.product.image_front_url || j.product.image_url;
+        if (imgUrl) {
+          var okOff = await new Promise(function(res) {
+            var im2 = new Image();
+            im2.onload = function() { res(imgUrl); };
+            im2.onerror = function() { res(null); };
+            im2.src = imgUrl;
+          });
+          if (okOff) return okOff;
+        }
+      }
+    } catch (e) {}
+    return null;
+  })();
+  return _fotoTarefaChainCache[cod];
+}
+function resolverFotosTarefasArea(root) {
+  if (!root) return;
+  var imgs = root.querySelectorAll('img[data-cod]:not([data-resolvido])');
+  imgs.forEach(function(img) {
+    img.setAttribute('data-resolvido', '1');
+    var cod = img.getAttribute('data-cod');
+    _resolverFotoTarefaChain(cod).then(function(url) {
+      if (url) {
+        img.src = url;
+      } else {
+        var wrap = img.closest('.urg-photobox-imgwrap');
+        if (wrap) wrap.outerHTML = '<div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div>';
+      }
+    });
+  });
 }
 async function _auraEstoqueThumbFallback(imgEl, cod) {
   imgEl.onerror = null;
