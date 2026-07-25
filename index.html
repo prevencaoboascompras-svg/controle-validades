@@ -7831,8 +7831,18 @@ function renderTarefasProntos() {
   var prontos = prontosTodos.filter(function(item) { return !ignoradosMap[item.cod]; });
   var prontosIgnorados = prontosTodos.filter(function(item) { return !!ignoradosMap[item.cod]; });
 
-  prontos.sort(function(a, b) { return new Date(b.t.confirmadoEm||b.t.criadoEm) - new Date(a.t.confirmadoEm||a.t.criadoEm); });
-  prontosIgnorados.sort(function(a, b) { return new Date(b.t.confirmadoEm||b.t.criadoEm) - new Date(a.t.confirmadoEm||a.t.criadoEm); });
+  // Ordena sempre por proximidade de vencimento — mesmo critério da coluna de Tarefas
+  // (mais urgente primeiro; sem validade cadastrada vai pro final).
+  var ordenarPorValidadeProntos = function(a, b) {
+    var da = a.t.validade ? new Date(a.t.validade + 'T00:00:00') : null;
+    var db = b.t.validade ? new Date(b.t.validade + 'T00:00:00') : null;
+    if (!da && !db) return new Date(b.t.confirmadoEm||b.t.criadoEm) - new Date(a.t.confirmadoEm||a.t.criadoEm);
+    if (!da) return 1;
+    if (!db) return -1;
+    return da - db;
+  };
+  prontos.sort(ordenarPorValidadeProntos);
+  prontosIgnorados.sort(ordenarPorValidadeProntos);
 
   var renderProntoRow = function(item, ignorado) {
     var p = products[item.idx];
@@ -7842,6 +7852,13 @@ function renderTarefasProntos() {
     var fotoHtml = thumbCod
       ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + fotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + fotoId + '" data-cod="' + thumbCod + '" src="" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
+
+    var validadeInfo = '';
+    if (item.t.validade) {
+      var dv = daysDiff(item.t.validade);
+      var corVal = (dv !== null && dv <= 3) ? 'var(--red)' : (dv !== null && dv <= 7 ? 'var(--amber)' : 'var(--tx2)');
+      validadeInfo = '<div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,.1);color:' + corVal + ';margin-bottom:6px"><i class="ti ti-calendar-exclamation"></i> Validade: ' + fmtDataExtenso(item.t.validade) + '</div>';
+    }
 
     var motivo = ignoradosMap[item.cod];
     var motivoTag = motivo === 'manual'
@@ -7861,6 +7878,7 @@ function renderTarefasProntos() {
       + '<div style="flex:1;min-width:0">'
       +   '<div style="font-size:14px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(nomeLimpo) + '</div>'
       +   (item.cod ? '<div style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:4px">' + item.cod + '</div>' : '')
+      +   validadeInfo
       +   '<div style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--tx2);flex-wrap:wrap">'
       +     '<span><i class="ti ti-package" style="font-size:13px"></i> ' + item.estoqueTotal + ' em estoque</span>'
       +     (ignorado ? motivoTag : (item.t.carrinhoStatus === 'nao'
