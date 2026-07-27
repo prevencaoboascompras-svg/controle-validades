@@ -2161,8 +2161,12 @@ function toggleTheme() {
       </div>
       <button class="btn btn-green" onclick="openTarefaModal()"><i class="ti ti-plus"></i> Nova tarefa</button>
     </div>
+    <div class="tarefas-mobile-toggle" id="tarefasMobileToggle">
+      <button type="button" class="active" id="tmt_tarefas" onclick="trocarColunaTarefasMobile('tarefas')"><i class="ti ti-clipboard-list"></i> Tarefas</button>
+      <button type="button" id="tmt_prontos" onclick="trocarColunaTarefasMobile('prontos')"><i class="ti ti-tag"></i> Prontos p/ encarte</button>
+    </div>
     <div class="tarefas-split">
-      <div class="tarefas-col">
+      <div class="tarefas-col" id="tarefasColTarefas">
         <div class="tarefas-col-title"><i class="ti ti-clipboard-list"></i> Tarefas</div>
         <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
           <input type="text" id="tarefasBusca" placeholder="Buscar por produto, código ou colaborador..." oninput="renderTarefas()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:180px">
@@ -2184,7 +2188,7 @@ function toggleTheme() {
         </div>
         <div id="tarefasGrid" style="display:grid;grid-template-columns:1fr;gap:10px"></div>
       </div>
-      <div class="tarefas-col">
+      <div class="tarefas-col" id="tarefasColProntos">
         <div class="tarefas-col-title"><i class="ti ti-tag" style="color:var(--green)"></i> Prontos para encarte</div>
         <p style="font-size:12px;color:var(--tx2);margin-bottom:14px">Produtos com tarefa <b>concluída</b> que ainda têm estoque — falta só criar a oferta.</p>
         <div id="tarefasProntosGrid" style="display:grid;grid-template-columns:1fr;gap:10px"></div>
