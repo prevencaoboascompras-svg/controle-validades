@@ -3042,8 +3042,12 @@ async function syncAll(){
   btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Sincronizando...';
   setDot('loading','Sincronizando...');
   try{
-    await loadBanco(cfg);
-    var table=await fetchSheet(cfg.id,cfg.aba);
+    // v6.18: loadBanco (aba BANCO DE DADOS) e fetchSheet (aba do ano)
+    // são leituras independentes — antes rodavam em série (await ... await
+    // ...), pagando a soma dos dois tempos. Em paralelo, o tempo total
+    // passa a ser o da mais lenta das duas.
+    var _syncResultados=await Promise.all([loadBanco(cfg),fetchSheet(cfg.id,cfg.aba)]);
+    var table=_syncResultados[1];
     var rows=rawRows(table);
     if(!rows.length)throw new Error('Nenhuma linha');
     var HKW=['PRODUTO','SETOR','VALIDADE','STATUS','VENDA','DESCONTO','CUSTO'];
@@ -6417,29 +6421,55 @@ function _gasGet(action,extra){
   return fetch(url).then(function(r){return r.json();}).catch(function(){return{ok:false};});
 }
 
-function cloudLoad(){
-  var acoes=[
-    {a:'buscarEncartes',   fn:function(d){_encartesAtivos=d;localStorage.setItem(ENC_KEY,JSON.stringify(d));atualizarBadge();renderEncartesAtivos&&renderEncartesAtivos();}},
-    {a:'buscarNegociacoes',fn:function(d){_negociacoes=d;localStorage.setItem(NEG_KEY,JSON.stringify(d));atualizarNegBadge&&atualizarNegBadge();typeof renderNegociacoes==='function'&&renderNegociacoes();}},
-    {a:'buscarResolvidos', fn:function(d){_resolvidos=d;localStorage.setItem(RESOLVIDOS_KEY,JSON.stringify(d));}},
-    {a:'buscarEncerradas', fn:function(d){_encerradas=d;localStorage.setItem(PROMO_ENC_KEY,JSON.stringify(d));renderPromos&&renderPromos();}},
-    {a:'buscarBiblioteca', fn:function(d){_biblioteca=d;localStorage.setItem(BIB_KEY,JSON.stringify(d));atualizarBibBadge&&atualizarBibBadge();}},
-    {a:'buscarModalidades',fn:function(d){if(d&&d.length){_modalidades=d;localStorage.setItem(MODALIDADES_KEY,JSON.stringify(d));renderModalidades&&renderModalidades();}}},
-    {a:'buscarPromoAtivas',fn:function(d){_promoAtivas=d;localStorage.setItem('boascompras_promo_ativas',JSON.stringify(d));}},
-    {a:'buscarSetorCorrigido',fn:function(d){
-      _setorCorrigido={};
-      (d||[]).forEach(function(item){if(item&&item.cod)_setorCorrigido[item.cod]=item;});
-      localStorage.setItem(SETOR_CORRIGIDO_KEY,JSON.stringify(_setorCorrigido));
-      aplicarSetorCorrigido();
-      saveProd();
-      refresh();
-    }}
-  ];
-  acoes.forEach(function(item){
-    _gasGet(item.a).then(function(res){
-      if(res&&res.ok&&res.dados)item.fn(res.dados);
+// Handlers compartilhados entre o caminho novo (buscarTudo, 1 request)
+// e o caminho antigo de fallback (8 requests separados), pra não duplicar
+// a lógica de aplicar cada conjunto de dados.
+var _cloudLoadHandlers={
+  encartes:function(d){_encartesAtivos=d;localStorage.setItem(ENC_KEY,JSON.stringify(d));atualizarBadge();renderEncartesAtivos&&renderEncartesAtivos();},
+  negociacoes:function(d){_negociacoes=d;localStorage.setItem(NEG_KEY,JSON.stringify(d));atualizarNegBadge&&atualizarNegBadge();typeof renderNegociacoes==='function'&&renderNegociacoes();},
+  resolvidos:function(d){_resolvidos=d;localStorage.setItem(RESOLVIDOS_KEY,JSON.stringify(d));},
+  encerradas:function(d){_encerradas=d;localStorage.setItem(PROMO_ENC_KEY,JSON.stringify(d));renderPromos&&renderPromos();},
+  biblioteca:function(d){_biblioteca=d;localStorage.setItem(BIB_KEY,JSON.stringify(d));atualizarBibBadge&&atualizarBibBadge();},
+  modalidades:function(d){if(d&&d.length){_modalidades=d;localStorage.setItem(MODALIDADES_KEY,JSON.stringify(d));renderModalidades&&renderModalidades();}},
+  promoAtivas:function(d){_promoAtivas=d;localStorage.setItem('boascompras_promo_ativas',JSON.stringify(d));},
+  setorCorrigido:function(d){
+    _setorCorrigido={};
+    (d||[]).forEach(function(item){if(item&&item.cod)_setorCorrigido[item.cod]=item;});
+    localStorage.setItem(SETOR_CORRIGIDO_KEY,JSON.stringify(_setorCorrigido));
+    aplicarSetorCorrigido();
+    saveProd();
+    refresh();
+  }
+};
+
+// Caminho antigo: 8 requisições HTTP separadas (uma por action). Mantido
+// como fallback automático caso o backend ainda não tenha a action
+// 'buscarTudo' (ex: Code.gs desatualizado numa implantação antiga).
+function _cloudLoadLegacy(){
+  var mapaActions={
+    buscarEncartes:'encartes', buscarNegociacoes:'negociacoes', buscarResolvidos:'resolvidos',
+    buscarEncerradas:'encerradas', buscarBiblioteca:'biblioteca', buscarModalidades:'modalidades',
+    buscarPromoAtivas:'promoAtivas', buscarSetorCorrigido:'setorCorrigido'
+  };
+  Object.keys(mapaActions).forEach(function(action){
+    _gasGet(action).then(function(res){
+      if(res&&res.ok&&res.dados)_cloudLoadHandlers[mapaActions[action]](res.dados);
     });
   });
+}
+
+// v6.18: caminho novo — 1 única requisição (action 'buscarTudo') que já
+// devolve todos os 8 conjuntos de dados de uma vez, no lugar das 8
+// requisições HTTP paralelas de antes. Se o backend ainda não tiver essa
+// action (ok:false ou erro de rede), cai automaticamente no caminho
+// antigo, então nunca quebra por causa de uma implantação desatualizada.
+function cloudLoad(){
+  _gasGet('buscarTudo').then(function(res){
+    if(!res||!res.ok){ _cloudLoadLegacy(); return; }
+    Object.keys(_cloudLoadHandlers).forEach(function(chave){
+      if(res[chave]!==undefined) _cloudLoadHandlers[chave](res[chave]);
+    });
+  }).catch(function(){ _cloudLoadLegacy(); });
 }
 
 // Migração única: sobe dados locais que ainda não estão na nuvem
