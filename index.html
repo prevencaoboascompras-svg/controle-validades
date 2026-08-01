@@ -3723,6 +3723,26 @@ function renderDashboard(){
 //  Cruza EAN com banco{} para obter nome do produto
 // ═══════════════════════════════════════════════════════════════
 var _ucDados = [];   // cache das coletas brutas
+// v6.20: índice EAN -> lista de coletas (já ordenada, mais recente primeiro).
+// buscarBipagem() era chamada 1x por card renderizado em Validades/Estoque e
+// fazia um .filter() na coleção INTEIRA de coletas históricas a cada
+// chamada — com centenas de cards e milhares de coletas acumuladas desde
+// sempre, isso tornava a troca pra essas abas visivelmente lenta. Com o
+// índice, o custo de filtrar vira O(1) por card (é só um lookup no mapa),
+// e a ordenação por data é feita uma única vez por grupo, não a cada card.
+var _ucIndex = null;
+function _construirUcIndex() {
+  var idx = {};
+  for (var i = 0; i < _ucDados.length; i++) {
+    var d = _ucDados[i];
+    if (!idx[d.ean]) idx[d.ean] = [];
+    idx[d.ean].push(d);
+  }
+  Object.keys(idx).forEach(function(k) {
+    idx[k].sort(function(a, b) { return (b.ts ? b.ts.getTime() : 0) - (a.ts ? a.ts.getTime() : 0); });
+  });
+  _ucIndex = idx;
+}
 var _ucFiltrados = []; // após filtros
 
 // ── Dicionário de usuários (e-mail → nome) ──────────────────────
@@ -3792,15 +3812,15 @@ function _ucAbrirCadastroUser(email){
 // com aquela validade exata, cai para a coleta mais recente daquele código.
 function buscarBipagem(cod, validade) {
   if (!cod || !_ucDados.length) return null;
+  if (!_ucIndex) _construirUcIndex();
   var codN = (cod || '').replace(/[^0-9]/g, '');
-  var candidatos = _ucDados.filter(function(d) { return d.ean === codN; });
-  if (!candidatos.length) return null;
+  var candidatos = _ucIndex[codN];
+  if (!candidatos || !candidatos.length) return null;
   if (validade) {
     var comValidade = candidatos.filter(function(d) { return d.valStr === validade; });
-    if (comValidade.length) candidatos = comValidade;
+    if (comValidade.length) return comValidade[0]; // já ordenado — o primeiro já é o mais recente
   }
-  candidatos = candidatos.slice().sort(function(a, b) { return (b.ts ? b.ts.getTime() : 0) - (a.ts ? a.ts.getTime() : 0); });
-  return candidatos[0] || null;
+  return candidatos[0]; // já ordenado — o primeiro já é o mais recente
 }
 // Monta o HTML da linha "Bipado por Fulano · 23/07 14:32" exibida nos cards
 // de Estoque e Validade. Retorna string vazia se não há coleta encontrada.
@@ -3843,6 +3863,7 @@ async function renderUltimasColetas(forceRefresh) {
       var table = await fetchSheet(cfg.id, abaResp);
       var rows = rawRows(table);
       _ucDados = [];
+      _ucIndex = null; // força reconstrução do índice na próxima buscarBipagem()
 
       // Detectar colunas pelo cabeçalho (linha 0 ou table.cols)
       var ciTs=-1, ciSetor=-1, ciEan=-1, ciVal=-1, ciQtde=-1, ciEmail=-1;
