@@ -8149,6 +8149,58 @@ function sincronizarTarefas(){sincronizarTarefasCompleto();}
 // barras, tenta o banco de imagens salvo no próprio sistema (Drive, mesma
 // fonte usada no Encarte). Se nada for encontrado, mostra um ícone vazio.
 var _auraEstoqueThumbCache = {};
+
+// ═══ Cache persistente de thumbnails (v6.19) ═══
+// Antes, toda vez que a aba Estoque (ou Tarefas) era aberta, cada produto
+// sem foto no Cosmos disparava de novo uma chamada ao GAS Web App
+// (buscarImagemProduto) — dezenas delas em paralelo, competindo por rede
+// e execução no Apps Script, o que travava a troca de aba. Agora o
+// resultado (achou uma foto, ou sabidamente não tem foto em lugar nenhum)
+// fica salvo em localStorage por até 24h, então reabrir a aba não repete
+// esse trabalho todo de novo.
+var THUMB_CACHE_KEY = 'boascompras_thumb_cache_v1';
+var THUMB_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+function _thumbCacheGet() {
+  try { return JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || '{}'); } catch (e) { return {}; }
+}
+function _thumbCacheSet(cod, url) {
+  try {
+    var c = _thumbCacheGet();
+    c[cod] = { url: url, ts: Date.now() };
+    localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(c));
+  } catch (e) {}
+}
+// Retorna undefined quando não há nada cacheado (ou expirou) — nesse caso
+// é preciso buscar de verdade. Retorna null quando já sabemos que não tem
+// foto em lugar nenhum. Retorna a URL/dataURL quando já achamos antes.
+function _thumbCacheLookup(cod) {
+  var entry = _thumbCacheGet()[cod];
+  if (!entry) return undefined;
+  if (Date.now() - entry.ts > THUMB_CACHE_TTL_MS) return undefined;
+  return entry.url;
+}
+
+// Fila de concorrência simples: no lugar de disparar todas as chamadas ao
+// GAS de uma vez (uma por produto sem foto visível na tela), roda no
+// máximo `limit` por vez e enfileira o resto. Evita afogar o Web App
+// quando uma tela com muitos produtos é renderizada.
+function _criarFilaConcorrencia(limit) {
+  var ativos = 0, fila = [];
+  function _tentarProximo() {
+    if (ativos >= limit || !fila.length) return;
+    ativos++;
+    var job = fila.shift();
+    job.tarefa().then(function(r) { ativos--; job.resolve(r); _tentarProximo(); })
+                 .catch(function(e) { ativos--; job.reject(e); _tentarProximo(); });
+  }
+  return function enfileirar(tarefa) {
+    return new Promise(function(resolve, reject) {
+      fila.push({ tarefa: tarefa, resolve: resolve, reject: reject });
+      _tentarProximo();
+    });
+  };
+}
+var _filaThumbGAS = _criarFilaConcorrencia(4); // no máx. 4 chamadas ao GAS por vez
 function abrirFotoGrande(url) {
   if (!url) return;
   document.getElementById('fotoLightboxImg').src = url;
@@ -8164,38 +8216,51 @@ var _fotoTarefaChainCache = {};
 function _resolverFotoTarefaChain(cod) {
   if (!cod) return Promise.resolve(null);
   if (_fotoTarefaChainCache[cod]) return _fotoTarefaChainCache[cod];
+  var cacheado = _thumbCacheLookup(cod);
+  if (cacheado !== undefined) {
+    _fotoTarefaChainCache[cod] = Promise.resolve(cacheado);
+    return _fotoTarefaChainCache[cod];
+  }
   _fotoTarefaChainCache[cod] = (async function() {
+    var resultado = null;
     try {
-      var dr = await _gasGet('buscarImagemProduto', '&codigoBarras=' + encodeURIComponent(cod) + '&tipo=produto');
+      var dr = await _filaThumbGAS(function() {
+        return _gasGet('buscarImagemProduto', '&codigoBarras=' + encodeURIComponent(cod) + '&tipo=produto');
+      });
       if (dr && dr.ok && dr.encontrado && dr.base64) {
-        return 'data:' + (dr.mimeType || 'image/jpeg') + ';base64,' + dr.base64;
+        resultado = 'data:' + (dr.mimeType || 'image/jpeg') + ';base64,' + dr.base64;
       }
     } catch (e) {}
-    var cosmosUrl = 'https://cdn-cosmos.bluesoft.com.br/products/' + cod;
-    var okCosmos = await new Promise(function(res) {
-      var im = new Image();
-      im.onload = function() { res(cosmosUrl); };
-      im.onerror = function() { res(null); };
-      im.src = cosmosUrl;
-    });
-    if (okCosmos) return okCosmos;
-    try {
-      var r = await fetch('https://world.openfoodfacts.org/api/v2/product/' + cod + '.json?fields=image_url,image_front_url');
-      var j = await r.json();
-      if (j && j.status === 1 && j.product) {
-        var imgUrl = j.product.image_front_url || j.product.image_url;
-        if (imgUrl) {
-          var okOff = await new Promise(function(res) {
-            var im2 = new Image();
-            im2.onload = function() { res(imgUrl); };
-            im2.onerror = function() { res(null); };
-            im2.src = imgUrl;
-          });
-          if (okOff) return okOff;
+    if (!resultado) {
+      var cosmosUrl = 'https://cdn-cosmos.bluesoft.com.br/products/' + cod;
+      var okCosmos = await new Promise(function(res) {
+        var im = new Image();
+        im.onload = function() { res(cosmosUrl); };
+        im.onerror = function() { res(null); };
+        im.src = cosmosUrl;
+      });
+      if (okCosmos) resultado = okCosmos;
+    }
+    if (!resultado) {
+      try {
+        var r = await fetch('https://world.openfoodfacts.org/api/v2/product/' + cod + '.json?fields=image_url,image_front_url');
+        var j = await r.json();
+        if (j && j.status === 1 && j.product) {
+          var imgUrl = j.product.image_front_url || j.product.image_url;
+          if (imgUrl) {
+            var okOff = await new Promise(function(res) {
+              var im2 = new Image();
+              im2.onload = function() { res(imgUrl); };
+              im2.onerror = function() { res(null); };
+              im2.src = imgUrl;
+            });
+            if (okOff) resultado = okOff;
+          }
         }
-      }
-    } catch (e) {}
-    return null;
+      } catch (e) {}
+    }
+    _thumbCacheSet(cod, resultado);
+    return resultado;
   })();
   return _fotoTarefaChainCache[cod];
 }
@@ -8217,8 +8282,13 @@ function resolverFotosTarefasArea(root) {
 }
 async function _auraEstoqueThumbFallback(imgEl, cod) {
   imgEl.onerror = null;
+  var cacheado = _thumbCacheLookup(cod);
+  if (cacheado !== undefined) {
+    if (cacheado) imgEl.src = cacheado; else _auraEstoqueThumbShowEmpty(imgEl);
+    return;
+  }
   if (!_auraEstoqueThumbCache[cod]) {
-    _auraEstoqueThumbCache[cod] = (async function() {
+    _auraEstoqueThumbCache[cod] = _filaThumbGAS(async function() {
       try {
         var r = await _gasGet('buscarImagemProduto', '&codigoBarras=' + encodeURIComponent(cod) + '&tipo=produto');
         if (r && r.ok && r.encontrado && r.base64) {
@@ -8226,9 +8296,10 @@ async function _auraEstoqueThumbFallback(imgEl, cod) {
         }
       } catch (e) {}
       return null;
-    })();
+    });
   }
   var dataUrl = await _auraEstoqueThumbCache[cod];
+  _thumbCacheSet(cod, dataUrl);
   if (dataUrl) imgEl.src = dataUrl;
   else _auraEstoqueThumbShowEmpty(imgEl);
 }
