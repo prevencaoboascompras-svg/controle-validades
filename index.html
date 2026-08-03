@@ -1579,7 +1579,7 @@ function tentarLogin() {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>Gerar encarte</span>
       </button>
-      <select id="retiradaDiaSel" style="max-width:168px;flex-shrink:0" title="Dia da semana do relatório de retirada"></select>
+      <input type="date" id="retiradaDiaSel" style="max-width:168px;flex-shrink:0" title="Escolha o dia do relatório de retirada">
       <button class="aura-btn" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.4);color:#fca5a5" onclick="abrirRelatorioRetirada()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span>Retirada</span>
@@ -7115,29 +7115,18 @@ function abrirRelatorioAntecipacao() {
 }
 
 // ── Relatório de Retirada (original) ────────────────────────────────────────────────────────
-// ── Relatório de Retirada — seletor de dia da semana (v6.21) ────────────
-// Preenche o menu suspenso com os 7 dias da semana atual (domingo a
-// sábado), pré-selecionando o dia de hoje. O valor de cada opção é a
-// data em formato ISO (YYYY-MM-DD), o mesmo formato usado em p.validade,
-// pra permitir filtrar direto por igualdade de string.
+// ── Relatório de Retirada — seletor de dia (v6.23) ───────────────────────
+// Antes era uma lista fixa de dias (select). Agora é um input type="date"
+// nativo (calendário suspenso do próprio navegador), permitindo escolher
+// qualquer dia — passado ou futuro — sem limite de 30 dias. Só define o
+// valor inicial como hoje; o resto (abrir calendário, navegar entre
+// meses) é tudo comportamento nativo do input.
 function _popularRetiradaDiaSel() {
   var sel = document.getElementById('retiradaDiaSel');
   if (!sel) return;
   var hoje = new Date();
-  var diaSemanaHoje = hoje.getDay(); // 0=domingo .. 6=sábado
-  var domingo = new Date(hoje);
-  domingo.setDate(hoje.getDate() - diaSemanaHoje);
-  var nomesDias = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
-  var opcoesHtml = '';
-  for (var i = 0; i < 7; i++) {
-    var d = new Date(domingo);
-    d.setDate(domingo.getDate() + i);
-    var iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-    var dataFmt = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
-    var ehHoje = (i === diaSemanaHoje);
-    opcoesHtml += '<option value="'+iso+'"'+(ehHoje?' selected':'')+'>'+nomesDias[i]+' · '+dataFmt+(ehHoje?' (hoje)':'')+'</option>';
-  }
-  sel.innerHTML = opcoesHtml;
+  var iso = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0') + '-' + String(hoje.getDate()).padStart(2,'0');
+  sel.value = iso;
 }
 
 function abrirRelatorioRetirada() {
@@ -7161,7 +7150,8 @@ function abrirRelatorioRetirada() {
 
   var totalQtde = doDia.reduce(function(s,p){ return s+(parseInt(p.qtde)||1); }, 0);
 
-  var msgVazio = ehHoje ? 'Nenhum produto vence hoje' : 'Nenhum produto vence nesse dia';
+  var ehPassado = !ehHoje && dataAlvo < hojeReal;
+  var msgVazio = ehHoje ? 'Nenhum produto vence hoje' : (ehPassado ? 'Nenhum produto venceu nesse dia' : 'Nenhum produto vence nesse dia');
   var cardsHtml = doDia.length === 0
     ? '<div style="text-align:center;padding:60px 20px;color:#666"><div style="font-size:52px;margin-bottom:14px">✅</div><div style="font-size:18px;font-weight:700;color:#333">'+msgVazio+'</div><div style="font-size:14px;margin-top:6px;color:#999">Tudo dentro da validade</div></div>'
     : doDia.map(function(p) {
@@ -7222,7 +7212,7 @@ function abrirRelatorioRetirada() {
       '<div class="topo-linha">',
         '<div>',
           '<div class="topo-label">Boas Compras · Retirada</div>',
-          '<h1>🗑️ '+(ehHoje?'Vence Hoje':'Vence em '+dataAlvo.toLocaleDateString('pt-BR',{weekday:'long'}))+'</h1>',
+          '<h1>🗑️ '+(ehHoje?'Vence Hoje':(ehPassado?'Venceu ':'Vence em ')+dataAlvo.toLocaleDateString('pt-BR',{weekday:'long'}))+'</h1>',
           '<div class="topo-data">'+dataFmt+'</div>',
         '</div>',
         doDia.length > 0 ? '<div class="topo-badge">'+doDia.length+(doDia.length>1?' itens':' item')+'</div>' : '',
