@@ -1579,6 +1579,7 @@ function tentarLogin() {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>Gerar encarte</span>
       </button>
+      <select id="retiradaDiaSel" style="max-width:168px;flex-shrink:0" title="Dia da semana do relatório de retirada"></select>
       <button class="aura-btn" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.4);color:#fca5a5" onclick="abrirRelatorioRetirada()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span>Retirada</span>
@@ -6536,6 +6537,7 @@ function migarDadosLocaisParaNuvem(){
   mostrarToast('Dados locais migrados para a nuvem!','ok');
 }
 
+_popularRetiradaDiaSel();
 if(_cfg.id){setDot('loading','Reconectando...');syncAll();sincronizarTarefasCompleto();cloudLoad();setTimeout(migarDadosLocaisParaNuvem,3000);}
 else refresh();
 
@@ -7113,23 +7115,56 @@ function abrirRelatorioAntecipacao() {
 }
 
 // ── Relatório de Retirada (original) ────────────────────────────────────────────────────────
+// ── Relatório de Retirada — seletor de dia da semana (v6.21) ────────────
+// Preenche o menu suspenso com os 7 dias da semana atual (domingo a
+// sábado), pré-selecionando o dia de hoje. O valor de cada opção é a
+// data em formato ISO (YYYY-MM-DD), o mesmo formato usado em p.validade,
+// pra permitir filtrar direto por igualdade de string.
+function _popularRetiradaDiaSel() {
+  var sel = document.getElementById('retiradaDiaSel');
+  if (!sel) return;
+  var hoje = new Date();
+  var diaSemanaHoje = hoje.getDay(); // 0=domingo .. 6=sábado
+  var domingo = new Date(hoje);
+  domingo.setDate(hoje.getDate() - diaSemanaHoje);
+  var nomesDias = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  var opcoesHtml = '';
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(domingo);
+    d.setDate(domingo.getDate() + i);
+    var iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    var dataFmt = String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
+    var ehHoje = (i === diaSemanaHoje);
+    opcoesHtml += '<option value="'+iso+'"'+(ehHoje?' selected':'')+'>'+nomesDias[i]+' · '+dataFmt+(ehHoje?' (hoje)':'')+'</option>';
+  }
+  sel.innerHTML = opcoesHtml;
+}
+
 function abrirRelatorioRetirada() {
-  var hoje = products.filter(function(p) {
+  var sel = document.getElementById('retiradaDiaSel');
+  var isoAlvo = sel && sel.value ? sel.value : null;
+  var dataAlvo = isoAlvo ? new Date(isoAlvo + 'T00:00:00') : new Date();
+
+  var doDia = products.filter(function(p) {
+    if (isoAlvo) return p.validade === isoAlvo;
     var d = daysDiff(p.validade);
     return d !== null && d === 0;
   }).sort(function(a,b) {
     return (cleanNome(a.nome||'')).localeCompare(cleanNome(b.nome||''));
   });
 
-  var dataHoje = new Date();
-  var dataFmt = dataHoje.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-  var dataFmtCurta = dataHoje.toLocaleDateString('pt-BR');
+  var hojeReal = new Date();
+  var ehHoje = !isoAlvo || (dataAlvo.toDateString() === hojeReal.toDateString());
 
-  var totalQtde = hoje.reduce(function(s,p){ return s+(parseInt(p.qtde)||1); }, 0);
+  var dataFmt = dataAlvo.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  var dataFmtCurta = dataAlvo.toLocaleDateString('pt-BR');
 
-  var cardsHtml = hoje.length === 0
-    ? '<div style="text-align:center;padding:60px 20px;color:#666"><div style="font-size:52px;margin-bottom:14px">✅</div><div style="font-size:18px;font-weight:700;color:#333">Nenhum produto vence hoje</div><div style="font-size:14px;margin-top:6px;color:#999">Tudo dentro da validade</div></div>'
-    : hoje.map(function(p) {
+  var totalQtde = doDia.reduce(function(s,p){ return s+(parseInt(p.qtde)||1); }, 0);
+
+  var msgVazio = ehHoje ? 'Nenhum produto vence hoje' : 'Nenhum produto vence nesse dia';
+  var cardsHtml = doDia.length === 0
+    ? '<div style="text-align:center;padding:60px 20px;color:#666"><div style="font-size:52px;margin-bottom:14px">✅</div><div style="font-size:18px;font-weight:700;color:#333">'+msgVazio+'</div><div style="font-size:14px;margin-top:6px;color:#999">Tudo dentro da validade</div></div>'
+    : doDia.map(function(p) {
         var nomeLimpo = cleanNome(p.nome || '--');
         var valFmt = p.validade ? p.validade.split('-').reverse().join('/') : '--';
         var cod = (p.cod||'').replace(/[^0-9]/g,'');
@@ -7187,20 +7222,20 @@ function abrirRelatorioRetirada() {
       '<div class="topo-linha">',
         '<div>',
           '<div class="topo-label">Boas Compras · Retirada</div>',
-          '<h1>🗑️ Vence Hoje</h1>',
+          '<h1>🗑️ '+(ehHoje?'Vence Hoje':'Vence em '+dataAlvo.toLocaleDateString('pt-BR',{weekday:'long'}))+'</h1>',
           '<div class="topo-data">'+dataFmt+'</div>',
         '</div>',
-        hoje.length > 0 ? '<div class="topo-badge">'+hoje.length+(hoje.length>1?' itens':' item')+'</div>' : '',
+        doDia.length > 0 ? '<div class="topo-badge">'+doDia.length+(doDia.length>1?' itens':' item')+'</div>' : '',
       '</div>',
     '</div>',
-    hoje.length > 0 ? [
+    doDia.length > 0 ? [
       '<div class="resumo">',
-        '<div class="res-card"><div class="res-lbl">Produtos</div><div class="res-val">'+hoje.length+'</div></div>',
+        '<div class="res-card"><div class="res-lbl">Produtos</div><div class="res-val">'+doDia.length+'</div></div>',
         '<div class="res-card"><div class="res-lbl">Unidades</div><div class="res-val">'+totalQtde+'</div></div>',
       '</div>',
     ].join('') : '',
     '<div class="cards">',cardsHtml,'</div>',
-    hoje.length > 0 ? '<button class="print-btn" onclick="window.print()">🖨️  Salvar como PDF</button>' : '',
+    doDia.length > 0 ? '<button class="print-btn" onclick="window.print()">🖨️  Salvar como PDF</button>' : '',
     '<div class="rodape">AURA Vencimentos · '+new Date().toLocaleString('pt-BR')+'</div>',
     '<script>',
       'var RET_GAS_URL='+JSON.stringify(loadCfg().url||'')+';',
