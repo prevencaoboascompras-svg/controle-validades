@@ -557,11 +557,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sa
   background: rgba(255,255,255,0.15); color: #fff;
   font-size: 13px; font-weight: 500; padding: 7px 12px; border-radius: 6px;
   border: none; cursor: pointer; transition: all 0.15s; backdrop-filter: blur(4px);
-  font-family: inherit; color-scheme: dark;
+  font-family: inherit; color-scheme: dark; width: 148px; flex-shrink: 0;
 }
 .aura-date-input:hover { background: rgba(255,255,255,0.25); }
 .aura-date-input::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
-@media (max-width: 900px) { .aura-header-actions .aura-date-input { font-size: 11px; padding: 5px 8px; } }
+@media (max-width: 900px) { .aura-header-actions .aura-date-input { font-size: 11px; padding: 5px 8px; width: 128px; } }
 
 /* Nav bar (was sidebar) */
 .aura-nav {
@@ -943,6 +943,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .aura-header-actions { gap: 4px; flex-shrink: 0; }
   .aura-header-actions .aura-btn { font-size: 11px; padding: 5px 8px; gap: 4px; }
   .aura-header-actions .aura-btn span { display: none; }
+  .aura-header-actions .aura-date-input { font-size: 10px; padding: 5px 6px; width: 96px; }
   .aura-syncbar { padding: 4px 12px !important; }
 
   /* Nav (was sidebar) — scroll horizontal */
@@ -1590,7 +1591,7 @@ function tentarLogin() {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>Gerar encarte</span>
       </button>
-      <input type="date" id="retiradaDiaSel" class="aura-date-input" style="max-width:168px;flex-shrink:0" title="Escolha o dia do relatório de retirada">
+      <input type="date" id="retiradaDiaSel" class="aura-date-input" title="Escolha o dia do relatório de retirada">
       <button class="aura-btn" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.4);color:#fca5a5" onclick="abrirRelatorioRetirada()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span>Retirada</span>
