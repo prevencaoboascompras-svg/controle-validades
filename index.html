@@ -3589,19 +3589,19 @@ function renderDashboard(){
     var d=daysDiff(p.validade);
     if(d!==null&&d<=15){
       var pp=parsePreco(p.precoPromo);
-      var qtd=parseInt(p.qtde)||1;
+      var qtd=qtdeEfetiva(p.qtde);
       if(pp&&pp>0)valorRisco+=pp*qtd;
     }
     // estoque monitorado: aguardando = sendo acompanhado ativamente
     if((p.status||'').toLowerCase().includes('aguard')){
       var pp2=parsePreco(p.precoPromo);
-      var qtd2=parseInt(p.qtde)||1;
+      var qtd2=qtdeEfetiva(p.qtde);
       if(pp2&&pp2>0)valorEstoqueMonitorado+=pp2*qtd2;
     }
     // custo (perda efetiva = vencidos)
     if(s==='vencido'){
       var cu=parsePreco(p.custo);
-      var qtd3=parseInt(p.qtde)||1;
+      var qtd3=qtdeEfetiva(p.qtde);
       if(cu&&cu>0)valorCusto+=cu*qtd3;
     }
   });
@@ -3613,7 +3613,7 @@ function renderDashboard(){
   products.forEach(function(p){
     if(encCodSet[p.cod||p.nome]){
       var pp3=parsePreco(p.precoPromo);
-      var qtd3b=parseInt(p.qtde)||1;
+      var qtd3b=qtdeEfetiva(p.qtde);
       if(pp3&&pp3>0)valorPerdaEvitada+=pp3*qtd3b;
     }
   });
@@ -3621,7 +3621,7 @@ function renderDashboard(){
   if(valorPerdaEvitada===0&&encerradas.length>0){
     encerradas.forEach(function(e){
       var p=products.find(function(x){return(x.cod&&x.cod===e.cod)||(x.nome===e.nome);});
-      if(p){var pp3=parsePreco(p.precoPromo);var qtd3b=parseInt(p.qtde)||1;if(pp3&&pp3>0)valorPerdaEvitada+=pp3*qtd3b;}
+      if(p){var pp3=parsePreco(p.precoPromo);var qtd3b=qtdeEfetiva(p.qtde);if(pp3&&pp3>0)valorPerdaEvitada+=pp3*qtd3b;}
     });
   }
 
@@ -4272,6 +4272,18 @@ function parsePreco(v){
   v=String(v);
   var n=parseFloat(v.replace(/R\$\s*/i,'').replace(',','.'));
   return isNaN(n)?null:n;
+}
+// v6.26 — Corrige o bug de "estoque zerado conta como 1 unidade": expressões
+// como `p.qtde||1` tratam 0 como valor ausente (0 é falsy em JS), então um
+// lote legitimamente zerado (produto vendido/retirado por completo) era
+// contabilizado como 1 em cálculos de perda evitada, relatório de retirada,
+// negociações e modais de "Marcar como Resolvido". Esta função distingue os
+// dois casos: 0 explícito continua 0; só quando o valor está de fato ausente
+// (undefined/null/não numérico — registros antigos sem esse campo) é que
+// assume 1 como estimativa padrão.
+function qtdeEfetiva(v){
+  var n=parseInt(v,10);
+  return isNaN(n)?1:n;
 }
 function fmtPreco(n){
   return n.toFixed(2).replace('.',',');
@@ -5723,7 +5735,7 @@ function openResolvidoModal(idx){
   // Título padrão (pode ser sobrescrito por encerrarPromo)
   var tit=document.getElementById('resolvidoModalTitulo');
   if(tit)tit.innerHTML='<i class="ti ti-circle-check" style="color:var(--green)"></i> Marcar como Resolvido';
-  var qtdeLote=p.qtde||1;
+  var qtdeLote=qtdeEfetiva(p.qtde);
   document.getElementById('resolvidoProdNome').textContent=(p.nome||'Produto')+' — '+qtdeLote+' un. no lote';
   // Pré-preencher campos
   document.getElementById('rQtdeTotal').value=qtdeLote;
@@ -5855,7 +5867,7 @@ function selectResolucao(tipo){
   document.getElementById('btnConfirmarResolvido').disabled=false;
   // Para descarte puro: zera vendida, preenche sobra com total
   var p=_resolvidoIdx!==null?products[_resolvidoIdx]:null;
-  var qtdeLote=p?p.qtde||1:1;
+  var qtdeLote=p?qtdeEfetiva(p.qtde):1;
   var campoPreco=document.getElementById('rPreco');
   var precoJaPreenchido=campoPreco&&campoPreco.value.trim()!=='';
   if(tipo==='descarte'){
@@ -5879,7 +5891,8 @@ function confirmarResolvido(){
   if(!_resolucaoSelecionada||_resolvidoIdx===null)return;
   var p=products[_resolvidoIdx];
   if(!p)return;
-  var qtdeTotal=parseInt(document.getElementById('rQtdeTotal').value)||p.qtde||1;
+  var qtdeTotal=parseInt(document.getElementById('rQtdeTotal').value,10);
+  if(isNaN(qtdeTotal))qtdeTotal=qtdeEfetiva(p.qtde);
   var qtdeVendida=parseInt(document.getElementById('rQtdeVendida').value)||0;
   var qtdeSobra=parseInt(document.getElementById('rQtdeSobra').value)||0;
   var precoStr=document.getElementById('rPreco').value;
@@ -6123,7 +6136,7 @@ function renderRelatorio(){
     var aReceberHtml=aReceber!==null&&aReceber>0
       ?'<td style="font-size:12px;font-weight:700;white-space:nowrap;color:var(--amber);background:rgba(186,117,23,.08)">'+fmt2(aReceber)+(aReceberLabel?'<br><span style="font-size:10px;font-weight:400;color:var(--amber)">'+aReceberLabel+'</span>':'')+'</td>'
       :'<td style="font-size:12px;color:var(--tx2)">--</td>';
-    return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+(n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+(n.qtde||1)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td>'+custoHtml+'<td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(fornDisplay||'--')+'</td>'+aReceberHtml+'<td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td><td style="white-space:nowrap"><button class="abtn" onclick="abrirEditarNeg('+realIdx+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> <button class="abtn" onclick="excluirNeg('+realIdx+')" title="Excluir" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td></tr>';
+    return'<tr><td style="font-size:12px;white-space:nowrap">'+n.data.split('-').reverse().join('/')+'</td><td style="font-size:12px;font-weight:500;max-width:180px">'+(n.nome||'--')+'</td><td style="font-size:12px">'+(n.setor||'--')+'</td><td style="font-size:12px">'+qtdeEfetiva(n.qtde)+'</td><td style="font-size:12px;white-space:nowrap">'+fmt2(n.precoNormal)+'</td><td style="font-size:12px;white-space:nowrap;color:var(--green);font-weight:600">'+fmt2(n.precoPraticado)+'</td>'+custoHtml+'<td style="font-size:12px">'+(pct>0?pct.toFixed(1)+'%':'--')+'</td><td style="font-size:12px;font-weight:600;white-space:nowrap">'+fmt2(n.valorTotal)+'</td><td><span class="badge '+(tipoClass[n.tipo]||'b-gray')+'">'+(tipoLabels[n.tipo]||n.tipo)+'</span></td><td style="font-size:12px">'+(fornDisplay||'--')+'</td>'+aReceberHtml+'<td style="font-size:12px;max-width:140px;color:var(--tx2)">'+(n.obs||'--')+'</td><td style="white-space:nowrap"><button class="abtn" onclick="abrirEditarNeg('+realIdx+')" title="Editar" style="border-color:var(--blue);color:var(--blue)"><i class="ti ti-pencil"></i></button> <button class="abtn" onclick="excluirNeg('+realIdx+')" title="Excluir" style="border-color:var(--red);color:var(--red)"><i class="ti ti-trash"></i></button></td></tr>';
   }).join('');
 }
 
@@ -6140,7 +6153,7 @@ function exportarCSV(){
   var header='Data,Produto,Setor,Qtde,Preco Normal,Preco Praticado,Desconto%,Valor Total,Tipo,Fornecedor,Observacao\n';
   var rows=negs.map(function(n){
     var pct=n.precoNormal&&n.precoPraticado?((n.precoNormal-n.precoPraticado)/n.precoNormal*100).toFixed(1):0;
-    return[n.data,'"'+(n.nome||'')+'"',n.setor||'',n.qtde||1,(n.precoNormal||0).toFixed(2),(n.precoPraticado||0).toFixed(2),pct,(n.valorTotal||0).toFixed(2),n.tipo||'','"'+(n.fornecedor||'')+'"','"'+(n.obs||'')+'"'].join(',');
+    return[n.data,'"'+(n.nome||'')+'"',n.setor||'',qtdeEfetiva(n.qtde),(n.precoNormal||0).toFixed(2),(n.precoPraticado||0).toFixed(2),pct,(n.valorTotal||0).toFixed(2),n.tipo||'','"'+(n.fornecedor||'')+'"','"'+(n.obs||'')+'"'].join(',');
   }).join('\n');
   var blob=new Blob([header+rows],{type:'text/csv;charset=utf-8;'});
   var a=document.createElement('a');a.download='negociacoes-boas-compras-'+new Date().toISOString().substring(0,10)+'.csv';a.href=URL.createObjectURL(blob);a.click();
@@ -7008,10 +7021,10 @@ function abrirRelatorioAntecipacao() {
   var dataFmt = dataHoje.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
   var dataFmtCurta = dataHoje.toLocaleDateString('pt-BR');
 
-  var totalQtde = selecionados.reduce(function(s,p){ return s+(parseInt(p.qtde)||1); }, 0);
+  var totalQtde = selecionados.reduce(function(s,p){ return s+qtdeEfetiva(p.qtde); }, 0);
   var totalValor = selecionados.reduce(function(s,p){
     var preco = p.precoPromo || p.precoNormal || 0;
-    return s + (preco * (parseInt(p.qtde)||1));
+    return s + (preco * qtdeEfetiva(p.qtde));
   }, 0);
 
   var cardsHtml = '';
@@ -7160,7 +7173,7 @@ function abrirRelatorioRetirada() {
   var dataFmt = dataAlvo.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
   var dataFmtCurta = dataAlvo.toLocaleDateString('pt-BR');
 
-  var totalQtde = doDia.reduce(function(s,p){ return s+(parseInt(p.qtde)||1); }, 0);
+  var totalQtde = doDia.reduce(function(s,p){ return s+qtdeEfetiva(p.qtde); }, 0);
 
   var ehPassado = !ehHoje && dataAlvo < hojeReal;
   var msgVazio = ehHoje ? 'Nenhum produto vence hoje' : (ehPassado ? 'Nenhum produto venceu nesse dia' : 'Nenhum produto vence nesse dia');
@@ -7433,7 +7446,7 @@ function processarTarefasConcluidasZero(){
     lotes.forEach(function(p){
       var chave=produtoChave(p);
       if(!resolvidos.includes(chave)){resolvidos.push(chave);houveMudanca=true;}
-      var qtdeLote=p.qtde||1;
+      var qtdeLote=qtdeEfetiva(p.qtde);
       var custo=p.custo||0;
       negs.unshift({
         id:Date.now()+Math.floor(Math.random()*1000),
