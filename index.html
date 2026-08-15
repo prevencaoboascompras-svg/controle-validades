@@ -1613,6 +1613,11 @@ function tentarLogin() {
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       <span>Estoque</span>
     </button>
+    <button onclick="auraNav(this,'encartes')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Encartes</span>
+      <span class="sb-nav-badge" id="asBadgeEnc" style="display:none">0</span>
+    </button>
     <button onclick="auraNav(this,'antecipacao')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <span>Antecipação Encarte</span>
@@ -1680,9 +1685,12 @@ function toggleTheme() {
   // Sync badge
   setInterval(function(){
     var pb = document.getElementById('asBadgePromo');
+    var eb = document.getElementById('asBadgeEnc');
+    var origEnc = document.getElementById('encBadge');
     var pg = document.getElementById('promoGrid');
     var promoCount = pg ? pg.querySelectorAll('.ecard,.promo-card').length : 0;
     if (pb) { if (promoCount>0){ pb.textContent=promoCount; pb.style.display='inline-flex'; } else { pb.style.display='none'; } }
+    if (eb && origEnc) { eb.textContent=origEnc.textContent; eb.style.display=origEnc.style.display==='none'?'none':'inline-flex'; }
     // Sync badge Antecipação
     try {
       var antSel = JSON.parse(localStorage.getItem('aura_ant_sel') || '{}');
@@ -1736,6 +1744,7 @@ function toggleTheme() {
   <div class="metrics" id="metrics" style="display:none"></div>
   <div class="tabs">
     <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
+    <div class="tab" onclick="goTab('encartes')"><i class="ti ti-photo-check"></i> Encartes <span id="encBadge" style="display:none;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório <span id="negBadge" style="display:none;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('modalidades')"><i class="ti ti-truck-delivery"></i> Modalidades</div>
     <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i> Como configurar</div>
@@ -1871,6 +1880,44 @@ function toggleTheme() {
       <div class="promo-section-title"><i class="ti ti-circle-check"></i> Encerradas</div>
       <div class="promo-grid" id="promoGridEncerradas"></div>
     </div>
+  </div>
+  <div id="sec-encartes" class="sec">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-photo-check" style="color:var(--green)"></i> Encartes gerados</div>
+        <p style="font-size:12px;color:var(--tx2)">Marque um ou mais para imprimir juntos em uma folha A4.</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="encBusca" placeholder="Buscar encarte por nome..." oninput="renderEncartesAtivos()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;min-width:220px">
+        <button class="btn" onclick="exportarEncartesJSON()" title="Baixar backup JSON"><i class="ti ti-download"></i> Exportar JSON</button>
+        <button class="btn" onclick="exportarEncartesCSV()" title="Baixar planilha CSV"><i class="ti ti-file-spreadsheet"></i> Exportar CSV</button>
+        <label class="btn" style="cursor:pointer" title="Restaurar backup JSON"><i class="ti ti-upload"></i> Importar JSON<input type="file" accept=".json" style="display:none" onchange="importarEncartesJSON(this)"></label>
+        <button class="btn" onclick="limparEncartesAtivos()"><i class="ti ti-trash"></i> Limpar tudo</button>
+        <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-plus"></i> Novo encarte</button>
+      </div>
+    </div>
+
+    <!-- Barra de impressão (aparece quando há selecionados) -->
+    <div id="printBar" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg);border:1px solid var(--green);border-radius:var(--r);padding:10px 14px;margin-bottom:14px">
+      <i class="ti ti-printer" style="color:var(--green);font-size:18px"></i>
+      <span id="printCount" style="font-size:13px;font-weight:600;color:var(--green)">0 selecionado(s)</span>
+      <span style="font-size:12px;color:var(--tx2)">Layout por página A4:</span>
+      <button class="layout-btn active" id="lay2btn" onclick="setLayout(2)">2 por página</button>
+      <button class="layout-btn" id="lay4btn" onclick="setLayout(4)">4 por página</button>
+      <button class="layout-btn" id="lay6btn" onclick="setLayout(6)">6 por página</button>
+      <button class="layout-btn" id="lay9btn" onclick="setLayout(9)">9 por página</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-sm" onclick="deselectAll()"><i class="ti ti-x"></i> Limpar seleção</button>
+      <button class="btn btn-green btn-sm" onclick="abrirPreview()"><i class="ti ti-eye"></i> Pré-visualizar impressão</button>
+    </div>
+
+    <!-- Lista QR-Ofertas style -->
+    <div id="encGrid" style="display:flex;flex-direction:column;gap:0;border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;background:var(--bg)">
+      <div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Novo encarte" para criar o primeiro.</div>
+    </div>
+
+
   </div>
   <div id="sec-antecipacao" class="sec">
     <!-- Header -->
@@ -4993,7 +5040,7 @@ function addManual(){
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
-  var tabNames=['dashboard','validades','estoque','promocoes','antecipacao','relatorio','modalidades','tarefas','ajuda'];
+  var tabNames=['dashboard','validades','estoque','promocoes','encartes','antecipacao','relatorio','modalidades','tarefas','ajuda'];
   document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('active');
@@ -5007,6 +5054,7 @@ function goTab(name){
     setTimeout(renderRelatorio,120);
   }
   if(name==='promocoes')renderPromos();
+  if(name==='encartes')renderEncartesAtivos();
   if(name==='modalidades')renderModalidades();
   if(name==='antecipacao')renderAntecipacao();
   if(name==='dashboard')renderDashboard();
@@ -5014,6 +5062,11 @@ function goTab(name){
   if(name==='tarefas'){renderTarefas();sincronizarTarefasCompleto();}
 }
 function refresh(){renderMetrics();renderTable();atualizarNegBadge();renderDashboard();}
+
+// ── Encartes Ativos ──────────────────────────────────────────────────────────
+var ENC_KEY='boascompras_encartes_ativos';
+var encLayout=2;
+var encSelecionados=[];
 
 // v-fix: encartes e biblioteca guardavam a lista INTEIRA no localStorage,
 // incluindo o campo "img" em base64 (cada imagem pode ter 50-300KB; com
@@ -5037,6 +5090,313 @@ function _semImagemParaCache(arr) {
     return item;
   });
 }
+var _encartesAtivos=JSON.parse(localStorage.getItem(ENC_KEY)||'[]');
+function getEncartesAtivos(){return _encartesAtivos;}
+function saveEncartesAtivos(arr){
+  _encartesAtivos=arr;
+  try { localStorage.setItem(ENC_KEY,JSON.stringify(_semImagemParaCache(arr))); } catch(e) { console.warn('localStorage cheio, pulando cache de encartes:', e); }
+  _gasPost({action:'salvarEncartes',dados:arr});
+}
+
+// ── Exportar / Importar backup de encartes ────────────────────────────────────
+function exportarEncartesJSON(){
+  var arr=getEncartesAtivos();
+  if(!arr.length){mostrarToast('Nenhum encarte para exportar.','warn');return;}
+  var blob=new Blob([JSON.stringify(arr,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  var d=new Date();var ds=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
+  a.download='encartes_backup_'+ds+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+  mostrarToast('Backup JSON baixado com '+arr.length+' encarte(s)!','ok');
+}
+
+function exportarEncartesCSV(){
+  var arr=getEncartesAtivos();
+  if(!arr.length){mostrarToast('Nenhum encarte para exportar.','warn');return;}
+  var cols=['id','produto','setor','validade','precoNormal','precoPraticado','pctDesc','qtde','unidade','tipo','fornecedor','riscar','mostraPct','maior18','criadoEm'];
+  var header=cols.join(',')+','+'imagem';
+  var rows=arr.map(function(e){
+    return cols.map(function(c){
+      var v=e[c]===undefined?'':String(e[c]);
+      return '"'+v.replace(/"/g,'""')+'"';
+    }).join(',') + ',"[imagem base64 omitida]"';
+  });
+  var csv=[header].concat(rows).join('\n');
+  var blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  var d=new Date();var ds=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0');
+  a.download='encartes_backup_'+ds+'.csv';
+  a.click();URL.revokeObjectURL(a.href);
+  mostrarToast('Planilha CSV baixada com '+arr.length+' encarte(s)!','ok');
+}
+
+function importarEncartesJSON(input){
+  var file=input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var imported=JSON.parse(e.target.result);
+      if(!Array.isArray(imported))throw new Error('Formato inválido');
+      var atual=getEncartesAtivos();
+      // mescla: adiciona apenas os que não existem (por id)
+      var idsAtuais=atual.map(function(x){return x.id;});
+      var novos=imported.filter(function(x){return x.id&&!idsAtuais.includes(x.id);});
+      var merged=novos.concat(atual);
+      if(merged.length>50)merged=merged.slice(0,50);
+      saveEncartesAtivos(merged);
+      renderEncartesAtivos();
+      mostrarToast('Importados '+novos.length+' encarte(s) do backup!','ok');
+    }catch(err){
+      mostrarToast('Erro ao importar: arquivo inválido.','warn');
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function salvarEncarteAtivo(nome,dataUrl,extras){
+  extras=extras||{};
+  var arr=getEncartesAtivos();
+  arr.unshift({
+    id:Date.now(),
+    nome:nome,
+    img:dataUrl,
+    criadoEm:new Date().toLocaleDateString('pt-BR'),
+    precoNormal:extras.precoNormal||null,
+    precoPromo:extras.precoPromo||null,
+    custo:extras.custo||null,
+    obs:extras.obs||''
+  });
+  if(arr.length>50)arr=arr.slice(0,50);
+  saveEncartesAtivos(arr);
+  atualizarBadge();
+  mostrarToast('Encarte salvo!','ok');
+}
+
+function atualizarBadge(){
+  var arr=getEncartesAtivos();
+  var badge=document.getElementById('encBadge');
+  if(arr.length){badge.textContent=arr.length;badge.style.display='';}
+  else{badge.style.display='none';}
+}
+
+// Salva campo editado direto na lista
+function updEncField(id, campo, val){
+  var arr=getEncartesAtivos();
+  var e=arr.find(function(x){return x.id===id;});
+  if(!e)return;
+  if(campo==='precoNormal'||campo==='precoPromo'){
+    var n=parseFloat(String(val).replace(',','.'));
+    e[campo]=isNaN(n)?null:n;
+  } else {
+    e[campo]=val;
+  }
+  saveEncartesAtivos(arr);
+}
+
+function encDescPct(de,por){
+  if(!de||!por||de<=0)return '';
+  var pct=Math.round((de-por)/de*100);
+  return pct>0?pct+'%':'';
+}
+
+function renderEncartesAtivos(){
+  var arr=getEncartesAtivos();
+  var buscaEl=document.getElementById('encBusca');
+  var busca=buscaEl?buscaEl.value.trim().toLowerCase():'';
+  if(busca){
+    arr=arr.filter(function(e){return (e.nome||'').toLowerCase().indexOf(busca)>-1;});
+  }
+  var grid=document.getElementById('encGrid');
+  encSelecionados=[];
+  document.getElementById('printBar').style.display='none';
+  if(!arr.length){
+    grid.innerHTML='<div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Novo encarte" para criar o primeiro.</div>'
+      +'<button class="ecard-add" onclick="openEncarteModal(null)"><i class="ti ti-plus"></i> Adicionar novo produto ao encarte</button>';
+    return;
+  }
+  var fi='ef-input',fs='ef-select',fl='ef-label',fp='ef-prefix',fpg='ef-pgroup';
+  grid.innerHTML=arr.map(function(e){
+    var pN=e.precoNormal||'';
+    var pP=e.precoPromo||'';
+    var pct=encDescPct(pN,pP);
+    var uni=e.unidade||'Cada';
+    var obs=e.obs||'PRODUTO COM VALIDADE PRÓXIMA AO VENCIMENTO. VÁLIDO ENQUANTO DURAR O ESTOQUE.';
+    var txDe=e.textoDe||'De'; var txPor=e.textoPor||'Por';
+    var riscar=e.riscar?'checked':''; var mostraPct=e.mostraPct?'checked':''; var maior18=e.maior18?'checked':'';
+    var eid=e.id;
+    return '<div class="ecard" id="ecard-'+eid+'">'
+      // Header
+      +'<div class="ecard-header">'
+        +'<span style="color:var(--tx2);cursor:grab;font-size:18px"><i class="ti ti-grip-vertical"></i></span>'
+        +'<div id="echk-'+eid+'" onclick="toggleEncarteSelecao('+eid+')" title="Selecionar para impressão" style="width:16px;height:16px;border:2px solid var(--bds);border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s">'
+          +'<i class="ti ti-check" style="display:none;font-size:10px;color:#fff"></i>'
+        +'</div>'
+        +'<div style="width:38px;height:38px;border-radius:6px;overflow:hidden;background:var(--bg2);border:1px solid var(--bd);flex-shrink:0">'
+          +'<img src="'+e.img+'" style="width:100%;height:100%;object-fit:cover">'
+        +'</div>'
+        +'<div class="ecard-title">'+e.nome+' <span style="font-size:11px;color:var(--tx2);font-weight:400">· Gerado em '+e.criadoEm+'</span></div>'
+        +'<div style="display:flex;gap:6px;flex-shrink:0">'
+          +'<button class="abtn" onclick="downloadEncarteAtivo('+eid+')" title="Baixar PNG" style="font-size:11px;padding:4px 8px"><i class="ti ti-download"></i> Baixar</button>'
+          +'<button class="abtn" style="font-size:11px;padding:4px 8px;border-color:var(--red);color:var(--red)" onclick="removerEncarteAtivo('+eid+')" title="Remover"><i class="ti ti-trash"></i></button>'
+        +'</div>'
+      +'</div>'
+      // Body
+      +'<div class="ecard-body">'
+        // Imagem
+        +'<div class="ecard-imgcol">'
+          +'<div class="ecard-imgbox"><img src="'+e.img+'" alt="'+e.nome+'"></div>'
+          +'<button class="ecard-imgbtn"><i class="ti ti-search" style="font-size:12px"></i> Trocar imagem</button>'
+        +'</div>'
+        // Campos
+        +'<div class="ecard-fields">'
+          +'<div class="ef-row"><span class="'+fl+'">Produto</span><input class="'+fi+'" value="'+e.nome.replace(/"/g,'&quot;')+'" oninput="updEncField('+eid+',\'nome\',this.value)"></div>'
+          +'<div class="ef-row"><span class="'+fl+'">Texto de</span><input class="'+fi+'" style="max-width:120px" value="'+txDe+'" oninput="updEncField('+eid+',\'textoDe\',this.value)"> <span class="'+fl+'" style="min-width:60px">Texto por</span><input class="'+fi+'" style="max-width:120px" value="'+txPor+'" oninput="updEncField('+eid+',\'textoPor\',this.value)"></div>'
+          +'<hr class="ef-divider">'
+          +'<div class="ef-row">'
+            +'<span class="'+fl+'">Preço Normal</span>'
+            +'<div class="'+fpg+'"><span class="'+fp+'">R$</span><input class="'+fi+'" type="number" step="0.01" value="'+pN+'" style="max-width:90px" oninput="updEncField('+eid+',\'precoNormal\',this.value);updPct('+eid+')"></div>'
+            +'<span class="'+fl+'" style="min-width:70px">Preço Oferta</span>'
+            +'<div class="'+fpg+'"><span class="'+fp+'">R$</span><input class="'+fi+'" type="number" step="0.01" value="'+pP+'" style="max-width:90px" oninput="updEncField('+eid+',\'precoPromo\',this.value);updPct('+eid+')"></div>'
+            +'<span id="epct-'+eid+'" class="ef-pct" style="'+(pct?'':'display:none')+'">-'+pct+'</span>'
+          +'</div>'
+          +'<div class="ef-row"><span class="'+fl+'">Unidade</span>'
+            +'<select class="'+fs+'" style="max-width:140px" onchange="updEncField('+eid+',\'unidade\',this.value)">'
+            +['Cada','Kg','100g','Litro','Par','Pacote','Caixa','Fardo'].map(function(u){return'<option'+(u===uni?' selected':'')+'>'+u+'</option>';}).join('')
+            +'</select>'
+          +'</div>'
+
+          +'<div class="ef-toggle-row">'
+            +'<label class="ef-toggle"><input type="checkbox" '+riscar+' onchange="updEncField('+eid+',\'riscar\',this.checked)"><span style="margin-left:4px">Riscar preço normal</span></label>'
+            +'<label class="ef-toggle"><input type="checkbox" '+mostraPct+' onchange="updEncField('+eid+',\'mostraPct\',this.checked)"><span style="margin-left:4px">Mostrar desconto %</span></label>'
+            +'<label class="ef-toggle"><input type="checkbox" '+maior18+' onchange="updEncField('+eid+',\'maior18\',this.checked)"><span style="margin-left:4px">Apenas maiores de 18</span></label>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }).join('')
+  +'<button class="ecard-add" onclick="openEncarteModal(null)"><i class="ti ti-plus"></i> Adicionar novo produto ao encarte</button>';
+}
+
+function updPct(id){
+  var arr=getEncartesAtivos();
+  var e=arr.find(function(x){return x.id===id;});
+  var el=document.getElementById('epct-'+id);
+  if(!el||!e)return;
+  var pct=encDescPct(e.precoNormal,e.precoPromo);
+  if(pct){el.textContent='-'+pct;el.style.display='';}
+  else el.style.display='none';
+}
+
+
+function toggleEncarteSelecao(id){
+  var idx=encSelecionados.indexOf(id);
+  var card=document.getElementById('ecard-'+id);
+  var chk=document.getElementById('echk-'+id);
+  if(idx===-1){
+    encSelecionados.push(id);
+    if(card)card.style.borderColor='var(--green)';
+    if(chk){chk.style.background='var(--green)';chk.style.borderColor='var(--green)';var i=chk.querySelector('i');if(i)i.style.display='';}
+  }else{
+    encSelecionados.splice(idx,1);
+    if(card)card.style.borderColor='';
+    if(chk){chk.style.background='';chk.style.borderColor='var(--bds)';var i=chk.querySelector('i');if(i)i.style.display='none';}
+  }
+  atualizarPrintBar();
+}
+
+function atualizarPrintBar(){
+  var bar=document.getElementById('printBar');
+  var cnt=document.getElementById('printCount');
+  if(encSelecionados.length){
+    bar.style.display='flex';
+    cnt.textContent=encSelecionados.length+' selecionado'+(encSelecionados.length>1?'s':'');
+  }else{
+    bar.style.display='none';
+  }
+}
+
+function setLayout(n){
+  encLayout=n;
+  [2,4,6,9].forEach(function(x){
+    var b=document.getElementById('lay'+x+'btn');
+    if(b)b.classList.toggle('active',x===n);
+  });
+}
+
+function deselectAll(){
+  encSelecionados.slice().forEach(function(id){
+    var card=document.getElementById('ecard-'+id);
+    var chk=document.getElementById('echk-'+id);
+    if(card)card.style.borderColor='';
+    if(chk){chk.style.background='';chk.style.borderColor='var(--bds)';var i=chk.querySelector('i');if(i)i.style.display='none';}
+  });
+  encSelecionados=[];
+  document.getElementById('printBar').style.display='none';
+}
+
+function downloadEncarteAtivo(id){
+  var arr=getEncartesAtivos();
+  var enc=arr.find(function(e){return e.id===id;});
+  if(!enc)return;
+  var a=document.createElement('a');
+  a.download='encarte-'+enc.nome.replace(/\s+/g,'-').toLowerCase()+'.png';
+  a.href=enc.img;a.click();
+}
+
+function removerEncarteAtivo(id){
+  var arr=getEncartesAtivos().filter(function(e){return e.id!==id;});
+  saveEncartesAtivos(arr);
+  encSelecionados=encSelecionados.filter(function(x){return x!==id;});
+  atualizarBadge();
+  renderEncartesAtivos();
+}
+
+function limparEncartesAtivos(){
+  if(!confirm('Remover todos os encartes salvos?'))return;
+  saveEncartesAtivos([]);
+  encSelecionados=[];
+  atualizarBadge();
+  renderEncartesAtivos();
+}
+
+function abrirPreview(){
+  if(!encSelecionados.length){alert('Selecione ao menos um encarte.');return;}
+  var arr=getEncartesAtivos();
+  var selecionados=encSelecionados.map(function(id){return arr.find(function(e){return e.id===id;});}).filter(Boolean);
+  var grid=document.getElementById('previewGrid');
+  grid.className='preview-grid lay'+encLayout;
+  var slots=encLayout;
+  var html='';
+  for(var i=0;i<slots;i++){
+    if(selecionados[i]){
+      html+='<img src="'+selecionados[i].img+'" alt="'+selecionados[i].nome+'">';
+    }else{
+      html+='<div class="preview-empty"></div>';
+    }
+  }
+  grid.innerHTML=html;
+  document.getElementById('previewModal').classList.add('open');
+}
+
+function executarImpressao(){
+  var arr=getEncartesAtivos();
+  var selecionados=encSelecionados.map(function(id){return arr.find(function(e){return e.id===id;});}).filter(Boolean);
+  var pa=document.getElementById('printArea');
+  pa.className='lay'+encLayout;
+  var slots=encLayout;
+  var html='';
+  for(var i=0;i<slots;i++){
+    if(selecionados[i]){html+='<img src="'+selecionados[i].img+'" alt="'+selecionados[i].nome+'">';}
+    else{html+='<div></div>';}
+  }
+  pa.innerHTML=html;
+  closeModal('previewModal');
+  setTimeout(function(){window.print();},200);
+}
+
 // ── Modalidades por Fornecedor ───────────────────────────────────────────
 var MODALIDADES_KEY='boascompras_modalidades';
 var PROCEDIMENTOS_PADRAO=['CONTATO','DESCARTE','LOTE + QTD','NF DEVOLUÇÃO','REGISTRO E DESCARTE','TROCA - (AVARIADOS)','TROCA / DESCONTO','TROCA P/ TROCA','RELATORIO + FOTO','NF DEVOLUÇÃO + BOLETO OU PIX','FOTO LOTE + QTD + DESCRIÇÃO'];
