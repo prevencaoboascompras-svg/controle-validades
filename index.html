@@ -1587,10 +1587,6 @@ function tentarLogin() {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         <span>Registro manual</span>
       </button>
-      <button class="aura-btn aura-btn-accent" onclick="openEncarteModal(null)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <span>Gerar encarte</span>
-      </button>
       <input type="date" id="retiradaDiaSel" class="aura-date-input" title="Escolha o dia do relatório de retirada">
       <button class="aura-btn" style="background:rgba(239,68,68,.18);border:1px solid rgba(239,68,68,.4);color:#fca5a5" onclick="abrirRelatorioRetirada()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -1612,11 +1608,6 @@ function tentarLogin() {
     <button onclick="auraNav(this,'estoque')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       <span>Estoque</span>
-    </button>
-    <button onclick="auraNav(this,'encartes')">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <span>Encartes</span>
-      <span class="sb-nav-badge" id="asBadgeEnc" style="display:none">0</span>
     </button>
     <button onclick="auraNav(this,'antecipacao')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -1713,7 +1704,6 @@ function toggleTheme() {
     <div class="topbar-right">
       <button class="btn" id="btnSync" onclick="syncAll()"><i class="ti ti-refresh"></i> Sincronizar</button>
       <button class="btn" onclick="openAddModal()"><i class="ti ti-plus"></i> Registro manual</button>
-      <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Gerar encarte</button>
     </div>
   </div>
   <div class="cfg" id="cfgBox">
@@ -1744,7 +1734,6 @@ function toggleTheme() {
   <div class="metrics" id="metrics" style="display:none"></div>
   <div class="tabs">
     <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
-    <div class="tab" onclick="goTab('encartes')"><i class="ti ti-photo-check"></i> Encartes <span id="encBadge" style="display:none;background:var(--green);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório <span id="negBadge" style="display:none;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('modalidades')"><i class="ti ti-truck-delivery"></i> Modalidades</div>
     <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i> Como configurar</div>
@@ -1858,7 +1847,6 @@ function toggleTheme() {
         <div style="font-size:14px;font-weight:600;margin-bottom:2px">Promoções ativas</div>
         <p style="font-size:12px;color:var(--tx2)">Produtos com status Aguarda. Encerre quando a promoção terminar.</p>
       </div>
-      <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-photo"></i> Novo encarte</button>
     </div>
     <div class="promo-filter-bar">
       <span style="font-size:12px;color:var(--tx2);font-weight:500">Urgência:</span>
@@ -1880,44 +1868,6 @@ function toggleTheme() {
       <div class="promo-section-title"><i class="ti ti-circle-check"></i> Encerradas</div>
       <div class="promo-grid" id="promoGridEncerradas"></div>
     </div>
-  </div>
-  <div id="sec-encartes" class="sec">
-    <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-photo-check" style="color:var(--green)"></i> Encartes gerados</div>
-        <p style="font-size:12px;color:var(--tx2)">Marque um ou mais para imprimir juntos em uma folha A4.</p>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <input type="text" id="encBusca" placeholder="Buscar encarte por nome..." oninput="renderEncartesAtivos()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;min-width:220px">
-        <button class="btn" onclick="exportarEncartesJSON()" title="Baixar backup JSON"><i class="ti ti-download"></i> Exportar JSON</button>
-        <button class="btn" onclick="exportarEncartesCSV()" title="Baixar planilha CSV"><i class="ti ti-file-spreadsheet"></i> Exportar CSV</button>
-        <label class="btn" style="cursor:pointer" title="Restaurar backup JSON"><i class="ti ti-upload"></i> Importar JSON<input type="file" accept=".json" style="display:none" onchange="importarEncartesJSON(this)"></label>
-        <button class="btn" onclick="limparEncartesAtivos()"><i class="ti ti-trash"></i> Limpar tudo</button>
-        <button class="btn btn-green" onclick="openEncarteModal(null)"><i class="ti ti-plus"></i> Novo encarte</button>
-      </div>
-    </div>
-
-    <!-- Barra de impressão (aparece quando há selecionados) -->
-    <div id="printBar" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg);border:1px solid var(--green);border-radius:var(--r);padding:10px 14px;margin-bottom:14px">
-      <i class="ti ti-printer" style="color:var(--green);font-size:18px"></i>
-      <span id="printCount" style="font-size:13px;font-weight:600;color:var(--green)">0 selecionado(s)</span>
-      <span style="font-size:12px;color:var(--tx2)">Layout por página A4:</span>
-      <button class="layout-btn active" id="lay2btn" onclick="setLayout(2)">2 por página</button>
-      <button class="layout-btn" id="lay4btn" onclick="setLayout(4)">4 por página</button>
-      <button class="layout-btn" id="lay6btn" onclick="setLayout(6)">6 por página</button>
-      <button class="layout-btn" id="lay9btn" onclick="setLayout(9)">9 por página</button>
-      <div style="flex:1"></div>
-      <button class="btn btn-sm" onclick="deselectAll()"><i class="ti ti-x"></i> Limpar seleção</button>
-      <button class="btn btn-green btn-sm" onclick="abrirPreview()"><i class="ti ti-eye"></i> Pré-visualizar impressão</button>
-    </div>
-
-    <!-- Lista QR-Ofertas style -->
-    <div id="encGrid" style="display:flex;flex-direction:column;gap:0;border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;background:var(--bg)">
-      <div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Novo encarte" para criar o primeiro.</div>
-    </div>
-
-
   </div>
   <div id="sec-antecipacao" class="sec">
     <!-- Header -->
@@ -4904,27 +4854,17 @@ async function drawEncarte(){
 }
 
 async function downloadEncarte(){
+  // v-fix: antes disso também salvava uma cópia em base64 na galeria
+  // "Encartes ativos" (aba removida — ver Arsenal de Ofertas). Como não há
+  // mais tela pra ver essa galeria, agora só baixa o PNG mesmo.
   await drawEncarte();
   var cv=document.getElementById('encarteCanvas');
   var prod=(document.getElementById('eProduto').value||'encarte').substring(0,25);
   cv.toBlob(function(blob){
-    // download normal
     var a=document.createElement('a');
     a.download='encarte-'+prod.replace(/\s+/g,'-').toLowerCase()+'.png';
     a.href=URL.createObjectURL(blob);a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
-    // salvar nos encartes ativos com dados de preço
-    var reader=new FileReader();
-    reader.onloadend=function(){
-      var parseVal=function(id){var v=document.getElementById(id).value;if(!v)return null;var n=parseFloat(v.replace(/R\$\s*/i,'').replace(',','.'));return isNaN(n)?null:n;};
-      salvarEncarteAtivo(prod, reader.result, {
-        precoNormal:parseVal('eDe'),
-        precoPromo:parseVal('ePor'),
-        custo:_custoProduto||null,
-        obs:''
-      });
-    };
-    reader.readAsDataURL(blob);
   },'image/png');
 }
 
@@ -5054,7 +4994,6 @@ function goTab(name){
     setTimeout(renderRelatorio,120);
   }
   if(name==='promocoes')renderPromos();
-  if(name==='encartes')renderEncartesAtivos();
   if(name==='modalidades')renderModalidades();
   if(name==='antecipacao')renderAntecipacao();
   if(name==='dashboard')renderDashboard();
@@ -5176,8 +5115,12 @@ function salvarEncarteAtivo(nome,dataUrl,extras){
 }
 
 function atualizarBadge(){
+  // v-fix: 'encBadge' era da aba Encartes (removida — ver Arsenal de
+  // Ofertas). Guarda contra elemento inexistente pra não quebrar outras
+  // chamadas (ex: sincronização) que ainda disparam essa função.
   var arr=getEncartesAtivos();
   var badge=document.getElementById('encBadge');
+  if(!badge) return;
   if(arr.length){badge.textContent=arr.length;badge.style.display='';}
   else{badge.style.display='none';}
 }
@@ -5219,6 +5162,11 @@ function renderEncartesAtivos(){
   }
   var fi='ef-input',fs='ef-select',fl='ef-label',fp='ef-prefix',fpg='ef-pgroup';
   grid.innerHTML=arr.map(function(e){
+    // v-fix: item sem 'nome' (ex: registro corrompido salvo antes da cota
+    // de localStorage estourar) derrubava o render inteiro com
+    // "Cannot read properties of undefined (reading 'replace')". Agora só
+    // pula o campo faltando em vez de travar a tela toda.
+    if(!e.nome) e.nome='';
     var pN=e.precoNormal||'';
     var pP=e.precoPromo||'';
     var pct=encDescPct(pN,pP);
@@ -6425,7 +6373,22 @@ function _gasGet(action,extra){
 // _semImagemParaCache).
 function _setCache_(key, value) {
   try { localStorage.setItem(key, JSON.stringify(value)); }
-  catch (e) { console.warn('localStorage cheio, pulando cache de', key, e); }
+  catch (e) {
+    // v-fix: antes, quando a cota estourava, TODA escrita seguinte falhava
+    // pra sempre (o cache de thumbnails — boascompras_thumb_cache_v1 — cresce
+    // sem limite, um dataURL por produto, e sozinho já enche a cota do
+    // localStorage). Agora, na primeira falha de cota, libera espaço
+    // descartando o cache de thumbnails (é só um cache, refaz sozinho) e
+    // tenta gravar de novo uma vez antes de desistir.
+    try {
+      localStorage.removeItem(THUMB_CACHE_KEY);
+      localStorage.setItem(key, JSON.stringify(value));
+      console.warn('localStorage cheio — cache de thumbnails limpo pra liberar espaço; gravação de', key, 'refeita com sucesso.');
+      return;
+    } catch (e2) {
+      console.warn('localStorage cheio, pulando cache de', key, e2);
+    }
+  }
 }
 var _cloudLoadHandlers={
   encartes:function(d){_encartesAtivos=d;_setCache_(ENC_KEY,_semImagemParaCache(d));atualizarBadge();renderEncartesAtivos&&renderEncartesAtivos();},
@@ -8194,12 +8157,38 @@ var THUMB_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 function _thumbCacheGet() {
   try { return JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || '{}'); } catch (e) { return {}; }
 }
+// v-fix: esse cache nunca tinha limite nem limpeza — cada produto sem foto
+// no Cosmos vira uma entrada nova, e como ela guarda o dataURL (base64) da
+// imagem quando acha uma, com ~2700+ produtos ele sozinho estourava a cota
+// do localStorage e travava a gravação de TUDO mais (tarefas, encartes,
+// negociações etc). Agora: descarta entradas expiradas antes de gravar, e
+// se o cache passar de MAX entradas, remove primeiro as mais antigas.
+var THUMB_CACHE_MAX = 400;
+function _thumbCachePrune(c) {
+  var now = Date.now();
+  var keys = Object.keys(c).filter(function(k){ return (now - c[k].ts) <= THUMB_CACHE_TTL_MS; });
+  if (keys.length > THUMB_CACHE_MAX) {
+    keys.sort(function(a,b){ return c[b].ts - c[a].ts; }); // mais recentes primeiro
+    keys = keys.slice(0, THUMB_CACHE_MAX);
+  }
+  var pruned = {};
+  keys.forEach(function(k){ pruned[k] = c[k]; });
+  return pruned;
+}
 function _thumbCacheSet(cod, url) {
   try {
     var c = _thumbCacheGet();
     c[cod] = { url: url, ts: Date.now() };
+    c = _thumbCachePrune(c);
     localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(c));
-  } catch (e) {}
+  } catch (e) {
+    // Cota estourou mesmo com poda (ex: cache de outra fonte ocupando tudo).
+    // Esse cache é descartável, então na pior hipótese zera e tenta uma vez.
+    try {
+      var only = {}; only[cod] = { url: url, ts: Date.now() };
+      localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(only));
+    } catch (e2) {}
+  }
 }
 // Retorna undefined quando não há nada cacheado (ou expirou) — nesse caso
 // é preciso buscar de verdade. Retorna null quando já sabemos que não tem
