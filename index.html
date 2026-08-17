@@ -214,6 +214,17 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .urg-card-header.status-none .badge{border:1.5px solid #60a5fa!important;color:#93c5fd!important}
 .urg-card-nome{font-size:12.5px;font-weight:700;color:#fff;line-height:1.3;flex:1;min-width:0;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .urg-card-cod{font-family:monospace;font-size:9.5px;color:rgba(255,255,255,.65);margin-top:2px}
+
+/* ── Mini-lista de lotes dentro do card (Estoque agrupado) ── */
+.urg-lotes-mini{display:flex;flex-direction:column;gap:4px;padding:0 13px 10px}
+.urg-lote-row{display:flex;align-items:center;gap:8px;padding:6px 9px;border-radius:8px;background:var(--bg2);border:1px solid var(--bd)}
+.urg-lote-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.urg-lote-mid{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px}
+.urg-lote-data{font-size:11.5px;font-weight:600;color:var(--tx)}
+.urg-lote-venc{font-size:11px}
+.urg-lote-qtde{font-size:11px;color:var(--tx2);white-space:nowrap}
+.urg-lote-more{font-size:11px;color:var(--tx2);text-align:center;padding:4px 0;cursor:pointer}
+.urg-lote-more:hover{color:var(--tx)}
 .urg-card-body{padding:12px 13px;display:flex;flex-direction:column;gap:10px;flex:1}
 .urg-card-mid{display:flex;align-items:center;gap:10px}
 .urg-speedo-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -3072,6 +3083,20 @@ function setDot(t,m){var d=document.getElementById('dot'),tx=document.getElement
 
 function daysDiff(v){if(!v)return null;var p=v.split('-');if(p.length!==3)return null;var d=new Date(+p[0],+p[1]-1,+p[2]);return Math.floor((d-TODAY)/86400000);}
 function statusFromDays(d){if(d===null)return'sem-data';if(d<=0)return'vencido';if(d<=3)return'critico';if(d<=7)return'urgente';if(d<=15)return'atencao';return'ok';}
+function _loteDotColor(days){if(days===null)return'var(--tx2)';if(days<=3)return'#ef4444';if(days<=7)return'#f97316';if(days<=15)return'#fbbf24';return'#34d399';}
+function _loteMiniRowHtml(lote){
+  var d=daysDiff(lote.validade);
+  var cor=_loteDotColor(d);
+  var venceTxt=d===null?'Sem data':d<=0?'Vencido':d===1?'Vence amanhã':'Faltam '+d+'d';
+  return '<div class="urg-lote-row">'
+    +   '<span class="urg-lote-dot" style="background:'+cor+'"></span>'
+    +   '<div class="urg-lote-mid">'
+    +     '<span class="urg-lote-data">'+(lote.validade?fmt(lote.validade):'—')+'</span>'
+    +     '<span class="urg-lote-venc" style="color:'+cor+'">'+venceTxt+'</span>'
+    +   '</div>'
+    +   '<span class="urg-lote-qtde">'+(Number(lote.qtde)||0)+' un</span>'
+    + '</div>';
+}
 function badge(s){var m={vencido:['b-danger','Vencido'],critico:['b-danger','Critico'],urgente:['b-warn','Urgente'],atencao:['b-warn','Atencao'],ok:['b-ok','OK'],'sem-data':['b-gray','Sem data']};var cl=m[s]||['b-gray','?'];return'<span class="badge '+cl[0]+'">'+cl[1]+'</span>';}
 // Gera o badge circular de quantidade (canto superior esquerdo dos cards) calculando
 // a largura conforme o número de dígitos, para números grandes (ex: 600) não tamparem o título.
@@ -8426,6 +8451,10 @@ function renderEstoque() {
       +       '</div>'
       +     '</div>'
       +   '</div>'
+      +   (multiLote ? '<div class="urg-lotes-mini">'
+      +     lotes.slice(0,3).map(_loteMiniRowHtml).join('')
+      +     (lotes.length>3 ? '<div class="urg-lote-more">+'+(lotes.length-3)+' lote(s) adicional(is) — ver todos</div>' : '')
+      +   '</div>' : '')
       +   '<div class="urg-card-forn" title="' + escHtml(fornProd) + '"><i class="ti ti-truck-delivery" style="opacity:.6"></i> ' + escHtml(fornProd) + '</div>'
       +   fmtBipagemHtml(buscarBipagem(p.cod, p.validade))
       + '</div>'
