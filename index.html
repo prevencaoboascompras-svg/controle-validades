@@ -7578,6 +7578,48 @@ function abrirEncarteDoProduto(cod){
   openEncarteModal(idx);
 }
 
+// Abre/fecha o menu "Tarefa" do modal de produto (Venda rápida / Inventário).
+// v-fix: o botão chamava toggleTarefaMenu(), que nunca tinha sido definida —
+// por isso não acontecia nada ao clicar.
+function toggleTarefaMenu(){
+  var m=document.getElementById('pmTarefaMenu');
+  if(!m)return;
+  var abrir=(m.style.display==='none'||!m.style.display);
+  m.style.display=abrir?'block':'none';
+  if(abrir){
+    setTimeout(function(){
+      document.addEventListener('click',_fecharTarefaMenuFora,{once:true});
+    },0);
+  }
+}
+function _fecharTarefaMenuFora(ev){
+  var m=document.getElementById('pmTarefaMenu');
+  if(m&&!m.contains(ev.target))m.style.display='none';
+}
+
+// Chamado pelas opções do menu "Tarefa" do modal de produto.
+// v-fix: abrirTarefaProduto também não existia — completa o fluxo junto com toggleTarefaMenu.
+function abrirTarefaProduto(cod,tipo){
+  cod=(cod||'').trim();
+  if(!cod)return;
+  var m=document.getElementById('pmTarefaMenu');
+  if(m)m.style.display='none';
+  var lotes=products.filter(function(p){return(p.cod||'').trim()===cod;});
+  if(!lotes.length){mostrarToast('Produto não encontrado.','warn');return;}
+  var lotesOrdenados=lotes.slice().sort(function(a,b){
+    var da=daysDiff(a.validade);da=da===null?99999:da;
+    var db=daysDiff(b.validade);db=db===null?99999:db;
+    return da-db;
+  });
+  var idx=products.indexOf(lotesOrdenados[0]);
+  if(idx<0){mostrarToast('Produto não encontrado.','warn');return;}
+  closeModal('produtoModal');
+  openTarefaModal(idx);
+  document.getElementById('tarefaDescricao').value=(tipo==='inventario')
+    ?'Conferência de inventário total do produto.'
+    :'Venda rápida deste lote.';
+}
+
 function openTarefaModal(prodIdx) {
   var modal = document.getElementById('tarefaModal');
   var p = prodIdx !== undefined ? products[prodIdx] : null;
