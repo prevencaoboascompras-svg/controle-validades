@@ -2793,7 +2793,17 @@ function loadAsset(src){return new Promise(function(r){var i=new Image();i.onloa
 var CFG_KEY='aura_cfg',PROD_KEY='aura_prod';
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var fotoImg=null;
-var products=[];
+// v6.31.1 PAINEL: inicia com o último snapshot local para renderizar o dashboard
+// imediatamente. A sincronização com a planilha continua logo depois em background.
+var products=(function(){
+  try{
+    var cache=JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
+    return Array.isArray(cache)?cache:[];
+  }catch(e){
+    console.warn('Cache local de produtos inválido; iniciando vazio.',e);
+    return [];
+  }
+})();
 var setorAtivo='';
 var SETOR_CORRIGIDO_KEY='aura_setor_corrigido';
 var _setorCorrigido=JSON.parse(localStorage.getItem(SETOR_CORRIGIDO_KEY)||'{}');
@@ -6507,8 +6517,39 @@ function migarDadosLocaisParaNuvem(){
 }
 
 _popularRetiradaDiaSel();
-if(_cfg.id){setDot('loading','Reconectando...');syncAll();sincronizarTarefasCompleto();cloudLoad();setTimeout(migarDadosLocaisParaNuvem,3000);}
-else refresh();
+
+// v6.31.1 PAINEL — abertura otimizada:
+// 1) mostra imediatamente o último snapshot local;
+// 2) dá prioridade de rede/CPU ao sync principal (ano + banco);
+// 3) tarefas e dados auxiliares entram logo depois, ou no máximo em 3,5s.
+function _iniciarDadosSecundariosAposCarga_(){
+  if(window._auraDadosSecundariosIniciados)return;
+  window._auraDadosSecundariosIniciados=true;
+  sincronizarTarefasCompleto();
+  cloudLoad();
+}
+if(_cfg.id){
+  if(products.length){
+    aplicarSetorCorrigido();
+    refresh();
+    setDot('loading','Dados locais exibidos — atualizando...');
+  }else{
+    setDot('loading','Reconectando...');
+  }
+
+  var _syncInicial=syncAll();
+  Promise.resolve(_syncInicial).then(function(){
+    setTimeout(_iniciarDadosSecundariosAposCarga_,80);
+  }).catch(function(){
+    setTimeout(_iniciarDadosSecundariosAposCarga_,80);
+  });
+
+  // Fallback: se a leitura principal demorar demais, não segura tarefas/nuvem indefinidamente.
+  setTimeout(_iniciarDadosSecundariosAposCarga_,3500);
+  setTimeout(migarDadosLocaisParaNuvem,4500);
+}else{
+  refresh();
+}
 
 // ── ANTECIPAÇÃO DE ENCARTES ──────────────────────────────────────────────
 var ANT_SEL_KEY = 'aura_ant_sel';
@@ -8546,6 +8587,8 @@ var _auraScanStream = null;
 var _auraScanVideoEl = null;
 var _auraScanNativeLoop = null;
 var _auraScanZxingReader = null;
+var _auraScanZxingControls = null; // .stop() encerra o decode contínuo de verdade
+var _auraScanSessionId = 0;        // invalida callbacks atrasados de sessões antigas
 var _auraScanTargetInput = null;
 
 function _auraIsIOS() {
@@ -8599,6 +8642,10 @@ async function iniciarScannerAura() {
   }
   if (_auraScanAtivo) return;
 
+  // Cada abertura recebe um ID próprio. Se algum callback antigo do ZXing/nativo
+  // aparecer depois do fechamento, ele é descartado em vez de preencher o campo.
+  var meuSession = ++_auraScanSessionId;
+
   if (typeof BarcodeDetector !== 'undefined' && !_auraIsIOS()) {
     try {
       var stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920, min: 1280 }, height: { ideal: 1080, min: 720 } } });
@@ -8627,14 +8674,18 @@ async function iniciarScannerAura() {
       var canvas = document.createElement('canvas');
       var ctx = canvas.getContext('2d');
       var loop = async function() {
-        if (!_auraScanAtivo || _auraScanMotor !== 'native') return;
+        if (!_auraScanAtivo || _auraScanMotor !== 'native' || meuSession !== _auraScanSessionId) return;
         if (vid.readyState >= 2) {
           canvas.width = vid.videoWidth || 640;
           canvas.height = vid.videoHeight || 480;
           ctx.drawImage(vid, 0, 0);
           try {
             var results = await detector.detect(canvas);
-            if (results && results.length > 0) { _auraOnScanSuccess(results[0].rawValue); return; }
+            if (results && results.length > 0) {
+              if(meuSession !== _auraScanSessionId)return;
+              _auraOnScanSuccess(results[0].rawValue);
+              return;
+            }
           } catch(e) {}
         }
         _auraScanNativeLoop = requestAnimationFrame(loop);
@@ -8678,11 +8729,30 @@ async function iniciarScannerAura() {
     await videoEl.play().catch(function(){});
     _auraApplyFocus(zxStream);
 
-    await _auraScanZxingReader.decodeFromStream(zxStream, videoEl, function(result, error) {
-      if (result && _auraScanAtivo) {
-        setTimeout(function() { _auraOnScanSuccess(result.getText()); }, 200);
+    _auraScanZxingControls = await _auraScanZxingReader.decodeFromStream(
+      zxStream,
+      videoEl,
+      function(result, error) {
+        if (!result) return;
+
+        // Resultado de uma câmera já fechada/reaberta: ignora.
+        if (meuSession !== _auraScanSessionId) return;
+
+        // v6.31.1: sem atraso artificial de 200 ms após o decode.
+        _auraOnScanSuccess(result.getText());
       }
-    });
+    );
+
+    // O usuário pode ter fechado o modal enquanto o ZXing inicializava.
+    if(meuSession !== _auraScanSessionId){
+      try{
+        if(_auraScanZxingControls && typeof _auraScanZxingControls.stop==='function'){
+          _auraScanZxingControls.stop();
+        }
+      }catch(e){}
+      _auraScanZxingControls=null;
+      return;
+    }
 
     _auraScanMotor = 'zxing';
     _auraScanAtivo = true;
@@ -8700,18 +8770,45 @@ async function iniciarScannerAura() {
 
 function pararScannerAura() {
   _auraScanAtivo = false;
+  _auraScanSessionId++; // invalida callbacks pendentes da sessão atual
   document.getElementById('scanLaser').style.display = 'none';
-  if (_auraScanNativeLoop) { cancelAnimationFrame(_auraScanNativeLoop); _auraScanNativeLoop = null; }
-  if (_auraScanZxingReader) {
+
+  if (_auraScanNativeLoop) {
+    cancelAnimationFrame(_auraScanNativeLoop);
+    _auraScanNativeLoop = null;
+  }
+
+  // No bundle usado pelo AURA, decodeFromStream devolve um controle com .stop().
+  // Esse é o caminho preferencial; reset() fica apenas como fallback de compatibilidade.
+  if (_auraScanZxingReader || _auraScanZxingControls) {
     try {
-      _auraScanZxingReader.reset();
+      if (_auraScanZxingControls && typeof _auraScanZxingControls.stop === 'function') {
+        _auraScanZxingControls.stop();
+      } else if (_auraScanZxingReader && typeof _auraScanZxingReader.reset === 'function') {
+        _auraScanZxingReader.reset();
+      }
+
       var zv = document.getElementById('aura-zxing-video');
-      if (zv && zv.srcObject) { zv.srcObject.getTracks().forEach(function(t){ t.stop(); }); zv.srcObject = null; }
-    } catch(e) {}
+      if (zv && zv.srcObject) {
+        zv.srcObject.getTracks().forEach(function(t){ t.stop(); });
+        zv.srcObject = null;
+      }
+    } catch(e) {
+      console.warn('Erro ao parar ZXing:', e);
+    }
+    _auraScanZxingControls = null;
     _auraScanZxingReader = null;
   }
-  if (_auraScanStream) { _auraScanStream.getTracks().forEach(function(t){ t.stop(); }); _auraScanStream = null; }
-  if (_auraScanVideoEl) { _auraScanVideoEl.srcObject = null; _auraScanVideoEl = null; }
+
+  if (_auraScanStream) {
+    _auraScanStream.getTracks().forEach(function(t){ t.stop(); });
+    _auraScanStream = null;
+  }
+  if (_auraScanVideoEl) {
+    _auraScanVideoEl.srcObject = null;
+    _auraScanVideoEl = null;
+  }
+
   _auraScanMotor = null;
   document.getElementById('scanView').innerHTML = '';
   document.getElementById('scanStateIdle').style.display = 'flex';
