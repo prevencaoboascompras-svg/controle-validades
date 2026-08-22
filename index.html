@@ -1676,6 +1676,10 @@ function tentarLogin() {
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       <span>Relatórios</span>
     </button>
+    <button onclick="auraNav(this,'bossvision')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span>Boss Vision</span>
+    </button>
     <button onclick="auraNav(this,'modalidades')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
       <span>Modalidades</span>
@@ -5116,7 +5120,7 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v3_unico';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8-aura-unica-jsonp';
+var BOSS_VISION_BUILD='v8.1-aura-unica-jsonp-menu-fix';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— usando somente a API principal da AURA');
 
 function bossFmtBRL(v){
@@ -5234,6 +5238,14 @@ function bossVencidosAura(){
   return bossNormalizarLista(itens);
 }
 function bossTotal(lista){return (lista||[]).reduce(function(a,x){return a+(Number(x.valor)||0);},0);}
+function bossEscapeHtml(v){
+  return String(v==null?'':v)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
 function bossRenderLista(id,lista){
   var el=document.getElementById(id);if(!el)return;
   if(!lista.length){el.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhum lançamento para esta data.</div>';return;}
@@ -5242,7 +5254,7 @@ function bossRenderLista(id,lista){
     return '<div class="boss-row">'
       +'<div class="boss-rank">'+(i+1)+'</div>'
       +photo
-      +'<div class="boss-prod"><div class="boss-prod-name" title="'+escapeHtml(x.nome)+'">'+escapeHtml(x.nome)+'</div>'+(x.cod?'<div class="boss-prod-cod">'+x.cod+'</div>':'')+'</div>'
+      +'<div class="boss-prod"><div class="boss-prod-name" title="'+bossEscapeHtml(x.nome)+'">'+bossEscapeHtml(x.nome)+'</div>'+(x.cod?'<div class="boss-prod-cod">'+x.cod+'</div>':'')+'</div>'
       +'<div class="boss-num boss-qtd"><small>Quantidade</small><strong>'+bossFmtQtd(x.qtde)+'</strong></div>'
       +'<div class="boss-num"><small>Custo unit.</small><strong>'+bossFmtBRL(x.custo)+'</strong></div>'
       +'<div class="boss-num"><small>Valor</small><strong>'+bossFmtBRL(x.valor)+'</strong></div>'
