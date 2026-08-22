@@ -1292,6 +1292,11 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-status.ok{color:var(--green)}.boss-status.warn{color:var(--amber)}.boss-status.err{color:var(--red)}
 .boss-kpis{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:10px}
 .boss-kpi{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:15px 16px}
+.boss-kpi-clicavel{cursor:pointer;transition:border-color .15s,transform .1s}
+.boss-kpi-clicavel:hover{border-color:var(--bds);transform:translateY(-1px)}
+.boss-kpi-clicavel .boss-kpi-lbl{display:flex;align-items:center;gap:4px}
+.boss-kpi-clicavel #bossConsumoChevron{transition:transform .18s;font-size:14px}
+.boss-kpi-clicavel.aberto #bossConsumoChevron{transform:rotate(180deg)}
 .boss-kpi-lbl{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:7px}
 .boss-kpi-val{font-size:25px;font-weight:800;line-height:1}
 .boss-kpi-sub{font-size:11px;color:var(--tx2);margin-top:6px}
@@ -2074,7 +2079,7 @@ function toggleTheme() {
       <div class="boss-kpis">
         <div class="boss-kpi"><div class="boss-kpi-lbl">Quebras</div><div class="boss-kpi-val" id="bossKpiQuebras">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasSub">Horti + Padaria</div></div>
         <div class="boss-kpi"><div class="boss-kpi-lbl">Perdas</div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Produtos vencidos</div></div>
-        <div class="boss-kpi"><div class="boss-kpi-lbl">Consumo interno</div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção Padaria + Uso e consumo</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossToggleConsumo()"><div class="boss-kpi-lbl">Consumo interno <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção Padaria + Uso e consumo</div></div>
       </div>
 
       <div class="boss-group">
@@ -2092,7 +2097,7 @@ function toggleTheme() {
         </div>
       </div>
 
-      <div class="boss-group">
+      <div class="boss-group boss-group-collapsible" id="bossGrupoConsumo" style="display:none">
         <div class="boss-group-title"><span>Consumo interno</span><span class="boss-period-badge boss-period-mes" id="bossPeriodoConsumo"></span><span class="boss-line"></span></div>
         <div class="boss-grid">
           <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-chef-hat" style="color:var(--blue)"></i> Produção Padaria</div><div class="boss-panel-total"><strong id="bossTotalProdPadaria">R$ 0,00</strong><span id="bossCountProdPadaria">0 itens</span></div></div><div class="boss-list" id="bossListProdPadaria"></div></div>
@@ -5303,6 +5308,15 @@ function bossAtualizaPeriodos_(dados){
   var elQ=document.getElementById('bossPeriodoQuebra');if(elQ)elQ.textContent=dataSel?('dia '+dataSel):'';
   var elP=document.getElementById('bossPeriodoPerdas');if(elP)elP.textContent=dataSel?('dia '+dataSel):'';
   var elC=document.getElementById('bossPeriodoConsumo');if(elC)elC.textContent=mesLabel?('acumulado de '+mesLabel):'';
+}
+function bossToggleConsumo(){
+  var grp=document.getElementById('bossGrupoConsumo');
+  var card=document.getElementById('bossKpiConsumoCard');
+  if(!grp)return;
+  var abrir=grp.style.display==='none';
+  grp.style.display=abrir?'':'none';
+  if(card)card.classList.toggle('aberto',abrir);
+  if(abrir)grp.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function bossRender(dados){
   _bossDados=dados||{};
