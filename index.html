@@ -2094,8 +2094,8 @@ function toggleTheme() {
     <div class="boss-wrap">
       <div class="boss-head">
         <div style="min-width:0;flex:1">
-          <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8.2</span></div>
-          <div class="boss-sub">Eventos organizados por impacto financeiro. Quebra e Vencidos mostram o <strong>dia selecionado</strong>; Consumo Interno mostra o <strong>acumulado do mês</strong> (lançamento não é diário). No topo, os setores e resumos passam a mostrar <strong>valor, quantidade/peso e itens</strong> do próprio Boss Vision. Qtd./peso respeita a unidade registrada em cada relatório, sem converter unidades diferentes.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
+          <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8.3</span></div>
+          <div class="boss-sub">Eventos organizados por impacto financeiro. Quebra pode mostrar o <strong>dia selecionado</strong> ou o <strong>mês até o dia</strong> em uma única consulta ao backend; Vencidos mostram o dia selecionado e Consumo Interno mostra o <strong>acumulado do mês</strong>. No topo, os setores e resumos mostram <strong>valor, quantidade/peso e itens</strong> do próprio Boss Vision. Qtd./peso respeita a unidade registrada em cada relatório, sem converter unidades diferentes.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
@@ -5133,13 +5133,15 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v3_unico';
 var BOSS_DAY_CACHE_PREFIX='aura_boss_dia_';
+var BOSS_MONTH_CACHE_PREFIX='aura_boss_mes_v83_';
+var _bossRequestSeq=0; // invalida respostas antigas quando data/modo muda durante uma busca
 var _bossModoQuebra='dia'; // 'dia' = lançamento do dia selecionado · 'mes' = acumulado do mês até o dia selecionado
 var _bossDados=null;
 var _bossListasCache=null;
 var _bossFiltroSetor='';
 var _bossFiltroTipo='todos';
 var _bossBusca='';
-var BOSS_VISION_BUILD='v8.2-gestor-overview-setor-filtros';
+var BOSS_VISION_BUILD='v8.3-gestor-rota-mensal-unica';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— usando somente a API principal da AURA');
 
 function bossFmtBRL(v){
@@ -5536,13 +5538,13 @@ function bossDiasDoMesAte_(dataIso){
   for(var d=1;d<=dia;d++)dias.push(ano+'-'+String(mes).padStart(2,'0')+'-'+String(d).padStart(2,'0'));
   return dias;
 }
-// Alterna entre ver a Quebra do dia selecionado ou o acumulado do mês (dia 1 até o dia
-// selecionado). O gestor pediu para ver "o total lançado até o momento" — como a API só
-// responde um dia por vez, aqui somamos localmente os dias já lançados no mês, com cache
-// por dia para não reconsultar o Drive toda vez.
+// Alterna entre a Quebra do dia selecionado e o acumulado do mês até o dia.
+// Na v8.3 o acumulado NÃO percorre 01, 02, 03... no navegador: chama a rota
+// buscarBossVisionMes uma única vez e o backend abre cada relatório apenas uma vez.
 function bossSetModoQuebra(modo){
   if(_bossModoQuebra===modo)return;
   _bossModoQuebra=modo;
+  ++_bossRequestSeq; // invalida qualquer resposta do modo anterior ainda em trânsito
   document.querySelectorAll('#bossSegPeriodo .boss-seg-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-modo')===modo);});
   bossCarregarAtual(false);
 }
@@ -5550,85 +5552,104 @@ function bossCarregarAtual(force){
   if(_bossModoQuebra==='mes')bossCarregarMes(force);
   else bossCarregar(force);
 }
+function bossBuscarMesCache_(data){
+  try{var raw=localStorage.getItem(BOSS_MONTH_CACHE_PREFIX+data);return raw?JSON.parse(raw):null;}catch(e){return null;}
+}
+function bossSalvarMesCache_(data,dados){
+  try{localStorage.setItem(BOSS_MONTH_CACHE_PREFIX+data,JSON.stringify({dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
+}
 function bossCarregarMes(force){
   var inp=document.getElementById('bossData');if(!inp)return;
   if(!inp.value)inp.value=bossHoje();
   var dataRef=inp.value;
   var url=bossApiUrl();
-  var dias=bossDiasDoMesAte_(dataRef);
-  var total=dias.length;
-  var pendentes=dias.slice();
-  var acumHorti=[],acumPadaria=[],arquivosLidos=0,diasComErro=0;
+  var reqId=++_bossRequestSeq;
   var btn=document.getElementById('bossBtnAtualizar');
-  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
-  function finalizar(){
-    var horti=bossNormalizarLista(acumHorti).map(function(x){if(!x.setor)x.setor='Horti';return x;});
-    var padaria=bossNormalizarLista(acumPadaria).map(function(x){if(!x.setor)x.setor='Padaria';return x;});
-    var base=_bossDados||{};
-    _bossDados=Object.assign({},base,{
-      data:dataRef,
-      grupos:Object.assign({},base.grupos||{},{quebra:{horti:horti,padaria:padaria}})
-    });
-    bossRender(_bossDados);
-    var msg='Acumulado do mês calculado · '+total+' dia(s) verificados';
-    if(diasComErro)msg+=' · '+diasComErro+' dia(s) sem retorno (ignorados)';
-    bossSetStatus(diasComErro?'warn':'ok',msg);
-    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
-  }
-  function proximo(){
-    if(!pendentes.length){finalizar();return;}
-    var data=pendentes.shift();
-    var progresso=(total-pendentes.length);
-    var cache=force?null:bossBuscarDiaCache_(data);
+  var dias=bossDiasDoMesAte_(dataRef);
+  var d0=dias.length?dias[0].split('-').reverse().join('/'):'01/'+dataRef.slice(5,7)+'/'+dataRef.slice(0,4);
+  var d1=dataRef.split('-').reverse().join('/');
+
+  if(!force){
+    var cache=bossBuscarMesCache_(dataRef);
     if(cache&&cache.dados){
-      acumHorti=acumHorti.concat(bossLista(cache.dados,'horti'));
-      acumPadaria=acumPadaria.concat(bossLista(cache.dados,'padaria'));
-      arquivosLidos+=Number(cache.dados.arquivosLidos)||0;
-      bossSetStatus('','Somando o mês... '+progresso+'/'+total+' dias (cache: '+data.split('-').reverse().join('/')+')');
-      proximo();
+      if(reqId!==_bossRequestSeq||_bossModoQuebra!=='mes')return;
+      bossRender(cache.dados);
+      bossSetStatus('ok','Acumulado '+d0+' a '+d1+' exibido do cache · clique em Atualizar para consultar o Drive novamente.');
       return;
     }
-    if(!url){diasComErro++;proximo();return;}
-    bossSetStatus('','Somando o mês... '+progresso+'/'+total+' dias (buscando '+data.split('-').reverse().join('/')+')');
-    bossFetch(url,data).then(function(res){
-      var dadosDia=(res&&(res.dados||res))||{};
-      bossSalvarDiaCache_(data,dadosDia);
-      acumHorti=acumHorti.concat(bossLista(dadosDia,'horti'));
-      acumPadaria=acumPadaria.concat(bossLista(dadosDia,'padaria'));
-      arquivosLidos+=Number(dadosDia.arquivosLidos)||0;
-    }).catch(function(){diasComErro++;}).finally(proximo);
   }
-  bossSetStatus('','Somando o mês... 0/'+total+' dias (cada dia sem cache pode levar ~20-25s; pode demorar alguns minutos na primeira vez)');
-  proximo();
+
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
+  bossSetStatus('','Consultando acumulado '+d0+' a '+d1+' em uma única chamada ao AURA...');
+  if(!url){
+    if(reqId===_bossRequestSeq){
+      bossRender(_bossDados||{});
+      bossSetStatus('warn','A API principal da AURA ainda não está disponível para consultar o acumulado mensal.');
+      if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
+    }
+    return;
+  }
+
+  var t0=performance.now();
+  console.time('[Boss Vision] mês até o dia (1 chamada)');
+  bossFetch(url,dataRef,'buscarBossVisionMes').then(function(res){
+    if(reqId!==_bossRequestSeq||_bossModoQuebra!=='mes')return;
+    if(!res||!res.ok)throw new Error((res&&res.erro)||'A rota mensal não retornou dados do Boss Vision.');
+    var dados=res.dados||res;
+    bossSalvarMesCache_(dataRef,dados);
+    bossRender(dados);
+    var avisos=(res.avisos||dados.avisos||[]);
+    var tempo=((performance.now()-t0)/1000).toFixed(1).replace('.',',');
+    if(avisos.length)bossSetStatus('warn','Acumulado mensal atualizado em '+tempo+'s · com avisos: '+avisos[0]);
+    else bossSetStatus('ok','Acumulado mensal atualizado em '+tempo+'s · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) lido(s) uma única vez':'consulta mensal concluída')+'.');
+  }).catch(function(err){
+    if(reqId!==_bossRequestSeq||_bossModoQuebra!=='mes')return;
+    console.warn('[Boss Vision] rota mensal falhou após',(performance.now()-t0).toFixed(0)+'ms:',err.message);
+    var cache=bossBuscarMesCache_(dataRef);
+    if(cache&&cache.dados){
+      bossRender(cache.dados);
+      bossSetStatus('warn','Rota mensal indisponível; exibindo o último acumulado salvo. '+err.message);
+    }else{
+      bossRender(_bossDados||{});
+      bossSetStatus('err','Não foi possível carregar o mês em uma única chamada. Publique o Code.gs v8.3 com a rota buscarBossVisionMes. '+err.message);
+    }
+  }).finally(function(){
+    try{console.timeEnd('[Boss Vision] mês até o dia (1 chamada)');}catch(e){}
+    if(reqId===_bossRequestSeq&&btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
+  });
 }
-function bossFetch(url,data){
+function bossFetch(url,data,action){
   return new Promise(function(resolve,reject){
     if(!url){reject(new Error('URL /exec principal da AURA não configurada.'));return;}
+    action=action||'buscarBossVision';
     var cb='__auraBoss_'+Date.now()+'_'+Math.random().toString(36).slice(2);
     var script=document.createElement('script');
     var timer=null;
     var expirado=false;
     function limpar(){
       if(timer)clearTimeout(timer);
-      // Não apagamos window[cb]: se o timeout já disparou e o <script> do Drive
-      // ainda estiver a caminho (o backend costuma levar ~20-25s por dia), ele
-      // vai chamar essa função quando finalmente chegar. Apagar causava
-      // "ReferenceError: __auraBoss_... is not defined" nesse cenário.
+      // Mantém um callback inerte para absorver eventual resposta tardia do JSONP.
       window[cb]=function(){};
       if(script&&script.parentNode)script.parentNode.removeChild(script);
     }
     window[cb]=function(payload){
-      if(expirado)return; // resposta tardia de uma chamada que já expirou; ignora
+      if(expirado)return;
       limpar();
       resolve(payload);
     };
-    script.onerror=function(){if(expirado)return;limpar();reject(new Error('A API principal da AURA não respondeu à rota buscarBossVision. Publique o Code.gs integrado.'));};
+    script.onerror=function(){
+      if(expirado)return;
+      limpar();
+      reject(new Error('A API principal da AURA não respondeu à rota '+action+'.'));
+    };
     var sep=url.indexOf('?')>=0?'&':'?';
-    script.src=url+sep+'action=buscarBossVision&data='+encodeURIComponent(data)+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();
+    script.src=url+sep+'action='+encodeURIComponent(action)+'&data='+encodeURIComponent(data)+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();
     script.async=true;
-    // O backend lê os relatórios do Drive dia a dia e costuma levar ~20-25s;
-    // 60s dá folga sem deixar o usuário esperando indefinidamente se algo travar.
-    timer=setTimeout(function(){expirado=true;limpar();reject(new Error('Tempo esgotado ao consultar os relatórios pela AURA (mais de 60s).'));},60000);
+    var timeoutMs=(action==='buscarBossVisionMes')?120000:60000;
+    timer=setTimeout(function(){
+      expirado=true;limpar();
+      reject(new Error('Tempo esgotado ao consultar '+action+' ('+(timeoutMs/1000)+'s).'));
+    },timeoutMs);
     document.head.appendChild(script);
   });
 }
@@ -5636,6 +5657,7 @@ function bossCarregar(force){
   var inp=document.getElementById('bossData');if(!inp)return;
   if(!inp.value)inp.value=bossHoje();
   var data=inp.value;
+  var reqId=++_bossRequestSeq;
   var url=bossApiUrl();
   var btn=document.getElementById('bossBtnAtualizar');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
@@ -5649,6 +5671,7 @@ function bossCarregar(force){
   var _bossT0=performance.now();
   console.time('[Boss Vision] tempo total (fetch+render)');
   bossFetch(url,data).then(function(res){
+    if(reqId!==_bossRequestSeq||_bossModoQuebra!=='dia')return;
     var _bossTFetch=performance.now();
     console.log('[Boss Vision] fetch (rede+backend):',(_bossTFetch-_bossT0).toFixed(0)+'ms');
     if(!res||!res.ok)throw new Error((res&&res.erro)||'A API não retornou dados do Boss Vision.');
@@ -5663,12 +5686,13 @@ function bossCarregar(force){
     if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);
     else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Vencidos AURA');
   }).catch(function(err){
+    if(reqId!==_bossRequestSeq||_bossModoQuebra!=='dia')return;
     console.timeEnd('[Boss Vision] tempo total (fetch+render)');
     console.warn('[Boss Vision] falhou após',(performance.now()-_bossT0).toFixed(0)+'ms:',err.message);
     var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
     if(cache&&cache.data===data&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','Drive indisponível; exibindo o último snapshot salvo deste dia.');}
     else{bossRender({});bossSetStatus('warn','Vencidos atualizados; relatórios do Drive pela AURA indisponíveis. '+err.message);}
-  }).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}});
+  }).finally(function(){if(reqId===_bossRequestSeq&&btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}});
 }
 function bossInit(){
   var inp=document.getElementById('bossData');if(inp&&!inp.value)inp.value=bossHoje();
