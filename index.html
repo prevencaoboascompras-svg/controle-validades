@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AURA — Boss Vision</title>
+<title>AURA Vencimentos</title>
 
 <!-- Favicon (aba do navegador) -->
 <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -2050,24 +2050,14 @@ function toggleTheme() {
     <div class="boss-wrap">
       <div class="boss-head">
         <div style="min-width:0;flex:1">
-          <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION</div>
+          <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
           <div class="boss-sub">Eventos do dia organizados por impacto financeiro. Os eventos externos são lidos das pastas mensais do Drive e os produtos usam o mesmo cadastro e banco de imagens do AURA.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
-          <div id="bossConfig" class="boss-config">
-            <div class="boss-config-grid">
-              <div>
-                <label>URL da API Boss Vision</label>
-                <input id="bossApiUrl" type="text" placeholder="Deixe vazio para usar a mesma API do AURA">
-              </div>
-              <button class="btn btn-green" onclick="bossSalvarConfig()"><i class="ti ti-device-floppy"></i> Salvar</button>
-            </div>
-            <div style="font-size:10px;color:var(--tx2);margin-top:6px">Se a API Boss Vision estiver no mesmo Apps Script do AURA, deixe este campo vazio.</div>
-          </div>
+          <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
         <div>
           <div class="boss-controls">
             <input id="bossData" class="boss-date" type="date" onchange="bossCarregar(true)">
-            <button class="btn" onclick="bossToggleConfig()" title="Configurar conexão"><i class="ti ti-settings"></i></button>
             <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
           </div>
         </div>
@@ -5124,9 +5114,10 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 // BOSS VISION — leitura de eventos do Drive via Apps Script
 // ═══════════════════════════════════════════════════════════════
-var BOSS_CACHE_KEY='aura_boss_vision_v2';
-var BOSS_API_KEY='aura_boss_api_url';
+var BOSS_CACHE_KEY='aura_boss_vision_v3_unico';
 var _bossDados=null;
+var BOSS_VISION_BUILD='v8-aura-unica-jsonp';
+console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— usando somente a API principal da AURA');
 
 function bossFmtBRL(v){
   v=Number(v)||0;
@@ -5149,25 +5140,14 @@ function bossHoje(){
   return y+'-'+m+'-'+day;
 }
 function bossApiUrl(){
-  var custom=(localStorage.getItem(BOSS_API_KEY)||'').trim();
-  if(custom)return custom;
-  var cfg=loadCfg();
-  return (cfg&&cfg.url)||'';
-}
-function bossToggleConfig(){
-  var box=document.getElementById('bossConfig');
-  if(!box)return;
-  box.classList.toggle('open');
-  var inp=document.getElementById('bossApiUrl');
-  if(inp)inp.value=localStorage.getItem(BOSS_API_KEY)||'';
-}
-function bossSalvarConfig(){
-  var inp=document.getElementById('bossApiUrl');
-  var v=inp?inp.value.trim():'';
-  localStorage.setItem(BOSS_API_KEY,v);
-  var box=document.getElementById('bossConfig');if(box)box.classList.remove('open');
-  mostrarToast('Conexão do Boss Vision salva.','ok');
-  bossCarregar(true);
+  // Boss Vision usa SOMENTE a mesma implantação da AURA.
+  // Prioriza a URL fixa desta build para não herdar override antigo de localStorage.
+  if(typeof GAS_URL!=='undefined' && String(GAS_URL||'').trim())return String(GAS_URL).trim();
+  try{
+    var cfg=(typeof loadCfg==='function')?loadCfg():null;
+    if(cfg&&cfg.url)return String(cfg.url).trim();
+  }catch(e){}
+  return '';
 }
 function bossSetStatus(tipo,msg){
   var el=document.getElementById('bossStatus');if(!el)return;
@@ -5314,8 +5294,24 @@ function bossRender(dados){
   var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(prodPad.length+uso.length)+' itens · Produção + Uso/Consumo';
 }
 function bossFetch(url,data){
-  var sep=url.indexOf('?')>=0?'&':'?';
-  return fetch(url+sep+'action=buscarBossVision&data='+encodeURIComponent(data),{cache:'no-store'}).then(function(r){return r.json();});
+  return new Promise(function(resolve,reject){
+    if(!url){reject(new Error('URL /exec principal da AURA não configurada.'));return;}
+    var cb='__auraBoss_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    var script=document.createElement('script');
+    var timer=null;
+    function limpar(){
+      if(timer)clearTimeout(timer);
+      try{delete window[cb];}catch(e){window[cb]=undefined;}
+      if(script&&script.parentNode)script.parentNode.removeChild(script);
+    }
+    window[cb]=function(payload){limpar();resolve(payload);};
+    script.onerror=function(){limpar();reject(new Error('A API principal da AURA não respondeu à rota buscarBossVision. Publique o Code.gs integrado.'));};
+    var sep=url.indexOf('?')>=0?'&':'?';
+    script.src=url+sep+'action=buscarBossVision&data='+encodeURIComponent(data)+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();
+    script.async=true;
+    timer=setTimeout(function(){limpar();reject(new Error('Tempo esgotado ao consultar os relatórios pela AURA.'));},30000);
+    document.head.appendChild(script);
+  });
 }
 function bossCarregar(force){
   var inp=document.getElementById('bossData');if(!inp)return;
@@ -5327,7 +5323,7 @@ function bossCarregar(force){
   bossSetStatus('','Atualizando eventos de '+data.split('-').reverse().join('/')+'...');
   if(!url){
     bossRender(_bossDados||{}); // mesmo sem Drive, Vencidos continua vindo da AURA
-    bossSetStatus('warn','Vencidos atualizados pela AURA. Configure a API para carregar Quebras e Consumo Interno.');
+    bossSetStatus('warn','Vencidos atualizados pela AURA. A API principal da AURA ainda não está disponível para carregar Quebras e Consumo Interno.');
     if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
     return;
   }
@@ -5342,7 +5338,7 @@ function bossCarregar(force){
   }).catch(function(err){
     var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
     if(cache&&cache.data===data&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','Drive indisponível; exibindo o último snapshot salvo deste dia.');}
-    else{bossRender({});bossSetStatus('warn','Vencidos atualizados pela AURA; relatórios do Drive indisponíveis. '+err.message);}
+    else{bossRender({});bossSetStatus('warn','Vencidos atualizados; relatórios do Drive pela AURA indisponíveis. '+err.message);}
   }).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}});
 }
 function bossInit(){
