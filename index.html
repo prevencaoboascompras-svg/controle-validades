@@ -1295,8 +1295,8 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-kpi-clicavel{cursor:pointer;transition:border-color .15s,transform .1s}
 .boss-kpi-clicavel:hover{border-color:var(--bds);transform:translateY(-1px)}
 .boss-kpi-clicavel .boss-kpi-lbl{display:flex;align-items:center;gap:4px}
-.boss-kpi-clicavel #bossConsumoChevron{transition:transform .18s;font-size:14px}
-.boss-kpi-clicavel.aberto #bossConsumoChevron{transform:rotate(180deg)}
+.boss-kpi-clicavel .ti-chevron-down{transition:transform .18s;font-size:14px}
+.boss-kpi-clicavel.aberto .ti-chevron-down{transform:rotate(180deg)}
 .boss-kpi-lbl{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:7px}
 .boss-kpi-val{font-size:25px;font-weight:800;line-height:1}
 .boss-kpi-sub{font-size:11px;color:var(--tx2);margin-top:6px}
@@ -1330,11 +1330,33 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-config-grid{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
 .boss-config label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--tx2);display:block;margin-bottom:4px}
 .boss-config input{width:100%;height:34px;padding:0 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-size:12px}
-.boss-cat-badge{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.02em;padding:1px 7px;border-radius:99px;margin-top:2px}
-.boss-panel-destaque{border-color:var(--red);box-shadow:0 0 0 1px var(--red)}
-.boss-panel-destaque .boss-panel-hd{background:color-mix(in srgb,var(--red) 10%,var(--bg2))}
-.boss-row-rank .boss-rank{font-size:12px;color:var(--red);font-weight:800}
-@media(max-width:900px){.boss-kpis{grid-template-columns:1fr}.boss-grid{grid-template-columns:1fr}.boss-row{grid-template-columns:24px 42px minmax(90px,1fr) 62px 80px 86px;gap:6px;padding:8px}.boss-photo{width:38px;height:38px}.boss-num strong{font-size:11px}}
+/* Boss Vision v8.2 — visão executiva contextual no topo */
+.boss-filters{display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-top:8px}
+.boss-search{height:35px;min-width:210px;padding:0 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg2);color:var(--tx);font:inherit;font-size:12px;outline:none}
+.boss-search:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(29,158,117,.12)}
+.boss-filter-state{font-size:10.5px;color:var(--tx2);text-align:right;margin-top:6px;line-height:1.4}
+.boss-filter-state strong{color:var(--green)}
+#dashSetorGrid.boss-mode{grid-template-columns:repeat(16,minmax(0,1fr))!important}
+#dashSetorGrid.boss-mode .dash-hero-card{padding:9px 7px!important}
+#dashSetorGrid.boss-mode .boss-setor-impacto{transition:border-color .15s,transform .1s,opacity .15s}
+#dashSetorGrid.boss-mode .boss-setor-impacto:hover{border-color:var(--green);transform:translateY(-1px)}
+#dashSetorGrid.boss-mode .boss-setor-impacto.active-filter{outline:2px solid var(--green);box-shadow:0 0 0 2px rgba(29,158,117,.16)}
+#dashSetorGrid.boss-mode .boss-setor-impacto.zero{opacity:.48}
+#dashSetorGrid.boss-mode .dsc-total{font-size:14px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#dashSetorGrid.boss-mode .dsc-status{font-size:8.5px!important;line-height:1.25;white-space:normal;min-height:21px}
+#dashSetorGrid.boss-mode .dsc-bar{margin-top:5px!important}
+#metrics.boss-mode{grid-template-columns:repeat(6,minmax(125px,1fr));gap:8px;margin-bottom:14px}
+#metrics.boss-mode .metric{padding:11px 12px;min-width:0}
+#metrics.boss-mode .metric.boss-metric-filter{cursor:pointer}
+#metrics.boss-mode .metric.boss-metric-filter.active-filter{border-color:var(--green)!important;box-shadow:0 0 0 2px rgba(29,158,117,.17)}
+#metrics.boss-mode .metric-val{font-size:20px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#metrics.boss-mode .metric-lbl{font-size:9px!important}
+.boss-metric-sub{font-size:9px;color:var(--tx2);margin-top:5px;line-height:1.25}
+.boss-panel.filtered-out{display:none}
+.boss-group.filtered-out{display:none}
+@media(max-width:1200px){#dashSetorGrid.boss-mode{grid-template-columns:repeat(8,minmax(0,1fr))!important}#metrics.boss-mode{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.boss-kpis{grid-template-columns:1fr}.boss-grid{grid-template-columns:1fr}.boss-row{grid-template-columns:24px 42px minmax(90px,1fr) 62px 80px 86px;gap:6px;padding:8px}.boss-photo{width:38px;height:38px}.boss-num strong{font-size:11px}.boss-filters{justify-content:flex-start}.boss-filter-state{text-align:left}}
+@media(max-width:700px){#dashSetorGrid.boss-mode{grid-template-columns:repeat(4,minmax(0,1fr))!important}#metrics.boss-mode{grid-template-columns:repeat(2,minmax(0,1fr))}.boss-search{min-width:0;flex:1;width:100%}}
 @media(max-width:620px){.boss-row{grid-template-columns:22px 38px minmax(0,1fr) 72px 82px}.boss-row .boss-qtd{display:none}.boss-photo{width:34px;height:34px}.boss-prod-name{font-size:11px}.boss-panel-hd{padding:11px 12px}.boss-kpi-val{font-size:22px}}
 
 </style>
@@ -1801,7 +1823,7 @@ function toggleTheme() {
   </div>
 
   <div id="setorStickyWrap">
-    <div class="dash-divider-label">Por setor</div>
+    <div class="dash-divider-label" id="topSetorLabel">Por setor</div>
     <div id="dashSetorGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">
     </div>
   </div>
@@ -2067,8 +2089,8 @@ function toggleTheme() {
     <div class="boss-wrap">
       <div class="boss-head">
         <div style="min-width:0;flex:1">
-          <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Eventos organizados por impacto financeiro. Quebra e Vencidos mostram o <strong>dia selecionado</strong>; Consumo Interno mostra o <strong>acumulado do mês</strong> (lançamento não é diário). Os eventos externos são lidos das pastas mensais do Drive e os produtos usam o mesmo cadastro e banco de imagens do AURA.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
+          <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8.2</span></div>
+          <div class="boss-sub">Eventos organizados por impacto financeiro. Quebra e Vencidos mostram o <strong>dia selecionado</strong>; Consumo Interno mostra o <strong>acumulado do mês</strong> (lançamento não é diário). No topo, os setores e resumos passam a mostrar <strong>valor, quantidade/peso e itens</strong> do próprio Boss Vision. Qtd./peso respeita a unidade registrada em cada relatório, sem converter unidades diferentes.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
@@ -2077,43 +2099,40 @@ function toggleTheme() {
             <input id="bossData" class="boss-date" type="date" onchange="bossCarregar(true)">
             <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
           </div>
+          <div class="boss-filters">
+            <input id="bossBusca" class="boss-search" type="search" placeholder="Filtrar produto / código" oninput="bossDefinirBusca(this.value)" aria-label="Filtrar produtos no Boss Vision">
+            <button class="btn btn-sm" id="bossBtnLimparFiltro" onclick="bossLimparFiltros()" title="Limpar setor, tipo e busca"><i class="ti ti-filter-off"></i> Limpar filtros</button>
+          </div>
+          <div class="boss-filter-state" id="bossFiltroAtivo">Visão geral · clique nos setores ou nos resumos para filtrar</div>
         </div>
       </div>
 
       <div class="boss-kpis">
-        <div class="boss-kpi"><div class="boss-kpi-lbl">Quebras</div><div class="boss-kpi-val" id="bossKpiQuebras">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasSub">Horti + Padaria</div></div>
-        <div class="boss-kpi"><div class="boss-kpi-lbl">Perdas</div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Produtos vencidos</div></div>
-        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossToggleConsumo()"><div class="boss-kpi-lbl">Consumo interno <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção Padaria + Uso e consumo</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiQuebrasCard" onclick="bossDefinirFiltroTipo('quebra')"><div class="boss-kpi-lbl">Quebras <i class="ti ti-filter"></i></div><div class="boss-kpi-val" id="bossKpiQuebras">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasSub">Horti + Padaria</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPerdasCard" onclick="bossDefinirFiltroTipo('perdas')"><div class="boss-kpi-lbl">Perdas <i class="ti ti-filter"></i></div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Produtos vencidos</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossDefinirFiltroTipo('consumo')"><div class="boss-kpi-lbl">Consumo interno <i class="ti ti-filter"></i></div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção Padaria + Uso e consumo</div></div>
       </div>
 
-      <div class="boss-group">
-        <div class="boss-group-title"><span><i class="ti ti-trending-down" style="color:var(--red)"></i> Ranking geral — maiores perdas</span><span class="boss-period-badge boss-period-dia" id="bossPeriodoRanking"></span><span class="boss-line"></span></div>
+      <div class="boss-group" id="bossGrupoQuebra">
+        <div class="boss-group-title"><span>Quebra</span><span class="boss-period-badge boss-period-dia" id="bossPeriodoQuebra"></span><span class="boss-line"></span></div>
+        <div class="boss-grid">
+          <div class="boss-panel" id="bossPanelHorti"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-leaf" style="color:var(--green)"></i> Horti</div><div class="boss-panel-total"><strong id="bossTotalHorti">R$ 0,00</strong><span id="bossCountHorti">0 itens</span></div></div><div class="boss-list" id="bossListHorti"></div></div>
+          <div class="boss-panel" id="bossPanelPadaria"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria</div><div class="boss-panel-total"><strong id="bossTotalPadaria">R$ 0,00</strong><span id="bossCountPadaria">0 itens</span></div></div><div class="boss-list" id="bossListPadaria"></div></div>
+        </div>
+      </div>
+
+      <div class="boss-group boss-group-collapsible" id="bossGrupoPerdas" style="display:none">
+        <div class="boss-group-title"><span>Perdas</span><span class="boss-period-badge boss-period-dia" id="bossPeriodoPerdas"></span><span class="boss-line"></span></div>
         <div class="boss-grid one">
-          <div class="boss-panel boss-panel-destaque"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-flame" style="color:var(--red)"></i> Top produtos que mais pesaram no dia</div><div class="boss-panel-total"><strong id="bossTotalRanking">R$ 0,00</strong><span id="bossCountRanking">0 itens</span></div></div><div class="boss-list" id="bossListRanking"></div></div>
+          <div class="boss-panel" id="bossPanelVencidos"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-calendar-x" style="color:var(--red)"></i> Vencidos</div><div class="boss-panel-total"><strong id="bossTotalVencidos">R$ 0,00</strong><span id="bossCountVencidos">0 itens</span></div></div><div class="boss-list" id="bossListVencidos"></div></div>
         </div>
-        <div class="boss-source-note" style="border:1px solid var(--bd);border-top:none;border-radius:0 0 var(--rl) var(--rl);margin-top:-1px">Combina Quebra (Horti + Padaria) e Vencidos do dia selecionado, do maior para o menor valor. Consumo interno é do mês e fica à parte, abaixo.</div>
       </div>
-
-      <details class="boss-group" style="cursor:default">
-        <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:2px">
-          <span>Ver detalhado por categoria (Quebra e Vencidos)</span><span class="boss-period-badge boss-period-dia" id="bossPeriodoQuebra"></span><span class="boss-line" style="flex:1"></span>
-        </summary>
-        <div style="margin-top:10px;display:flex;flex-direction:column;gap:12px">
-          <div class="boss-grid">
-            <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-leaf" style="color:var(--green)"></i> Horti</div><div class="boss-panel-total"><strong id="bossTotalHorti">R$ 0,00</strong><span id="bossCountHorti">0 itens</span></div></div><div class="boss-list" id="bossListHorti"></div></div>
-            <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria</div><div class="boss-panel-total"><strong id="bossTotalPadaria">R$ 0,00</strong><span id="bossCountPadaria">0 itens</span></div></div><div class="boss-list" id="bossListPadaria"></div></div>
-          </div>
-          <div class="boss-grid one">
-            <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-calendar-x" style="color:var(--red)"></i> Vencidos</div><div class="boss-panel-total"><strong id="bossTotalVencidos">R$ 0,00</strong><span id="bossCountVencidos">0 itens</span></div></div><div class="boss-list" id="bossListVencidos"></div></div>
-          </div>
-        </div>
-      </details>
 
       <div class="boss-group boss-group-collapsible" id="bossGrupoConsumo" style="display:none">
         <div class="boss-group-title"><span>Consumo interno</span><span class="boss-period-badge boss-period-mes" id="bossPeriodoConsumo"></span><span class="boss-line"></span></div>
         <div class="boss-grid">
-          <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-chef-hat" style="color:var(--blue)"></i> Produção Padaria</div><div class="boss-panel-total"><strong id="bossTotalProdPadaria">R$ 0,00</strong><span id="bossCountProdPadaria">0 itens</span></div></div><div class="boss-list" id="bossListProdPadaria"></div></div>
-          <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-building-warehouse" style="color:var(--blue)"></i> Uso e Consumo</div><div class="boss-panel-total"><strong id="bossTotalUsoConsumo">R$ 0,00</strong><span id="bossCountUsoConsumo">0 itens</span></div></div><div class="boss-list" id="bossListUsoConsumo"></div></div>
+          <div class="boss-panel" id="bossPanelProdPadaria"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-chef-hat" style="color:var(--blue)"></i> Produção Padaria</div><div class="boss-panel-total"><strong id="bossTotalProdPadaria">R$ 0,00</strong><span id="bossCountProdPadaria">0 itens</span></div></div><div class="boss-list" id="bossListProdPadaria"></div></div>
+          <div class="boss-panel" id="bossPanelUsoConsumo"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-building-warehouse" style="color:var(--blue)"></i> Uso e Consumo</div><div class="boss-panel-total"><strong id="bossTotalUsoConsumo">R$ 0,00</strong><span id="bossCountUsoConsumo">0 itens</span></div></div><div class="boss-list" id="bossListUsoConsumo"></div></div>
         </div>
       </div>
     </div>
@@ -5141,7 +5160,11 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v3_unico';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8.1-aura-unica-jsonp-menu-fix';
+var _bossListasCache=null;
+var _bossFiltroSetor='';
+var _bossFiltroTipo='todos';
+var _bossBusca='';
+var BOSS_VISION_BUILD='v8.2-gestor-overview-setor-filtros';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— usando somente a API principal da AURA');
 
 function bossFmtBRL(v){
@@ -5209,27 +5232,30 @@ function bossNormItem(item){
   if(cod&&typeof banco!=='undefined'&&banco[cod])nome=banco[cod];
   if(!custo&&cod&&typeof bancoCusto!=='undefined')custo=bancoCusto[cod]||0;
   if(!nome)nome=cod?('Produto '+cod):'Produto sem descrição';
-  return {cod:cod,nome:nome,qtde:qtd,custo:custo,valor:valor,arquivo:item.arquivo||'',data:item.data||''};
+  return {cod:cod,nome:nome,qtde:qtd,custo:custo,valor:valor,arquivo:item.arquivo||'',data:item.data||'',setor:String(item.setor||item.secao||'').trim()};
 }
 function bossNormalizarLista(arr){
   var mapa={};
   (Array.isArray(arr)?arr:[]).forEach(function(raw){
     var x=bossNormItem(raw);
     if(!x.nome||(!x.qtde&&!x.valor))return;
-    var k=(x.cod||x.nome.toUpperCase());
-    if(!mapa[k])mapa[k]={cod:x.cod,nome:x.nome,qtde:0,valor:0,custo:x.custo,arquivo:x.arquivo,data:x.data};
+    var k=(x.setor||'')+'|'+(x.cod||x.nome.toUpperCase());
+    if(!mapa[k])mapa[k]={cod:x.cod,nome:x.nome,qtde:0,valor:0,custo:x.custo,arquivo:x.arquivo,data:x.data,setor:x.setor||''};
     mapa[k].qtde+=x.qtde;
     mapa[k].valor+=x.valor;
     if(mapa[k].qtde>0)mapa[k].custo=mapa[k].valor/mapa[k].qtde;
   });
   return Object.keys(mapa).map(function(k){return mapa[k];}).sort(function(a,b){return b.valor-a.valor;});
 }
+function bossComSetorPadrao_(lista,setor){
+  return (lista||[]).map(function(x){if(!x.setor)x.setor=setor;return x;});
+}
 function bossLista(dados,chave){
   var g=dados&&dados.grupos?dados.grupos:dados||{};
-  if(chave==='horti')return bossNormalizarLista(bossGetPath(g,['quebra','horti'],g.quebraHorti||g.horti||[]));
-  if(chave==='padaria')return bossNormalizarLista(bossGetPath(g,['quebra','padaria'],g.quebraPadaria||g.padaria||[]));
-  if(chave==='producaoPadaria')return bossNormalizarLista(bossGetPath(g,['consumoInterno','producaoPadaria'],g.producaoPadaria||[]));
-  if(chave==='usoConsumo')return bossNormalizarLista(bossGetPath(g,['consumoInterno','usoConsumo'],g.usoConsumo||[]));
+  if(chave==='horti')return bossComSetorPadrao_(bossNormalizarLista(bossGetPath(g,['quebra','horti'],g.quebraHorti||g.horti||[])),'Horti');
+  if(chave==='padaria')return bossComSetorPadrao_(bossNormalizarLista(bossGetPath(g,['quebra','padaria'],g.quebraPadaria||g.padaria||[])),'Padaria');
+  if(chave==='producaoPadaria')return bossComSetorPadrao_(bossNormalizarLista(bossGetPath(g,['consumoInterno','producaoPadaria'],g.producaoPadaria||[])),'Padaria');
+  if(chave==='usoConsumo')return bossComSetorPadrao_(bossNormalizarLista(bossGetPath(g,['consumoInterno','usoConsumo'],g.usoConsumo||[])),'Uso/Consumo');
   return [];
 }
 
@@ -5253,12 +5279,132 @@ function bossVencidosAura(){
       qtde:qtd,
       custo:custo,
       valor:qtd*custo,
-      data:p.validade||''
+      data:p.validade||'',
+      setor:String(p.setor||'Outros')
     });
   });
   return bossNormalizarLista(itens);
 }
 function bossTotal(lista){return (lista||[]).reduce(function(a,x){return a+(Number(x.valor)||0);},0);}
+function bossVolume(lista){return (lista||[]).reduce(function(a,x){return a+(Number(x.qtde)||0);},0);}
+function bossTipoDaFonte_(chave){return(chave==='horti'||chave==='padaria')?'quebra':chave==='vencidos'?'perdas':'consumo';}
+function bossFiltroTipoPermite_(chave){return _bossFiltroTipo==='todos'||_bossFiltroTipo===bossTipoDaFonte_(chave);}
+function bossFiltrarLista_(chave,lista){
+  if(!bossFiltroTipoPermite_(chave))return [];
+  var busca=String(_bossBusca||'').trim().toLowerCase();
+  return (lista||[]).filter(function(x){
+    if(_bossFiltroSetor && String(x.setor||'Outros')!==_bossFiltroSetor)return false;
+    if(busca){
+      var hay=(String(x.nome||'')+' '+String(x.cod||'')+' '+String(x.setor||'')).toLowerCase();
+      if(hay.indexOf(busca)<0)return false;
+    }
+    return true;
+  });
+}
+function bossTodosItens_(listas){
+  return [].concat(listas.horti||[],listas.padaria||[],listas.vencidos||[],listas.producaoPadaria||[],listas.usoConsumo||[]);
+}
+function bossSetorIcon_(setor){
+  var m={'Açougue':'ti-meat','Acougue':'ti-meat','Bazar':'ti-home','Bebidas':'ti-beer','Congelados':'ti-snowflake','Frios':'ti-cheese','Horti':'ti-leaf','FLV':'ti-leaf','Laticínios':'ti-milk','Laticinios':'ti-milk','Limpeza':'ti-wash','Outros':'ti-package','Padaria':'ti-bread','Perfumaria':'ti-spray','Pet':'ti-paw','Pilhas/Baterias':'ti-battery','Seca':'ti-shopping-cart','Seca doce':'ti-candy','Uso/Consumo':'ti-building-warehouse'};
+  return m[setor]||'ti-package';
+}
+function bossRenderTopo_(listas){
+  if(typeof currentTabName!=='undefined'&&currentTabName!=='bossvision')return;
+  var label=document.getElementById('topSetorLabel');
+  var grid=document.getElementById('dashSetorGrid');
+  var metrics=document.getElementById('metrics');
+  if(!grid||!metrics)return;
+  if(label)label.innerHTML='Boss Vision · impacto por setor <span style="font-size:9px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--tx2)">R$ + qtd./peso · clique para filtrar</span>';
+  grid.classList.add('boss-mode');
+  metrics.classList.add('boss-mode');
+  var setorMap={};
+  bossTodosItens_(listas).forEach(function(x){
+    var setor=String(x.setor||'Outros');
+    if(!setorMap[setor])setorMap[setor]={valor:0,qtde:0,itens:0};
+    setorMap[setor].valor+=Number(x.valor)||0;
+    setorMap[setor].qtde+=Number(x.qtde)||0;
+    setorMap[setor].itens++;
+  });
+  var setores=(typeof SETORES_CANONICOS!=='undefined'?SETORES_CANONICOS.slice():[]);
+  Object.keys(setorMap).forEach(function(s){if(setores.indexOf(s)<0)setores.push(s);});
+  if(setores.indexOf('Uso/Consumo')<0)setores.push('Uso/Consumo');
+  var maxValor=Math.max.apply(null,setores.map(function(s){return setorMap[s]?setorMap[s].valor:0;}).concat([0]));
+  grid.style.gridTemplateColumns='repeat('+setores.length+', minmax(0,1fr))';
+  grid.innerHTML=setores.map(function(setor){
+    var d=setorMap[setor]||{valor:0,qtde:0,itens:0};
+    var pct=maxValor>0?Math.round((d.valor/maxValor)*100):0;
+    var ativo=_bossFiltroSetor===setor?' active-filter':'';
+    var zero=d.valor===0&&d.itens===0?' zero':'';
+    var cor=d.valor>0?'var(--green)':'var(--tx2)';
+    return '<div class="dash-hero-card dash-setor-card boss-setor-impacto'+ativo+zero+'" data-boss-setor="'+bossEscapeHtml(setor)+'" onclick="bossDefinirFiltroSetor(\''+String(setor).replace(/'/g,"\\'")+'\')" title="Filtrar Boss Vision por '+bossEscapeHtml(setor)+'">'
+      +'<div class="dsc-icon" style="color:'+cor+'"><i class="ti '+bossSetorIcon_(setor)+'"></i></div>'
+      +'<div class="dsc-nome" title="'+bossEscapeHtml(setor)+'">'+bossEscapeHtml(setor)+'</div>'
+      +'<div class="dsc-total">'+bossFmtBRL(d.valor)+'</div>'
+      +'<div class="dsc-status">'+bossFmtQtd(d.qtde)+' qtd./peso · '+d.itens+' '+(d.itens===1?'item':'itens')+'</div>'
+      +'<div class="dsc-bar"><div style="height:100%;width:'+pct+'%;background:'+(d.valor>0?'var(--green)':'var(--tx2)')+';border-radius:2px"></div></div>'
+      +'</div>';
+  }).join('');
+
+  var q=bossTotal(listas.horti)+bossTotal(listas.padaria);
+  var p=bossTotal(listas.vencidos);
+  var ci=bossTotal(listas.producaoPadaria)+bossTotal(listas.usoConsumo);
+  var volQ=bossVolume(listas.horti)+bossVolume(listas.padaria);
+  var volP=bossVolume(listas.vencidos);
+  var volCi=bossVolume(listas.producaoPadaria)+bossVolume(listas.usoConsumo);
+  var total=q+p+ci, volume=volQ+volP+volCi;
+  var itens=bossTodosItens_(listas).length;
+  function bm(lbl,val,sub,tipo,cls){
+    var ativo=tipo&&_bossFiltroTipo===tipo?' active-filter':'';
+    var click=tipo?' onclick="bossDefinirFiltroTipo(\''+tipo+'\')"':'';
+    return '<div class="metric boss-metric-filter'+ativo+'"'+click+' title="'+bossEscapeHtml(sub)+'">'
+      +'<div class="metric-lbl">'+lbl+'</div><div class="metric-val'+(cls?' '+cls:'')+'">'+val+'</div><div class="boss-metric-sub">'+sub+'</div></div>';
+  }
+  metrics.innerHTML=
+    bm('Impacto exibido',bossFmtBRL(total),'Quebra/perdas do dia + consumo do mês','todos','')+
+    bm('Quebras',bossFmtBRL(q),bossFmtQtd(volQ)+' qtd./peso · dia','quebra','danger')+
+    bm('Perdas',bossFmtBRL(p),bossFmtQtd(volP)+' qtd./peso · vencidos','perdas','danger')+
+    bm('Consumo interno',bossFmtBRL(ci),bossFmtQtd(volCi)+' qtd./peso · mês','consumo','info')+
+    bm('Volume lançado',bossFmtQtd(volume),'Qtd./peso conforme a unidade de cada relatório',null,'warn')+
+    bm('Itens consolidados',String(itens),'Produtos/eventos após consolidação',null,'ok');
+  metrics.style.display='grid';
+  bossAtualizarEstadoFiltro_();
+}
+function bossAtualizarEstadoFiltro_(){
+  var el=document.getElementById('bossFiltroAtivo');if(!el)return;
+  var partes=[];
+  if(_bossFiltroSetor)partes.push('Setor: <strong>'+bossEscapeHtml(_bossFiltroSetor)+'</strong>');
+  if(_bossFiltroTipo!=='todos')partes.push('Tipo: <strong>'+(_bossFiltroTipo==='quebra'?'Quebras':_bossFiltroTipo==='perdas'?'Perdas':'Consumo interno')+'</strong>');
+  if(_bossBusca)partes.push('Busca: <strong>'+bossEscapeHtml(_bossBusca)+'</strong>');
+  el.innerHTML=partes.length?partes.join(' · '):'Visão geral · clique nos setores ou nos resumos para filtrar';
+  ['bossKpiQuebrasCard','bossKpiPerdasCard','bossKpiConsumoCard'].forEach(function(id){var c=document.getElementById(id);if(c)c.classList.remove('aberto');});
+  var id=_bossFiltroTipo==='quebra'?'bossKpiQuebrasCard':_bossFiltroTipo==='perdas'?'bossKpiPerdasCard':_bossFiltroTipo==='consumo'?'bossKpiConsumoCard':'';
+  if(id){var c=document.getElementById(id);if(c)c.classList.add('aberto');}
+}
+function bossDefinirFiltroSetor(setor){
+  _bossFiltroSetor=(_bossFiltroSetor===setor)?'':setor;
+  bossRender(_bossDados||{});
+}
+function bossDefinirFiltroTipo(tipo){
+  tipo=tipo||'todos';
+  _bossFiltroTipo=(_bossFiltroTipo===tipo&&tipo!=='todos')?'todos':tipo;
+  bossRender(_bossDados||{});
+}
+function bossDefinirBusca(v){_bossBusca=String(v||'').trim();bossRender(_bossDados||{});}
+function bossLimparFiltros(){
+  _bossFiltroSetor='';_bossFiltroTipo='todos';_bossBusca='';
+  var inp=document.getElementById('bossBusca');if(inp)inp.value='';
+  bossRender(_bossDados||{});
+}
+function bossRestaurarTopoPadrao_(){
+  var label=document.getElementById('topSetorLabel');
+  var grid=document.getElementById('dashSetorGrid');
+  var metrics=document.getElementById('metrics');
+  if(label)label.textContent='Por setor';
+  if(grid){grid.classList.remove('boss-mode');grid.style.gridTemplateColumns='';}
+  if(metrics)metrics.classList.remove('boss-mode');
+  if(typeof renderDashboard==='function')renderDashboard();
+  if(typeof renderMetrics==='function')renderMetrics();
+}
 function bossEscapeHtml(v){
   return String(v==null?'':v)
     .replace(/&/g,'&amp;')
@@ -5275,7 +5421,7 @@ function bossRenderLista(id,lista){
     return '<div class="boss-row">'
       +'<div class="boss-rank">'+(i+1)+'</div>'
       +photo
-      +'<div class="boss-prod"><div class="boss-prod-name" title="'+bossEscapeHtml(x.nome)+'">'+bossEscapeHtml(x.nome)+'</div>'+(x.cod?'<div class="boss-prod-cod">'+x.cod+'</div>':'')+'</div>'
+      +'<div class="boss-prod"><div class="boss-prod-name" title="'+bossEscapeHtml(x.nome)+'">'+bossEscapeHtml(x.nome)+'</div>'+((x.cod||x.setor)?'<div class="boss-prod-cod">'+(x.cod?x.cod:'')+(x.cod&&x.setor?' · ':'')+(x.setor?bossEscapeHtml(x.setor):'')+'</div>':'')+'</div>'
       +'<div class="boss-num boss-qtd"><small>Quantidade</small><strong>'+bossFmtQtd(x.qtde)+'</strong></div>'
       +'<div class="boss-num"><small>Custo unit.</small><strong>'+bossFmtBRL(x.custo)+'</strong></div>'
       +'<div class="boss-num"><small>Valor</small><strong>'+bossFmtBRL(x.valor)+'</strong></div>'
@@ -5293,59 +5439,19 @@ function bossResolverFotos(root){
     }).catch(function(){var box=img.closest('.boss-photo');if(box)box.innerHTML='<i class="ti ti-photo-off"></i>';});
   });
 }
-// Ranking geral: junta Quebra (Horti+Padaria) e Vencidos do dia num único
-// painel ordenado por valor, do maior prejuízo pro menor — é o que o gestor
-// quer ver primeiro ao abrir a aba.
-function bossCombinarRanking(horti,padaria,vencidos){
-  var arr=[];
-  (horti||[]).forEach(function(x){arr.push(Object.assign({},x,{cat:'Horti',catColor:'var(--green)'}));});
-  (padaria||[]).forEach(function(x){arr.push(Object.assign({},x,{cat:'Padaria',catColor:'var(--amber)'}));});
-  (vencidos||[]).forEach(function(x){arr.push(Object.assign({},x,{cat:'Vencido',catColor:'var(--red)'}));});
-  arr.sort(function(a,b){return (b.valor||0)-(a.valor||0);});
-  return arr;
-}
-function bossRenderRanking(listaCompleta){
-  var el=document.getElementById('bossListRanking');if(!el)return;
-  var top=(listaCompleta||[]).slice(0,10);
-  if(!top.length){el.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhum lançamento para esta data.</div>';}
-  else{
-    el.innerHTML=top.map(function(x,i){
-      var photo=x.cod?'<div class="boss-photo"><img data-boss-cod="'+x.cod+'" alt="" loading="lazy"></div>':'<div class="boss-photo"><i class="ti ti-photo-off"></i></div>';
-      return '<div class="boss-row boss-row-rank">'
-        +'<div class="boss-rank">'+(i+1)+'</div>'
-        +photo
-        +'<div class="boss-prod"><div class="boss-prod-name" title="'+bossEscapeHtml(x.nome)+'">'+bossEscapeHtml(x.nome)+'</div>'
-          +'<span class="boss-cat-badge" style="background:color-mix(in srgb,'+x.catColor+' 18%,transparent);color:'+x.catColor+'">'+x.cat+'</span></div>'
-        +'<div class="boss-num boss-qtd"><small>Quantidade</small><strong>'+bossFmtQtd(x.qtde)+'</strong></div>'
-        +'<div class="boss-num"><small>Custo unit.</small><strong>'+bossFmtBRL(x.custo)+'</strong></div>'
-        +'<div class="boss-num"><small>Valor</small><strong>'+bossFmtBRL(x.valor)+'</strong></div>'
-        +'</div>';
-    }).join('');
-    bossResolverFotos(el);
-  }
-  var totalGeral=(listaCompleta||[]).reduce(function(a,x){return a+(Number(x.valor)||0);},0);
-  var t=document.getElementById('bossTotalRanking');if(t)t.textContent=bossFmtBRL(totalGeral);
-  var c=document.getElementById('bossCountRanking');
-  if(c)c.textContent=(listaCompleta||[]).length+' itens no total'+((listaCompleta||[]).length>top.length?' · top '+top.length+' exibidos':'');
-  var pr=document.getElementById('bossPeriodoRanking');
-  var pq=document.getElementById('bossPeriodoQuebra');
-  if(pr&&pq)pr.textContent=pq.textContent;
-}
 function bossAtualizaCabecalho(prefix,lista){
   var total=bossTotal(lista);
   var t=document.getElementById('bossTotal'+prefix),c=document.getElementById('bossCount'+prefix);
   if(t)t.textContent=bossFmtBRL(total);
-  if(c)c.textContent=lista.length+' '+(lista.length===1?'item':'itens');
+  if(c)c.textContent=lista.length+' '+(lista.length===1?'item':'itens')+' · '+bossFmtQtd(bossVolume(lista))+' qtd./peso';
 }
 function bossAtualizarVencidosAura(){
+  if(typeof currentTabName!=='undefined'&&currentTabName==='bossvision'){bossRender(_bossDados||{});return;}
   var lista=bossVencidosAura();
   bossRenderLista('bossListVencidos',lista);
   bossAtualizaCabecalho('Vencidos',lista);
   var k=document.getElementById('bossKpiPerdas');if(k)k.textContent=bossFmtBRL(bossTotal(lista));
-  var sub=document.getElementById('bossKpiPerdasSub');if(sub)sub.textContent=lista.length+' itens vencidos · fonte AURA';
-  var horti=bossLista(_bossDados||{},'horti');
-  var padaria=bossLista(_bossDados||{},'padaria');
-  bossRenderRanking(bossCombinarRanking(horti,padaria,lista));
+  var sub=document.getElementById('bossKpiPerdasSub');if(sub)sub.textContent=lista.length+' itens vencidos · '+bossFmtQtd(bossVolume(lista))+' qtd./peso · fonte AURA';
 }
 var BOSS_MESES_=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 function bossFmtDataBR_(iso){
@@ -5355,16 +5461,18 @@ function bossFmtDataBR_(iso){
 }
 function bossAtualizaPeriodos_(dados){
   var dataSel=bossFmtDataBR_(dados&&dados.data);
-  var mesNum=(dados&&dados.mes!=null)?Number(dados.mes):null;
+  var mesRaw=dados&&dados.mes;
   var ano=dados&&dados.ano;
-  var mesLabel=(mesNum!=null&&BOSS_MESES_[mesNum])?BOSS_MESES_[mesNum]+(ano?'/'+ano:''):'';
+  var mesLabel='';
+  if(typeof mesRaw==='string'&&mesRaw.trim()&&!/^\d+$/.test(mesRaw.trim()))mesLabel=mesRaw.trim()+(ano?'/'+ano:'');
+  else {var mesNum=(mesRaw!=null)?Number(mesRaw):null;if(mesNum!=null&&BOSS_MESES_[mesNum])mesLabel=BOSS_MESES_[mesNum]+(ano?'/'+ano:'');}
   var elQ=document.getElementById('bossPeriodoQuebra');if(elQ)elQ.textContent=dataSel?('dia '+dataSel):'';
   var elP=document.getElementById('bossPeriodoPerdas');if(elP)elP.textContent=dataSel?('dia '+dataSel):'';
   var elC=document.getElementById('bossPeriodoConsumo');if(elC)elC.textContent=mesLabel?('acumulado de '+mesLabel):'';
 }
-function bossToggleConsumo(){
-  var grp=document.getElementById('bossGrupoConsumo');
-  var card=document.getElementById('bossKpiConsumoCard');
+function bossToggleGrupo(grupoId,cardId,chevronId){
+  var grp=document.getElementById(grupoId);
+  var card=document.getElementById(cardId);
   if(!grp)return;
   var abrir=grp.style.display==='none';
   grp.style.display=abrir?'':'none';
@@ -5374,25 +5482,60 @@ function bossToggleConsumo(){
 function bossRender(dados){
   _bossDados=dados||{};
   bossAtualizaPeriodos_(dados);
-  var horti=bossLista(_bossDados,'horti');
-  var padaria=bossLista(_bossDados,'padaria');
-  var vencidos=bossVencidosAura();
-  var prodPad=bossLista(_bossDados,'producaoPadaria');
-  var uso=bossLista(_bossDados,'usoConsumo');
-  bossRenderLista('bossListHorti',horti);bossAtualizaCabecalho('Horti',horti);
-  bossRenderLista('bossListPadaria',padaria);bossAtualizaCabecalho('Padaria',padaria);
-  bossRenderLista('bossListVencidos',vencidos);bossAtualizaCabecalho('Vencidos',vencidos);
-  bossRenderLista('bossListProdPadaria',prodPad);bossAtualizaCabecalho('ProdPadaria',prodPad);
-  bossRenderLista('bossListUsoConsumo',uso);bossAtualizaCabecalho('UsoConsumo',uso);
-  bossRenderRanking(bossCombinarRanking(horti,padaria,vencidos));
-  var q=bossTotal(horti)+bossTotal(padaria),p=bossTotal(vencidos),ci=bossTotal(prodPad)+bossTotal(uso);
+  var base={
+    horti:bossLista(_bossDados,'horti'),
+    padaria:bossLista(_bossDados,'padaria'),
+    vencidos:bossVencidosAura(),
+    producaoPadaria:bossLista(_bossDados,'producaoPadaria'),
+    usoConsumo:bossLista(_bossDados,'usoConsumo')
+  };
+  _bossListasCache=base;
+  var vis={
+    horti:bossFiltrarLista_('horti',base.horti),
+    padaria:bossFiltrarLista_('padaria',base.padaria),
+    vencidos:bossFiltrarLista_('vencidos',base.vencidos),
+    producaoPadaria:bossFiltrarLista_('producaoPadaria',base.producaoPadaria),
+    usoConsumo:bossFiltrarLista_('usoConsumo',base.usoConsumo)
+  };
+
+  bossRenderLista('bossListHorti',vis.horti);bossAtualizaCabecalho('Horti',vis.horti);
+  bossRenderLista('bossListPadaria',vis.padaria);bossAtualizaCabecalho('Padaria',vis.padaria);
+  bossRenderLista('bossListVencidos',vis.vencidos);bossAtualizaCabecalho('Vencidos',vis.vencidos);
+  bossRenderLista('bossListProdPadaria',vis.producaoPadaria);bossAtualizaCabecalho('ProdPadaria',vis.producaoPadaria);
+  bossRenderLista('bossListUsoConsumo',vis.usoConsumo);bossAtualizaCabecalho('UsoConsumo',vis.usoConsumo);
+
+  // Totais executivos permanecem baseados na visão completa; os filtros afetam os detalhes.
+  var q=bossTotal(base.horti)+bossTotal(base.padaria),p=bossTotal(base.vencidos),ci=bossTotal(base.producaoPadaria)+bossTotal(base.usoConsumo);
+  var vq=bossVolume(base.horti)+bossVolume(base.padaria),vp=bossVolume(base.vencidos),vci=bossVolume(base.producaoPadaria)+bossVolume(base.usoConsumo);
   var a=document.getElementById('bossKpiQuebras');if(a)a.textContent=bossFmtBRL(q);
   var b=document.getElementById('bossKpiPerdas');if(b)b.textContent=bossFmtBRL(p);
   var c=document.getElementById('bossKpiConsumo');if(c)c.textContent=bossFmtBRL(ci);
-  var as=document.getElementById('bossKpiQuebrasSub');if(as)as.textContent=(horti.length+padaria.length)+' itens · Horti + Padaria';
-  var ps=document.getElementById('bossKpiPerdasSub');if(ps)ps.textContent=vencidos.length+' itens vencidos';
-  var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(prodPad.length+uso.length)+' itens · Produção + Uso/Consumo · mês todo';
+  var as=document.getElementById('bossKpiQuebrasSub');if(as)as.textContent=(base.horti.length+base.padaria.length)+' itens · '+bossFmtQtd(vq)+' qtd./peso · Horti + Padaria';
+  var ps=document.getElementById('bossKpiPerdasSub');if(ps)ps.textContent=base.vencidos.length+' itens · '+bossFmtQtd(vp)+' qtd./peso · vencidos';
+  var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(base.producaoPadaria.length+base.usoConsumo.length)+' itens · '+bossFmtQtd(vci)+' qtd./peso · mês todo';
+
+  // Visibilidade dos grupos/painéis conforme filtros combinados.
+  var pH=document.getElementById('bossPanelHorti'),pP=document.getElementById('bossPanelPadaria'),pV=document.getElementById('bossPanelVencidos'),pPr=document.getElementById('bossPanelProdPadaria'),pU=document.getElementById('bossPanelUsoConsumo');
+  [[pH,'horti'],[pP,'padaria'],[pV,'vencidos'],[pPr,'producaoPadaria'],[pU,'usoConsumo']].forEach(function(par){if(par[0])par[0].classList.toggle('filtered-out',!bossFiltroTipoPermite_(par[1])||(_bossFiltroSetor&&vis[par[1]].length===0));});
+  var gQ=document.getElementById('bossGrupoQuebra'),gP=document.getElementById('bossGrupoPerdas'),gC=document.getElementById('bossGrupoConsumo');
+  var temBuscaOuSetor=!!(_bossBusca||_bossFiltroSetor);
+  var qVis=vis.horti.length+vis.padaria.length, pVis=vis.vencidos.length, cVis=vis.producaoPadaria.length+vis.usoConsumo.length;
+  if(_bossFiltroTipo==='quebra'){
+    if(gQ)gQ.style.display='';if(gP)gP.style.display='none';if(gC)gC.style.display='none';
+  } else if(_bossFiltroTipo==='perdas'){
+    if(gQ)gQ.style.display='none';if(gP)gP.style.display='';if(gC)gC.style.display='none';
+  } else if(_bossFiltroTipo==='consumo'){
+    if(gQ)gQ.style.display='none';if(gP)gP.style.display='none';if(gC)gC.style.display='';
+  } else if(temBuscaOuSetor){
+    if(gQ)gQ.style.display=qVis?'':'none';if(gP)gP.style.display=pVis?'':'none';if(gC)gC.style.display=cVis?'':'none';
+  } else {
+    if(gQ)gQ.style.display='';if(gP)gP.style.display='none';if(gC)gC.style.display='none';
+  }
+
+  bossAtualizarEstadoFiltro_();
+  bossRenderTopo_(base);
 }
+
 function bossFetch(url,data){
   return new Promise(function(resolve,reject){
     if(!url){reject(new Error('URL /exec principal da AURA não configurada.'));return;}
@@ -5468,14 +5611,15 @@ function goTab(name){
   document.getElementById('sec-'+name).classList.add('active');
   // Na aba Dashboard, o próprio dashboard já mostra os totais (dash-tiles).
   // Esconde a barra de métricas global pra não duplicar.
-  // Na aba Boss Vision, esses blocos são resumo global de validade (todas as
-  // datas) e não têm relação com o recorte financeiro do dia da Boss Vision,
-  // então ficam ocultos também.
   var metricsEl=document.getElementById('metrics');
-  if(metricsEl) metricsEl.style.display = (name==='dashboard'||name==='bossvision') ? 'none' : '';
-  var setorEl=document.getElementById('setorStickyWrap');
-  if(setorEl) setorEl.style.display = (name==='bossvision') ? 'none' : '';
-  if(name==='bossvision')bossCarregar(false);
+  if(metricsEl) metricsEl.style.display = (name==='dashboard') ? 'none' : '';
+  if(name==='bossvision'){
+    if(_bossDados)bossRender(_bossDados);
+    bossCarregar(false);
+  } else {
+    bossRestaurarTopoPadrao_();
+    if(metricsEl)metricsEl.style.display=(name==='dashboard')?'none':'';
+  }
   if(name==='relatorio'){
     var selFiltro=document.getElementById('filtroNegTipo');
     if(selFiltro)selFiltro.value='sobras';
@@ -5488,7 +5632,7 @@ function goTab(name){
   if(name==='estoque')renderEstoque();
   if(name==='tarefas'){renderTarefas();sincronizarTarefasCompleto();}
 }
-function refresh(){renderMetrics();renderTable();atualizarNegBadge();renderDashboard();if(typeof bossAtualizarVencidosAura==='function')bossAtualizarVencidosAura();}
+function refresh(){renderMetrics();renderTable();atualizarNegBadge();renderDashboard();if(typeof bossAtualizarVencidosAura==='function')bossAtualizarVencidosAura();if(typeof currentTabName!=='undefined'&&currentTabName==='bossvision'&&typeof bossRender==='function')bossRender(_bossDados||{});}
 
 // ── Encartes Ativos ──────────────────────────────────────────────────────────
 var ENC_KEY='boascompras_encartes_ativos';
