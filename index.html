@@ -1277,6 +1277,53 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .scan-state{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;text-align:center;padding:20px}
 .scan-state i{font-size:40px;opacity:.7}
 .scan-state-btn{background:#34d399;color:#06281c;border:none;padding:10px 20px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}
+
+/* ═══════════════════════════════════════════════════════════════
+   BOSS VISION — painel executivo de eventos diários
+   ═══════════════════════════════════════════════════════════════ */
+.boss-wrap{display:flex;flex-direction:column;gap:18px}
+.boss-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:18px}
+.boss-title{font-size:20px;font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:9px}
+.boss-title i{color:var(--red)}
+.boss-sub{font-size:12px;color:var(--tx2);margin-top:5px;line-height:1.5}
+.boss-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.boss-date{height:35px;padding:0 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg2);color:var(--tx);font:inherit;font-size:12px}
+.boss-status{font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:6px;margin-top:8px}
+.boss-status.ok{color:var(--green)}.boss-status.warn{color:var(--amber)}.boss-status.err{color:var(--red)}
+.boss-kpis{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:10px}
+.boss-kpi{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);padding:15px 16px}
+.boss-kpi-lbl{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:7px}
+.boss-kpi-val{font-size:25px;font-weight:800;line-height:1}
+.boss-kpi-sub{font-size:11px;color:var(--tx2);margin-top:6px}
+.boss-group{display:flex;flex-direction:column;gap:10px}
+.boss-group-title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2)}
+.boss-group-title .boss-line{height:1px;flex:1;background:var(--bd)}
+.boss-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.boss-grid.one{grid-template-columns:minmax(0,1fr)}
+.boss-panel{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;min-width:0}
+.boss-panel-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;background:var(--bg2);border-bottom:1px solid var(--bd)}
+.boss-panel-title{font-size:13px;font-weight:800;display:flex;align-items:center;gap:7px}
+.boss-panel-total{text-align:right;white-space:nowrap}
+.boss-panel-total strong{display:block;font-size:17px}.boss-panel-total span{font-size:10px;color:var(--tx2)}
+.boss-list{display:flex;flex-direction:column}
+.boss-row{display:grid;grid-template-columns:28px 48px minmax(110px,1fr) 76px 92px 96px;gap:8px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--bd);min-width:0}
+.boss-row:last-child{border-bottom:none}
+.boss-rank{font-size:11px;font-weight:800;color:var(--tx2);text-align:center}
+.boss-photo{width:44px;height:44px;border-radius:8px;background:#fff;border:1px solid var(--bd);overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--tx2)}
+.boss-photo img{width:100%;height:100%;object-fit:contain;display:block}
+.boss-prod{min-width:0}.boss-prod-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.boss-prod-cod{font-size:9.5px;color:var(--tx2);margin-top:2px;font-family:monospace}
+.boss-num{text-align:right}.boss-num small{display:block;font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}.boss-num strong{font-size:12px;white-space:nowrap}
+.boss-empty{padding:26px 14px;text-align:center;color:var(--tx2);font-size:12px}
+.boss-empty i{font-size:24px;display:block;margin-bottom:7px;opacity:.45}
+.boss-source-note{font-size:10px;color:var(--tx2);padding:8px 12px;background:var(--bg2);border-top:1px solid var(--bd)}
+.boss-config{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
+.boss-config.open{display:block}
+.boss-config-grid{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.boss-config label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--tx2);display:block;margin-bottom:4px}
+.boss-config input{width:100%;height:34px;padding:0 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-size:12px}
+@media(max-width:900px){.boss-kpis{grid-template-columns:1fr}.boss-grid{grid-template-columns:1fr}.boss-row{grid-template-columns:24px 42px minmax(90px,1fr) 62px 80px 86px;gap:6px;padding:8px}.boss-photo{width:38px;height:38px}.boss-num strong{font-size:11px}}
+@media(max-width:620px){.boss-row{grid-template-columns:22px 38px minmax(0,1fr) 72px 82px}.boss-row .boss-qtd{display:none}.boss-photo{width:34px;height:34px}.boss-prod-name{font-size:11px}.boss-panel-hd{padding:11px 12px}.boss-kpi-val{font-size:22px}}
+
 </style>
 </head>
 <body>
@@ -1745,6 +1792,7 @@ function toggleTheme() {
   <div class="metrics" id="metrics" style="display:none"></div>
   <div class="tabs">
     <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
+    <div class="tab" onclick="goTab('bossvision')"><i class="ti ti-eye"></i> Boss Vision</div>
     <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório <span id="negBadge" style="display:none;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('modalidades')"><i class="ti ti-truck-delivery"></i> Modalidades</div>
     <div class="tab" onclick="goTab('ajuda')"><i class="ti ti-help"></i> Como configurar</div>
@@ -1995,6 +2043,65 @@ function toggleTheme() {
 
     <!-- Cards por mês -->
     <div id="antMesesContainer"></div>
+  </div>
+
+
+  <div id="sec-bossvision" class="sec">
+    <div class="boss-wrap">
+      <div class="boss-head">
+        <div style="min-width:0;flex:1">
+          <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION</div>
+          <div class="boss-sub">Eventos do dia organizados por impacto financeiro. Os relatórios são lidos das pastas mensais do Drive e os produtos usam o mesmo cadastro e banco de imagens do AURA.</div>
+          <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
+          <div id="bossConfig" class="boss-config">
+            <div class="boss-config-grid">
+              <div>
+                <label>URL da API Boss Vision</label>
+                <input id="bossApiUrl" type="text" placeholder="Deixe vazio para usar a mesma API do AURA">
+              </div>
+              <button class="btn btn-green" onclick="bossSalvarConfig()"><i class="ti ti-device-floppy"></i> Salvar</button>
+            </div>
+            <div style="font-size:10px;color:var(--tx2);margin-top:6px">Se a API Boss Vision estiver no mesmo Apps Script do AURA, deixe este campo vazio.</div>
+          </div>
+        </div>
+        <div>
+          <div class="boss-controls">
+            <input id="bossData" class="boss-date" type="date" onchange="bossCarregar(true)">
+            <button class="btn" onclick="bossToggleConfig()" title="Configurar conexão"><i class="ti ti-settings"></i></button>
+            <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregar(true)"><i class="ti ti-refresh"></i> Atualizar Drive</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="boss-kpis">
+        <div class="boss-kpi"><div class="boss-kpi-lbl">Quebras</div><div class="boss-kpi-val" id="bossKpiQuebras">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasSub">Horti + Padaria</div></div>
+        <div class="boss-kpi"><div class="boss-kpi-lbl">Perdas</div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Produtos vencidos</div></div>
+        <div class="boss-kpi"><div class="boss-kpi-lbl">Consumo interno</div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção Padaria + Uso e consumo</div></div>
+      </div>
+
+      <div class="boss-group">
+        <div class="boss-group-title"><span>Quebra</span><span class="boss-line"></span></div>
+        <div class="boss-grid">
+          <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-leaf" style="color:var(--green)"></i> Horti</div><div class="boss-panel-total"><strong id="bossTotalHorti">R$ 0,00</strong><span id="bossCountHorti">0 itens</span></div></div><div class="boss-list" id="bossListHorti"></div></div>
+          <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria</div><div class="boss-panel-total"><strong id="bossTotalPadaria">R$ 0,00</strong><span id="bossCountPadaria">0 itens</span></div></div><div class="boss-list" id="bossListPadaria"></div></div>
+        </div>
+      </div>
+
+      <div class="boss-group">
+        <div class="boss-group-title"><span>Perdas</span><span class="boss-line"></span></div>
+        <div class="boss-grid one">
+          <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-calendar-x" style="color:var(--red)"></i> Vencidos</div><div class="boss-panel-total"><strong id="bossTotalVencidos">R$ 0,00</strong><span id="bossCountVencidos">0 itens</span></div></div><div class="boss-list" id="bossListVencidos"></div></div>
+        </div>
+      </div>
+
+      <div class="boss-group">
+        <div class="boss-group-title"><span>Consumo interno</span><span class="boss-line"></span></div>
+        <div class="boss-grid">
+          <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-chef-hat" style="color:var(--blue)"></i> Produção Padaria</div><div class="boss-panel-total"><strong id="bossTotalProdPadaria">R$ 0,00</strong><span id="bossCountProdPadaria">0 itens</span></div></div><div class="boss-list" id="bossListProdPadaria"></div></div>
+          <div class="boss-panel"><div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-building-warehouse" style="color:var(--blue)"></i> Uso e Consumo</div><div class="boss-panel-total"><strong id="bossTotalUsoConsumo">R$ 0,00</strong><span id="bossCountUsoConsumo">0 itens</span></div></div><div class="boss-list" id="bossListUsoConsumo"></div></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="sec-relatorio" class="sec">
@@ -5012,17 +5119,220 @@ function addManual(){
   saveProd();closeModal('addModal');refresh();
 }
 
+
+
+// ═══════════════════════════════════════════════════════════════
+// BOSS VISION — leitura de eventos do Drive via Apps Script
+// ═══════════════════════════════════════════════════════════════
+var BOSS_CACHE_KEY='aura_boss_vision_v1';
+var BOSS_API_KEY='aura_boss_api_url';
+var _bossDados=null;
+
+function bossFmtBRL(v){
+  v=Number(v)||0;
+  return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function bossNum(v){
+  if(v===null||v===undefined||v==='')return 0;
+  if(typeof v==='number')return isFinite(v)?v:0;
+  var s=String(v).trim().replace(/R\$|\s/g,'');
+  if(s.indexOf(',')>=0)s=s.replace(/\./g,'').replace(',','.');
+  return Math.abs(parseFloat(s)||0);
+}
+function bossFmtQtd(v){
+  var n=bossNum(v);
+  return n.toLocaleString('pt-BR',{minimumFractionDigits:Number.isInteger(n)?0:2,maximumFractionDigits:3});
+}
+function bossHoje(){
+  var d=new Date();
+  var y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+function bossApiUrl(){
+  var custom=(localStorage.getItem(BOSS_API_KEY)||'').trim();
+  if(custom)return custom;
+  var cfg=loadCfg();
+  return (cfg&&cfg.url)||'';
+}
+function bossToggleConfig(){
+  var box=document.getElementById('bossConfig');
+  if(!box)return;
+  box.classList.toggle('open');
+  var inp=document.getElementById('bossApiUrl');
+  if(inp)inp.value=localStorage.getItem(BOSS_API_KEY)||'';
+}
+function bossSalvarConfig(){
+  var inp=document.getElementById('bossApiUrl');
+  var v=inp?inp.value.trim():'';
+  localStorage.setItem(BOSS_API_KEY,v);
+  var box=document.getElementById('bossConfig');if(box)box.classList.remove('open');
+  mostrarToast('Conexão do Boss Vision salva.','ok');
+  bossCarregar(true);
+}
+function bossSetStatus(tipo,msg){
+  var el=document.getElementById('bossStatus');if(!el)return;
+  el.className='boss-status '+(tipo||'');
+  var ico=tipo==='ok'?'ti-circle-check':tipo==='err'?'ti-alert-circle':tipo==='warn'?'ti-alert-triangle':'ti-point-filled';
+  el.innerHTML='<i class="ti '+ico+'"></i> '+msg;
+}
+function bossGetPath(obj,path,def){
+  var cur=obj;
+  for(var i=0;i<path.length;i++){if(cur==null)return def;cur=cur[path[i]];}
+  return cur==null?def:cur;
+}
+function bossNormItem(item){
+  item=item||{};
+  var cod=String(item.cod||item.codigo||item.ean||item.barras||'').replace(/[^0-9]/g,'');
+  var qtd=bossNum(item.qtde!=null?item.qtde:(item.quantidade!=null?item.quantidade:item.qtd));
+  var valor=bossNum(item.valor!=null?item.valor:(item.total!=null?item.total:item.custoTotal));
+  var custo=bossNum(item.custoUnitario!=null?item.custoUnitario:(item.custo!=null?item.custo:item.custoUn));
+  if(!custo&&qtd&&valor)custo=valor/qtd;
+  if(!valor&&qtd&&custo)valor=qtd*custo;
+  var nome=String(item.nome||item.descricao||item.produto||'').trim();
+  // O relatório pode trazer código interno em vez do EAN. Quando isso acontecer,
+  // tenta casar pelo nome com o BANCO DE DADOS do AURA para recuperar o código
+  // de barras usado nas fotos e na descrição padrão do sistema.
+  if(nome&&typeof banco!=='undefined'&&(!cod||!banco[cod])){
+    var alvoNome=(typeof normNome==='function'?normNome(nome):nome.toUpperCase());
+    var chaves=Object.keys(banco);
+    for(var bi=0;bi<chaves.length;bi++){
+      var bc=chaves[bi], bn=banco[bc]||'';
+      var bnNorm=(typeof normNome==='function'?normNome(bn):String(bn).toUpperCase());
+      if(bnNorm===alvoNome){cod=bc;break;}
+    }
+  }
+  if(cod&&typeof banco!=='undefined'&&banco[cod])nome=banco[cod];
+  if(!custo&&cod&&typeof bancoCusto!=='undefined')custo=bancoCusto[cod]||0;
+  if(!nome)nome=cod?('Produto '+cod):'Produto sem descrição';
+  return {cod:cod,nome:nome,qtde:qtd,custo:custo,valor:valor,arquivo:item.arquivo||'',data:item.data||''};
+}
+function bossNormalizarLista(arr){
+  var mapa={};
+  (Array.isArray(arr)?arr:[]).forEach(function(raw){
+    var x=bossNormItem(raw);
+    if(!x.nome||(!x.qtde&&!x.valor))return;
+    var k=(x.cod||x.nome.toUpperCase());
+    if(!mapa[k])mapa[k]={cod:x.cod,nome:x.nome,qtde:0,valor:0,custo:x.custo,arquivo:x.arquivo,data:x.data};
+    mapa[k].qtde+=x.qtde;
+    mapa[k].valor+=x.valor;
+    if(mapa[k].qtde>0)mapa[k].custo=mapa[k].valor/mapa[k].qtde;
+  });
+  return Object.keys(mapa).map(function(k){return mapa[k];}).sort(function(a,b){return b.valor-a.valor;});
+}
+function bossLista(dados,chave){
+  var g=dados&&dados.grupos?dados.grupos:dados||{};
+  if(chave==='horti')return bossNormalizarLista(bossGetPath(g,['quebra','horti'],g.quebraHorti||g.horti||[]));
+  if(chave==='padaria')return bossNormalizarLista(bossGetPath(g,['quebra','padaria'],g.quebraPadaria||g.padaria||[]));
+  if(chave==='vencidos')return bossNormalizarLista(bossGetPath(g,['perdas','vencidos'],g.vencidos||[]));
+  if(chave==='producaoPadaria')return bossNormalizarLista(bossGetPath(g,['consumoInterno','producaoPadaria'],g.producaoPadaria||[]));
+  if(chave==='usoConsumo')return bossNormalizarLista(bossGetPath(g,['consumoInterno','usoConsumo'],g.usoConsumo||[]));
+  return [];
+}
+function bossTotal(lista){return (lista||[]).reduce(function(a,x){return a+(Number(x.valor)||0);},0);}
+function bossRenderLista(id,lista){
+  var el=document.getElementById(id);if(!el)return;
+  if(!lista.length){el.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhum lançamento para esta data.</div>';return;}
+  el.innerHTML=lista.map(function(x,i){
+    var photo=x.cod?'<div class="boss-photo"><img data-boss-cod="'+x.cod+'" alt="" loading="lazy"></div>':'<div class="boss-photo"><i class="ti ti-photo-off"></i></div>';
+    return '<div class="boss-row">'
+      +'<div class="boss-rank">'+(i+1)+'</div>'
+      +photo
+      +'<div class="boss-prod"><div class="boss-prod-name" title="'+escapeHtml(x.nome)+'">'+escapeHtml(x.nome)+'</div>'+(x.cod?'<div class="boss-prod-cod">'+x.cod+'</div>':'')+'</div>'
+      +'<div class="boss-num boss-qtd"><small>Quantidade</small><strong>'+bossFmtQtd(x.qtde)+'</strong></div>'
+      +'<div class="boss-num"><small>Custo unit.</small><strong>'+bossFmtBRL(x.custo)+'</strong></div>'
+      +'<div class="boss-num"><small>Valor</small><strong>'+bossFmtBRL(x.valor)+'</strong></div>'
+      +'</div>';
+  }).join('');
+  bossResolverFotos(el);
+}
+function bossResolverFotos(root){
+  if(!root||typeof _resolverFotoTarefaChain!=='function')return;
+  root.querySelectorAll('img[data-boss-cod]').forEach(function(img){
+    var cod=img.getAttribute('data-boss-cod');
+    _resolverFotoTarefaChain(cod).then(function(url){
+      if(url){img.src=url;}
+      else{var box=img.closest('.boss-photo');if(box)box.innerHTML='<i class="ti ti-photo-off"></i>';}
+    }).catch(function(){var box=img.closest('.boss-photo');if(box)box.innerHTML='<i class="ti ti-photo-off"></i>';});
+  });
+}
+function bossAtualizaCabecalho(prefix,lista){
+  var total=bossTotal(lista);
+  var t=document.getElementById('bossTotal'+prefix),c=document.getElementById('bossCount'+prefix);
+  if(t)t.textContent=bossFmtBRL(total);
+  if(c)c.textContent=lista.length+' '+(lista.length===1?'item':'itens');
+}
+function bossRender(dados){
+  _bossDados=dados||{};
+  var horti=bossLista(_bossDados,'horti');
+  var padaria=bossLista(_bossDados,'padaria');
+  var vencidos=bossLista(_bossDados,'vencidos');
+  var prodPad=bossLista(_bossDados,'producaoPadaria');
+  var uso=bossLista(_bossDados,'usoConsumo');
+  bossRenderLista('bossListHorti',horti);bossAtualizaCabecalho('Horti',horti);
+  bossRenderLista('bossListPadaria',padaria);bossAtualizaCabecalho('Padaria',padaria);
+  bossRenderLista('bossListVencidos',vencidos);bossAtualizaCabecalho('Vencidos',vencidos);
+  bossRenderLista('bossListProdPadaria',prodPad);bossAtualizaCabecalho('ProdPadaria',prodPad);
+  bossRenderLista('bossListUsoConsumo',uso);bossAtualizaCabecalho('UsoConsumo',uso);
+  var q=bossTotal(horti)+bossTotal(padaria),p=bossTotal(vencidos),ci=bossTotal(prodPad)+bossTotal(uso);
+  var a=document.getElementById('bossKpiQuebras');if(a)a.textContent=bossFmtBRL(q);
+  var b=document.getElementById('bossKpiPerdas');if(b)b.textContent=bossFmtBRL(p);
+  var c=document.getElementById('bossKpiConsumo');if(c)c.textContent=bossFmtBRL(ci);
+  var as=document.getElementById('bossKpiQuebrasSub');if(as)as.textContent=(horti.length+padaria.length)+' itens · Horti + Padaria';
+  var ps=document.getElementById('bossKpiPerdasSub');if(ps)ps.textContent=vencidos.length+' itens vencidos';
+  var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(prodPad.length+uso.length)+' itens · Produção + Uso/Consumo';
+}
+function bossFetch(url,data){
+  var sep=url.indexOf('?')>=0?'&':'?';
+  return fetch(url+sep+'action=buscarBossVision&data='+encodeURIComponent(data),{cache:'no-store'}).then(function(r){return r.json();});
+}
+function bossCarregar(force){
+  var inp=document.getElementById('bossData');if(!inp)return;
+  if(!inp.value)inp.value=bossHoje();
+  var data=inp.value;
+  var url=bossApiUrl();
+  var btn=document.getElementById('bossBtnAtualizar');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Lendo Drive...';}
+  bossSetStatus('','Lendo relatórios de '+data.split('-').reverse().join('/')+'...');
+  if(!url){
+    bossSetStatus('err','API não configurada. Configure a URL do Apps Script do Boss Vision.');
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar Drive';}
+    return;
+  }
+  bossFetch(url,data).then(function(res){
+    if(!res||!res.ok)throw new Error((res&&res.erro)||'A API não retornou dados do Boss Vision.');
+    var dados=res.dados||res;
+    bossRender(dados);
+    try{localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({data:data,dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
+    var avisos=(res.avisos||dados.avisos||[]);
+    if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);
+    else bossSetStatus('ok','Drive atualizado agora · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' arquivo(s) lido(s)':'dados recebidos'));
+  }).catch(function(err){
+    var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
+    if(cache&&cache.data===data&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','Drive indisponível; exibindo o último snapshot salvo deste dia.');}
+    else{bossRender({});bossSetStatus('err',err.message+' Verifique se a action buscarBossVision está instalada no Apps Script.');}
+  }).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar Drive';}});
+}
+function bossInit(){
+  var inp=document.getElementById('bossData');if(inp&&!inp.value)inp.value=bossHoje();
+  var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
+  if(cache&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','Snapshot local exibido; abra o Boss Vision para atualizar o Drive.');}
+}
+setTimeout(bossInit,0);
+
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
-  var tabNames=['dashboard','validades','estoque','promocoes','encartes','antecipacao','relatorio','modalidades','tarefas','ajuda'];
-  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',tabNames[i]===name);});
+  document.querySelectorAll('.tab').forEach(function(t){
+    var oc=t.getAttribute('onclick')||'';
+    t.classList.toggle('active', oc.indexOf("goTab('"+name+"')")!==-1);
+  });
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
   document.getElementById('sec-'+name).classList.add('active');
   // Na aba Dashboard, o próprio dashboard já mostra os totais (dash-tiles).
   // Esconde a barra de métricas global pra não duplicar.
   var metricsEl=document.getElementById('metrics');
   if(metricsEl) metricsEl.style.display = (name==='dashboard') ? 'none' : '';
+  if(name==='bossvision')bossCarregar(false);
   if(name==='relatorio'){
     var selFiltro=document.getElementById('filtroNegTipo');
     if(selFiltro)selFiltro.value='sobras';
@@ -5181,15 +5491,21 @@ function encDescPct(de,por){
 }
 
 function renderEncartesAtivos(){
+  // v6.31.1 fix: esta interface antiga de encartes não existe em algumas telas/versões.
+  // A sincronização em nuvem ainda atualiza os dados normalmente; apenas não tentamos
+  // renderizar componentes que não estão presentes no DOM.
+  var grid=document.getElementById('encGrid');
+  if(!grid)return;
+
   var arr=getEncartesAtivos();
   var buscaEl=document.getElementById('encBusca');
   var busca=buscaEl?buscaEl.value.trim().toLowerCase():'';
   if(busca){
     arr=arr.filter(function(e){return (e.nome||'').toLowerCase().indexOf(busca)>-1;});
   }
-  var grid=document.getElementById('encGrid');
   encSelecionados=[];
-  document.getElementById('printBar').style.display='none';
+  var printBar=document.getElementById('printBar');
+  if(printBar)printBar.style.display='none';
   if(!arr.length){
     grid.innerHTML='<div class="empty"><i class="ti ti-photo-off"></i>Nenhum encarte gerado ainda.<br>Clique em "Novo encarte" para criar o primeiro.</div>'
       +'<button class="ecard-add" onclick="openEncarteModal(null)"><i class="ti ti-plus"></i> Adicionar novo produto ao encarte</button>';
@@ -5293,9 +5609,11 @@ function toggleEncarteSelecao(id){
 function atualizarPrintBar(){
   var bar=document.getElementById('printBar');
   var cnt=document.getElementById('printCount');
+  // A barra pertence à interface antiga de encartes e pode não existir nesta versão.
+  if(!bar)return;
   if(encSelecionados.length){
     bar.style.display='flex';
-    cnt.textContent=encSelecionados.length+' selecionado'+(encSelecionados.length>1?'s':'');
+    if(cnt)cnt.textContent=encSelecionados.length+' selecionado'+(encSelecionados.length>1?'s':'');
   }else{
     bar.style.display='none';
   }
@@ -5317,7 +5635,8 @@ function deselectAll(){
     if(chk){chk.style.background='';chk.style.borderColor='var(--bds)';var i=chk.querySelector('i');if(i)i.style.display='none';}
   });
   encSelecionados=[];
-  document.getElementById('printBar').style.display='none';
+  var printBar=document.getElementById('printBar');
+  if(printBar)printBar.style.display='none';
 }
 
 function downloadEncarteAtivo(id){
