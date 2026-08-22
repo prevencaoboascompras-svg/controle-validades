@@ -5634,7 +5634,7 @@ function bossCarregarMes(force){
       arquivosLidos+=Number(dadosDia.arquivosLidos)||0;
     }).catch(function(){diasComErro++;}).finally(proximo);
   }
-  bossSetStatus('','Somando o mês... 0/'+total+' dias');
+  bossSetStatus('','Somando o mês... 0/'+total+' dias (cada dia sem cache pode levar ~20-25s; pode demorar alguns minutos na primeira vez)');
   proximo();
 }
 function bossFetch(url,data){
@@ -5643,17 +5643,28 @@ function bossFetch(url,data){
     var cb='__auraBoss_'+Date.now()+'_'+Math.random().toString(36).slice(2);
     var script=document.createElement('script');
     var timer=null;
+    var expirado=false;
     function limpar(){
       if(timer)clearTimeout(timer);
-      try{delete window[cb];}catch(e){window[cb]=undefined;}
+      // Não apagamos window[cb]: se o timeout já disparou e o <script> do Drive
+      // ainda estiver a caminho (o backend costuma levar ~20-25s por dia), ele
+      // vai chamar essa função quando finalmente chegar. Apagar causava
+      // "ReferenceError: __auraBoss_... is not defined" nesse cenário.
+      window[cb]=function(){};
       if(script&&script.parentNode)script.parentNode.removeChild(script);
     }
-    window[cb]=function(payload){limpar();resolve(payload);};
-    script.onerror=function(){limpar();reject(new Error('A API principal da AURA não respondeu à rota buscarBossVision. Publique o Code.gs integrado.'));};
+    window[cb]=function(payload){
+      if(expirado)return; // resposta tardia de uma chamada que já expirou; ignora
+      limpar();
+      resolve(payload);
+    };
+    script.onerror=function(){if(expirado)return;limpar();reject(new Error('A API principal da AURA não respondeu à rota buscarBossVision. Publique o Code.gs integrado.'));};
     var sep=url.indexOf('?')>=0?'&':'?';
     script.src=url+sep+'action=buscarBossVision&data='+encodeURIComponent(data)+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();
     script.async=true;
-    timer=setTimeout(function(){limpar();reject(new Error('Tempo esgotado ao consultar os relatórios pela AURA.'));},30000);
+    // O backend lê os relatórios do Drive dia a dia e costuma levar ~20-25s;
+    // 60s dá folga sem deixar o usuário esperando indefinidamente se algo travar.
+    timer=setTimeout(function(){expirado=true;limpar();reject(new Error('Tempo esgotado ao consultar os relatórios pela AURA (mais de 60s).'));},60000);
     document.head.appendChild(script);
   });
 }
