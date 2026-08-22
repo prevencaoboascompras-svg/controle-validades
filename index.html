@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle de Validades</title>
+<title>AURA — Boss Vision</title>
 
 <!-- Favicon (aba do navegador) -->
 <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -2051,7 +2051,7 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION</div>
-          <div class="boss-sub">Eventos do dia organizados por impacto financeiro. Os relatórios são lidos das pastas mensais do Drive e os produtos usam o mesmo cadastro e banco de imagens do AURA.</div>
+          <div class="boss-sub">Eventos do dia organizados por impacto financeiro. Os eventos externos são lidos das pastas mensais do Drive e os produtos usam o mesmo cadastro e banco de imagens do AURA.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div id="bossConfig" class="boss-config">
             <div class="boss-config-grid">
@@ -2068,7 +2068,7 @@ function toggleTheme() {
           <div class="boss-controls">
             <input id="bossData" class="boss-date" type="date" onchange="bossCarregar(true)">
             <button class="btn" onclick="bossToggleConfig()" title="Configurar conexão"><i class="ti ti-settings"></i></button>
-            <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregar(true)"><i class="ti ti-refresh"></i> Atualizar Drive</button>
+            <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
           </div>
         </div>
       </div>
@@ -5124,7 +5124,7 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 // BOSS VISION — leitura de eventos do Drive via Apps Script
 // ═══════════════════════════════════════════════════════════════
-var BOSS_CACHE_KEY='aura_boss_vision_v1';
+var BOSS_CACHE_KEY='aura_boss_vision_v2';
 var BOSS_API_KEY='aura_boss_api_url';
 var _bossDados=null;
 
@@ -5223,10 +5223,35 @@ function bossLista(dados,chave){
   var g=dados&&dados.grupos?dados.grupos:dados||{};
   if(chave==='horti')return bossNormalizarLista(bossGetPath(g,['quebra','horti'],g.quebraHorti||g.horti||[]));
   if(chave==='padaria')return bossNormalizarLista(bossGetPath(g,['quebra','padaria'],g.quebraPadaria||g.padaria||[]));
-  if(chave==='vencidos')return bossNormalizarLista(bossGetPath(g,['perdas','vencidos'],g.vencidos||[]));
   if(chave==='producaoPadaria')return bossNormalizarLista(bossGetPath(g,['consumoInterno','producaoPadaria'],g.producaoPadaria||[]));
   if(chave==='usoConsumo')return bossNormalizarLista(bossGetPath(g,['consumoInterno','usoConsumo'],g.usoConsumo||[]));
   return [];
+}
+
+// Vencidos do Boss Vision vêm diretamente da base já carregada pelo AURA.
+// Usa a mesma regra do Dashboard: status "vencido" + custo x quantidade atual.
+function bossVencidosAura(){
+  if(typeof products==='undefined'||!Array.isArray(products))return [];
+  var itens=[];
+  products.forEach(function(p){
+    if(!p||typeof daysDiff!=='function'||typeof statusFromDays!=='function')return;
+    if(statusFromDays(daysDiff(p.validade))!=='vencido')return;
+    var qtd=(typeof qtdeEfetiva==='function')?qtdeEfetiva(p.qtde):bossNum(p.qtde);
+    var custo=(typeof parsePreco==='function')?parsePreco(p.custo):bossNum(p.custo);
+    custo=Number(custo)||0;
+    if(!custo&&p.cod&&typeof bancoCusto!=='undefined')custo=Number(bancoCusto[p.cod])||0;
+    var nome=String(p.nome||'').trim();
+    if(p.cod&&typeof banco!=='undefined'&&banco[p.cod])nome=banco[p.cod];
+    itens.push({
+      cod:String(p.cod||'').replace(/[^0-9]/g,''),
+      nome:nome||('Produto '+(p.cod||'')),
+      qtde:qtd,
+      custo:custo,
+      valor:qtd*custo,
+      data:p.validade||''
+    });
+  });
+  return bossNormalizarLista(itens);
 }
 function bossTotal(lista){return (lista||[]).reduce(function(a,x){return a+(Number(x.valor)||0);},0);}
 function bossRenderLista(id,lista){
@@ -5261,11 +5286,18 @@ function bossAtualizaCabecalho(prefix,lista){
   if(t)t.textContent=bossFmtBRL(total);
   if(c)c.textContent=lista.length+' '+(lista.length===1?'item':'itens');
 }
+function bossAtualizarVencidosAura(){
+  var lista=bossVencidosAura();
+  bossRenderLista('bossListVencidos',lista);
+  bossAtualizaCabecalho('Vencidos',lista);
+  var k=document.getElementById('bossKpiPerdas');if(k)k.textContent=bossFmtBRL(bossTotal(lista));
+  var sub=document.getElementById('bossKpiPerdasSub');if(sub)sub.textContent=lista.length+' itens vencidos · fonte AURA';
+}
 function bossRender(dados){
   _bossDados=dados||{};
   var horti=bossLista(_bossDados,'horti');
   var padaria=bossLista(_bossDados,'padaria');
-  var vencidos=bossLista(_bossDados,'vencidos');
+  var vencidos=bossVencidosAura();
   var prodPad=bossLista(_bossDados,'producaoPadaria');
   var uso=bossLista(_bossDados,'usoConsumo');
   bossRenderLista('bossListHorti',horti);bossAtualizaCabecalho('Horti',horti);
@@ -5291,11 +5323,12 @@ function bossCarregar(force){
   var data=inp.value;
   var url=bossApiUrl();
   var btn=document.getElementById('bossBtnAtualizar');
-  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Lendo Drive...';}
-  bossSetStatus('','Lendo relatórios de '+data.split('-').reverse().join('/')+'...');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
+  bossSetStatus('','Atualizando eventos de '+data.split('-').reverse().join('/')+'...');
   if(!url){
-    bossSetStatus('err','API não configurada. Configure a URL do Apps Script do Boss Vision.');
-    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar Drive';}
+    bossRender(_bossDados||{}); // mesmo sem Drive, Vencidos continua vindo da AURA
+    bossSetStatus('warn','Vencidos atualizados pela AURA. Configure a API para carregar Quebras e Consumo Interno.');
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
     return;
   }
   bossFetch(url,data).then(function(res){
@@ -5305,12 +5338,12 @@ function bossCarregar(force){
     try{localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({data:data,dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
     var avisos=(res.avisos||dados.avisos||[]);
     if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);
-    else bossSetStatus('ok','Drive atualizado agora · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' arquivo(s) lido(s)':'dados recebidos'));
+    else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Vencidos AURA');
   }).catch(function(err){
     var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
     if(cache&&cache.data===data&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','Drive indisponível; exibindo o último snapshot salvo deste dia.');}
-    else{bossRender({});bossSetStatus('err',err.message+' Verifique se a action buscarBossVision está instalada no Apps Script.');}
-  }).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar Drive';}});
+    else{bossRender({});bossSetStatus('warn','Vencidos atualizados pela AURA; relatórios do Drive indisponíveis. '+err.message);}
+  }).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}});
 }
 function bossInit(){
   var inp=document.getElementById('bossData');if(inp&&!inp.value)inp.value=bossHoje();
@@ -5345,7 +5378,7 @@ function goTab(name){
   if(name==='estoque')renderEstoque();
   if(name==='tarefas'){renderTarefas();sincronizarTarefasCompleto();}
 }
-function refresh(){renderMetrics();renderTable();atualizarNegBadge();renderDashboard();}
+function refresh(){renderMetrics();renderTable();atualizarNegBadge();renderDashboard();if(typeof bossAtualizarVencidosAura==='function')bossAtualizarVencidosAura();}
 
 // ── Encartes Ativos ──────────────────────────────────────────────────────────
 var ENC_KEY='boascompras_encartes_ativos';
