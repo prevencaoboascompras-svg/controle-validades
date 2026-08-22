@@ -4616,8 +4616,9 @@ async function buscarFotoOpenverse(query){
 // 2) Bluesoft Cosmos (catálogo público por EAN)
 // 3) Google CSE (fundo branco, por nome e por código de barras)
 // 4) Openverse (reforço quando o Google não encontra nada)
-// 5) Open Food Facts (por EAN e por nome)
-// 6) em branco (upload manual)
+// 5) em branco (upload manual)
+// Open Food Facts foi removido dessa cadeia (gerava muitos erros
+// 404/CORS/429 no console e raramente tinha a foto certa).
 async function buscarFotoCompleta(ean, nomeProduto){
   var nomeLimpo = (nomeProduto||'').replace(/\s*\(\d+.*$/,'').replace(/\s*\{.*$/,'').trim();
 
@@ -4682,45 +4683,8 @@ async function buscarFotoCompleta(ean, nomeProduto){
     }
   }
 
-  // 7ª tentativa — Open Food Facts pelo EAN exato
-  if(ean){
-    setFotoStatus('Tentando Open Food Facts (código de barras)...','var(--amber)');
-    try{
-      var res=await fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json?fields=image_url,image_front_url,product_name');
-      var data=await res.json();
-      if(data.status===1&&data.product){
-        var imgUrl=data.product.image_front_url||data.product.image_url;
-        if(imgUrl){
-          var ok=await carregarImagemUrl(imgUrl);
-          if(ok!==false){
-            setFotoStatus('✓ Foto encontrada (Open Food Facts, código de barras)','var(--green)');
-            return true;
-          }
-        }
-      }
-    }catch(e){}
-  }
-
-  // 8ª tentativa — Open Food Facts pelo nome
-  if(nomeLimpo){
-    setFotoStatus('Tentando Open Food Facts (nome)...','var(--amber)');
-    try{
-      var res2=await fetch('https://world.openfoodfacts.org/api/v2/search?search_terms='+encodeURIComponent(nomeLimpo)+'&page_size=5&fields=image_front_url,image_url,product_name');
-      var data2=await res2.json();
-      if(data2.products&&data2.products.length>0){
-        for(var i=0;i<data2.products.length;i++){
-          var imgUrl2=data2.products[i].image_front_url||data2.products[i].image_url;
-          if(imgUrl2){
-            var ok2=await carregarImagemUrl(imgUrl2);
-            if(ok2!==false){
-              setFotoStatus('✓ Foto encontrada (Open Food Facts): "'+(data2.products[i].product_name||nomeLimpo)+'"','var(--green)');
-              return true;
-            }
-          }
-        }
-      }
-    }catch(e){}
-  }
+  // 7ª tentativa — Open Food Facts removida (gerava muitos erros 404/CORS/429
+  // no console e raramente encontrava a foto certa dos produtos deste mercado).
 
   setFotoStatus('Foto não encontrada. Envie manualmente.','var(--red)');
   return false;
@@ -7977,14 +7941,6 @@ function abrirRelatorioRetirada() {
         '}',
         'var cosmos=await retFotoTestImg("https://cdn-cosmos.bluesoft.com.br/products/"+cod);',
         'if(cosmos)return cosmos;',
-        'try{',
-          'var r2=await fetch("https://world.openfoodfacts.org/api/v2/product/"+cod+".json?fields=image_url,image_front_url");',
-          'var j2=await r2.json();',
-          'if(j2&&j2.status===1&&j2.product){',
-            'var imgUrl=j2.product.image_front_url||j2.product.image_url;',
-            'if(imgUrl){var off=await retFotoTestImg(imgUrl);if(off)return off;}',
-          '}',
-        '}catch(e){}',
         'return null;',
       '}',
       'document.querySelectorAll(".ret-foto[data-cod]").forEach(function(el){',
@@ -9062,7 +9018,7 @@ function fecharFotoGrande() {
   document.getElementById('fotoLightboxImg').src = '';
 }
 
-// ═══ Foto do produto na área de Tarefas: Drive > Cosmos > Open Food Facts ═══
+// ═══ Foto do produto na área de Tarefas: Drive > Cosmos ═══
 var _fotoTarefaChainCache = {};
 function _resolverFotoTarefaChain(cod) {
   if (!cod) return Promise.resolve(null);
@@ -9091,24 +9047,6 @@ function _resolverFotoTarefaChain(cod) {
         im.src = cosmosUrl;
       });
       if (okCosmos) resultado = okCosmos;
-    }
-    if (!resultado) {
-      try {
-        var r = await fetch('https://world.openfoodfacts.org/api/v2/product/' + cod + '.json?fields=image_url,image_front_url');
-        var j = await r.json();
-        if (j && j.status === 1 && j.product) {
-          var imgUrl = j.product.image_front_url || j.product.image_url;
-          if (imgUrl) {
-            var okOff = await new Promise(function(res) {
-              var im2 = new Image();
-              im2.onload = function() { res(imgUrl); };
-              im2.onerror = function() { res(null); };
-              im2.src = imgUrl;
-            });
-            if (okOff) resultado = okOff;
-          }
-        }
-      } catch (e) {}
     }
     _thumbCacheSet(cod, resultado);
     return resultado;
