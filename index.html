@@ -1288,6 +1288,11 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-sub{font-size:12px;color:var(--tx2);margin-top:5px;line-height:1.5}
 .boss-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .boss-date{height:35px;padding:0 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg2);color:var(--tx);font:inherit;font-size:12px}
+.boss-seg{display:flex;border:1px solid var(--bds);border-radius:var(--r);overflow:hidden;height:35px}
+.boss-seg-btn{border:none;background:var(--bg2);color:var(--tx2);font-size:12px;font-weight:600;padding:0 12px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s,color .15s}
+.boss-seg-btn+.boss-seg-btn{border-left:1px solid var(--bds)}
+.boss-seg-btn.active{background:var(--green);color:#fff}
+.boss-seg-btn:hover:not(.active){background:var(--bg3)}
 .boss-status{font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:6px;margin-top:8px}
 .boss-status.ok{color:var(--green)}.boss-status.warn{color:var(--amber)}.boss-status.err{color:var(--red)}
 .boss-kpis{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:10px}
@@ -2096,8 +2101,12 @@ function toggleTheme() {
         </div>
         <div>
           <div class="boss-controls">
-            <input id="bossData" class="boss-date" type="date" onchange="bossCarregar(true)">
-            <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
+            <div class="boss-seg" id="bossSegPeriodo">
+              <button type="button" class="boss-seg-btn active" data-modo="dia" onclick="bossSetModoQuebra('dia')"><i class="ti ti-calendar"></i> Dia</button>
+              <button type="button" class="boss-seg-btn" data-modo="mes" onclick="bossSetModoQuebra('mes')"><i class="ti ti-calendar-stats"></i> Mês até o dia</button>
+            </div>
+            <input id="bossData" class="boss-date" type="date" onchange="bossCarregarAtual(true)">
+            <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregarAtual(true)"><i class="ti ti-refresh"></i> Atualizar</button>
           </div>
           <div class="boss-filters">
             <input id="bossBusca" class="boss-search" type="search" placeholder="Filtrar produto / código" oninput="bossDefinirBusca(this.value)" aria-label="Filtrar produtos no Boss Vision">
@@ -2108,7 +2117,7 @@ function toggleTheme() {
       </div>
 
       <div class="boss-kpis">
-        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiQuebrasCard" onclick="bossDefinirFiltroTipo('quebra')"><div class="boss-kpi-lbl">Quebras <i class="ti ti-filter"></i></div><div class="boss-kpi-val" id="bossKpiQuebras">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasSub">Horti + Padaria</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiQuebrasCard" onclick="bossDefinirFiltroTipo('quebra')"><div class="boss-kpi-lbl">Quebras <i class="ti ti-filter"></i></div><div class="boss-kpi-val" id="bossKpiQuebras">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasSub">Horti + Padaria · dia</div></div>
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPerdasCard" onclick="bossDefinirFiltroTipo('perdas')"><div class="boss-kpi-lbl">Perdas <i class="ti ti-filter"></i></div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Produtos vencidos</div></div>
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossDefinirFiltroTipo('consumo')"><div class="boss-kpi-lbl">Consumo interno <i class="ti ti-filter"></i></div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção Padaria + Uso e consumo</div></div>
       </div>
@@ -5159,6 +5168,8 @@ function addManual(){
 // BOSS VISION — leitura de eventos do Drive via Apps Script
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v3_unico';
+var BOSS_DAY_CACHE_PREFIX='aura_boss_dia_';
+var _bossModoQuebra='dia'; // 'dia' = lançamento do dia selecionado · 'mes' = acumulado do mês até o dia selecionado
 var _bossDados=null;
 var _bossListasCache=null;
 var _bossFiltroSetor='';
@@ -5466,7 +5477,19 @@ function bossAtualizaPeriodos_(dados){
   var mesLabel='';
   if(typeof mesRaw==='string'&&mesRaw.trim()&&!/^\d+$/.test(mesRaw.trim()))mesLabel=mesRaw.trim()+(ano?'/'+ano:'');
   else {var mesNum=(mesRaw!=null)?Number(mesRaw):null;if(mesNum!=null&&BOSS_MESES_[mesNum])mesLabel=BOSS_MESES_[mesNum]+(ano?'/'+ano:'');}
-  var elQ=document.getElementById('bossPeriodoQuebra');if(elQ)elQ.textContent=dataSel?('dia '+dataSel):'';
+  var elQ=document.getElementById('bossPeriodoQuebra');
+  if(elQ){
+    if(_bossModoQuebra==='mes'){
+      var inp=document.getElementById('bossData');
+      var dataRef=(inp&&inp.value)||(dados&&dados.data)||'';
+      var dias=dataRef?bossDiasDoMesAte_(dataRef):[];
+      var d0=dias.length?dias[0].split('-').reverse().join('/'):'';
+      var d1=dataRef?dataRef.split('-').reverse().join('/'):'';
+      elQ.textContent=(dias.length>1?('acumulado '+d0+' a '+d1):(d1?('dia '+d1):''));
+    } else {
+      elQ.textContent=dataSel?('dia '+dataSel):'';
+    }
+  }
   var elP=document.getElementById('bossPeriodoPerdas');if(elP)elP.textContent=dataSel?('dia '+dataSel):'';
   var elC=document.getElementById('bossPeriodoConsumo');if(elC)elC.textContent=mesLabel?('acumulado de '+mesLabel):'';
 }
@@ -5510,7 +5533,7 @@ function bossRender(dados){
   var a=document.getElementById('bossKpiQuebras');if(a)a.textContent=bossFmtBRL(q);
   var b=document.getElementById('bossKpiPerdas');if(b)b.textContent=bossFmtBRL(p);
   var c=document.getElementById('bossKpiConsumo');if(c)c.textContent=bossFmtBRL(ci);
-  var as=document.getElementById('bossKpiQuebrasSub');if(as)as.textContent=(base.horti.length+base.padaria.length)+' itens · '+bossFmtQtd(vq)+' qtd./peso · Horti + Padaria';
+  var as=document.getElementById('bossKpiQuebrasSub');if(as)as.textContent=(base.horti.length+base.padaria.length)+' itens · '+bossFmtQtd(vq)+' qtd./peso · Horti + Padaria'+(_bossModoQuebra==='mes'?' · mês até o dia':' · dia selecionado');
   var ps=document.getElementById('bossKpiPerdasSub');if(ps)ps.textContent=base.vencidos.length+' itens · '+bossFmtQtd(vp)+' qtd./peso · vencidos';
   var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(base.producaoPadaria.length+base.usoConsumo.length)+' itens · '+bossFmtQtd(vci)+' qtd./peso · mês todo';
 
@@ -5536,6 +5559,84 @@ function bossRender(dados){
   bossRenderTopo_(base);
 }
 
+function bossBuscarDiaCache_(data){
+  try{var raw=localStorage.getItem(BOSS_DAY_CACHE_PREFIX+data);return raw?JSON.parse(raw):null;}catch(e){return null;}
+}
+function bossSalvarDiaCache_(data,dados){
+  try{localStorage.setItem(BOSS_DAY_CACHE_PREFIX+data,JSON.stringify({dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
+}
+function bossDiasDoMesAte_(dataIso){
+  var p=dataIso.split('-').map(Number);
+  var ano=p[0],mes=p[1],dia=p[2];
+  var dias=[];
+  for(var d=1;d<=dia;d++)dias.push(ano+'-'+String(mes).padStart(2,'0')+'-'+String(d).padStart(2,'0'));
+  return dias;
+}
+// Alterna entre ver a Quebra do dia selecionado ou o acumulado do mês (dia 1 até o dia
+// selecionado). O gestor pediu para ver "o total lançado até o momento" — como a API só
+// responde um dia por vez, aqui somamos localmente os dias já lançados no mês, com cache
+// por dia para não reconsultar o Drive toda vez.
+function bossSetModoQuebra(modo){
+  if(_bossModoQuebra===modo)return;
+  _bossModoQuebra=modo;
+  document.querySelectorAll('#bossSegPeriodo .boss-seg-btn').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-modo')===modo);});
+  bossCarregarAtual(false);
+}
+function bossCarregarAtual(force){
+  if(_bossModoQuebra==='mes')bossCarregarMes(force);
+  else bossCarregar(force);
+}
+function bossCarregarMes(force){
+  var inp=document.getElementById('bossData');if(!inp)return;
+  if(!inp.value)inp.value=bossHoje();
+  var dataRef=inp.value;
+  var url=bossApiUrl();
+  var dias=bossDiasDoMesAte_(dataRef);
+  var total=dias.length;
+  var pendentes=dias.slice();
+  var acumHorti=[],acumPadaria=[],arquivosLidos=0,diasComErro=0;
+  var btn=document.getElementById('bossBtnAtualizar');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
+  function finalizar(){
+    var horti=bossNormalizarLista(acumHorti).map(function(x){if(!x.setor)x.setor='Horti';return x;});
+    var padaria=bossNormalizarLista(acumPadaria).map(function(x){if(!x.setor)x.setor='Padaria';return x;});
+    var base=_bossDados||{};
+    _bossDados=Object.assign({},base,{
+      data:dataRef,
+      grupos:Object.assign({},base.grupos||{},{quebra:{horti:horti,padaria:padaria}})
+    });
+    bossRender(_bossDados);
+    var msg='Acumulado do mês calculado · '+total+' dia(s) verificados';
+    if(diasComErro)msg+=' · '+diasComErro+' dia(s) sem retorno (ignorados)';
+    bossSetStatus(diasComErro?'warn':'ok',msg);
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
+  }
+  function proximo(){
+    if(!pendentes.length){finalizar();return;}
+    var data=pendentes.shift();
+    var progresso=(total-pendentes.length);
+    var cache=force?null:bossBuscarDiaCache_(data);
+    if(cache&&cache.dados){
+      acumHorti=acumHorti.concat(bossLista(cache.dados,'horti'));
+      acumPadaria=acumPadaria.concat(bossLista(cache.dados,'padaria'));
+      arquivosLidos+=Number(cache.dados.arquivosLidos)||0;
+      bossSetStatus('','Somando o mês... '+progresso+'/'+total+' dias (cache: '+data.split('-').reverse().join('/')+')');
+      proximo();
+      return;
+    }
+    if(!url){diasComErro++;proximo();return;}
+    bossSetStatus('','Somando o mês... '+progresso+'/'+total+' dias (buscando '+data.split('-').reverse().join('/')+')');
+    bossFetch(url,data).then(function(res){
+      var dadosDia=(res&&(res.dados||res))||{};
+      bossSalvarDiaCache_(data,dadosDia);
+      acumHorti=acumHorti.concat(bossLista(dadosDia,'horti'));
+      acumPadaria=acumPadaria.concat(bossLista(dadosDia,'padaria'));
+      arquivosLidos+=Number(dadosDia.arquivosLidos)||0;
+    }).catch(function(){diasComErro++;}).finally(proximo);
+  }
+  bossSetStatus('','Somando o mês... 0/'+total+' dias');
+  proximo();
+}
 function bossFetch(url,data){
   return new Promise(function(resolve,reject){
     if(!url){reject(new Error('URL /exec principal da AURA não configurada.'));return;}
@@ -5582,6 +5683,7 @@ function bossCarregar(force){
     console.log('[Boss Vision] render:',(_bossTRender-_bossTFetch).toFixed(0)+'ms');
     console.timeEnd('[Boss Vision] tempo total (fetch+render)');
     try{localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({data:data,dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
+    bossSalvarDiaCache_(data,dados);
     var avisos=(res.avisos||dados.avisos||[]);
     if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);
     else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Vencidos AURA');
@@ -5615,7 +5717,7 @@ function goTab(name){
   if(metricsEl) metricsEl.style.display = (name==='dashboard') ? 'none' : '';
   if(name==='bossvision'){
     if(_bossDados)bossRender(_bossDados);
-    bossCarregar(false);
+    bossCarregarAtual(false);
   } else {
     bossRestaurarTopoPadrao_();
     if(metricsEl)metricsEl.style.display=(name==='dashboard')?'none':'';
