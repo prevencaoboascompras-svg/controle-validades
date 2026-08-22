@@ -6531,8 +6531,12 @@ function _iniciarDadosSecundariosAposCarga_(){
 if(_cfg.id){
   if(products.length){
     aplicarSetorCorrigido();
-    refresh();
     setDot('loading','Dados locais exibidos — atualizando...');
+    // Aguarda o fim da inicialização síncrona do script antes do primeiro render.
+    // Evita acessar variáveis globais (ex.: _promoAtivas) antes de serem inicializadas.
+    setTimeout(function(){
+      try{ refresh(); }catch(e){ console.error('Falha no refresh inicial do cache:',e); }
+    },0);
   }else{
     setDot('loading','Reconectando...');
   }
@@ -7468,7 +7472,7 @@ function processarTarefasConcluidasZero(){
   }
 }
 var _promoAtivas=JSON.parse(localStorage.getItem('boascompras_promo_ativas')||'[]');
-function getPromoAtivas(){return _promoAtivas;}
+function getPromoAtivas(){return Array.isArray(_promoAtivas)?_promoAtivas:[];}
 function savePromoAtivas(arr){
   _promoAtivas=arr;
   try { localStorage.setItem('boascompras_promo_ativas',JSON.stringify(arr)); } catch(e) { console.warn('localStorage cheio, pulando cache de promoAtivas:', e); }
