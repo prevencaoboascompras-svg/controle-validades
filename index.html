@@ -2648,8 +2648,8 @@ function toggleTheme() {
         <div class="form-row">
           <label>Foto do produto</label>
           <div style="display:flex;gap:6px;margin-bottom:6px">
-            <input type="text" id="eFotoBusca" placeholder="Buscar por nome..." style="flex:1;font-size:12px;padding:6px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none" onkeydown="if(event.key==='Enter')buscarFotoNome()">
-            <button class="btn btn-sm" onclick="buscarFotoNome()" style="white-space:nowrap"><i class="ti ti-search"></i> Buscar</button>
+            <input type="text" id="eFotoBusca" placeholder="EAN/código de barras (opcional)" style="flex:1;font-size:12px;padding:6px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;font-family:monospace" onkeydown="if(event.key==='Enter')buscarFotoEAN()">
+            <button class="btn btn-sm" onclick="buscarFotoEAN()" style="white-space:nowrap"><i class="ti ti-search"></i> Buscar foto</button>
           </div>
           <div id="fotoStatus" style="font-size:11px;color:var(--tx2);margin-bottom:6px;min-height:16px"></div>
           <input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)" style="font-size:12px">
@@ -3356,7 +3356,7 @@ function renderTable(){
     var qb=qtdeBadge(p.qtde,badgeSt,p.qtde+' unidades a vencer');
     var thumbCod=(p.cod||'').replace(/[^0-9]/g,'');
     var photoBoxHtml=thumbCod
-      ?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+thumbCod+'"><img src="https://cdn-cosmos.bluesoft.com.br/products/'+thumbCod+'" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\''+thumbCod+'\')"></div></div>'
+      ?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+thumbCod+'"><img data-cod="'+thumbCod+'" alt="" loading="lazy"></div></div>'
       :'<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
     return '<div class="'+cardCls+'">'
       +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px;--qb-pad-m:'+qb.headerPadLeftMobile+'px">'
@@ -3398,6 +3398,7 @@ function renderTable(){
     cards=cards.concat(vencidos.map(function(p){return cardHtml(p,true);}));
   }
   grid.innerHTML=cards.join('');
+  resolverFotosTarefasArea(grid);
 }
 
 // ── Promoções: estado ──────────────────────────────────────────────────
@@ -4505,203 +4506,45 @@ function setFotoStatus(msg, cor){
   if(el){el.textContent=msg;el.style.color=cor||'var(--tx2)';}
 }
 
-async function buscarFotoOpenFoodFacts(ean, nomeProduto){
-  // Ponto de entrada usado na abertura automática do modal de encarte.
-  // Delega tudo para buscarFotoCompleta, que SEMPRE tenta o Google (fundo
-  // branco) primeiro — o EAN só entra como reforço/fallback, nunca como
-  // atalho que encerra a busca antes do Google atuar.
-  return await buscarFotoCompleta(ean, nomeProduto);
-}
-
-// ── Configurações Google Custom Search ──────────────────────────────────────
-var GCSE_API_KEY = 'AIzaSyClxbl8yzMpHdahpB38Fc66NcqtDWxjdvw';
-var GCSE_CX      = 'a74b49ecb1fd546fb';
-
-async function buscarFotoGoogleCSE(query){
-  try{
-    var url = 'https://www.googleapis.com/customsearch/v1'
-      + '?key=' + GCSE_API_KEY
-      + '&cx='  + GCSE_CX
-      + '&searchType=image'
-      + '&imgDominantColor=white'
-      + '&imgType=photo'
-      + '&safe=active'
-      + '&num=5'
-      + '&q=' + encodeURIComponent(query);
-    var res  = await fetch(url);
-    var data = await res.json();
-    if(data.error){
-      // Cota esgotada ou erro de API — sinaliza para tentar outras fontes
-      console.warn('Google CSE erro:', data.error.message);
-      return null; // null = erro/cota, tente fallback
-    }
-    if(data.items && data.items.length > 0){
-      for(var i = 0; i < data.items.length; i++){
-        var imgUrl = data.items[i].link;
-        if(!imgUrl) continue;
-        var ok = await carregarImagemUrl(imgUrl);
-        if(ok !== false) return true;
-      }
-    }
-    return false; // buscou, não achou nada utilizável
-  }catch(e){
-    console.warn('Google CSE exception:', e);
-    return null; // null = erro, tente fallback
+// ═══ Fotos do produto — cadeia única em TODO o AURA ═══
+// Ordem obrigatória: 1) Banco de imagens no Drive  2) Bluesoft Cosmos  3) sem foto.
+// Não usa Google CSE, Openverse nem Open Food Facts. O resolver central também
+// é usado por Boss Vision, Estoque, Validades, Tarefas e modal do produto.
+async function buscarFotoCompleta(ean, nomeProduto){
+  var cod=String(ean||'').trim().replace(/[^0-9]/g,'');
+  if(!cod || !/^\d{8,14}$/.test(cod)){
+    setFotoStatus('Informe um EAN/código de barras válido para buscar a foto.','var(--red)');
+    return false;
   }
-}
 
-// Consulta o banco de imagens no Drive (via Code.gs) antes de qualquer
-// busca externa. Retorna true se achou e carregou a imagem, false caso
-// contrário (nunca lança erro — se o Drive falhar, cai pro resto da cascata).
-async function buscarFotoDrive(codigoBarras, tipo){
-  var cod = String(codigoBarras||'').trim();
-  if(!cod) return false;
+  setFotoStatus('Buscando no Drive e, se necessário, no Bluesoft Cosmos...','var(--amber)');
   try{
-    var r = await _gasGet('buscarImagemProduto', '&codigoBarras='+encodeURIComponent(cod)+'&tipo='+encodeURIComponent(tipo||'produto'));
-    // Correção CORS: o backend agora manda a imagem em base64 (data URL)
-    // em vez de uma URL do Drive, porque drive.google.com não manda
-    // cabeçalhos CORS e o carregamento com crossOrigin='anonymous' falhava
-    // mesmo com a imagem existindo. Data URL não sofre bloqueio de CORS.
-    if(r && r.ok && r.encontrado && r.base64){
-      var dataUrl = 'data:'+(r.mimeType||'image/jpeg')+';base64,'+r.base64;
-      var ok = await carregarImagemUrl(dataUrl);
-      if(ok !== false) return true;
+    var url=await _resolverFotoTarefaChain(cod);
+    if(!url){
+      setFotoStatus('Foto não encontrada no Drive nem no Bluesoft Cosmos.','var(--tx2)');
+      return false;
     }
+    var ok=await carregarImagemUrl(url);
+    if(ok===false){
+      setFotoStatus('Foto encontrada, mas não foi possível carregá-la.','var(--red)');
+      return false;
+    }
+    var origem=String(url).indexOf('data:')===0?'Drive':'Bluesoft Cosmos';
+    setFotoStatus('✓ Foto encontrada ('+origem+')','var(--green)');
+    return true;
   }catch(e){
-    console.warn('buscarFotoDrive exception:', e);
-  }
-  return false;
-}
-
-// Catálogo público Bluesoft Cosmos — indexado pelo EAN/código de barras.
-// Mesma fonte usada no Arsenal de Ofertas.
-async function buscarFotoCosmos(ean){
-  var cod = String(ean||'').trim().replace(/[^0-9]/g,'');
-  if(!cod || !/^\d{8,14}$/.test(cod)) return false;
-  try{
-    var ok = await carregarImagemUrl('https://cdn-cosmos.bluesoft.com.br/products/'+cod);
-    return ok !== false;
-  }catch(e){
-    console.warn('buscarFotoCosmos exception:', e);
+    console.warn('buscarFotoCompleta exception:',e);
+    setFotoStatus('Não foi possível consultar a foto agora.','var(--red)');
     return false;
   }
 }
 
-// Openverse (banco de imagens livres/CC) — mesma fonte usada no Arsenal
-// de Ofertas, usada como reforço quando o Google CSE não encontra nada
-// (ex.: cota esgotada ou sem resultado).
-async function buscarFotoOpenverse(query){
-  query = String(query||'').trim();
-  if(!query) return false;
-  try{
-    var url = 'https://api.openverse.org/v1/images/?mature=false&page_size=12&q='+encodeURIComponent(query);
-    var r = await fetch(url,{cache:'no-store'});
-    if(!r.ok) return false;
-    var j = await r.json();
-    var items = j.results||[];
-    for(var i=0;i<items.length;i++){
-      var links=[items[i].thumbnail,items[i].thumbnail_url,items[i].url].filter(Boolean);
-      for(var li=0;li<links.length;li++){
-        var ok = await carregarImagemUrl(links[li]);
-        if(ok !== false) return true;
-      }
-    }
-  }catch(e){
-    console.warn('buscarFotoOpenverse exception:', e);
-  }
-  return false;
-}
-
-// Orquestra TODAS as fontes, na mesma ordem do Arsenal de Ofertas:
-// 1) banco de imagens no Drive (já salvo anteriormente)
-// 2) Bluesoft Cosmos (catálogo público por EAN)
-// 3) Google CSE (fundo branco, por nome e por código de barras)
-// 4) Openverse (reforço quando o Google não encontra nada)
-// 5) em branco (upload manual)
-// Open Food Facts foi removido dessa cadeia (gerava muitos erros
-// 404/CORS/429 no console e raramente tinha a foto certa).
-async function buscarFotoCompleta(ean, nomeProduto){
-  var nomeLimpo = (nomeProduto||'').replace(/\s*\(\d+.*$/,'').replace(/\s*\{.*$/,'').trim();
-
-  // 1ª tentativa — Banco de imagens no Drive, pelo código de barras
-  if(ean){
-    setFotoStatus('Verificando banco de imagens (Drive)...','var(--amber)');
-    var dr = await buscarFotoDrive(ean, 'produto');
-    if(dr === true){
-      setFotoStatus('✓ Foto encontrada (banco de imagens)','var(--green)');
-      return true;
-    }
-  }
-
-  // 2ª tentativa — Bluesoft Cosmos, pelo código de barras
-  if(ean){
-    setFotoStatus('Buscando no catálogo Bluesoft Cosmos...','var(--amber)');
-    var cs = await buscarFotoCosmos(ean);
-    if(cs === true){
-      setFotoStatus('✓ Foto encontrada (Cosmos)','var(--green)');
-      return true;
-    }
-  }
-
-  // 3ª tentativa — Google CSE pelo NOME do produto (fundo branco)
-  if(nomeLimpo){
-    setFotoStatus('Buscando foto (fundo branco)...','var(--amber)');
-    var g1 = await buscarFotoGoogleCSE(nomeLimpo + ' fundo branco produto embalagem');
-    if(g1 === true){
-      setFotoStatus('✓ Foto encontrada (Google): "'+nomeLimpo+'"','var(--green)');
-      return true;
-    }
-  }
-
-  // 4ª tentativa — Google CSE pelo CÓDIGO DE BARRAS (alguns produtos têm a
-  // foto indexada em sites de varejo associada ao EAN)
-  if(ean){
-    setFotoStatus('Tentando buscar pelo código de barras (Google)...','var(--amber)');
-    var g2 = await buscarFotoGoogleCSE(ean + ' produto embalagem fundo branco');
-    if(g2 === true){
-      setFotoStatus('✓ Foto encontrada (Google, por código de barras)','var(--green)');
-      return true;
-    }
-  }
-
-  // 5ª tentativa — Openverse pelo nome (reforço quando o Google não achou)
-  if(nomeLimpo){
-    setFotoStatus('Google não achou. Tentando Openverse...','var(--amber)');
-    var ov1 = await buscarFotoOpenverse(nomeLimpo);
-    if(ov1 === true){
-      setFotoStatus('✓ Foto encontrada (Openverse): "'+nomeLimpo+'"','var(--green)');
-      return true;
-    }
-  }
-
-  // 6ª tentativa — Openverse pelo código de barras
-  if(ean){
-    setFotoStatus('Tentando Openverse pelo código de barras...','var(--amber)');
-    var ov2 = await buscarFotoOpenverse(ean);
-    if(ov2 === true){
-      setFotoStatus('✓ Foto encontrada (Openverse, por código de barras)','var(--green)');
-      return true;
-    }
-  }
-
-  // 7ª tentativa — Open Food Facts removida (gerava muitos erros 404/CORS/429
-  // no console e raramente encontrava a foto certa dos produtos deste mercado).
-
-  setFotoStatus('Foto não encontrada. Envie manualmente.','var(--red)');
-  return false;
-}
-
-// Mantido por compatibilidade com chamadas que buscam só por nome
-// (ex.: campo "Buscar por nome" no modal). Também passa pelo Google primeiro.
-async function buscarFotoPorNome(nome){
-  setFotoStatus('Buscando foto...','var(--amber)');
-  return await buscarFotoCompleta('', nome);
-}
-
-async function buscarFotoNome(){
-  var q=document.getElementById('eFotoBusca').value.trim()||document.getElementById('eProduto').value.trim();
-  if(!q){setFotoStatus('Digite um nome para buscar.','var(--red)');return;}
-  await buscarFotoPorNome(q);
+// Busca manual: usa o EAN digitado neste campo; se vazio, usa o código do produto.
+async function buscarFotoEAN(){
+  var digitado=document.getElementById('eFotoBusca').value.trim().replace(/[^0-9]/g,'');
+  var cod=digitado || String(document.getElementById('eCod').value||'').trim().replace(/[^0-9]/g,'');
+  if(!cod){setFotoStatus('Informe o código de barras do produto.','var(--red)');return;}
+  await buscarFotoCompleta(cod,document.getElementById('eProduto').value||'');
 }
 
 function carregarImagemUrl(url){
@@ -5063,7 +4906,7 @@ function openEncarteModal(idx){
   setTimeout(function(){
     atualizarPainelCusto();
     drawEncarte();
-    if(_cod||_nome) buscarFotoOpenFoodFacts(_cod,_nome);
+    if(_cod) buscarFotoCompleta(_cod,_nome);
   },150);
 }
 function openAddModal(){
@@ -5142,7 +4985,7 @@ var _bossListasCache=null;
 var _bossFiltroSetor='';
 var _bossFiltroTipo='todos';
 var _bossBusca='';
-var BOSS_VISION_BUILD='v8.4-gestor-rota-mensal-jsonp-fotos';
+var BOSS_VISION_BUILD='v8.6-drive-cosmos-only';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— usando somente a API principal da AURA');
 
 function bossFmtBRL(v){
@@ -8279,24 +8122,14 @@ function abrirProdutoModal(cod){
   pmBox.innerHTML='<img id="pmFoto" alt="" loading="lazy">';
   pmImg=document.getElementById('pmFoto');
   if(pmBarras){
-    pmImg.src='https://cdn-cosmos.bluesoft.com.br/products/'+pmBarras;
-    pmImg.onerror=function(){
-      var self=this;
-      (async function(){
-        if(!_auraEstoqueThumbCache[pmBarras]){
-          _auraEstoqueThumbCache[pmBarras]=(async function(){
-            try{
-              var r=await _gasGet('buscarImagemProduto','&codigoBarras='+encodeURIComponent(pmBarras)+'&tipo=produto');
-              if(r&&r.ok&&r.encontrado&&r.base64)return 'data:'+(r.mimeType||'image/jpeg')+';base64,'+r.base64;
-            }catch(e){}
-            return null;
-          })();
-        }
-        var dataUrl=await _auraEstoqueThumbCache[pmBarras];
-        if(dataUrl)self.src=dataUrl;
-        else pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';
-      })();
-    };
+    _resolverFotoTarefaChain(pmBarras).then(function(url){
+      if(url){
+        pmImg.src=url;
+        pmImg.onerror=function(){pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';};
+      }else{
+        pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';
+      }
+    }).catch(function(){pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';});
   } else {
     pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';
   }
@@ -8995,23 +8828,31 @@ var _auraEstoqueThumbCache = {};
 // resultado (achou uma foto, ou sabidamente não tem foto em lugar nenhum)
 // fica salvo em localStorage por até 24h, então reabrir a aba não repete
 // esse trabalho todo de novo.
-var THUMB_CACHE_KEY = 'boascompras_thumb_cache_v1';
-var THUMB_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
+// v8.5: nova geração do cache de fotos. A v1 podia guardar `null` por 24h
+// durante o antigo bloqueio CORS; isso fazia fotos existentes continuarem em
+// branco mesmo depois da correção. Mudamos a chave para invalidar esse cache
+// negativo antigo automaticamente.
+var THUMB_CACHE_KEY = 'boascompras_thumb_cache_v3_drive_cosmos';
+try { localStorage.removeItem('boascompras_thumb_cache_v1'); } catch(e) {}
+var THUMB_CACHE_TTL_OK_MS  = 7 * 24 * 60 * 60 * 1000; // URL externa válida: 7 dias
+var THUMB_CACHE_TTL_NEG_MS = 10 * 60 * 1000;           // "sem foto": só 10 min
 function _thumbCacheGet() {
   try { return JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || '{}'); } catch (e) { return {}; }
 }
-// v-fix: esse cache nunca tinha limite nem limpeza — cada produto sem foto
-// no Cosmos vira uma entrada nova, e como ela guarda o dataURL (base64) da
-// imagem quando acha uma, com ~2700+ produtos ele sozinho estourava a cota
-// do localStorage e travava a gravação de TUDO mais (tarefas, encartes,
-// negociações etc). Agora: descarta entradas expiradas antes de gravar, e
-// se o cache passar de MAX entradas, remove primeiro as mais antigas.
+// Nunca persistimos dataURL/base64 no localStorage: uma única foto pode ter
+// centenas de KB e várias delas estouram a cota do navegador. Fotos do Drive
+// ficam apenas no cache em memória da sessão; URLs leves (Cosmos) podem persistir.
 var THUMB_CACHE_MAX = 400;
+function _thumbCacheEntryValida_(entry, now) {
+  if (!entry || !entry.ts) return false;
+  var ttl = entry.url ? THUMB_CACHE_TTL_OK_MS : THUMB_CACHE_TTL_NEG_MS;
+  return (now - entry.ts) <= ttl;
+}
 function _thumbCachePrune(c) {
   var now = Date.now();
-  var keys = Object.keys(c).filter(function(k){ return (now - c[k].ts) <= THUMB_CACHE_TTL_MS; });
+  var keys = Object.keys(c).filter(function(k){ return _thumbCacheEntryValida_(c[k], now); });
   if (keys.length > THUMB_CACHE_MAX) {
-    keys.sort(function(a,b){ return c[b].ts - c[a].ts; }); // mais recentes primeiro
+    keys.sort(function(a,b){ return c[b].ts - c[a].ts; });
     keys = keys.slice(0, THUMB_CACHE_MAX);
   }
   var pruned = {};
@@ -9019,27 +8860,24 @@ function _thumbCachePrune(c) {
   return pruned;
 }
 function _thumbCacheSet(cod, url) {
+  // Base64 do Drive permanece somente em memória para não lotar localStorage.
+  if (typeof url === 'string' && url.indexOf('data:') === 0) return;
   try {
     var c = _thumbCacheGet();
-    c[cod] = { url: url, ts: Date.now() };
+    c[cod] = { url: url || null, ts: Date.now() };
     c = _thumbCachePrune(c);
     localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(c));
   } catch (e) {
-    // Cota estourou mesmo com poda (ex: cache de outra fonte ocupando tudo).
-    // Esse cache é descartável, então na pior hipótese zera e tenta uma vez.
     try {
-      var only = {}; only[cod] = { url: url, ts: Date.now() };
+      var only = {}; only[cod] = { url: url || null, ts: Date.now() };
       localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(only));
     } catch (e2) {}
   }
 }
-// Retorna undefined quando não há nada cacheado (ou expirou) — nesse caso
-// é preciso buscar de verdade. Retorna null quando já sabemos que não tem
-// foto em lugar nenhum. Retorna a URL/dataURL quando já achamos antes.
 function _thumbCacheLookup(cod) {
   var entry = _thumbCacheGet()[cod];
   if (!entry) return undefined;
-  if (Date.now() - entry.ts > THUMB_CACHE_TTL_MS) return undefined;
+  if (!_thumbCacheEntryValida_(entry, Date.now())) return undefined;
   return entry.url;
 }
 
@@ -9074,7 +8912,8 @@ function fecharFotoGrande() {
   document.getElementById('fotoLightboxImg').src = '';
 }
 
-// ═══ Foto do produto na área de Tarefas: Drive > Cosmos ═══
+// ═══ Resolver central de fotos do AURA: Drive > Bluesoft Cosmos > sem foto ═══
+// Esta é a única cadeia automática autorizada no HTML.
 var _fotoTarefaChainCache = {};
 function _resolverFotoTarefaChain(cod) {
   if (!cod) return Promise.resolve(null);
@@ -9086,10 +8925,14 @@ function _resolverFotoTarefaChain(cod) {
   }
   _fotoTarefaChainCache[cod] = (async function() {
     var resultado = null;
+    var driveRespondeu = false;
     try {
       var dr = await _filaThumbGAS(function() {
         return _gasGet('buscarImagemProduto', '&codigoBarras=' + encodeURIComponent(cod) + '&tipo=produto');
       });
+      // Só consideramos uma negativa do Drive confiável quando a API respondeu ok.
+      // Timeout/erro de rede NÃO pode envenenar o cache como "sem foto".
+      driveRespondeu = !!(dr && dr.ok);
       if (dr && dr.ok && dr.encontrado && dr.base64) {
         resultado = 'data:' + (dr.mimeType || 'image/jpeg') + ';base64,' + dr.base64;
       }
@@ -9104,7 +8947,8 @@ function _resolverFotoTarefaChain(cod) {
       });
       if (okCosmos) resultado = okCosmos;
     }
-    _thumbCacheSet(cod, resultado);
+    if (resultado) _thumbCacheSet(cod, resultado);
+    else if (driveRespondeu) _thumbCacheSet(cod, null); // negativo curto (10 min)
     return resultado;
   })();
   return _fotoTarefaChainCache[cod];
@@ -9126,27 +8970,12 @@ function resolverFotosTarefasArea(root) {
   });
 }
 async function _auraEstoqueThumbFallback(imgEl, cod) {
-  imgEl.onerror = null;
-  var cacheado = _thumbCacheLookup(cod);
-  if (cacheado !== undefined) {
-    if (cacheado) imgEl.src = cacheado; else _auraEstoqueThumbShowEmpty(imgEl);
-    return;
-  }
-  if (!_auraEstoqueThumbCache[cod]) {
-    _auraEstoqueThumbCache[cod] = _filaThumbGAS(async function() {
-      try {
-        var r = await _gasGet('buscarImagemProduto', '&codigoBarras=' + encodeURIComponent(cod) + '&tipo=produto');
-        if (r && r.ok && r.encontrado && r.base64) {
-          return 'data:' + (r.mimeType || 'image/jpeg') + ';base64,' + r.base64;
-        }
-      } catch (e) {}
-      return null;
-    });
-  }
-  var dataUrl = await _auraEstoqueThumbCache[cod];
-  _thumbCacheSet(cod, dataUrl);
-  if (dataUrl) imgEl.src = dataUrl;
-  else _auraEstoqueThumbShowEmpty(imgEl);
+  imgEl.onerror=null;
+  try{
+    var url=await _resolverFotoTarefaChain(cod);
+    if(url){imgEl.src=url;return;}
+  }catch(e){}
+  _auraEstoqueThumbShowEmpty(imgEl);
 }
 function _auraEstoqueThumbShowEmpty(imgEl) {
   var box = imgEl.closest('.urg-thumb') || imgEl.closest('.urg-photobox-imgwrap');
@@ -9223,7 +9052,7 @@ function renderEstoque() {
 
     var thumbCod = (grupo.cod || '').replace(/[^0-9]/g, '');
     var photoBoxHtml = thumbCod
-      ? '<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_' + thumbCod + '"><img src="https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\'' + thumbCod + '\')"></div></div>'
+      ? '<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_' + thumbCod + '"><img data-cod="' + thumbCod + '" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
 
     return '<div class="urg-card" onclick="abrirProdutoModal(\'' + escHtml(grupo.cod || '') + '\')" style="cursor:pointer">'
@@ -9264,6 +9093,7 @@ function renderEstoque() {
       + '</div>'
       + '</div>';
   }).join('');
+  resolverFotosTarefasArea(container);
 }
 
 
