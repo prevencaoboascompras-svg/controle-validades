@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="AURA Venc.">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <!-- Android/PWA: manifest + cor do tema -->
@@ -2094,7 +2095,7 @@ function toggleTheme() {
     <div class="boss-wrap">
       <div class="boss-head">
         <div style="min-width:0;flex:1">
-          <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8.3</span></div>
+          <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8.4</span></div>
           <div class="boss-sub">Eventos organizados por impacto financeiro. Quebra pode mostrar o <strong>dia selecionado</strong> ou o <strong>mês até o dia</strong> em uma única consulta ao backend; Vencidos mostram o dia selecionado e Consumo Interno mostra o <strong>acumulado do mês</strong>. No topo, os setores e resumos mostram <strong>valor, quantidade/peso e itens</strong> do próprio Boss Vision. Qtd./peso respeita a unidade registrada em cada relatório, sem converter unidades diferentes.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
@@ -5141,7 +5142,7 @@ var _bossListasCache=null;
 var _bossFiltroSetor='';
 var _bossFiltroTipo='todos';
 var _bossBusca='';
-var BOSS_VISION_BUILD='v8.3-gestor-rota-mensal-unica';
+var BOSS_VISION_BUILD='v8.4-gestor-rota-mensal-jsonp-fotos';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— usando somente a API principal da AURA');
 
 function bossFmtBRL(v){
@@ -7097,7 +7098,38 @@ function _gasPost(body){
   }).catch(function(){});
 }
 
+function _gasGetJsonp(action,extra,timeoutMs){
+  return new Promise(function(resolve){
+    var cfg=loadCfg();
+    if(!cfg.url){resolve({ok:false});return;}
+    var cb='__auraGet_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    var script=document.createElement('script');
+    var timer=null,encerrado=false;
+    function limpar(){
+      if(timer)clearTimeout(timer);
+      try{delete window[cb];}catch(e){window[cb]=undefined;}
+      if(script&&script.parentNode)script.parentNode.removeChild(script);
+    }
+    window[cb]=function(payload){
+      if(encerrado)return;encerrado=true;limpar();resolve(payload||{ok:false});
+    };
+    script.onerror=function(){
+      if(encerrado)return;encerrado=true;limpar();resolve({ok:false});
+    };
+    var sep=cfg.url.indexOf('?')>=0?'&':'?';
+    script.src=cfg.url+sep+'action='+encodeURIComponent(action)+(extra||'')+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();
+    script.async=true;
+    timer=setTimeout(function(){
+      if(encerrado)return;encerrado=true;limpar();resolve({ok:false});
+    },timeoutMs||30000);
+    document.head.appendChild(script);
+  });
+}
+
 function _gasGet(action,extra){
+  // v8.4: a busca de imagens usa JSONP para não sofrer bloqueio CORS
+  // entre GitHub Pages e Apps Script. As demais rotas continuam como antes.
+  if(action==='buscarImagemProduto')return _gasGetJsonp(action,extra,30000);
   var cfg=loadCfg();
   if(!cfg.url)return Promise.resolve({ok:false});
   var url=cfg.url+'?action='+action+(extra||'');
@@ -7955,11 +7987,11 @@ function abrirRelatorioRetirada() {
     '<script>',
       'var RET_GAS_URL='+JSON.stringify(loadCfg().url||'')+';',
       'function retFotoTestImg(url){return new Promise(function(res){var im=new Image();im.onload=function(){res(url);};im.onerror=function(){res(null);};im.src=url;});}',
+      'function retGasJsonp(cod){return new Promise(function(res){if(!RET_GAS_URL){res(null);return;}var cb="__retImg_"+Date.now()+"_"+Math.random().toString(36).slice(2),s=document.createElement("script"),done=false,t;function fim(v){if(done)return;done=true;if(t)clearTimeout(t);try{delete window[cb];}catch(e){window[cb]=undefined;}if(s.parentNode)s.parentNode.removeChild(s);res(v);}window[cb]=function(j){fim(j);};s.onerror=function(){fim(null);};s.src=RET_GAS_URL+"?action=buscarImagemProduto&codigoBarras="+encodeURIComponent(cod)+"&tipo=produto&callback="+encodeURIComponent(cb)+"&_="+Date.now();document.head.appendChild(s);t=setTimeout(function(){fim(null);},30000);});}',
       'async function retFotoResolve(cod){',
         'if(RET_GAS_URL){',
           'try{',
-            'var r=await fetch(RET_GAS_URL+"?action=buscarImagemProduto&codigoBarras="+encodeURIComponent(cod)+"&tipo=produto");',
-            'var j=await r.json();',
+            'var j=await retGasJsonp(cod);',
             'if(j&&j.ok&&j.encontrado&&j.base64){return "data:"+(j.mimeType||"image/jpeg")+";base64,"+j.base64;}',
           '}catch(e){}',
         '}',
