@@ -365,6 +365,12 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .encarte-controls{padding:18px;overflow-y:auto;border-right:1px solid var(--bd)}
 .encarte-preview{padding:16px;background:var(--bg2);display:flex;flex-direction:column;align-items:center;gap:12px;overflow-y:auto}
 .form-row{margin-bottom:13px}
+.form-erro{background:rgba(217,68,68,.1);border:1px solid var(--red);color:var(--red);font-size:12px;font-weight:600;padding:8px 12px;border-radius:var(--r)}
+.ec-linha{display:grid;grid-template-columns:1fr 100px 78px 110px 30px;gap:6px;align-items:end;margin-bottom:8px}
+.ec-linha label{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--tx2);display:block;margin-bottom:3px}
+.ec-linha input,.ec-linha select{width:100%;font-size:12.5px;padding:6px 8px;border:1px solid var(--bds);border-radius:6px;background:var(--bg);color:var(--tx);outline:none;box-sizing:border-box}
+.ec-linha .ec-rm{height:31px;width:30px;border:1px solid var(--bds);border-radius:6px;background:var(--bg);color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ec-linha .ec-rm:hover{background:rgba(217,68,68,.1)}
 .form-row label{display:block;font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em}
 .form-row input,.form-row select{width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;font-family:inherit}
 .form-row input:focus,.form-row select:focus{border-color:var(--green)}
@@ -2078,6 +2084,7 @@ function toggleTheme() {
               <button type="button" class="boss-periodo-opt" data-periodo="dia" onclick="bossSetPeriodo('dia')">Dia específico</button>
             </div>
             <input id="bossData" class="boss-date" type="date" onchange="bossCarregar(true)">
+            <button class="btn" onclick="abrirEntradaCeasaModal()"><i class="ti ti-truck-delivery"></i> Entrada CEASA</button>
             <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
           </div>
         </div>
@@ -2087,6 +2094,20 @@ function toggleTheme() {
         <div class="boss-kpi"><div class="boss-kpi-lbl">Quebras</div><div class="boss-kpi-val" id="bossKpiQuebras">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasSub">Horti + Padaria</div></div>
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPerdasCard" onclick="bossToggleGrupo('bossGrupoPerdas','bossKpiPerdasCard','bossPerdasChevron')"><div class="boss-kpi-lbl">Perdas <i class="ti ti-chevron-down" id="bossPerdasChevron"></i></div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Produtos vencidos</div></div>
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossToggleGrupo('bossGrupoConsumo','bossKpiConsumoCard','bossConsumoChevron')"><div class="boss-kpi-lbl">Consumo interno <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção Padaria + Uso e consumo</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiEntradaCard" onclick="bossToggleGrupo('bossGrupoEntrada','bossKpiEntradaCard','bossEntradaChevron')"><div class="boss-kpi-lbl">Entrada CEASA <i class="ti ti-chevron-down" id="bossEntradaChevron"></i></div><div class="boss-kpi-val" id="bossKpiEntrada">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiEntradaSub">Custo de compra Horti</div></div>
+      </div>
+
+      <div class="boss-group boss-group-collapsible" id="bossGrupoEntrada" style="display:none">
+        <div class="boss-group-title"><span>Entrada CEASA</span><span class="boss-period-badge boss-period-mes" id="bossPeriodoEntrada"></span><span class="boss-line"></span></div>
+        <div class="boss-grid one">
+          <div class="boss-panel">
+            <div class="boss-panel-hd">
+              <div class="boss-panel-title"><i class="ti ti-scale" style="color:var(--green)"></i> Custo médio por produto (ponderado)</div>
+              <div class="boss-panel-total"><strong id="bossTotalEntrada">R$ 0,00</strong><span id="bossCountEntrada">0 itens</span></div>
+            </div>
+            <div class="boss-list" id="bossListEntrada"></div>
+          </div>
+        </div>
       </div>
 
       <div class="boss-group">
@@ -2548,6 +2569,30 @@ function toggleTheme() {
     <div class="smodal-foot">
       <button class="btn" onclick="_encerrandoPromoCod=null;_encerrandoPromoNome=null;closeModal('resolvidoModal')">Cancelar</button>
       <button class="btn btn-green" id="btnConfirmarResolvido" onclick="confirmarResolvido()" disabled><i class="ti ti-check"></i> Confirmar</button>
+    </div>
+  </div>
+</div>
+<div class="modal-ov" id="entradaCeasaModal">
+  <div class="smodal" style="width:640px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h3 style="display:flex;align-items:center;gap:8px;margin:0"><i class="ti ti-truck-delivery" style="color:var(--green)"></i> Lançar Entrada CEASA</h3>
+      <button class="btn btn-sm" onclick="closeModal('entradaCeasaModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-row-2">
+      <div class="form-row"><label>Data da compra</label><input type="date" id="ecData"></div>
+      <div class="form-row"><label>Fornecedor / Feirante</label><input type="text" id="ecFornecedor" placeholder="Ex: Box 14 - João Hortifruti"></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:14px 0 6px">Produtos da nota</div>
+    <div id="ecLinhas"></div>
+    <button class="btn btn-sm" style="margin-top:8px" onclick="entradaCeasaAddLinha()"><i class="ti ti-plus"></i> Adicionar produto</button>
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--bd)">
+      <span style="font-size:12px;color:var(--tx2)">Total da nota</span>
+      <strong id="ecTotalNota" style="font-size:18px">R$ 0,00</strong>
+    </div>
+    <div id="ecErro" class="form-erro" style="display:none;margin-top:8px"></div>
+    <div class="smodal-foot">
+      <button class="btn" onclick="closeModal('entradaCeasaModal')">Cancelar</button>
+      <button class="btn btn-green" id="ecBtnSalvar" onclick="salvarEntradaCeasa()"><i class="ti ti-check"></i> Salvar nota</button>
     </div>
   </div>
 </div>
@@ -5268,6 +5313,100 @@ function bossFmtDataBR_(iso){
   var p=String(iso).split('-');
   return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso;
 }
+// ═══ ENTRADA CEASA (compras de hortifruti) ═══
+var _ecLinhaSeq=0;
+function entradaCeasaAddLinha(preenchido){
+  var id=(++_ecLinhaSeq);
+  var wrap=document.getElementById('ecLinhas');
+  if(!wrap)return;
+  var div=document.createElement('div');
+  div.className='ec-linha';
+  div.id='ecLinha'+id;
+  div.innerHTML=
+    '<div><label>Produto</label><input type="text" id="ecNome'+id+'" placeholder="Ex: Tomate Salada"></div>'
+    +'<div><label>Cód. barras</label><input type="text" id="ecCod'+id+'" placeholder="opcional" oninput="entradaCeasaAutoNome('+id+')" style="font-family:monospace"></div>'
+    +'<div><label>Unid.</label><select id="ecUnid'+id+'"><option value="kg">kg</option><option value="un">un</option></select></div>'
+    +'<div><label>Peso/Qtd</label><input type="number" step="0.001" min="0" id="ecPeso'+id+'" placeholder="0" oninput="entradaCeasaAtualizarTotal()"></div>'
+    +'<button type="button" class="ec-rm" onclick="entradaCeasaRemoverLinha('+id+')" title="Remover"><i class="ti ti-trash"></i></button>'
+    +'<div style="grid-column:1/3"><label>Valor pago (R$, total do item)</label><input type="number" step="0.01" min="0" id="ecValor'+id+'" placeholder="0,00" oninput="entradaCeasaAtualizarTotal()"></div>'
+    +'<div style="grid-column:3/6;font-size:11px;color:var(--tx2);align-self:center" id="ecCustoCalc'+id+'"></div>';
+  wrap.appendChild(div);
+}
+function entradaCeasaRemoverLinha(id){
+  var el=document.getElementById('ecLinha'+id);
+  if(el)el.remove();
+  entradaCeasaAtualizarTotal();
+}
+function entradaCeasaAutoNome(id){
+  var cod=(document.getElementById('ecCod'+id).value||'').trim();
+  var nomeInp=document.getElementById('ecNome'+id);
+  if(cod&&banco[cod]&&nomeInp&&!nomeInp.value)nomeInp.value=banco[cod];
+}
+function entradaCeasaAtualizarTotal(){
+  var total=0;
+  document.querySelectorAll('.ec-linha').forEach(function(div){
+    var idm=div.id.replace('ecLinha','');
+    var peso=parseFloat((document.getElementById('ecPeso'+idm)||{}).value)||0;
+    var valor=parseFloat((document.getElementById('ecValor'+idm)||{}).value)||0;
+    total+=valor;
+    var calcEl=document.getElementById('ecCustoCalc'+idm);
+    if(calcEl){
+      if(peso>0&&valor>0)calcEl.textContent='≈ '+bossFmtBRL(valor/peso)+' /'+(document.getElementById('ecUnid'+idm).value||'kg');
+      else calcEl.textContent='';
+    }
+  });
+  var tEl=document.getElementById('ecTotalNota');if(tEl)tEl.textContent=bossFmtBRL(total);
+}
+function abrirEntradaCeasaModal(){
+  var d=document.getElementById('ecData');if(d)d.value=bossHoje();
+  var f=document.getElementById('ecFornecedor');if(f)f.value='';
+  var wrap=document.getElementById('ecLinhas');if(wrap)wrap.innerHTML='';
+  _ecLinhaSeq=0;
+  entradaCeasaAddLinha();
+  var erro=document.getElementById('ecErro');if(erro){erro.style.display='none';erro.textContent='';}
+  entradaCeasaAtualizarTotal();
+  document.getElementById('entradaCeasaModal').classList.add('open');
+}
+function salvarEntradaCeasa(){
+  var erroEl=document.getElementById('ecErro');
+  function erro(msg){if(erroEl){erroEl.textContent=msg;erroEl.style.display='block';}}
+  if(erroEl){erroEl.style.display='none';erroEl.textContent='';}
+  var data=(document.getElementById('ecData').value||'').trim();
+  if(!data)return erro('Informe a data da compra.');
+  var fornecedor=(document.getElementById('ecFornecedor').value||'').trim();
+  var itens=[];
+  var linhasOk=true;
+  document.querySelectorAll('.ec-linha').forEach(function(div){
+    var idm=div.id.replace('ecLinha','');
+    var nome=(document.getElementById('ecNome'+idm).value||'').trim();
+    var cod=(document.getElementById('ecCod'+idm).value||'').trim();
+    var unidade=document.getElementById('ecUnid'+idm).value||'kg';
+    var peso=parseFloat(document.getElementById('ecPeso'+idm).value)||0;
+    var valor=parseFloat(document.getElementById('ecValor'+idm).value)||0;
+    if(!nome&&!cod&&!peso&&!valor)return; // linha em branco, ignora
+    if(!nome||peso<=0||valor<=0){linhasOk=false;return;}
+    itens.push({cod:cod,nome:nome,unidade:unidade,peso:peso,valor:valor});
+  });
+  if(!linhasOk)return erro('Preencha produto, peso/qtd e valor pago em todas as linhas (ou remova as vazias).');
+  if(!itens.length)return erro('Adicione ao menos um produto.');
+  var url=bossApiUrl();
+  if(!url)return erro('URL da API principal da AURA não configurada.');
+  var btn=document.getElementById('ecBtnSalvar');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Salvando...';}
+  fetch(url,{
+    method:'POST',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action:'lancarEntradaCeasa',data:data,fornecedor:fornecedor,itens:itens})
+  }).then(function(r){return r.json();}).then(function(res){
+    if(!res||!res.ok)throw new Error((res&&res.erro)||'Falha ao salvar a entrada.');
+    closeModal('entradaCeasaModal');
+    if(currentTabName==='bossvision')bossCarregar(true);
+  }).catch(function(e){
+    erro(e.message||'Erro ao salvar. Tente novamente.');
+  }).finally(function(){
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Salvar nota';}
+  });
+}
 function bossAtualizaPeriodos_(dados){
   var dataSel=bossFmtDataBR_(dados&&dados.data);
   var mesNum=(dados&&dados.mes!=null)?Number(dados.mes):null;
@@ -5288,6 +5427,36 @@ function bossToggleGrupo(grupoId,cardId,chevronId){
   if(card)card.classList.toggle('aberto',abrir);
   if(abrir)grp.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+function bossRenderEntradaCeasa_(dados){
+  var ec=(dados&&dados.grupos&&dados.grupos.entradaCeasa)||{porProduto:[],totalValor:0,totalPeso:0};
+  var lista=ec.porProduto||[];
+  var wrap=document.getElementById('bossListEntrada');
+  if(wrap){
+    if(!lista.length){
+      wrap.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhuma entrada CEASA lançada neste mês.</div>';
+    }else{
+      wrap.innerHTML=lista.map(function(it,i){
+        return '<div class="boss-row">'
+          +'<div class="boss-rank">'+(i+1)+'</div>'
+          +'<div class="boss-photo"><i class="ti ti-leaf"></i></div>'
+          +'<div class="boss-prod"><div class="boss-prod-name" title="'+bossEscapeHtml(it.nome)+'">'+bossEscapeHtml(it.nome)+'</div>'+(it.cod?'<div class="boss-prod-cod">'+it.cod+'</div>':'')+'</div>'
+          +'<div class="boss-num"><small>Peso/Qtd</small><strong>'+(Number(it.pesoTotal)||0).toLocaleString('pt-BR',{maximumFractionDigits:3})+' '+(it.unidade||'kg')+'</strong></div>'
+          +'<div class="boss-num"><small>Custo médio</small><strong style="color:var(--green)">'+bossFmtBRL(it.custoMedio||0)+'/'+(it.unidade||'kg')+'</strong></div>'
+          +'<div class="boss-num"><small>Total pago</small><strong>'+bossFmtBRL(it.valorTotal||0)+'</strong></div>'
+          +'</div>';
+      }).join('');
+    }
+  }
+  var tEl=document.getElementById('bossTotalEntrada');if(tEl)tEl.textContent=bossFmtBRL(ec.totalValor||0);
+  var cEl=document.getElementById('bossCountEntrada');if(cEl)cEl.textContent=lista.length+' produtos';
+  var kEl=document.getElementById('bossKpiEntrada');if(kEl)kEl.textContent=bossFmtBRL(ec.totalValor||0);
+  var mesNum=(dados&&dados.mes!=null)?Number(dados.mes):null;
+  var ano=dados&&dados.ano;
+  var mesLabel=(mesNum!=null&&BOSS_MESES_[mesNum])?BOSS_MESES_[mesNum]+(ano?'/'+ano:''):'';
+  var pesoTotal=Number(ec.totalPeso)||0;
+  var ksEl=document.getElementById('bossKpiEntradaSub');if(ksEl)ksEl.textContent=(pesoTotal?pesoTotal.toLocaleString('pt-BR',{maximumFractionDigits:1})+' kg · ':'')+'mês todo';
+  var pEl=document.getElementById('bossPeriodoEntrada');if(pEl)pEl.textContent=mesLabel?('acumulado de '+mesLabel):'';
+}
 function bossRender(dados){
   _bossDados=dados||{};
   bossAtualizaPeriodos_(dados);
@@ -5301,6 +5470,7 @@ function bossRender(dados){
   bossRenderLista('bossListVencidos',vencidos);bossAtualizaCabecalho('Vencidos',vencidos);
   bossRenderLista('bossListProdPadaria',prodPad);bossAtualizaCabecalho('ProdPadaria',prodPad);
   bossRenderLista('bossListUsoConsumo',uso);bossAtualizaCabecalho('UsoConsumo',uso);
+  bossRenderEntradaCeasa_(dados);
   var q=bossTotal(horti)+bossTotal(padaria),p=bossTotal(vencidos),ci=bossTotal(prodPad)+bossTotal(uso);
   var a=document.getElementById('bossKpiQuebras');if(a)a.textContent=bossFmtBRL(q);
   var b=document.getElementById('bossKpiPerdas');if(b)b.textContent=bossFmtBRL(p);
