@@ -1288,6 +1288,9 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-sub{font-size:12px;color:var(--tx2);margin-top:5px;line-height:1.5}
 .boss-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .boss-date{height:35px;padding:0 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg2);color:var(--tx);font:inherit;font-size:12px}
+.boss-periodo-toggle{display:flex;background:var(--bg2);border:1px solid var(--bds);border-radius:var(--r);padding:2px;height:35px;box-sizing:border-box}
+.boss-periodo-opt{border:none;background:transparent;color:var(--tx2);font:inherit;font-size:11.5px;font-weight:700;padding:0 12px;border-radius:calc(var(--r) - 2px);cursor:pointer;transition:background .15s,color .15s}
+.boss-periodo-opt.active{background:var(--green);color:#fff}
 .boss-status{font-size:11px;color:var(--tx2);display:flex;align-items:center;gap:6px;margin-top:8px}
 .boss-status.ok{color:var(--green)}.boss-status.warn{color:var(--amber)}.boss-status.err{color:var(--red)}
 .boss-kpis{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:10px}
@@ -2064,12 +2067,16 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Eventos organizados por impacto financeiro. Quebra e Vencidos mostram o <strong>dia selecionado</strong>; Consumo Interno mostra o <strong>acumulado do mês</strong> (lançamento não é diário). Os eventos externos são lidos das pastas mensais do Drive e os produtos usam o mesmo cadastro e banco de imagens do AURA.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
+          <div class="boss-sub">Eventos organizados por impacto financeiro. Por padrão mostra o <strong>mês inteiro até hoje</strong>; use "Dia específico" para consultar Quebra e Vencidos de um dia só. Consumo Interno sempre mostra o <strong>acumulado do mês</strong> (lançamento não é diário). Os eventos externos são lidos das pastas mensais do Drive e os produtos usam o mesmo cadastro e banco de imagens do AURA.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
         <div>
           <div class="boss-controls">
+            <div class="boss-periodo-toggle" id="bossPeriodoToggle">
+              <button type="button" class="boss-periodo-opt active" data-periodo="mes" onclick="bossSetPeriodo('mes')">Mês completo</button>
+              <button type="button" class="boss-periodo-opt" data-periodo="dia" onclick="bossSetPeriodo('dia')">Dia específico</button>
+            </div>
             <input id="bossData" class="boss-date" type="date" onchange="bossCarregar(true)">
             <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
           </div>
@@ -5266,8 +5273,10 @@ function bossAtualizaPeriodos_(dados){
   var mesNum=(dados&&dados.mes!=null)?Number(dados.mes):null;
   var ano=dados&&dados.ano;
   var mesLabel=(mesNum!=null&&BOSS_MESES_[mesNum])?BOSS_MESES_[mesNum]+(ano?'/'+ano:''):'';
-  var elQ=document.getElementById('bossPeriodoQuebra');if(elQ)elQ.textContent=dataSel?('dia '+dataSel):'';
-  var elP=document.getElementById('bossPeriodoPerdas');if(elP)elP.textContent=dataSel?('dia '+dataSel):'';
+  var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
+  var elQ=document.getElementById('bossPeriodoQuebra');
+  if(elQ)elQ.textContent=periodoEfetivo==='mes'?(mesLabel?('mês inteiro · '+mesLabel):'mês inteiro'):(dataSel?('dia '+dataSel):'');
+  var elP=document.getElementById('bossPeriodoPerdas');if(elP)elP.textContent=dataSel?('hoje · '+dataSel):'';
   var elC=document.getElementById('bossPeriodoConsumo');if(elC)elC.textContent=mesLabel?('acumulado de '+mesLabel):'';
 }
 function bossToggleGrupo(grupoId,cardId,chevronId){
@@ -5300,7 +5309,18 @@ function bossRender(dados){
   var ps=document.getElementById('bossKpiPerdasSub');if(ps)ps.textContent=vencidos.length+' itens vencidos';
   var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(prodPad.length+uso.length)+' itens · Produção + Uso/Consumo · mês todo';
 }
-function bossFetch(url,data){
+var bossPeriodoAtual='mes';
+function bossSetPeriodo(p){
+  if(bossPeriodoAtual===p)return;
+  bossPeriodoAtual=p;
+  document.querySelectorAll('.boss-periodo-opt').forEach(function(b){
+    b.classList.toggle('active',b.getAttribute('data-periodo')===p);
+  });
+  var inp=document.getElementById('bossData');
+  if(inp)inp.disabled=false; // data continua editável: define o mês de referência mesmo no modo "mês completo"
+  bossCarregar(true);
+}
+function bossFetch(url,data,periodo){
   return new Promise(function(resolve,reject){
     if(!url){reject(new Error('URL /exec principal da AURA não configurada.'));return;}
     var cb='__auraBoss_'+Date.now()+'_'+Math.random().toString(36).slice(2);
@@ -5314,7 +5334,7 @@ function bossFetch(url,data){
     window[cb]=function(payload){limpar();resolve(payload);};
     script.onerror=function(){limpar();reject(new Error('A API principal da AURA não respondeu à rota buscarBossVision. Publique o Code.gs integrado.'));};
     var sep=url.indexOf('?')>=0?'&':'?';
-    script.src=url+sep+'action=buscarBossVision&data='+encodeURIComponent(data)+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();
+    script.src=url+sep+'action=buscarBossVision&data='+encodeURIComponent(data)+'&periodo='+encodeURIComponent(periodo||'mes')+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();
     script.async=true;
     timer=setTimeout(function(){limpar();reject(new Error('Tempo esgotado ao consultar os relatórios pela AURA.'));},30000);
     document.head.appendChild(script);
@@ -5324,10 +5344,11 @@ function bossCarregar(force){
   var inp=document.getElementById('bossData');if(!inp)return;
   if(!inp.value)inp.value=bossHoje();
   var data=inp.value;
+  var periodo=bossPeriodoAtual;
   var url=bossApiUrl();
   var btn=document.getElementById('bossBtnAtualizar');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
-  bossSetStatus('','Atualizando eventos de '+data.split('-').reverse().join('/')+'...');
+  bossSetStatus('',periodo==='mes'?'Atualizando o mês completo até '+data.split('-').reverse().join('/')+'...':'Atualizando eventos de '+data.split('-').reverse().join('/')+'...');
   if(!url){
     bossRender(_bossDados||{}); // mesmo sem Drive, Vencidos continua vindo da AURA
     bossSetStatus('warn','Vencidos atualizados pela AURA. A API principal da AURA ainda não está disponível para carregar Quebras e Consumo Interno.');
@@ -5336,7 +5357,7 @@ function bossCarregar(force){
   }
   var _bossT0=performance.now();
   console.time('[Boss Vision] tempo total (fetch+render)');
-  bossFetch(url,data).then(function(res){
+  bossFetch(url,data,periodo).then(function(res){
     var _bossTFetch=performance.now();
     console.log('[Boss Vision] fetch (rede+backend):',(_bossTFetch-_bossT0).toFixed(0)+'ms');
     if(!res||!res.ok)throw new Error((res&&res.erro)||'A API não retornou dados do Boss Vision.');
@@ -5345,7 +5366,7 @@ function bossCarregar(force){
     var _bossTRender=performance.now();
     console.log('[Boss Vision] render:',(_bossTRender-_bossTFetch).toFixed(0)+'ms');
     console.timeEnd('[Boss Vision] tempo total (fetch+render)');
-    try{localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({data:data,dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
+    try{localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({data:data,periodo:periodo,dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
     var avisos=(res.avisos||dados.avisos||[]);
     if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);
     else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Vencidos AURA');
@@ -5353,13 +5374,17 @@ function bossCarregar(force){
     console.timeEnd('[Boss Vision] tempo total (fetch+render)');
     console.warn('[Boss Vision] falhou após',(performance.now()-_bossT0).toFixed(0)+'ms:',err.message);
     var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
-    if(cache&&cache.data===data&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','Drive indisponível; exibindo o último snapshot salvo deste dia.');}
+    if(cache&&cache.data===data&&cache.periodo===periodo&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','Drive indisponível; exibindo o último snapshot salvo deste período.');}
     else{bossRender({});bossSetStatus('warn','Vencidos atualizados; relatórios do Drive pela AURA indisponíveis. '+err.message);}
   }).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}});
 }
 function bossInit(){
   var inp=document.getElementById('bossData');if(inp&&!inp.value)inp.value=bossHoje();
   var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
+  if(cache&&cache.periodo)bossPeriodoAtual=cache.periodo;
+  document.querySelectorAll('.boss-periodo-opt').forEach(function(b){
+    b.classList.toggle('active',b.getAttribute('data-periodo')===bossPeriodoAtual);
+  });
   if(cache&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','Snapshot local exibido; abra o Boss Vision para atualizar o Drive.');}
 }
 setTimeout(bossInit,0);
