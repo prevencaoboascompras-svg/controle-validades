@@ -2977,6 +2977,8 @@ function aplicarSetorCorrigido(){
   });
 }
 var GAS_URL='https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk2OOaOOG_oOhpGdKETgZgIkTrZOBY36_UzS35Ns8s/exec';
+var AURA_INDEX_BUILD='CEASA-COMPAT-20260825-1800';
+console.info('[AURA] index build',AURA_INDEX_BUILD,'— compatível com Code.gs CEASA + Boss periodo + imagens API AURA');
 function loadCfg(){var d={id:'1HDJvgbKqYRUh8YvKeNTJZ5PhjbqyqZTsYT3bUnjp0VQ',aba:'2025',idBanco:'1HDJvgbKqYRUh8YvKeNTJZ5PhjbqyqZTsYT3bUnjp0VQ',abaBanco:'BANCO DE DADOS',abaResp:'Respostas ao formulario 1',url:GAS_URL};var s=localStorage.getItem(CFG_KEY);if(!s)return d;var c=JSON.parse(s);return Object.assign(d,c);}
 function saveProd(){try{localStorage.setItem(PROD_KEY,JSON.stringify(products));}catch(e){console.warn('localStorage cheio — dados mantidos só em memória:',e.message);}}
 
@@ -3367,7 +3369,7 @@ function renderTable(){
     var qb=qtdeBadge(p.qtde,badgeSt,p.qtde+' unidades a vencer');
     var thumbCod=(p.cod||'').replace(/[^0-9]/g,'');
     var photoBoxHtml=thumbCod
-      ?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+thumbCod+'"><img src="https://cdn-cosmos.bluesoft.com.br/products/'+thumbCod+'" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\''+thumbCod+'\')"></div></div>'
+      ?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+thumbCod+'"><img data-cod="'+thumbCod+'" alt="" loading="lazy"></div></div>'
       :'<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
     return '<div class="'+cardCls+'">'
       +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px;--qb-pad-m:'+qb.headerPadLeftMobile+'px">'
@@ -4584,16 +4586,19 @@ async function buscarFotoDrive(codigoBarras, tipo){
   return false;
 }
 
-// Catálogo público Bluesoft Cosmos — indexado pelo EAN/código de barras.
-// Mesma fonte usada no Arsenal de Ofertas.
+// Compatibilidade: o navegador NÃO acessa mais o CDN do Cosmos diretamente.
+// A action buscarImagemProduto do Code.gs já executa Drive -> Cosmos no backend,
+// salva no Drive e devolve a imagem em base64/JSONP.
 async function buscarFotoCosmos(ean){
-  var cod = String(ean||'').trim().replace(/[^0-9]/g,'');
-  if(!cod || !/^\d{8,14}$/.test(cod)) return false;
+  var cod=String(ean||'').trim().replace(/[^0-9]/g,'');
+  if(!cod||!/^\d{8,14}$/.test(cod))return false;
   try{
-    var ok = await carregarImagemUrl('https://cdn-cosmos.bluesoft.com.br/products/'+cod);
-    return ok !== false;
+    var url=await _resolverFotoTarefaChain(cod);
+    if(!url)return false;
+    var ok=await carregarImagemUrl(url);
+    return ok!==false;
   }catch(e){
-    console.warn('buscarFotoCosmos exception:', e);
+    console.warn('buscarFotoCosmos via API AURA exception:',e);
     return false;
   }
 }
@@ -4630,73 +4635,30 @@ async function buscarFotoOpenverse(query){
 // 4) Openverse (reforço quando o Google não encontra nada)
 // 5) em branco (upload manual)
 async function buscarFotoCompleta(ean, nomeProduto){
-  var nomeLimpo = (nomeProduto||'').replace(/\s*\(\d+.*$/,'').replace(/\s*\{.*$/,'').trim();
-
-  // 1ª tentativa — Banco de imagens no Drive, pelo código de barras
-  if(ean){
-    setFotoStatus('Verificando banco de imagens (Drive)...','var(--amber)');
-    var dr = await buscarFotoDrive(ean, 'produto');
-    if(dr === true){
-      setFotoStatus('✓ Foto encontrada (banco de imagens)','var(--green)');
-      return true;
-    }
+  var cod=String(ean||'').trim().replace(/[^0-9]/g,'');
+  if(!cod||!/^\d{8,14}$/.test(cod)){
+    setFotoStatus('Informe um EAN/código de barras válido para buscar a foto.','var(--red)');
+    return false;
   }
-
-  // 2ª tentativa — Bluesoft Cosmos, pelo código de barras
-  if(ean){
-    setFotoStatus('Buscando no catálogo Bluesoft Cosmos...','var(--amber)');
-    var cs = await buscarFotoCosmos(ean);
-    if(cs === true){
-      setFotoStatus('✓ Foto encontrada (Cosmos)','var(--green)');
-      return true;
+  setFotoStatus('Buscando na API AURA: Drive e, se necessário, Bluesoft Cosmos...','var(--amber)');
+  try{
+    var url=await _resolverFotoTarefaChain(cod);
+    if(!url){
+      setFotoStatus('Foto não encontrada no Drive nem no Bluesoft Cosmos.','var(--tx2)');
+      return false;
     }
-  }
-
-  // 3ª tentativa — Google CSE pelo NOME do produto (fundo branco)
-  if(nomeLimpo){
-    setFotoStatus('Buscando foto (fundo branco)...','var(--amber)');
-    var g1 = await buscarFotoGoogleCSE(nomeLimpo + ' fundo branco produto embalagem');
-    if(g1 === true){
-      setFotoStatus('✓ Foto encontrada (Google): "'+nomeLimpo+'"','var(--green)');
-      return true;
+    var ok=await carregarImagemUrl(url);
+    if(ok===false){
+      setFotoStatus('Foto encontrada, mas não foi possível carregá-la.','var(--red)');
+      return false;
     }
+    setFotoStatus('✓ Foto encontrada via API AURA (Drive/Cosmos)','var(--green)');
+    return true;
+  }catch(e){
+    console.warn('buscarFotoCompleta exception:',e);
+    setFotoStatus('Não foi possível consultar a foto agora.','var(--red)');
+    return false;
   }
-
-  // 4ª tentativa — Google CSE pelo CÓDIGO DE BARRAS (alguns produtos têm a
-  // foto indexada em sites de varejo associada ao EAN)
-  if(ean){
-    setFotoStatus('Tentando buscar pelo código de barras (Google)...','var(--amber)');
-    var g2 = await buscarFotoGoogleCSE(ean + ' produto embalagem fundo branco');
-    if(g2 === true){
-      setFotoStatus('✓ Foto encontrada (Google, por código de barras)','var(--green)');
-      return true;
-    }
-  }
-
-  // 5ª tentativa — Openverse pelo nome (reforço quando o Google não achou)
-  if(nomeLimpo){
-    setFotoStatus('Google não achou. Tentando Openverse...','var(--amber)');
-    var ov1 = await buscarFotoOpenverse(nomeLimpo);
-    if(ov1 === true){
-      setFotoStatus('✓ Foto encontrada (Openverse): "'+nomeLimpo+'"','var(--green)');
-      return true;
-    }
-  }
-
-  // 6ª tentativa — Openverse pelo código de barras
-  if(ean){
-    setFotoStatus('Tentando Openverse pelo código de barras...','var(--amber)');
-    var ov2 = await buscarFotoOpenverse(ean);
-    if(ov2 === true){
-      setFotoStatus('✓ Foto encontrada (Openverse, por código de barras)','var(--green)');
-      return true;
-    }
-  }
-
-  // 7ª tentativa — Open Food Facts removida da cadeia de busca (mantidas as anteriores: Google, Openverse, etc.)
-
-  setFotoStatus('Foto não encontrada. Envie manualmente.','var(--red)');
-  return false;
 }
 
 // Mantido por compatibilidade com chamadas que buscam só por nome
@@ -5140,10 +5102,10 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 // BOSS VISION — leitura de eventos do Drive via Apps Script
 // ═══════════════════════════════════════════════════════════════
-var BOSS_CACHE_KEY='aura_boss_vision_v3_unico';
+var BOSS_CACHE_KEY='aura_boss_vision_v5_ceasa_periodo';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8.1-aura-unica-jsonp-menu-fix';
-console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— usando somente a API principal da AURA');
+var BOSS_VISION_BUILD='v8.9-aura-ceasa-drive-cosmos';
+console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— API AURA + Entradas CEASA + imagens Drive > Cosmos');
 
 function bossFmtBRL(v){
   v=Number(v)||0;
@@ -5338,7 +5300,7 @@ function entradaCeasaRemoverLinha(id){
   entradaCeasaAtualizarTotal();
 }
 function entradaCeasaAutoNome(id){
-  var cod=(document.getElementById('ecCod'+id).value||'').trim();
+  var cod=(document.getElementById('ecCod'+id).value||'').trim().replace(/[^0-9]/g,'');
   var nomeInp=document.getElementById('ecNome'+id);
   if(cod&&banco[cod]&&nomeInp&&!nomeInp.value)nomeInp.value=banco[cod];
 }
@@ -5372,18 +5334,19 @@ function salvarEntradaCeasa(){
   function erro(msg){if(erroEl){erroEl.textContent=msg;erroEl.style.display='block';}}
   if(erroEl){erroEl.style.display='none';erroEl.textContent='';}
   var data=(document.getElementById('ecData').value||'').trim();
-  if(!data)return erro('Informe a data da compra.');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(data))return erro('Informe uma data válida para a compra.');
   var fornecedor=(document.getElementById('ecFornecedor').value||'').trim();
   var itens=[];
   var linhasOk=true;
   document.querySelectorAll('.ec-linha').forEach(function(div){
     var idm=div.id.replace('ecLinha','');
     var nome=(document.getElementById('ecNome'+idm).value||'').trim();
-    var cod=(document.getElementById('ecCod'+idm).value||'').trim();
-    var unidade=document.getElementById('ecUnid'+idm).value||'kg';
+    var cod=(document.getElementById('ecCod'+idm).value||'').trim().replace(/[^0-9]/g,'');
+    var unidade=(document.getElementById('ecUnid'+idm).value||'kg').toLowerCase();
     var peso=parseFloat(document.getElementById('ecPeso'+idm).value)||0;
     var valor=parseFloat(document.getElementById('ecValor'+idm).value)||0;
-    if(!nome&&!cod&&!peso&&!valor)return; // linha em branco, ignora
+    if(!nome&&!cod&&!peso&&!valor)return;
+    if(!nome&&cod&&typeof banco!=='undefined'&&banco[cod])nome=banco[cod];
     if(!nome||peso<=0||valor<=0){linhasOk=false;return;}
     itens.push({cod:cod,nome:nome,unidade:unidade,peso:peso,valor:valor});
   });
@@ -5393,29 +5356,48 @@ function salvarEntradaCeasa(){
   if(!url)return erro('URL da API principal da AURA não configurada.');
   var btn=document.getElementById('ecBtnSalvar');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Salvando...';}
+
+  // O Apps Script pode bloquear a leitura da resposta por CORS no GitHub Pages.
+  // mode:no-cors envia a gravação normalmente; depois confirmamos visualmente
+  // recarregando o Boss Vision por JSONP, que é suportado pelo Code.gs atual.
   fetch(url,{
     method:'POST',
-    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    mode:'no-cors',
+    headers:{'Content-Type':'text/plain;charset=UTF-8'},
     body:JSON.stringify({action:'lancarEntradaCeasa',data:data,fornecedor:fornecedor,itens:itens})
-  }).then(function(r){return r.json();}).then(function(res){
-    if(!res||!res.ok)throw new Error((res&&res.erro)||'Falha ao salvar a entrada.');
+  }).then(function(){
     closeModal('entradaCeasaModal');
-    if(currentTabName==='bossvision')bossCarregar(true);
+    if(typeof mostrarToast==='function')mostrarToast('Entrada CEASA enviada. Atualizando Boss Vision...','ok');
+    setTimeout(function(){if(currentTabName==='bossvision')bossCarregar(true);},1200);
   }).catch(function(e){
-    erro(e.message||'Erro ao salvar. Tente novamente.');
+    erro((e&&e.message)||'Erro de rede ao enviar a entrada. Tente novamente.');
   }).finally(function(){
     if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Salvar nota';}
   });
 }
+function bossMesLabelDados_(dados){
+  dados=dados||{};
+  var ano=dados.ano||'';
+  var mesRaw=dados.mes;
+  var nome='';
+  if(typeof mesRaw==='number'||(/^\d+$/.test(String(mesRaw||''))&&Number(mesRaw)>=0&&Number(mesRaw)<=11)){
+    nome=BOSS_MESES_[Number(mesRaw)]||'';
+  }else if(mesRaw){
+    nome=String(mesRaw).trim();
+  }
+  if(!nome&&dados.data){
+    var p=String(dados.data).split('-');
+    if(p.length===3)nome=BOSS_MESES_[Number(p[1])-1]||'';
+  }
+  return nome+(nome&&ano?'/'+ano:'');
+}
 function bossAtualizaPeriodos_(dados){
   var dataSel=bossFmtDataBR_(dados&&dados.data);
-  var mesNum=(dados&&dados.mes!=null)?Number(dados.mes):null;
-  var ano=dados&&dados.ano;
-  var mesLabel=(mesNum!=null&&BOSS_MESES_[mesNum])?BOSS_MESES_[mesNum]+(ano?'/'+ano:''):'';
+  var mesLabel=bossMesLabelDados_(dados);
   var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
   var elQ=document.getElementById('bossPeriodoQuebra');
   if(elQ)elQ.textContent=periodoEfetivo==='mes'?(mesLabel?('mês inteiro · '+mesLabel):'mês inteiro'):(dataSel?('dia '+dataSel):'');
-  var elP=document.getElementById('bossPeriodoPerdas');if(elP)elP.textContent=dataSel?('hoje · '+dataSel):'';
+  var elP=document.getElementById('bossPeriodoPerdas');if(elP)elP.textContent=periodoEfetivo==='mes'?(mesLabel?('vencidos atuais · ref. '+mesLabel):'vencidos atuais'):(dataSel?('dia '+dataSel):'');
   var elC=document.getElementById('bossPeriodoConsumo');if(elC)elC.textContent=mesLabel?('acumulado de '+mesLabel):'';
 }
 function bossToggleGrupo(grupoId,cardId,chevronId){
@@ -5438,7 +5420,7 @@ function bossRenderEntradaCeasa_(dados){
       wrap.innerHTML=lista.map(function(it,i){
         return '<div class="boss-row">'
           +'<div class="boss-rank">'+(i+1)+'</div>'
-          +'<div class="boss-photo"><i class="ti ti-leaf"></i></div>'
+          +(it.cod?'<div class="boss-photo"><img data-boss-cod="'+bossEscapeHtml(it.cod)+'" alt="" loading="lazy"></div>':'<div class="boss-photo"><i class="ti ti-leaf"></i></div>')
           +'<div class="boss-prod"><div class="boss-prod-name" title="'+bossEscapeHtml(it.nome)+'">'+bossEscapeHtml(it.nome)+'</div>'+(it.cod?'<div class="boss-prod-cod">'+it.cod+'</div>':'')+'</div>'
           +'<div class="boss-num"><small>Peso/Qtd</small><strong>'+(Number(it.pesoTotal)||0).toLocaleString('pt-BR',{maximumFractionDigits:3})+' '+(it.unidade||'kg')+'</strong></div>'
           +'<div class="boss-num"><small>Custo médio</small><strong style="color:var(--green)">'+bossFmtBRL(it.custoMedio||0)+'/'+(it.unidade||'kg')+'</strong></div>'
@@ -5447,15 +5429,21 @@ function bossRenderEntradaCeasa_(dados){
       }).join('');
     }
   }
+  if(wrap)bossResolverFotos(wrap);
   var tEl=document.getElementById('bossTotalEntrada');if(tEl)tEl.textContent=bossFmtBRL(ec.totalValor||0);
   var cEl=document.getElementById('bossCountEntrada');if(cEl)cEl.textContent=lista.length+' produtos';
   var kEl=document.getElementById('bossKpiEntrada');if(kEl)kEl.textContent=bossFmtBRL(ec.totalValor||0);
-  var mesNum=(dados&&dados.mes!=null)?Number(dados.mes):null;
-  var ano=dados&&dados.ano;
-  var mesLabel=(mesNum!=null&&BOSS_MESES_[mesNum])?BOSS_MESES_[mesNum]+(ano?'/'+ano:''):'';
+  var mesLabel=bossMesLabelDados_(dados);
   var pesoTotal=Number(ec.totalPeso)||0;
-  var ksEl=document.getElementById('bossKpiEntradaSub');if(ksEl)ksEl.textContent=(pesoTotal?pesoTotal.toLocaleString('pt-BR',{maximumFractionDigits:1})+' kg · ':'')+'mês todo';
-  var pEl=document.getElementById('bossPeriodoEntrada');if(pEl)pEl.textContent=mesLabel?('acumulado de '+mesLabel):'';
+  var unidadesEntrada=[];
+  lista.forEach(function(it){var u=String(it.unidade||'kg').toLowerCase();if(unidadesEntrada.indexOf(u)<0)unidadesEntrada.push(u);});
+  var volumeTxt='';
+  if(pesoTotal){
+    var sufixoVol=unidadesEntrada.length===1?(' '+unidadesEntrada[0]):' qtd/peso';
+    volumeTxt=pesoTotal.toLocaleString('pt-BR',{maximumFractionDigits:1})+sufixoVol+' · ';
+  }
+  var ksEl=document.getElementById('bossKpiEntradaSub');if(ksEl)ksEl.textContent=volumeTxt+'mês todo';
+  var pEl=document.getElementById('bossPeriodoEntrada');if(pEl)pEl.textContent=mesLabel?('acumulado de '+mesLabel):'mês inteiro';
 }
 function bossRender(dados){
   _bossDados=dados||{};
@@ -5539,7 +5527,7 @@ function bossCarregar(force){
     try{localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({data:data,periodo:periodo,dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
     var avisos=(res.avisos||dados.avisos||[]);
     if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);
-    else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Vencidos AURA');
+    else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Vencidos AURA + Entradas CEASA');
   }).catch(function(err){
     console.timeEnd('[Boss Vision] tempo total (fetch+render)');
     console.warn('[Boss Vision] falhou após',(performance.now()-_bossT0).toFixed(0)+'ms:',err.message);
@@ -6949,7 +6937,32 @@ function _gasPost(body){
   }).catch(function(){});
 }
 
+function _gasGetJsonp(action,extra,timeoutMs){
+  return new Promise(function(resolve){
+    var cfg=loadCfg();
+    if(!cfg.url){resolve({ok:false});return;}
+    var cb='__auraGet_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    var script=document.createElement('script');
+    var timer=null,encerrado=false;
+    function limpar(){
+      if(timer)clearTimeout(timer);
+      try{delete window[cb];}catch(e){window[cb]=undefined;}
+      if(script&&script.parentNode)script.parentNode.removeChild(script);
+    }
+    window[cb]=function(payload){if(encerrado)return;encerrado=true;limpar();resolve(payload||{ok:false});};
+    script.onerror=function(){if(encerrado)return;encerrado=true;limpar();resolve({ok:false});};
+    var sep=cfg.url.indexOf('?')>=0?'&':'?';
+    script.src=cfg.url+sep+'action='+encodeURIComponent(action)+(extra||'')+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();
+    script.async=true;
+    timer=setTimeout(function(){if(encerrado)return;encerrado=true;limpar();resolve({ok:false});},timeoutMs||30000);
+    document.head.appendChild(script);
+  });
+}
+
 function _gasGet(action,extra){
+  // O Code.gs atual aceita JSONP em buscarImagemProduto; isso evita CORS
+  // entre GitHub Pages e Apps Script. A própria action já faz Drive -> Cosmos.
+  if(action==='buscarImagemProduto')return _gasGetJsonp(action,extra,30000);
   var cfg=loadCfg();
   if(!cfg.url)return Promise.resolve({ok:false});
   var url=cfg.url+'?action='+action+(extra||'');
@@ -7806,17 +7819,13 @@ function abrirRelatorioRetirada() {
     '<div class="rodape">AURA Vencimentos · '+new Date().toLocaleString('pt-BR')+'</div>',
     '<script>',
       'var RET_GAS_URL='+JSON.stringify(loadCfg().url||'')+';',
-      'function retFotoTestImg(url){return new Promise(function(res){var im=new Image();im.onload=function(){res(url);};im.onerror=function(){res(null);};im.src=url;});}',
+      'function retGasJsonp(cod){return new Promise(function(res){if(!RET_GAS_URL){res(null);return;}var cb="__retImg_"+Date.now()+"_"+Math.random().toString(36).slice(2),s=document.createElement("script"),done=false,t;function fim(v){if(done)return;done=true;if(t)clearTimeout(t);try{delete window[cb];}catch(e){window[cb]=undefined;}if(s.parentNode)s.parentNode.removeChild(s);res(v);}window[cb]=function(j){fim(j);};s.onerror=function(){fim(null);};s.src=RET_GAS_URL+"?action=buscarImagemProduto&codigoBarras="+encodeURIComponent(cod)+"&tipo=produto&callback="+encodeURIComponent(cb)+"&_="+Date.now();document.head.appendChild(s);t=setTimeout(function(){fim(null);},30000);});}',
       'async function retFotoResolve(cod){',
-        'if(RET_GAS_URL){',
-          'try{',
-            'var r=await fetch(RET_GAS_URL+"?action=buscarImagemProduto&codigoBarras="+encodeURIComponent(cod)+"&tipo=produto");',
-            'var j=await r.json();',
-            'if(j&&j.ok&&j.encontrado&&j.base64){return "data:"+(j.mimeType||"image/jpeg")+";base64,"+j.base64;}',
-          '}catch(e){}',
-        '}',
-        'var cosmos=await retFotoTestImg("https://cdn-cosmos.bluesoft.com.br/products/"+cod);',
-        'if(cosmos)return cosmos;',
+        'if(!RET_GAS_URL)return null;',
+        'try{',
+          'var j=await retGasJsonp(cod);',
+          'if(j&&j.ok&&j.encontrado&&j.base64){return "data:"+(j.mimeType||"image/jpeg")+";base64,"+j.base64;}',
+        '}catch(e){}',
         'return null;',
       '}',
       'document.querySelectorAll(".ret-foto[data-cod]").forEach(function(el){',
@@ -8099,24 +8108,14 @@ function abrirProdutoModal(cod){
   pmBox.innerHTML='<img id="pmFoto" alt="" loading="lazy">';
   pmImg=document.getElementById('pmFoto');
   if(pmBarras){
-    pmImg.src='https://cdn-cosmos.bluesoft.com.br/products/'+pmBarras;
-    pmImg.onerror=function(){
-      var self=this;
-      (async function(){
-        if(!_auraEstoqueThumbCache[pmBarras]){
-          _auraEstoqueThumbCache[pmBarras]=(async function(){
-            try{
-              var r=await _gasGet('buscarImagemProduto','&codigoBarras='+encodeURIComponent(pmBarras)+'&tipo=produto');
-              if(r&&r.ok&&r.encontrado&&r.base64)return 'data:'+(r.mimeType||'image/jpeg')+';base64,'+r.base64;
-            }catch(e){}
-            return null;
-          })();
-        }
-        var dataUrl=await _auraEstoqueThumbCache[pmBarras];
-        if(dataUrl)self.src=dataUrl;
-        else pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';
-      })();
-    };
+    _resolverFotoTarefaChain(pmBarras).then(function(url){
+      if(url){
+        pmImg.src=url;
+        pmImg.onerror=function(){pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';};
+      }else{
+        pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';
+      }
+    }).catch(function(){pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';});
   } else {
     pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';
   }
@@ -8815,51 +8814,38 @@ var _auraEstoqueThumbCache = {};
 // resultado (achou uma foto, ou sabidamente não tem foto em lugar nenhum)
 // fica salvo em localStorage por até 24h, então reabrir a aba não repete
 // esse trabalho todo de novo.
-var THUMB_CACHE_KEY = 'boascompras_thumb_cache_v1';
-var THUMB_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24h
-function _thumbCacheGet() {
-  try { return JSON.parse(localStorage.getItem(THUMB_CACHE_KEY) || '{}'); } catch (e) { return {}; }
+var THUMB_CACHE_KEY = 'boascompras_thumb_cache_v4_api_drive_cosmos';
+try { localStorage.removeItem('boascompras_thumb_cache_v1'); } catch(e) {}
+try { localStorage.removeItem('boascompras_thumb_cache_v3_drive_cosmos'); } catch(e) {}
+var THUMB_CACHE_TTL_OK_MS  = 7 * 24 * 60 * 60 * 1000;
+var THUMB_CACHE_TTL_NEG_MS = 10 * 60 * 1000;
+function _thumbCacheGet(){
+  try{return JSON.parse(localStorage.getItem(THUMB_CACHE_KEY)||'{}');}catch(e){return{};}
 }
-// v-fix: esse cache nunca tinha limite nem limpeza — cada produto sem foto
-// no Cosmos vira uma entrada nova, e como ela guarda o dataURL (base64) da
-// imagem quando acha uma, com ~2700+ produtos ele sozinho estourava a cota
-// do localStorage e travava a gravação de TUDO mais (tarefas, encartes,
-// negociações etc). Agora: descarta entradas expiradas antes de gravar, e
-// se o cache passar de MAX entradas, remove primeiro as mais antigas.
-var THUMB_CACHE_MAX = 400;
-function _thumbCachePrune(c) {
-  var now = Date.now();
-  var keys = Object.keys(c).filter(function(k){ return (now - c[k].ts) <= THUMB_CACHE_TTL_MS; });
-  if (keys.length > THUMB_CACHE_MAX) {
-    keys.sort(function(a,b){ return c[b].ts - c[a].ts; }); // mais recentes primeiro
-    keys = keys.slice(0, THUMB_CACHE_MAX);
-  }
-  var pruned = {};
-  keys.forEach(function(k){ pruned[k] = c[k]; });
-  return pruned;
+var THUMB_CACHE_MAX=400;
+function _thumbCacheEntryValida_(entry,now){
+  if(!entry||!entry.ts)return false;
+  var ttl=entry.url?THUMB_CACHE_TTL_OK_MS:THUMB_CACHE_TTL_NEG_MS;
+  return (now-entry.ts)<=ttl;
 }
-function _thumbCacheSet(cod, url) {
-  try {
-    var c = _thumbCacheGet();
-    c[cod] = { url: url, ts: Date.now() };
-    c = _thumbCachePrune(c);
-    localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(c));
-  } catch (e) {
-    // Cota estourou mesmo com poda (ex: cache de outra fonte ocupando tudo).
-    // Esse cache é descartável, então na pior hipótese zera e tenta uma vez.
-    try {
-      var only = {}; only[cod] = { url: url, ts: Date.now() };
-      localStorage.setItem(THUMB_CACHE_KEY, JSON.stringify(only));
-    } catch (e2) {}
-  }
+function _thumbCachePrune(c){
+  var now=Date.now();
+  var keys=Object.keys(c).filter(function(k){return _thumbCacheEntryValida_(c[k],now);});
+  if(keys.length>THUMB_CACHE_MAX){keys.sort(function(a,b){return c[b].ts-c[a].ts;});keys=keys.slice(0,THUMB_CACHE_MAX);}
+  var pruned={};keys.forEach(function(k){pruned[k]=c[k];});return pruned;
 }
-// Retorna undefined quando não há nada cacheado (ou expirou) — nesse caso
-// é preciso buscar de verdade. Retorna null quando já sabemos que não tem
-// foto em lugar nenhum. Retorna a URL/dataURL quando já achamos antes.
-function _thumbCacheLookup(cod) {
-  var entry = _thumbCacheGet()[cod];
-  if (!entry) return undefined;
-  if (Date.now() - entry.ts > THUMB_CACHE_TTL_MS) return undefined;
+function _thumbCacheSet(cod,url){
+  // Base64 retornado pela API permanece somente na memória da sessão.
+  if(typeof url==='string'&&url.indexOf('data:')===0)return;
+  try{
+    var c=_thumbCacheGet();c[cod]={url:url||null,ts:Date.now()};c=_thumbCachePrune(c);
+    localStorage.setItem(THUMB_CACHE_KEY,JSON.stringify(c));
+  }catch(e){}
+}
+function _thumbCacheLookup(cod){
+  var entry=_thumbCacheGet()[cod];
+  if(!entry)return undefined;
+  if(!_thumbCacheEntryValida_(entry,Date.now()))return undefined;
   return entry.url;
 }
 
@@ -8894,7 +8880,7 @@ function fecharFotoGrande() {
   document.getElementById('fotoLightboxImg').src = '';
 }
 
-// ═══ Foto do produto na área de Tarefas: Drive > Cosmos ═══
+// ═══ Resolver central de fotos: API AURA -> Drive > Cosmos -> sem foto ═══
 var _fotoTarefaChainCache = {};
 function _resolverFotoTarefaChain(cod) {
   if (!cod) return Promise.resolve(null);
@@ -8906,25 +8892,18 @@ function _resolverFotoTarefaChain(cod) {
   }
   _fotoTarefaChainCache[cod] = (async function() {
     var resultado = null;
+    var apiRespondeu = false;
     try {
       var dr = await _filaThumbGAS(function() {
         return _gasGet('buscarImagemProduto', '&codigoBarras=' + encodeURIComponent(cod) + '&tipo=produto');
       });
+      apiRespondeu = !!(dr && dr.ok);
       if (dr && dr.ok && dr.encontrado && dr.base64) {
         resultado = 'data:' + (dr.mimeType || 'image/jpeg') + ';base64,' + dr.base64;
       }
     } catch (e) {}
-    if (!resultado) {
-      var cosmosUrl = 'https://cdn-cosmos.bluesoft.com.br/products/' + cod;
-      var okCosmos = await new Promise(function(res) {
-        var im = new Image();
-        im.onload = function() { res(cosmosUrl); };
-        im.onerror = function() { res(null); };
-        im.src = cosmosUrl;
-      });
-      if (okCosmos) resultado = okCosmos;
-    }
-    _thumbCacheSet(cod, resultado);
+    if (resultado) _thumbCacheSet(cod, resultado);
+    else if (apiRespondeu) _thumbCacheSet(cod, null);
     return resultado;
   })();
   return _fotoTarefaChainCache[cod];
@@ -9043,7 +9022,7 @@ function renderEstoque() {
 
     var thumbCod = (grupo.cod || '').replace(/[^0-9]/g, '');
     var photoBoxHtml = thumbCod
-      ? '<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_' + thumbCod + '"><img src="https://cdn-cosmos.bluesoft.com.br/products/' + thumbCod + '" alt="" loading="lazy" onerror="_auraEstoqueThumbFallback(this,\'' + thumbCod + '\')"></div></div>'
+      ? '<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_' + thumbCod + '"><img data-cod="' + thumbCod + '" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
 
     return '<div class="urg-card" onclick="abrirProdutoModal(\'' + escHtml(grupo.cod || '') + '\')" style="cursor:pointer">'
@@ -9090,9 +9069,6 @@ function renderEstoque() {
 </script>
 
 
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <!-- === Carrega ZXing (self-hosted, com fallback CDN) - mesmo padrao do coleta-validades === -->
 <script>
 (function() {
