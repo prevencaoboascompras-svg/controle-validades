@@ -371,6 +371,18 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .ec-linha input,.ec-linha select{width:100%;font-size:12.5px;padding:6px 8px;border:1px solid var(--bds);border-radius:6px;background:var(--bg);color:var(--tx);outline:none;box-sizing:border-box}
 .ec-linha .ec-rm{height:31px;width:30px;border:1px solid var(--bds);border-radius:6px;background:var(--bg);color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center}
 .ec-linha .ec-rm:hover{background:rgba(217,68,68,.1)}
+.ec-ac-wrap{position:relative}
+.ec-ac-drop{display:none;position:absolute;left:0;right:0;top:calc(100% + 3px);z-index:650;background:var(--bg);border:1px solid var(--bds);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.28);max-height:280px;overflow-y:auto;min-width:360px}
+.ec-ac-drop.open{display:block}
+.ec-ac-item{padding:8px 10px;border-bottom:1px solid var(--bd);cursor:pointer;display:flex;gap:10px;align-items:flex-start;background:var(--bg)}
+.ec-ac-item:last-child{border-bottom:none}
+.ec-ac-item:hover,.ec-ac-item.focused{background:var(--bg2)}
+.ec-ac-main{flex:1;min-width:0}
+.ec-ac-nome{font-size:12px;font-weight:600;color:var(--tx);line-height:1.25;white-space:normal}
+.ec-ac-cod{font-size:10px;font-family:monospace;color:var(--tx2);margin-top:2px}
+.ec-ac-un{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--green);padding:2px 5px;border-radius:4px;background:rgba(29,158,117,.12);white-space:nowrap}
+.ec-ac-empty{padding:9px 10px;font-size:11px;color:var(--tx2)}
+@media(max-width:700px){.ec-ac-drop{min-width:280px;max-width:90vw}}
 .form-row label{display:block;font-size:11px;font-weight:600;color:var(--tx2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em}
 .form-row input,.form-row select{width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;font-family:inherit}
 .form-row input:focus,.form-row select:focus{border-color:var(--green)}
@@ -2977,8 +2989,8 @@ function aplicarSetorCorrigido(){
   });
 }
 var GAS_URL='https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk2OOaOOG_oOhpGdKETgZgIkTrZOBY36_UzS35Ns8s/exec';
-var AURA_INDEX_BUILD='CEASA-COMPAT-20260825-1800';
-console.info('[AURA] index build',AURA_INDEX_BUILD,'— compatível com Code.gs CEASA + Boss periodo + imagens API AURA');
+var AURA_INDEX_BUILD='CEASA-AUTOCOMPLETE-20260825-1845';
+console.info('[AURA] index build',AURA_INDEX_BUILD,'— CEASA com autocomplete do BANCO DE DADOS + Boss periodo + imagens API AURA');
 function loadCfg(){var d={id:'1HDJvgbKqYRUh8YvKeNTJZ5PhjbqyqZTsYT3bUnjp0VQ',aba:'2025',idBanco:'1HDJvgbKqYRUh8YvKeNTJZ5PhjbqyqZTsYT3bUnjp0VQ',abaBanco:'BANCO DE DADOS',abaResp:'Respostas ao formulario 1',url:GAS_URL};var s=localStorage.getItem(CFG_KEY);if(!s)return d;var c=JSON.parse(s);return Object.assign(d,c);}
 function saveProd(){try{localStorage.setItem(PROD_KEY,JSON.stringify(products));}catch(e){console.warn('localStorage cheio — dados mantidos só em memória:',e.message);}}
 
@@ -3032,6 +3044,7 @@ var banco={};
 var bancoCusto={};
 var bancoFornecedor={};
 var bancoFornecedorNome={}; // índice: nome normalizado → fornecedor (fallback sem código de barras)
+var bancoUnidade={}; // unidade do BANCO DE DADOS (usada também nas Entradas CEASA)
 
 // Normaliza nome de produto removendo quantidades "(NUN)", "{N}" e espaços extras
 function normNome(n){return n.replace(/\s*\(.*?\)\s*/g,'').replace(/\s*\{.*?\}/g,'').replace(/\s+/g,' ').trim().toUpperCase();}
@@ -3063,7 +3076,7 @@ async function loadBanco(cfg){
   if(!cfg.idBanco)return;
   try{
     var table=await fetchSheet(cfg.idBanco,cfg.abaBanco);
-    var rows=rawRows(table);banco={};bancoCusto={};bancoFornecedor={};bancoFornecedorNome={};
+    var rows=rawRows(table);banco={};bancoCusto={};bancoFornecedor={};bancoFornecedorNome={};bancoUnidade={};
     var hIdx=-1,ciCod=-1,ciNome=-1,ciCusto=-1,ciForn=-1,ciUnid=-1;
 
     // Funções de detecção de coluna
@@ -3119,6 +3132,7 @@ async function loadBanco(cfg){
         banco[cod]=nome;
         if(ciCusto>=0){var cv=cellNum(cells[ciCusto]);if(cv)bancoCusto[cod]=cv;}
         if(ciForn>=0){var fv=String((cells[ciForn]&&cells[ciForn].f)||(cells[ciForn]&&cells[ciForn].v)||'').trim();if(fv)bancoFornecedor[cod]=fv;}
+        if(ciUnid>=0){var uv=String((cells[ciUnid]&&cells[ciUnid].f)||(cells[ciUnid]&&cells[ciUnid].v)||'').trim();if(uv)bancoUnidade[cod]=uv;}
       }
       // ▸ Índice nome→fornecedor: funciona mesmo sem código de barras
       if(nome&&ciForn>=0){
@@ -5277,6 +5291,16 @@ function bossFmtDataBR_(iso){
 }
 // ═══ ENTRADA CEASA (compras de hortifruti) ═══
 var _ecLinhaSeq=0;
+var _ecAcFoco={};
+function _ecNormalizaUnidade_(u){
+  var s=String(u||'').trim().toLowerCase();
+  if(s==='kg'||s.indexOf('quilo')>=0)return 'kg';
+  if(s==='un'||s==='und'||s==='unid'||s==='unidade'||s==='unidades')return 'un';
+  return '';
+}
+function _ecEsc_(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+}
 function entradaCeasaAddLinha(preenchido){
   var id=(++_ecLinhaSeq);
   var wrap=document.getElementById('ecLinhas');
@@ -5285,7 +5309,7 @@ function entradaCeasaAddLinha(preenchido){
   div.className='ec-linha';
   div.id='ecLinha'+id;
   div.innerHTML=
-    '<div><label>Produto</label><input type="text" id="ecNome'+id+'" placeholder="Ex: Tomate Salada"></div>'
+    '<div><label>Produto</label><div class="ec-ac-wrap"><input type="text" id="ecNome'+id+'" placeholder="Digite nome ou código..." autocomplete="off" oninput="entradaCeasaSugere('+id+')" onfocus="entradaCeasaSugere('+id+')" onkeydown="entradaCeasaAcKeydown(event,'+id+')" onblur="setTimeout(function(){entradaCeasaFechaSugestoes('+id+');},180)"><div id="ecSug'+id+'" class="ec-ac-drop"></div></div></div>'
     +'<div><label>Cód. barras</label><input type="text" id="ecCod'+id+'" placeholder="opcional" oninput="entradaCeasaAutoNome('+id+')" style="font-family:monospace"></div>'
     +'<div><label>Unid.</label><select id="ecUnid'+id+'"><option value="kg">kg</option><option value="un">un</option></select></div>'
     +'<div><label>Peso/Qtd</label><input type="number" step="0.001" min="0" id="ecPeso'+id+'" placeholder="0" oninput="entradaCeasaAtualizarTotal()"></div>'
@@ -5293,16 +5317,103 @@ function entradaCeasaAddLinha(preenchido){
     +'<div style="grid-column:1/3"><label>Valor pago (R$, total do item)</label><input type="number" step="0.01" min="0" id="ecValor'+id+'" placeholder="0,00" oninput="entradaCeasaAtualizarTotal()"></div>'
     +'<div style="grid-column:3/6;font-size:11px;color:var(--tx2);align-self:center" id="ecCustoCalc'+id+'"></div>';
   wrap.appendChild(div);
+  if(preenchido){
+    var cod=String(preenchido.cod||'').replace(/[^0-9]/g,'');
+    document.getElementById('ecCod'+id).value=cod;
+    document.getElementById('ecNome'+id).value=preenchido.nome||banco[cod]||'';
+    document.getElementById('ecPeso'+id).value=preenchido.peso||'';
+    document.getElementById('ecValor'+id).value=preenchido.valor||'';
+    var un=_ecNormalizaUnidade_(preenchido.unidade||bancoUnidade[cod]);
+    if(un)document.getElementById('ecUnid'+id).value=un;
+  }
 }
 function entradaCeasaRemoverLinha(id){
   var el=document.getElementById('ecLinha'+id);
   if(el)el.remove();
+  delete _ecAcFoco[id];
   entradaCeasaAtualizarTotal();
+}
+function entradaCeasaFechaSugestoes(id){
+  var drop=document.getElementById('ecSug'+id);
+  if(drop){drop.classList.remove('open');drop.innerHTML='';}
+  _ecAcFoco[id]=-1;
+}
+function entradaCeasaSelecionar(id,cod){
+  cod=String(cod||'').replace(/[^0-9]/g,'');
+  if(!cod||!banco[cod])return;
+  var nome=document.getElementById('ecNome'+id), codEl=document.getElementById('ecCod'+id), unEl=document.getElementById('ecUnid'+id);
+  if(nome)nome.value=banco[cod];
+  if(codEl)codEl.value=cod;
+  var un=_ecNormalizaUnidade_(bancoUnidade[cod]);
+  if(un&&unEl)unEl.value=un;
+  entradaCeasaFechaSugestoes(id);
+  entradaCeasaAtualizarTotal();
+  var peso=document.getElementById('ecPeso'+id);if(peso)peso.focus();
+}
+function entradaCeasaSugere(id){
+  var inp=document.getElementById('ecNome'+id), drop=document.getElementById('ecSug'+id);
+  if(!inp||!drop)return;
+  var termo=String(inp.value||'').trim();
+  if(!termo){entradaCeasaFechaSugestoes(id);return;}
+  var codigos=Object.keys(banco||{});
+  if(!codigos.length){
+    drop.innerHTML='<div class="ec-ac-empty">Banco de produtos ainda está carregando. Aguarde a sincronização.</div>';
+    drop.classList.add('open');return;
+  }
+  var tNorm=normBuscaTxt(termo), tDig=termo.replace(/[^0-9]/g,'');
+  var lista=[];
+  for(var i=0;i<codigos.length;i++){
+    var cod=codigos[i], nome=banco[cod]||'';
+    if(!matchBusca(nome,cod,termo))continue;
+    var nomeN=normBuscaTxt(nome), score=50;
+    if(tDig&&cod===tDig)score=0;
+    else if(tDig&&cod.indexOf(tDig)===0)score=5;
+    else if(nomeN===tNorm)score=10;
+    else if(nomeN.indexOf(tNorm)===0)score=15;
+    else if(nomeN.indexOf(tNorm)>=0)score=25;
+    lista.push({cod:cod,nome:nome,un:bancoUnidade[cod]||'',score:score});
+  }
+  lista.sort(function(a,b){return a.score-b.score||a.nome.localeCompare(b.nome,'pt-BR');});
+  lista=lista.slice(0,12);
+  if(!lista.length){
+    drop.innerHTML='<div class="ec-ac-empty">Nenhum produto encontrado no BANCO DE DADOS.</div>';
+    drop.classList.add('open');_ecAcFoco[id]=-1;return;
+  }
+  drop.innerHTML=lista.map(function(p,idx){
+    var un=_ecNormalizaUnidade_(p.un)||String(p.un||'').trim();
+    return '<div class="ec-ac-item" data-idx="'+idx+'" onmousedown="event.preventDefault();entradaCeasaSelecionar('+id+',\''+p.cod+'\')">'
+      +'<div class="ec-ac-main"><div class="ec-ac-nome">'+_ecEsc_(p.nome)+'</div><div class="ec-ac-cod">'+_ecEsc_(p.cod)+'</div></div>'
+      +(un?'<span class="ec-ac-un">'+_ecEsc_(un)+'</span>':'')+'</div>';
+  }).join('');
+  drop.classList.add('open');_ecAcFoco[id]=-1;
+}
+function entradaCeasaAcKeydown(ev,id){
+  var drop=document.getElementById('ecSug'+id);
+  if(!drop||!drop.classList.contains('open')){
+    if(ev.key==='ArrowDown'){entradaCeasaSugere(id);ev.preventDefault();}
+    return;
+  }
+  var itens=Array.prototype.slice.call(drop.querySelectorAll('.ec-ac-item'));
+  if(!itens.length)return;
+  var foco=Number(_ecAcFoco[id]);if(!isFinite(foco))foco=-1;
+  if(ev.key==='ArrowDown'){foco=Math.min(itens.length-1,foco+1);ev.preventDefault();}
+  else if(ev.key==='ArrowUp'){foco=Math.max(0,foco-1);ev.preventDefault();}
+  else if(ev.key==='Enter'&&foco>=0){ev.preventDefault();itens[foco].dispatchEvent(new MouseEvent('mousedown',{bubbles:true}));return;}
+  else if(ev.key==='Escape'){entradaCeasaFechaSugestoes(id);return;}
+  else return;
+  _ecAcFoco[id]=foco;
+  itens.forEach(function(el,i){el.classList.toggle('focused',i===foco);});
+  if(itens[foco])itens[foco].scrollIntoView({block:'nearest'});
 }
 function entradaCeasaAutoNome(id){
   var cod=(document.getElementById('ecCod'+id).value||'').trim().replace(/[^0-9]/g,'');
   var nomeInp=document.getElementById('ecNome'+id);
-  if(cod&&banco[cod]&&nomeInp&&!nomeInp.value)nomeInp.value=banco[cod];
+  if(cod&&banco[cod]){
+    if(nomeInp)nomeInp.value=banco[cod];
+    var un=_ecNormalizaUnidade_(bancoUnidade[cod]);
+    var unEl=document.getElementById('ecUnid'+id);if(un&&unEl)unEl.value=un;
+    entradaCeasaFechaSugestoes(id);
+  }
 }
 function entradaCeasaAtualizarTotal(){
   var total=0;
