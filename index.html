@@ -4529,8 +4529,7 @@ async function buscarFotoCompleta(ean, nomeProduto){
       setFotoStatus('Foto encontrada, mas não foi possível carregá-la.','var(--red)');
       return false;
     }
-    var origem=String(url).indexOf('data:')===0?'Drive':'Bluesoft Cosmos';
-    setFotoStatus('✓ Foto encontrada ('+origem+')','var(--green)');
+    setFotoStatus('✓ Foto encontrada via API AURA (Drive/Cosmos)','var(--green)');
     return true;
   }catch(e){
     console.warn('buscarFotoCompleta exception:',e);
@@ -4985,8 +4984,8 @@ var _bossListasCache=null;
 var _bossFiltroSetor='';
 var _bossFiltroTipo='todos';
 var _bossBusca='';
-var BOSS_VISION_BUILD='v8.6-drive-cosmos-only';
-console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— usando somente a API principal da AURA');
+var BOSS_VISION_BUILD='v8.7-api-aura-drive-cosmos';
+console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— imagens automáticas: API AURA (Drive > Cosmos)');
 
 function bossFmtBRL(v){
   v=Number(v)||0;
@@ -7829,17 +7828,13 @@ function abrirRelatorioRetirada() {
     '<div class="rodape">AURA Vencimentos · '+new Date().toLocaleString('pt-BR')+'</div>',
     '<script>',
       'var RET_GAS_URL='+JSON.stringify(loadCfg().url||'')+';',
-      'function retFotoTestImg(url){return new Promise(function(res){var im=new Image();im.onload=function(){res(url);};im.onerror=function(){res(null);};im.src=url;});}',
       'function retGasJsonp(cod){return new Promise(function(res){if(!RET_GAS_URL){res(null);return;}var cb="__retImg_"+Date.now()+"_"+Math.random().toString(36).slice(2),s=document.createElement("script"),done=false,t;function fim(v){if(done)return;done=true;if(t)clearTimeout(t);try{delete window[cb];}catch(e){window[cb]=undefined;}if(s.parentNode)s.parentNode.removeChild(s);res(v);}window[cb]=function(j){fim(j);};s.onerror=function(){fim(null);};s.src=RET_GAS_URL+"?action=buscarImagemProduto&codigoBarras="+encodeURIComponent(cod)+"&tipo=produto&callback="+encodeURIComponent(cb)+"&_="+Date.now();document.head.appendChild(s);t=setTimeout(function(){fim(null);},30000);});}',
       'async function retFotoResolve(cod){',
-        'if(RET_GAS_URL){',
-          'try{',
-            'var j=await retGasJsonp(cod);',
-            'if(j&&j.ok&&j.encontrado&&j.base64){return "data:"+(j.mimeType||"image/jpeg")+";base64,"+j.base64;}',
-          '}catch(e){}',
-        '}',
-        'var cosmos=await retFotoTestImg("https://cdn-cosmos.bluesoft.com.br/products/"+cod);',
-        'if(cosmos)return cosmos;',
+        'if(!RET_GAS_URL)return null;',
+        'try{',
+          'var j=await retGasJsonp(cod);',
+          'if(j&&j.ok&&j.encontrado&&j.base64){return "data:"+(j.mimeType||"image/jpeg")+";base64,"+j.base64;}',
+        '}catch(e){}',
         'return null;',
       '}',
       'document.querySelectorAll(".ret-foto[data-cod]").forEach(function(el){',
@@ -8832,8 +8827,9 @@ var _auraEstoqueThumbCache = {};
 // durante o antigo bloqueio CORS; isso fazia fotos existentes continuarem em
 // branco mesmo depois da correção. Mudamos a chave para invalidar esse cache
 // negativo antigo automaticamente.
-var THUMB_CACHE_KEY = 'boascompras_thumb_cache_v3_drive_cosmos';
+var THUMB_CACHE_KEY = 'boascompras_thumb_cache_v4_api_drive_cosmos';
 try { localStorage.removeItem('boascompras_thumb_cache_v1'); } catch(e) {}
+try { localStorage.removeItem('boascompras_thumb_cache_v3_drive_cosmos'); } catch(e) {}
 var THUMB_CACHE_TTL_OK_MS  = 7 * 24 * 60 * 60 * 1000; // URL externa válida: 7 dias
 var THUMB_CACHE_TTL_NEG_MS = 10 * 60 * 1000;           // "sem foto": só 10 min
 function _thumbCacheGet() {
@@ -8925,30 +8921,21 @@ function _resolverFotoTarefaChain(cod) {
   }
   _fotoTarefaChainCache[cod] = (async function() {
     var resultado = null;
-    var driveRespondeu = false;
+    var apiRespondeu = false;
     try {
       var dr = await _filaThumbGAS(function() {
         return _gasGet('buscarImagemProduto', '&codigoBarras=' + encodeURIComponent(cod) + '&tipo=produto');
       });
-      // Só consideramos uma negativa do Drive confiável quando a API respondeu ok.
-      // Timeout/erro de rede NÃO pode envenenar o cache como "sem foto".
-      driveRespondeu = !!(dr && dr.ok);
+      // A action buscarImagemProduto no Apps Script já resolve a cadeia completa:
+      // Drive -> Cosmos -> salva no Drive -> retorna base64.
+      // Só gravamos cache negativo quando a API respondeu ok e disse que não encontrou.
+      apiRespondeu = !!(dr && dr.ok);
       if (dr && dr.ok && dr.encontrado && dr.base64) {
         resultado = 'data:' + (dr.mimeType || 'image/jpeg') + ';base64,' + dr.base64;
       }
     } catch (e) {}
-    if (!resultado) {
-      var cosmosUrl = 'https://cdn-cosmos.bluesoft.com.br/products/' + cod;
-      var okCosmos = await new Promise(function(res) {
-        var im = new Image();
-        im.onload = function() { res(cosmosUrl); };
-        im.onerror = function() { res(null); };
-        im.src = cosmosUrl;
-      });
-      if (okCosmos) resultado = okCosmos;
-    }
     if (resultado) _thumbCacheSet(cod, resultado);
-    else if (driveRespondeu) _thumbCacheSet(cod, null); // negativo curto (10 min)
+    else if (apiRespondeu) _thumbCacheSet(cod, null); // negativo curto (10 min)
     return resultado;
   })();
   return _fotoTarefaChainCache[cod];
