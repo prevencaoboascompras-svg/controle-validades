@@ -8147,7 +8147,7 @@ function abrirProdutoModal(cod){
   pmBox.innerHTML='<img id="pmFoto" alt="" loading="lazy">';
   pmImg=document.getElementById('pmFoto');
   if(pmBarras){
-    _resolverFotoTarefaChain(pmBarras).then(function(url){
+    _resolverFotoTarefaChain(pmBarras, principal.nome || '').then(function(url){
       if(url){
         pmImg.src=url;
         pmImg.onerror=function(){pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';};
@@ -9001,7 +9001,8 @@ function resolverFotosTarefasArea(root) {
   imgs.forEach(function(img) {
     img.setAttribute('data-resolvido', '1');
     var cod = img.getAttribute('data-cod');
-    _resolverFotoTarefaChain(cod).then(function(url) {
+    var nomeProduto = img.getAttribute('data-nome') || '';
+    _resolverFotoTarefaChain(cod, nomeProduto).then(function(url) {
       if (url) {
         img.src = url;
       } else {
@@ -9109,7 +9110,7 @@ function renderEstoque() {
 
     var thumbCod = (grupo.cod || '').replace(/[^0-9]/g, '');
     var photoBoxHtml = thumbCod
-      ? '<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_' + thumbCod + '"><img data-cod="' + thumbCod + '" alt="" loading="lazy"></div></div>'
+      ? '<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_' + thumbCod + '"><img data-cod="' + thumbCod + '" data-nome="' + escHtml(cleanNome(p.nome || '')) + '" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
 
     return '<div class="urg-card" onclick="abrirProdutoModal(\'' + escHtml(grupo.cod || '') + '\')" style="cursor:pointer">'
@@ -9150,6 +9151,10 @@ function renderEstoque() {
       + '</div>'
       + '</div>';
   }).join('');
+
+  // As miniaturas do Estoque são criadas com data-cod e src vazio.
+  // Dispara o mesmo resolvedor central usado no modal para preencher as fotos.
+  resolverFotosTarefasArea(container);
 }
 
 
