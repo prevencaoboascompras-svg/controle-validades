@@ -3383,7 +3383,7 @@ function renderTable(){
     var qb=qtdeBadge(p.qtde,badgeSt,p.qtde+' unidades a vencer');
     var thumbCod=(p.cod||'').replace(/[^0-9]/g,'');
     var photoBoxHtml=thumbCod
-      ?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+thumbCod+'"><img data-cod="'+thumbCod+'" alt="" loading="lazy"></div></div>'
+      ?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+thumbCod+'"><img data-cod="'+thumbCod+'" data-nome="'+escHtml(cleanNome(p.nome||''))+'" alt="" loading="lazy"></div></div>'
       :'<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
     return '<div class="'+cardCls+'">'
       +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px;--qb-pad-m:'+qb.headerPadLeftMobile+'px">'
@@ -3425,6 +3425,8 @@ function renderTable(){
     cards=cards.concat(vencidos.map(function(p){return cardHtml(p,true);}));
   }
   grid.innerHTML=cards.join('');
+  // Fotos de Validades: usa o mesmo resolvedor central das demais áreas.
+  resolverFotosTarefasArea(grid);
 }
 
 // ── Promoções: estado ──────────────────────────────────────────────────
@@ -5166,7 +5168,7 @@ function bossRenderLista(id,lista){
   var el=document.getElementById(id);if(!el)return;
   if(!lista.length){el.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhum lançamento para esta data.</div>';return;}
   el.innerHTML=lista.map(function(x,i){
-    var photo=x.cod?'<div class="boss-photo"><img data-boss-cod="'+x.cod+'" alt="" loading="lazy"></div>':'<div class="boss-photo"><i class="ti ti-photo-off"></i></div>';
+    var photo=x.cod?'<div class="boss-photo"><img data-boss-cod="'+bossEscapeHtml(x.cod)+'" data-boss-nome="'+bossEscapeHtml(x.nome||'')+'" alt="" loading="lazy"></div>':'<div class="boss-photo"><i class="ti ti-photo-off"></i></div>';
     return '<div class="boss-row">'
       +'<div class="boss-rank">'+(i+1)+'</div>'
       +photo
@@ -5179,14 +5181,7 @@ function bossRenderLista(id,lista){
   bossResolverFotos(el);
 }
 function bossResolverFotos(root){
-  if(!root||typeof _resolverFotoTarefaChain!=='function')return;
-  root.querySelectorAll('img[data-boss-cod]').forEach(function(img){
-    var cod=img.getAttribute('data-boss-cod');
-    _resolverFotoTarefaChain(cod).then(function(url){
-      if(url){img.src=url;}
-      else{var box=img.closest('.boss-photo');if(box)box.innerHTML='<i class="ti ti-photo-off"></i>';}
-    }).catch(function(){var box=img.closest('.boss-photo');if(box)box.innerHTML='<i class="ti ti-photo-off"></i>';});
-  });
+  resolverFotosTarefasArea(root);
 }
 function bossAtualizaCabecalho(prefix,lista){
   var total=bossTotal(lista);
@@ -5449,7 +5444,7 @@ function bossRenderEntradaCeasa_(dados){
       wrap.innerHTML=lista.map(function(it,i){
         return '<div class="boss-row">'
           +'<div class="boss-rank">'+(i+1)+'</div>'
-          +(it.cod?'<div class="boss-photo"><img data-boss-cod="'+bossEscapeHtml(it.cod)+'" alt="" loading="lazy"></div>':'<div class="boss-photo"><i class="ti ti-leaf"></i></div>')
+          +(it.cod?'<div class="boss-photo"><img data-boss-cod="'+bossEscapeHtml(it.cod)+'" data-boss-nome="'+bossEscapeHtml(it.nome||'')+'" alt="" loading="lazy"></div>':'<div class="boss-photo"><i class="ti ti-leaf"></i></div>')
           +'<div class="boss-prod"><div class="boss-prod-name" title="'+bossEscapeHtml(it.nome)+'">'+bossEscapeHtml(it.nome)+'</div>'+(it.cod?'<div class="boss-prod-cod">'+it.cod+'</div>':'')+'</div>'
           +'<div class="boss-num"><small>Peso/Qtd</small><strong>'+(Number(it.pesoTotal)||0).toLocaleString('pt-BR',{maximumFractionDigits:3})+' '+(it.unidade||'kg')+'</strong></div>'
           +'<div class="boss-num"><small>Custo médio</small><strong style="color:var(--green)">'+bossFmtBRL(it.custoMedio||0)+'/'+(it.unidade||'kg')+'</strong></div>'
@@ -7788,7 +7783,7 @@ function abrirRelatorioRetirada() {
         var valFmt = p.validade ? p.validade.split('-').reverse().join('/') : '--';
         var cod = (p.cod||'').replace(/[^0-9]/g,'');
         var fotoHtml = cod
-          ? '<div class="ret-foto" data-cod="'+cod+'"><div class="ret-foto-load"></div></div>'
+          ? '<div class="ret-foto" data-cod="'+cod+'" data-nome="'+escHtml(nomeLimpo)+'"><div class="ret-foto-load"></div></div>'
           : '<div class="ret-foto ret-foto-vazia"><i class="ti ti-photo-off"></i></div>';
         return [
           '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.1);margin-bottom:12px">',
@@ -7858,18 +7853,18 @@ function abrirRelatorioRetirada() {
     '<div class="rodape">AURA Vencimentos · '+new Date().toLocaleString('pt-BR')+'</div>',
     '<script>',
       'var RET_GAS_URL='+JSON.stringify(loadCfg().url||'')+';',
-      'function retGasJsonp(cod){return new Promise(function(res){if(!RET_GAS_URL){res(null);return;}var cb="__retImg_"+Date.now()+"_"+Math.random().toString(36).slice(2),s=document.createElement("script"),done=false,t;function fim(v){if(done)return;done=true;if(t)clearTimeout(t);try{delete window[cb];}catch(e){window[cb]=undefined;}if(s.parentNode)s.parentNode.removeChild(s);res(v);}window[cb]=function(j){try{if(j&&j.salvoNoDrive&&window.opener&&typeof window.opener._notificarFotoCentralAtualizada==="function"){window.opener._notificarFotoCentralAtualizada(j.codigoCanonico||j.codigoSolicitado||cod);}}catch(e){}fim(j);};s.onerror=function(){fim(null);};s.src=RET_GAS_URL+"?action=buscarImagemProduto&codigoBarras="+encodeURIComponent(cod)+"&tipo=produto&callback="+encodeURIComponent(cb)+"&_="+Date.now();document.head.appendChild(s);t=setTimeout(function(){fim(null);},30000);});}',
-      'async function retFotoResolve(cod){',
+      'function retGasJsonp(cod,nome){return new Promise(function(res){if(!RET_GAS_URL){res(null);return;}var cb="__retImg_"+Date.now()+"_"+Math.random().toString(36).slice(2),s=document.createElement("script"),done=false,t;function fim(v){if(done)return;done=true;if(t)clearTimeout(t);try{delete window[cb];}catch(e){window[cb]=undefined;}if(s.parentNode)s.parentNode.removeChild(s);res(v);}window[cb]=function(j){try{if(j&&j.salvoNoDrive&&window.opener&&typeof window.opener._notificarFotoCentralAtualizada==="function"){window.opener._notificarFotoCentralAtualizada(j.codigoCanonico||j.codigoSolicitado||cod);}}catch(e){}fim(j);};s.onerror=function(){fim(null);};var extra="&tipo=produto"+(nome?"&nomeProduto="+encodeURIComponent(nome):"");s.src=RET_GAS_URL+"?action=buscarImagemProduto&codigoBarras="+encodeURIComponent(cod)+extra+"&callback="+encodeURIComponent(cb)+"&_="+Date.now();document.head.appendChild(s);t=setTimeout(function(){fim(null);},30000);});}',
+      'async function retFotoResolve(cod,nome){',
         'if(!RET_GAS_URL)return null;',
         'try{',
-          'var j=await retGasJsonp(cod);',
+          'var j=await retGasJsonp(cod,nome);',
           'if(j&&j.ok&&j.encontrado&&j.base64){return "data:"+(j.mimeType||"image/jpeg")+";base64,"+j.base64;}',
         '}catch(e){}',
         'return null;',
       '}',
       'document.querySelectorAll(".ret-foto[data-cod]").forEach(function(el){',
-        'var cod=el.getAttribute("data-cod");',
-        'retFotoResolve(cod).then(function(url){',
+        'var cod=el.getAttribute("data-cod"),nome=el.getAttribute("data-nome")||"";',
+        'retFotoResolve(cod,nome).then(function(url){',
           'if(url){el.innerHTML="<img src=\\""+url+"\\" alt=\\"\\">";}',
           'else{el.classList.add("ret-foto-vazia");el.innerHTML="<i class=\\"ti ti-photo-off\\"></i>";}',
         '});',
@@ -8442,7 +8437,7 @@ function renderTarefas() {
     var thumbCod = (t.cod||'').replace(/[^0-9]/g,'');
     var tarefaFotoId = 'tarefaFoto_' + t.id.replace(/[^a-zA-Z0-9]/g,'_');
     var fotoHtml = thumbCod
-      ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + tarefaFotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + tarefaFotoId + '" data-cod="' + thumbCod + '" src="" alt="" loading="lazy"></div></div>'
+      ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + tarefaFotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + tarefaFotoId + '" data-cod="' + thumbCod + '" data-nome="' + escHtml(cleanNome(t.produto || '')) + '" src="" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
     
     var qtdeInfo = '';
@@ -8603,7 +8598,7 @@ function renderTarefasProntos() {
     var thumbCod = (item.cod||'').replace(/[^0-9]/g,'');
     var fotoId = 'prontoFoto_' + item.cod.replace(/[^a-zA-Z0-9]/g,'_');
     var fotoHtml = thumbCod
-      ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + fotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + fotoId + '" data-cod="' + thumbCod + '" src="" alt="" loading="lazy"></div></div>'
+      ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + fotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + fotoId + '" data-cod="' + thumbCod + '" data-nome="' + escHtml(nomeLimpo) + '" src="" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
 
     var validadeInfo = '';
@@ -8857,7 +8852,7 @@ var THUMB_CACHE_KEY = 'boascompras_thumb_cache_v4_api_drive_cosmos';
 try { localStorage.removeItem('boascompras_thumb_cache_v1'); } catch(e) {}
 try { localStorage.removeItem('boascompras_thumb_cache_v3_drive_cosmos'); } catch(e) {}
 var THUMB_CACHE_TTL_OK_MS  = 7 * 24 * 60 * 60 * 1000;
-var THUMB_CACHE_TTL_NEG_MS = 10 * 60 * 1000;
+var THUMB_CACHE_TTL_NEG_MS = 30 * 1000; // ausência é revalidada rápido: a foto pode ter sido incluída por outro sistema
 function _thumbCacheGet(){
   try{return JSON.parse(localStorage.getItem(THUMB_CACHE_KEY)||'{}');}catch(e){return{};}
 }
@@ -8948,7 +8943,13 @@ function _notificarFotoCentralAtualizada(cod){
 }
 window.addEventListener('storage',function(ev){
   if(ev.key!==FOTO_CENTRAL_SYNC_KEY||!ev.newValue)return;
-  try{var d=JSON.parse(ev.newValue);if(d&&d.cod)_invalidarFotoCentralAura(d.cod);}catch(e){}
+  try{
+    var d=JSON.parse(ev.newValue);
+    if(d&&d.cod){
+      _invalidarFotoCentralAura(d.cod);
+      setTimeout(function(){_atualizarFotosVisiveisCodigoAura(d.cod);},0);
+    }
+  }catch(e){}
 });
 setInterval(function(){try{_fotoTarefaChainCache={};}catch(e){}},5*60*1000);
 
@@ -8995,22 +8996,122 @@ function _resolverFotoTarefaChain(cod,nomeProduto) {
   return _fotoTarefaChainCache[chave];
 }
 
+// Resolve QUALQUER miniatura de produto do AURA pelo banco central.
+// Usa IntersectionObserver para não disparar milhares de requisições na aba Estoque:
+// a foto é consultada quando o card está visível ou perto da tela.
+var _auraFotoObserver=null;
+function _auraMostrarSemFotoElemento(img){
+  if(!img)return;
+  // Mantém o <img> no DOM mesmo quando ainda não existe foto. Assim uma foto
+  // cadastrada depois no Arsenal/Coleta pode aparecer sem precisar recriar o card.
+  var wrap=img.closest('.urg-photobox-imgwrap');
+  if(wrap){
+    img.style.display='none';
+    wrap.classList.add('urg-photobox-empty');
+    if(!wrap.querySelector('.foto-central-empty-icon')){
+      var ic=document.createElement('i');
+      ic.className='ti ti-photo-off foto-central-empty-icon';
+      wrap.appendChild(ic);
+    }
+    return;
+  }
+  var boss=img.closest('.boss-photo');
+  if(boss){
+    img.style.display='none';
+    if(!boss.querySelector('.foto-central-empty-icon')){
+      var ic2=document.createElement('i');
+      ic2.className='ti ti-photo-off foto-central-empty-icon';
+      boss.appendChild(ic2);
+    }
+  }
+}
+function _auraPrepararFotoEncontradaElemento(img){
+  if(!img)return;
+  img.style.display='';
+  var wrap=img.closest('.urg-photobox-imgwrap');
+  if(wrap){
+    wrap.classList.remove('urg-photobox-empty');
+    var ic=wrap.querySelector('.foto-central-empty-icon');if(ic)ic.remove();
+  }
+  var boss=img.closest('.boss-photo');
+  if(boss){var ic2=boss.querySelector('.foto-central-empty-icon');if(ic2)ic2.remove();}
+}
+function _auraResolverImagemProdutoElemento(img){
+  if(!img||!img.isConnected)return;
+  if(img.getAttribute('data-resolvendo')==='1'||img.getAttribute('data-resolvido')==='1')return;
+  var cod=img.getAttribute('data-cod')||img.getAttribute('data-boss-cod')||'';
+  var nome=img.getAttribute('data-nome')||img.getAttribute('data-boss-nome')||'';
+  cod=String(cod||'').replace(/[^0-9]/g,'');
+  if(!cod){_auraMostrarSemFotoElemento(img);return;}
+  img.setAttribute('data-resolvendo','1');
+  _resolverFotoTarefaChain(cod,nome).then(function(url){
+    if(!img.isConnected)return;
+    img.removeAttribute('data-resolvendo');
+    img.setAttribute('data-resolvido','1');
+    if(url){
+      _auraPrepararFotoEncontradaElemento(img);
+      img.onerror=function(){
+        img.onerror=null;
+        _invalidarFotoCentralAura(cod);
+        _auraMostrarSemFotoElemento(img);
+      };
+      img.src=url;
+    }else{
+      _auraMostrarSemFotoElemento(img);
+    }
+  }).catch(function(){
+    if(!img.isConnected)return;
+    img.removeAttribute('data-resolvendo');
+    img.setAttribute('data-resolvido','1');
+    _auraMostrarSemFotoElemento(img);
+  });
+}
+function _auraObservarImagemProduto(img){
+  if(!img||img.getAttribute('data-resolvido')==='1'||img.getAttribute('data-resolvendo')==='1')return;
+  if('IntersectionObserver' in window){
+    if(!_auraFotoObserver){
+      _auraFotoObserver=new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting){
+            try{_auraFotoObserver.unobserve(entry.target);}catch(e){}
+            _auraResolverImagemProdutoElemento(entry.target);
+          }
+        });
+      },{root:null,rootMargin:'650px 0px',threshold:0.01});
+    }
+    _auraFotoObserver.observe(img);
+  }else{
+    _auraResolverImagemProdutoElemento(img);
+  }
+}
 function resolverFotosTarefasArea(root) {
   if (!root) return;
-  var imgs = root.querySelectorAll('img[data-cod]:not([data-resolvido])');
-  imgs.forEach(function(img) {
-    img.setAttribute('data-resolvido', '1');
-    var cod = img.getAttribute('data-cod');
-    var nomeProduto = img.getAttribute('data-nome') || '';
-    _resolverFotoTarefaChain(cod, nomeProduto).then(function(url) {
-      if (url) {
-        img.src = url;
-      } else {
-        var wrap = img.closest('.urg-photobox-imgwrap');
-        if (wrap) wrap.outerHTML = '<div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div>';
-      }
-    });
+  var imgs=root.querySelectorAll('img[data-cod],img[data-boss-cod]');
+  imgs.forEach(function(img){_auraObservarImagemProduto(img);});
+}
+function _atualizarFotosVisiveisCodigoAura(cod){
+  cod=String(cod||'').replace(/[^0-9]/g,'');
+  if(!cod)return;
+  var equivalentes=[cod];
+  if(cod.length===12)equivalentes.push('0'+cod);
+  if(cod.length===13&&cod.charAt(0)==='0')equivalentes.push(cod.substring(1));
+  document.querySelectorAll('img[data-cod],img[data-boss-cod]').forEach(function(img){
+    var c=String(img.getAttribute('data-cod')||img.getAttribute('data-boss-cod')||'').replace(/[^0-9]/g,'');
+    if(equivalentes.indexOf(c)<0)return;
+    try{if(_auraFotoObserver)_auraFotoObserver.unobserve(img);}catch(e){}
+    img.removeAttribute('data-resolvido');
+    img.removeAttribute('data-resolvendo');
+    img.removeAttribute('src');
+    _auraResolverImagemProdutoElemento(img);
   });
+  try{
+    var pmCod=String(window._pmCodAtual||'').replace(/[^0-9]/g,'');
+    if(pmCod&&equivalentes.indexOf(pmCod)>=0){
+      var principal=(products||[]).find(function(p){return String(p.cod||'').replace(/[^0-9]/g,'')===pmCod;});
+      var pm=document.getElementById('pmFoto');
+      if(pm)_resolverFotoTarefaChain(pmCod,principal&&principal.nome||'').then(function(url){if(pm&&url)pm.src=url;});
+    }
+  }catch(e2){}
 }
 async function _auraEstoqueThumbFallback(imgEl, cod) {
   imgEl.onerror = null;
