@@ -4658,7 +4658,7 @@ function enviarImagemProdutoParaDrive(dataUrl, mimeType){
   })
   .then(function(r){return r.json();})
   .then(function(res){
-    if(res&&res.ok){_notificarFotoCentralAtualizada(cod);}
+    if(res&&res.ok){var codCentral=String(res.codigoCanonico||cod);_notificarFotoCentralAtualizada(codCentral);if(codCentral!==cod)_invalidarFotoCentralAura(cod);}
     if(st) st.textContent = res && res.ok ? '✅ Imagem salva no banco central de produtos (' + cod + ')' : '❌ Erro ao salvar: '+(res&&res.erro||'desconhecido');
   })
   .catch(function(err){
@@ -6991,7 +6991,17 @@ function _gasGetJsonp(action,extra,timeoutMs){
 function _gasGet(action,extra){
   // O Code.gs atual aceita JSONP em buscarImagemProduto; isso evita CORS
   // entre GitHub Pages e Apps Script. A própria action já faz Drive -> Cosmos.
-  if(action==='buscarImagemProduto')return _gasGetJsonp(action,extra,30000);
+  if(action==='buscarImagemProduto'){
+    return _gasGetJsonp(action,extra,30000).then(function(r){
+      if(r&&r.salvoNoDrive&&typeof _notificarFotoCentralAtualizada==='function'){
+        var canon=String(r.codigoCanonico||r.codigoSolicitado||'');
+        var solicitado=String(r.codigoSolicitado||'');
+        if(canon)_notificarFotoCentralAtualizada(canon);
+        if(solicitado&&solicitado!==canon)_invalidarFotoCentralAura(solicitado);
+      }
+      return r;
+    });
+  }
   var cfg=loadCfg();
   if(!cfg.url)return Promise.resolve({ok:false});
   var url=cfg.url+'?action='+action+(extra||'');
@@ -7848,7 +7858,7 @@ function abrirRelatorioRetirada() {
     '<div class="rodape">AURA Vencimentos · '+new Date().toLocaleString('pt-BR')+'</div>',
     '<script>',
       'var RET_GAS_URL='+JSON.stringify(loadCfg().url||'')+';',
-      'function retGasJsonp(cod){return new Promise(function(res){if(!RET_GAS_URL){res(null);return;}var cb="__retImg_"+Date.now()+"_"+Math.random().toString(36).slice(2),s=document.createElement("script"),done=false,t;function fim(v){if(done)return;done=true;if(t)clearTimeout(t);try{delete window[cb];}catch(e){window[cb]=undefined;}if(s.parentNode)s.parentNode.removeChild(s);res(v);}window[cb]=function(j){fim(j);};s.onerror=function(){fim(null);};s.src=RET_GAS_URL+"?action=buscarImagemProduto&codigoBarras="+encodeURIComponent(cod)+"&tipo=produto&callback="+encodeURIComponent(cb)+"&_="+Date.now();document.head.appendChild(s);t=setTimeout(function(){fim(null);},30000);});}',
+      'function retGasJsonp(cod){return new Promise(function(res){if(!RET_GAS_URL){res(null);return;}var cb="__retImg_"+Date.now()+"_"+Math.random().toString(36).slice(2),s=document.createElement("script"),done=false,t;function fim(v){if(done)return;done=true;if(t)clearTimeout(t);try{delete window[cb];}catch(e){window[cb]=undefined;}if(s.parentNode)s.parentNode.removeChild(s);res(v);}window[cb]=function(j){try{if(j&&j.salvoNoDrive&&window.opener&&typeof window.opener._notificarFotoCentralAtualizada==="function"){window.opener._notificarFotoCentralAtualizada(j.codigoCanonico||j.codigoSolicitado||cod);}}catch(e){}fim(j);};s.onerror=function(){fim(null);};s.src=RET_GAS_URL+"?action=buscarImagemProduto&codigoBarras="+encodeURIComponent(cod)+"&tipo=produto&callback="+encodeURIComponent(cb)+"&_="+Date.now();document.head.appendChild(s);t=setTimeout(function(){fim(null);},30000);});}',
       'async function retFotoResolve(cod){',
         'if(!RET_GAS_URL)return null;',
         'try{',
