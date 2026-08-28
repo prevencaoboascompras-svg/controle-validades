@@ -1343,6 +1343,30 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-photo img{width:100%;height:100%;object-fit:contain;display:block}
 .boss-prod{min-width:0}.boss-prod-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.boss-prod-cod{font-size:9.5px;color:var(--tx2);margin-top:2px;font-family:monospace}
 .boss-num{text-align:right}.boss-num small{display:block;font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}.boss-num strong{font-size:12px;white-space:nowrap}
+/* CEASA — entradas separadas por dia/nota + comparação de custos */
+.boss-ceasa-list{display:block;overflow-x:auto}
+.boss-ceasa-dia{display:flex;align-items:center;gap:8px;padding:10px 13px;background:var(--bg3);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);position:sticky;left:0;z-index:1}
+.boss-ceasa-dia:first-child{border-top:none}
+.boss-ceasa-nota{min-width:860px;border-bottom:2px solid var(--bd)}
+.boss-ceasa-nota:last-child{border-bottom:none}
+.boss-ceasa-nota-hd{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-bottom:1px solid var(--bd)}
+.boss-ceasa-nota-titulo{font-size:11px;font-weight:800;color:var(--tx);white-space:nowrap}
+.boss-ceasa-forn{font-size:10.5px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.boss-ceasa-nota-total{font-size:11px;font-weight:800;white-space:nowrap}
+.boss-ceasa-row{display:grid;grid-template-columns:28px 48px minmax(165px,1fr) 88px 100px 104px 122px 98px;gap:8px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--bd);min-width:860px}
+.boss-ceasa-row:last-child{border-bottom:none}
+.boss-ceasa-custo{border-radius:7px;padding:5px 7px;text-align:right;border:1px solid transparent;min-width:0}
+.boss-ceasa-custo small{display:block;font-size:8.5px;text-transform:uppercase;letter-spacing:.03em;opacity:.8;margin-bottom:2px}
+.boss-ceasa-custo strong{display:block;font-size:12px;white-space:nowrap}
+.boss-ceasa-var{display:block;font-size:9px;font-weight:700;margin-top:2px;white-space:nowrap}
+.boss-ceasa-media{background:rgba(55,138,221,.09);border-color:rgba(55,138,221,.22);color:var(--blue)}
+.boss-ceasa-anterior{background:var(--bg2);border-color:var(--bd);color:var(--tx)}
+.boss-ceasa-atual.alta{background:rgba(226,75,74,.12);border-color:rgba(226,75,74,.34);color:var(--red)}
+.boss-ceasa-atual.baixa{background:rgba(29,158,117,.12);border-color:rgba(29,158,117,.34);color:var(--green)}
+.boss-ceasa-atual.igual{background:var(--bg2);border-color:var(--bd);color:var(--tx)}
+.boss-ceasa-atual.novo{background:rgba(55,138,221,.12);border-color:rgba(55,138,221,.34);color:var(--blue)}
+@media(max-width:900px){.boss-ceasa-nota,.boss-ceasa-row{min-width:820px}.boss-ceasa-row{grid-template-columns:24px 42px minmax(150px,1fr) 82px 94px 98px 116px 92px}}
+
 .boss-empty{padding:26px 14px;text-align:center;color:var(--tx2);font-size:12px}
 .boss-empty i{font-size:24px;display:block;margin-bottom:7px;opacity:.45}
 .boss-source-note{font-size:10px;color:var(--tx2);padding:8px 12px;background:var(--bg2);border-top:1px solid var(--bd)}
@@ -2114,10 +2138,10 @@ function toggleTheme() {
         <div class="boss-grid one">
           <div class="boss-panel">
             <div class="boss-panel-hd">
-              <div class="boss-panel-title"><i class="ti ti-scale" style="color:var(--green)"></i> Custo médio por produto (ponderado)</div>
+              <div class="boss-panel-title"><i class="ti ti-scale" style="color:var(--green)"></i> Custos por entrada / dia</div>
               <div class="boss-panel-total"><strong id="bossTotalEntrada">R$ 0,00</strong><span id="bossCountEntrada">0 itens</span></div>
             </div>
-            <div class="boss-list" id="bossListEntrada"></div>
+            <div class="boss-list boss-ceasa-list" id="bossListEntrada"></div>
           </div>
         </div>
       </div>
@@ -5434,40 +5458,98 @@ function bossToggleGrupo(grupoId,cardId,chevronId){
   if(abrir)grp.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function bossRenderEntradaCeasa_(dados){
-  var ec=(dados&&dados.grupos&&dados.grupos.entradaCeasa)||{porProduto:[],totalValor:0,totalPeso:0};
-  var lista=ec.porProduto||[];
+  var ec=(dados&&dados.grupos&&dados.grupos.entradaCeasa)||{entradas:[],porProduto:[],totalValor:0,totalPeso:0,totalEntradas:0,totalItens:0};
+  var entradas=Array.isArray(ec.entradas)?ec.entradas:[];
+  var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
   var wrap=document.getElementById('bossListEntrada');
-  if(wrap){
-    if(!lista.length){
-      wrap.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhuma entrada CEASA lançada neste mês.</div>';
+  var dataSel=bossFmtDataBR_(dados&&dados.data);
+  var mesLabel=bossMesLabelDados_(dados);
+
+  function custoHtml_(classe,label,valor,sufixo,extra){
+    var val=(valor===null||valor===undefined)?'—':(bossFmtBRL(Number(valor)||0)+(sufixo||''));
+    return '<div class="boss-ceasa-custo '+classe+'"><small>'+label+'</small><strong>'+val+'</strong>'+(extra||'')+'</div>';
+  }
+
+  function atualHtml_(it){
+    var tend=String(it.tendencia||'novo');
+    var icone=tend==='alta'?'<i class="ti ti-arrow-up"></i> ':tend==='baixa'?'<i class="ti ti-arrow-down"></i> ':tend==='igual'?'<i class="ti ti-equal"></i> ':'<i class="ti ti-sparkles"></i> ';
+    var extra='';
+    if(it.custoAnterior!==null&&it.custoAnterior!==undefined){
+      var v=Number(it.variacao)||0;
+      var pct=(it.variacaoPct===null||it.variacaoPct===undefined)?'':(' · '+(Number(it.variacaoPct)>=0?'+':'')+Number(it.variacaoPct).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%');
+      extra='<span class="boss-ceasa-var">'+icone+(v>=0?'+':'')+bossFmtBRL(v)+pct+'</span>';
     }else{
-      wrap.innerHTML=lista.map(function(it,i){
-        return '<div class="boss-row">'
-          +'<div class="boss-rank">'+(i+1)+'</div>'
-          +(it.cod?'<div class="boss-photo"><img data-boss-cod="'+bossEscapeHtml(it.cod)+'" data-boss-nome="'+bossEscapeHtml(it.nome||'')+'" alt="" loading="lazy"></div>':'<div class="boss-photo"><i class="ti ti-leaf"></i></div>')
-          +'<div class="boss-prod"><div class="boss-prod-name" title="'+bossEscapeHtml(it.nome)+'">'+bossEscapeHtml(it.nome)+'</div>'+(it.cod?'<div class="boss-prod-cod">'+it.cod+'</div>':'')+'</div>'
-          +'<div class="boss-num"><small>Peso/Qtd</small><strong>'+(Number(it.pesoTotal)||0).toLocaleString('pt-BR',{maximumFractionDigits:3})+' '+(it.unidade||'kg')+'</strong></div>'
-          +'<div class="boss-num"><small>Custo médio</small><strong style="color:var(--green)">'+bossFmtBRL(it.custoMedio||0)+'/'+(it.unidade||'kg')+'</strong></div>'
-          +'<div class="boss-num"><small>Total pago</small><strong>'+bossFmtBRL(it.valorTotal||0)+'</strong></div>'
+      extra='<span class="boss-ceasa-var">'+icone+'primeira compra</span>';
+    }
+    return custoHtml_('boss-ceasa-atual '+tend,'Custo atual',it.custoAtual,'/'+bossEscapeHtml(it.unidade||'kg'),extra);
+  }
+
+  if(wrap){
+    if(!entradas.length){
+      wrap.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>'+(periodoEfetivo==='dia'?'Nenhuma entrada CEASA lançada em '+(dataSel||'este dia')+'.':'Nenhuma entrada CEASA lançada neste mês.')+'</div>';
+    }else{
+      var htmlCeasa='';
+      var ultimoDia='';
+      entradas.forEach(function(ent,idxEnt){
+        if(ent.data!==ultimoDia){
+          ultimoDia=ent.data;
+          htmlCeasa+='<div class="boss-ceasa-dia"><i class="ti ti-calendar"></i> '+bossEscapeHtml(bossFmtDataBR_(ent.data))+'</div>';
+        }
+
+        var forn=ent.fornecedor?bossEscapeHtml(ent.fornecedor):'Fornecedor não informado';
+        htmlCeasa+='<div class="boss-ceasa-nota">'
+          +'<div class="boss-ceasa-nota-hd">'
+          +'<div class="boss-ceasa-nota-titulo"><i class="ti ti-truck-delivery"></i> Entrada '+(idxEnt+1)+'</div>'
+          +'<div class="boss-ceasa-forn">'+forn+'</div>'
+          +'<div class="boss-ceasa-nota-total">'+bossFmtBRL(ent.totalValor||0)+'</div>'
           +'</div>';
-      }).join('');
+
+        (ent.itens||[]).forEach(function(it,i){
+          var un=it.unidade||'kg';
+          var unEsc=bossEscapeHtml(un);
+          htmlCeasa+='<div class="boss-ceasa-row">'
+            +'<div class="boss-rank">'+(i+1)+'</div>'
+            +(it.cod?'<div class="boss-photo"><img data-boss-cod="'+bossEscapeHtml(it.cod)+'" data-boss-nome="'+bossEscapeHtml(it.nome||'')+'" alt="" loading="lazy"></div>':'<div class="boss-photo"><i class="ti ti-leaf"></i></div>')
+            +'<div class="boss-prod"><div class="boss-prod-name" title="'+bossEscapeHtml(it.nome||'')+'">'+bossEscapeHtml(it.nome||'Produto')+'</div>'+(it.cod?'<div class="boss-prod-cod">'+bossEscapeHtml(it.cod)+'</div>':'')+'</div>'
+            +'<div class="boss-num"><small>Peso/Qtd</small><strong>'+(Number(it.pesoTotal)||0).toLocaleString('pt-BR',{maximumFractionDigits:3})+' '+unEsc+'</strong></div>'
+            +custoHtml_('boss-ceasa-media','Média',it.custoMedio,'/'+unEsc,'')
+            +custoHtml_('boss-ceasa-anterior','Custo anterior',it.custoAnterior,'/'+unEsc,'')
+            +atualHtml_(it)
+            +'<div class="boss-num"><small>Total pago</small><strong>'+bossFmtBRL(it.valorTotal||0)+'</strong></div>'
+            +'</div>';
+        });
+        htmlCeasa+='</div>';
+      });
+      wrap.innerHTML=htmlCeasa;
     }
   }
+
   if(wrap)bossResolverFotos(wrap);
+
+  var totalEntradas=Number(ec.totalEntradas)||entradas.length;
+  var totalItens=Number(ec.totalItens)||entradas.reduce(function(acc,e){return acc+((e.itens||[]).length);},0);
   var tEl=document.getElementById('bossTotalEntrada');if(tEl)tEl.textContent=bossFmtBRL(ec.totalValor||0);
-  var cEl=document.getElementById('bossCountEntrada');if(cEl)cEl.textContent=lista.length+' produtos';
+  var cEl=document.getElementById('bossCountEntrada');if(cEl)cEl.textContent=totalEntradas+' '+(totalEntradas===1?'entrada':'entradas')+' · '+totalItens+' '+(totalItens===1?'item':'itens');
   var kEl=document.getElementById('bossKpiEntrada');if(kEl)kEl.textContent=bossFmtBRL(ec.totalValor||0);
-  var mesLabel=bossMesLabelDados_(dados);
+
   var pesoTotal=Number(ec.totalPeso)||0;
   var unidadesEntrada=[];
-  lista.forEach(function(it){var u=String(it.unidade||'kg').toLowerCase();if(unidadesEntrada.indexOf(u)<0)unidadesEntrada.push(u);});
+  entradas.forEach(function(ent){(ent.itens||[]).forEach(function(it){var u=String(it.unidade||'kg').toLowerCase();if(unidadesEntrada.indexOf(u)<0)unidadesEntrada.push(u);});});
   var volumeTxt='';
   if(pesoTotal){
     var sufixoVol=unidadesEntrada.length===1?(' '+unidadesEntrada[0]):' qtd/peso';
     volumeTxt=pesoTotal.toLocaleString('pt-BR',{maximumFractionDigits:1})+sufixoVol+' · ';
   }
-  var ksEl=document.getElementById('bossKpiEntradaSub');if(ksEl)ksEl.textContent=volumeTxt+'mês todo';
-  var pEl=document.getElementById('bossPeriodoEntrada');if(pEl)pEl.textContent=mesLabel?('acumulado de '+mesLabel):'mês inteiro';
+
+  var ksEl=document.getElementById('bossKpiEntradaSub');
+  if(ksEl)ksEl.textContent=volumeTxt+(periodoEfetivo==='dia'?('dia '+(dataSel||'')):'mês todo');
+
+  var pEl=document.getElementById('bossPeriodoEntrada');
+  if(pEl){
+    pEl.classList.toggle('boss-period-dia',periodoEfetivo==='dia');
+    pEl.classList.toggle('boss-period-mes',periodoEfetivo!=='dia');
+    pEl.textContent=periodoEfetivo==='dia'?(dataSel?('dia '+dataSel):'dia específico'):(mesLabel?('mês inteiro · '+mesLabel):'mês inteiro');
+  }
 }
 function bossRender(dados){
   _bossDados=dados||{};
