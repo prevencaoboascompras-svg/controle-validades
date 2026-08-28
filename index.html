@@ -1356,6 +1356,39 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-ceasa-nota-actions{display:flex;align-items:center;gap:7px;white-space:nowrap}
 .boss-ceasa-edit{border:1px solid rgba(55,138,221,.35);background:rgba(55,138,221,.09);color:var(--blue);font-size:10px;font-weight:700;padding:5px 8px;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
 .boss-ceasa-edit:hover{background:rgba(55,138,221,.17);border-color:rgba(55,138,221,.55)}
+
+/* ── Boss Vision — Gerencial Horti ───────────────────────── */
+.boss-horti-gerencial{display:flex;flex-direction:column;gap:10px}
+.boss-horti-kpis{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:9px}
+.boss-horti-card{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px 13px;min-width:0}
+.boss-horti-card.status-positivo{border-color:rgba(29,158,117,.45);box-shadow:inset 0 0 0 1px rgba(29,158,117,.08)}
+.boss-horti-card.status-negativo{border-color:rgba(226,75,74,.52);box-shadow:inset 0 0 0 1px rgba(226,75,74,.08)}
+.boss-horti-card.status-equilibrio{border-color:rgba(186,117,23,.45)}
+.boss-horti-card .gh-label{font-size:9.5px;color:var(--tx2);text-transform:uppercase;letter-spacing:.045em;font-weight:700;margin-bottom:5px}
+.boss-horti-card .gh-value{font-size:20px;line-height:1.05;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boss-horti-card .gh-value.pos{color:var(--green)}
+.boss-horti-card .gh-value.neg{color:var(--red)}
+.boss-horti-card .gh-value.neutro{color:var(--blue)}
+.boss-horti-card .gh-sub{font-size:9.5px;color:var(--tx2);margin-top:6px;line-height:1.35}
+.boss-horti-status{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;border-radius:10px;border:1px solid var(--bd);background:var(--bg2)}
+.boss-horti-status i{font-size:20px;flex-shrink:0;margin-top:1px}
+.boss-horti-status.positivo{background:rgba(29,158,117,.09);border-color:rgba(29,158,117,.3);color:var(--green)}
+.boss-horti-status.negativo{background:rgba(226,75,74,.09);border-color:rgba(226,75,74,.3);color:var(--red)}
+.boss-horti-status.equilibrio{background:rgba(186,117,23,.10);border-color:rgba(186,117,23,.3);color:var(--amber)}
+.boss-horti-status.sem-base{color:var(--tx2)}
+.boss-horti-status-text{min-width:0}
+.boss-horti-status-title{font-size:12px;font-weight:850}
+.boss-horti-status-desc{font-size:10px;line-height:1.45;margin-top:2px;color:var(--tx2)}
+.boss-horti-criticos{background:var(--bg);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.boss-horti-criticos-hd{padding:9px 12px;background:var(--bg2);border-bottom:1px solid var(--bd);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);display:flex;align-items:center;gap:6px}
+.boss-horti-critico-row{display:grid;grid-template-columns:minmax(150px,1fr) 100px 95px 125px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--bd);font-size:10.5px}
+.boss-horti-critico-row:last-child{border-bottom:none}
+.boss-horti-critico-prod{min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boss-horti-critico-num{text-align:right;white-space:nowrap}
+.boss-horti-critico-num small{display:block;color:var(--tx2);font-size:8.5px;text-transform:uppercase}
+.boss-horti-metodo{font-size:9px;color:var(--tx2);line-height:1.45;padding:0 2px}
+@media(max-width:1050px){.boss-horti-kpis{grid-template-columns:repeat(3,minmax(120px,1fr))}}
+@media(max-width:680px){.boss-horti-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.boss-horti-critico-row{grid-template-columns:minmax(120px,1fr) 86px 90px}.boss-horti-critico-row .gh-hide-mobile{display:none}}
 .boss-ceasa-row{display:grid;grid-template-columns:28px 48px minmax(165px,1fr) 88px 100px 104px 122px 98px;gap:8px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--bd);min-width:860px}
 .boss-ceasa-row:last-child{border-bottom:none}
 .boss-ceasa-custo{border-radius:7px;padding:5px 7px;text-align:right;border:1px solid transparent;min-width:0}
@@ -2112,7 +2145,7 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Eventos organizados por impacto financeiro. Por padrão mostra o <strong>mês inteiro até hoje</strong>; use "Dia específico" para consultar Quebra e Vencidos de um dia só. Consumo Interno sempre mostra o <strong>acumulado do mês</strong> (lançamento não é diário). Os eventos externos são lidos das pastas mensais do Drive e os produtos usam o mesmo cadastro e banco de imagens do AURA.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
+          <div class="boss-sub">Eventos organizados por impacto financeiro. Por padrão mostra o <strong>mês inteiro até hoje</strong>; use "Dia específico" para consultar o dia escolhido. O painel <strong>Horti — Visão Gerencial</strong> cruza Entrada CEASA, Quebra Horti e preço atual de venda para mostrar quebra sobre compra, aproveitamento e uma projeção de resultado após perdas. Consumo Interno continua mostrando o acumulado do mês.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> Vencidos: dados atuais da própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
@@ -2134,6 +2167,62 @@ function toggleTheme() {
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPerdasCard" onclick="bossToggleGrupo('bossGrupoPerdas','bossKpiPerdasCard','bossPerdasChevron')"><div class="boss-kpi-lbl">Perdas <i class="ti ti-chevron-down" id="bossPerdasChevron"></i></div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Produtos vencidos</div></div>
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossToggleGrupo('bossGrupoConsumo','bossKpiConsumoCard','bossConsumoChevron')"><div class="boss-kpi-lbl">Consumo interno <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção Padaria + Uso e consumo</div></div>
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiEntradaCard" onclick="bossToggleGrupo('bossGrupoEntrada','bossKpiEntradaCard','bossEntradaChevron')"><div class="boss-kpi-lbl">Entrada CEASA <i class="ti ti-chevron-down" id="bossEntradaChevron"></i></div><div class="boss-kpi-val" id="bossKpiEntrada">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiEntradaSub">Custo de compra Horti</div></div>
+      </div>
+
+      <div class="boss-group" id="bossGrupoGerencialHorti">
+        <div class="boss-group-title">
+          <span><i class="ti ti-chart-dots-3" style="color:var(--green)"></i> Horti — Visão Gerencial</span>
+          <span class="boss-period-badge boss-period-mes" id="bossPeriodoGerencialHorti"></span>
+          <span class="boss-line"></span>
+        </div>
+        <div class="boss-horti-gerencial">
+          <div class="boss-horti-kpis">
+            <div class="boss-horti-card" id="ghCardResultado">
+              <div class="gh-label">Resultado potencial</div>
+              <div class="gh-value" id="ghResultado">—</div>
+              <div class="gh-sub" id="ghResultadoSub">Após a quebra registrada</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Quebra / Compra</div>
+              <div class="gh-value" id="ghIndiceQuebra">—</div>
+              <div class="gh-sub" id="ghIndiceQuebraSub">R$ quebra ÷ R$ compras CEASA</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Aproveitamento</div>
+              <div class="gh-value neutro" id="ghAproveitamento">—</div>
+              <div class="gh-sub">Compra menos impacto financeiro da quebra</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Margem potencial</div>
+              <div class="gh-value" id="ghMargem">—</div>
+              <div class="gh-sub" id="ghMargemSub">Sobre receita potencial após quebra</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Cobertura da análise</div>
+              <div class="gh-value neutro" id="ghCobertura">—</div>
+              <div class="gh-sub" id="ghCoberturaSub">Compras com preço de venda encontrado</div>
+            </div>
+          </div>
+
+          <div class="boss-horti-status sem-base" id="ghStatus">
+            <i class="ti ti-info-circle"></i>
+            <div class="boss-horti-status-text">
+              <div class="boss-horti-status-title" id="ghStatusTitulo">Aguardando dados</div>
+              <div class="boss-horti-status-desc" id="ghStatusDesc">O painel cruza compras CEASA, quebra Horti e preço atual de venda.</div>
+            </div>
+          </div>
+
+          <div class="boss-horti-criticos" id="ghCriticosBox" style="display:none">
+            <div class="boss-horti-criticos-hd"><i class="ti ti-alert-triangle"></i> Maiores impactos de quebra no período</div>
+            <div id="ghCriticos"></div>
+          </div>
+
+          <div class="boss-horti-metodo">
+            <i class="ti ti-calculator"></i>
+            Resultado potencial = receita estimada do volume comprado e não quebrado, usando o preço de venda atual, menos o custo das compras analisadas.
+            É um indicador gerencial — não é lucro contábil: não considera estoque remanescente, impostos, despesas, descontos ou vendas efetivamente realizadas.
+          </div>
+        </div>
       </div>
 
       <div class="boss-group boss-group-collapsible" id="bossGrupoEntrada" style="display:none">
@@ -5527,6 +5616,137 @@ function bossToggleGrupo(grupoId,cardId,chevronId){
   if(card)card.classList.toggle('aberto',abrir);
   if(abrir)grp.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+
+function bossRenderGerencialHorti_(dados){
+  var g=(dados&&dados.grupos&&dados.grupos.gerencialHorti)||null;
+  var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
+  var dataSel=bossFmtDataBR_(dados&&dados.data);
+  var mesLabel=bossMesLabelDados_(dados);
+
+  function pct_(v){
+    if(v===null||v===undefined||!isFinite(Number(v)))return '—';
+    return Number(v).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+  }
+  function setTxt_(id,txt){
+    var el=document.getElementById(id);if(el)el.textContent=txt;
+  }
+
+  var per=document.getElementById('bossPeriodoGerencialHorti');
+  if(per){
+    per.classList.toggle('boss-period-dia',periodoEfetivo==='dia');
+    per.classList.toggle('boss-period-mes',periodoEfetivo!=='dia');
+    per.textContent=periodoEfetivo==='dia'?(dataSel?('dia '+dataSel):'dia específico'):(mesLabel?('mês inteiro · '+mesLabel):'mês inteiro');
+  }
+
+  var cardResultado=document.getElementById('ghCardResultado');
+  var statusEl=document.getElementById('ghStatus');
+  var resultadoEl=document.getElementById('ghResultado');
+  var margemEl=document.getElementById('ghMargem');
+
+  if(!g){
+    setTxt_('ghResultado','—');
+    setTxt_('ghIndiceQuebra','—');
+    setTxt_('ghAproveitamento','—');
+    setTxt_('ghMargem','—');
+    setTxt_('ghCobertura','—');
+    setTxt_('ghStatusTitulo','Sem dados gerenciais');
+    setTxt_('ghStatusDesc','Atualize o Boss Vision após publicar o Code.gs com o módulo gerencial Horti.');
+    var box0=document.getElementById('ghCriticosBox');if(box0)box0.style.display='none';
+    return;
+  }
+
+  var status=String(g.status||'sem_base');
+  var resultado=Number(g.resultadoPotencial)||0;
+  var cobertura=(g.coberturaPct===null||g.coberturaPct===undefined)?null:Number(g.coberturaPct);
+
+  setTxt_('ghResultado',g.compraComPreco>0?bossFmtBRL(resultado):'—');
+  setTxt_('ghResultadoSub',
+    g.compraComPreco>0
+      ? ('Receita pós-quebra '+bossFmtBRL(g.receitaPotencialAposQuebra||0)+' · compras analisadas '+bossFmtBRL(g.compraComPreco||0))
+      : 'Sem preço de venda suficiente para projetar'
+  );
+  setTxt_('ghIndiceQuebra',pct_(g.indiceQuebraPct));
+  setTxt_('ghIndiceQuebraSub',
+    bossFmtBRL(g.totalQuebra||0)+' de quebra · '+bossFmtBRL(g.totalCompra||0)+' em compras'
+  );
+  setTxt_('ghAproveitamento',pct_(g.aproveitamentoPct));
+  setTxt_('ghMargem',pct_(g.margemPotencialPct));
+  setTxt_('ghMargemSub',
+    g.perdaVendaPotencial>0
+      ? ('Venda potencial perdida pela quebra: '+bossFmtBRL(g.perdaVendaPotencial))
+      : 'Sobre a receita potencial após quebra'
+  );
+  setTxt_('ghCobertura',pct_(cobertura));
+  setTxt_('ghCoberturaSub',
+    (Number(g.produtosComPreco)||0)+' produtos com preço · '+(Number(g.produtosSemPreco)||0)+' sem preço'
+  );
+
+  if(cardResultado){
+    cardResultado.classList.remove('status-positivo','status-negativo','status-equilibrio');
+    if(status==='positivo'||status==='negativo'||status==='equilibrio')cardResultado.classList.add('status-'+status);
+  }
+  if(resultadoEl){
+    resultadoEl.classList.remove('pos','neg','neutro');
+    resultadoEl.classList.add(status==='positivo'?'pos':(status==='negativo'?'neg':'neutro'));
+  }
+  if(margemEl){
+    margemEl.classList.remove('pos','neg','neutro');
+    var mp=Number(g.margemPotencialPct);
+    margemEl.classList.add(isFinite(mp)&&mp>0?'pos':(isFinite(mp)&&mp<0?'neg':'neutro'));
+  }
+
+  if(statusEl){
+    statusEl.classList.remove('positivo','negativo','equilibrio','sem-base');
+    statusEl.classList.add(status==='sem_base'?'sem-base':status);
+
+    var ic=statusEl.querySelector('i');
+    if(ic){
+      ic.className=status==='positivo'
+        ?'ti ti-trending-up'
+        :(status==='negativo'?'ti ti-trending-down'
+          :(status==='equilibrio'?'ti ti-arrows-left-right':'ti ti-info-circle'));
+    }
+  }
+
+  var coberturaTxt=cobertura===null?'':(' Cobertura da projeção: '+pct_(cobertura)+'.');
+  if(status==='positivo'){
+    setTxt_('ghStatusTitulo','Cenário potencial POSITIVO');
+    setTxt_('ghStatusDesc','Pelo preço de venda atual, o volume comprado e não quebrado ainda projeta resultado positivo de '+bossFmtBRL(resultado)+'.'+coberturaTxt);
+  }else if(status==='negativo'){
+    setTxt_('ghStatusTitulo','Cenário potencial NEGATIVO');
+    setTxt_('ghStatusDesc','Mesmo assumindo venda de todo o volume aproveitável ao preço atual, a projeção fica negativa em '+bossFmtBRL(Math.abs(resultado))+'. Revise preço, custo de compra e quebra.'+coberturaTxt);
+  }else if(status==='equilibrio'){
+    setTxt_('ghStatusTitulo','Cenário próximo do EQUILÍBRIO');
+    setTxt_('ghStatusDesc','A compra analisada está praticamente no ponto de equilíbrio após a quebra registrada.'+coberturaTxt);
+  }else{
+    setTxt_('ghStatusTitulo','Ainda não dá para concluir ganho ou perda');
+    setTxt_('ghStatusDesc',
+      (Number(g.totalCompra)||0)<=0
+        ? 'Não há entrada CEASA no período selecionado para comparar com a quebra.'
+        : 'Há compras no período, mas faltam preços de venda suficientes para projetar o resultado.'
+    );
+  }
+
+  var crit=Array.isArray(g.criticos)?g.criticos:[];
+  var critBox=document.getElementById('ghCriticosBox');
+  var critEl=document.getElementById('ghCriticos');
+  if(critBox)critBox.style.display=crit.length?'block':'none';
+  if(critEl){
+    critEl.innerHTML=crit.map(function(x){
+      var nome=bossEscapeHtml(x.nome||x.cod||'Produto');
+      var pct=x.quebraQtdPct===null||x.quebraQtdPct===undefined
+        ?(x.temCompraPeriodo?'—':'estoque anterior')
+        :pct_(x.quebraQtdPct);
+      return '<div class="boss-horti-critico-row">'
+        +'<div class="boss-horti-critico-prod" title="'+nome+'">'+nome+'</div>'
+        +'<div class="boss-horti-critico-num"><small>Quebra</small><strong>'+bossFmtBRL(x.quebraValor||0)+'</strong></div>'
+        +'<div class="boss-horti-critico-num"><small>Qtd. quebrada</small><strong>'+(Number(x.quebraQtd)||0).toLocaleString('pt-BR',{maximumFractionDigits:2})+(x.unidade?' '+bossEscapeHtml(x.unidade):'')+'</strong></div>'
+        +'<div class="boss-horti-critico-num gh-hide-mobile"><small>Quebra / compra qtd.</small><strong>'+pct+'</strong></div>'
+        +'</div>';
+    }).join('');
+  }
+}
+
 function bossRenderEntradaCeasa_(dados){
   var ec=(dados&&dados.grupos&&dados.grupos.entradaCeasa)||{entradas:[],porProduto:[],totalValor:0,totalPeso:0,totalEntradas:0,totalItens:0};
   var entradas=Array.isArray(ec.entradas)?ec.entradas:[];
@@ -5638,6 +5858,7 @@ function bossRender(dados){
   bossRenderLista('bossListProdPadaria',prodPad);bossAtualizaCabecalho('ProdPadaria',prodPad);
   bossRenderLista('bossListUsoConsumo',uso);bossAtualizaCabecalho('UsoConsumo',uso);
   bossRenderEntradaCeasa_(dados);
+  bossRenderGerencialHorti_(dados);
   var q=bossTotal(horti)+bossTotal(padaria),p=bossTotal(vencidos),ci=bossTotal(prodPad)+bossTotal(uso);
   var a=document.getElementById('bossKpiQuebras');if(a)a.textContent=bossFmtBRL(q);
   var b=document.getElementById('bossKpiPerdas');if(b)b.textContent=bossFmtBRL(p);
