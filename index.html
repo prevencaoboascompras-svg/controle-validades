@@ -1353,6 +1353,9 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-ceasa-nota-titulo{font-size:11px;font-weight:800;color:var(--tx);white-space:nowrap}
 .boss-ceasa-forn{font-size:10.5px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .boss-ceasa-nota-total{font-size:11px;font-weight:800;white-space:nowrap}
+.boss-ceasa-nota-actions{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.boss-ceasa-edit{border:1px solid rgba(55,138,221,.35);background:rgba(55,138,221,.09);color:var(--blue);font-size:10px;font-weight:700;padding:5px 8px;border-radius:7px;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.boss-ceasa-edit:hover{background:rgba(55,138,221,.17);border-color:rgba(55,138,221,.55)}
 .boss-ceasa-row{display:grid;grid-template-columns:28px 48px minmax(165px,1fr) 88px 100px 104px 122px 98px;gap:8px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--bd);min-width:860px}
 .boss-ceasa-row:last-child{border-bottom:none}
 .boss-ceasa-custo{border-radius:7px;padding:5px 7px;text-align:right;border:1px solid transparent;min-width:0}
@@ -2611,13 +2614,14 @@ function toggleTheme() {
 <div class="modal-ov" id="entradaCeasaModal">
   <div class="smodal" style="width:640px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h3 style="display:flex;align-items:center;gap:8px;margin:0"><i class="ti ti-truck-delivery" style="color:var(--green)"></i> Lançar Entrada CEASA</h3>
+      <h3 id="ecModalTitulo" style="display:flex;align-items:center;gap:8px;margin:0"><i class="ti ti-truck-delivery" style="color:var(--green)"></i> Lançar Entrada CEASA</h3>
       <button class="btn btn-sm" onclick="closeModal('entradaCeasaModal')"><i class="ti ti-x"></i></button>
     </div>
     <div class="form-row-2">
       <div class="form-row"><label>Data da compra</label><input type="date" id="ecData"></div>
       <div class="form-row"><label>Fornecedor / Feirante</label><input type="text" id="ecFornecedor" placeholder="Ex: Box 14 - João Hortifruti"></div>
     </div>
+    <div id="ecModoEdicao" style="display:none;margin:10px 0 2px;padding:8px 10px;border-radius:8px;background:rgba(55,138,221,.10);border:1px solid rgba(55,138,221,.25);color:var(--blue);font-size:11px;font-weight:700"><i class="ti ti-edit"></i> Editando nota já lançada — ao salvar, os itens desta mesma nota serão atualizados.</div>
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:14px 0 6px">Produtos da nota</div>
     <div id="ecLinhas"></div>
     <button class="btn btn-sm" style="margin-top:8px" onclick="entradaCeasaAddLinha()"><i class="ti ti-plus"></i> Adicionar produto</button>
@@ -5229,6 +5233,20 @@ function bossFmtDataBR_(iso){
 // ═══ ENTRADA CEASA (compras de hortifruti) ═══
 var _ecLinhaSeq=0;
 var _ecAcFoco={};
+var _ecNotaEditando=null;
+
+function _ecConfigurarModoModal_(editando){
+  var titulo=document.getElementById('ecModalTitulo');
+  var aviso=document.getElementById('ecModoEdicao');
+  var btn=document.getElementById('ecBtnSalvar');
+  if(titulo){
+    titulo.innerHTML='<i class="ti ti-truck-delivery" style="color:var(--green)"></i> '+(editando?'Editar Entrada CEASA':'Lançar Entrada CEASA');
+  }
+  if(aviso)aviso.style.display=editando?'block':'none';
+  if(btn){
+    btn.innerHTML=editando?'<i class="ti ti-device-floppy"></i> Atualizar nota':'<i class="ti ti-check"></i> Salvar nota';
+  }
+}
 function _ecNormalizaUnidade_(u){
   var s=String(u||'').trim().toLowerCase();
   if(s==='kg'||s.indexOf('quilo')>=0)return 'kg';
@@ -5368,11 +5386,50 @@ function entradaCeasaAtualizarTotal(){
   var tEl=document.getElementById('ecTotalNota');if(tEl)tEl.textContent=bossFmtBRL(total);
 }
 function abrirEntradaCeasaModal(){
+  _ecNotaEditando=null;
+  _ecConfigurarModoModal_(false);
   var d=document.getElementById('ecData');if(d)d.value=bossHoje();
   var f=document.getElementById('ecFornecedor');if(f)f.value='';
   var wrap=document.getElementById('ecLinhas');if(wrap)wrap.innerHTML='';
   _ecLinhaSeq=0;
   entradaCeasaAddLinha();
+  var erro=document.getElementById('ecErro');if(erro){erro.style.display='none';erro.textContent='';}
+  entradaCeasaAtualizarTotal();
+  document.getElementById('entradaCeasaModal').classList.add('open');
+}
+
+function editarEntradaCeasaNota(notaId){
+  notaId=String(notaId||'').trim();
+  var ec=_bossDados&&_bossDados.grupos&&_bossDados.grupos.entradaCeasa;
+  var entradas=ec&&Array.isArray(ec.entradas)?ec.entradas:[];
+  var ent=null;
+  for(var i=0;i<entradas.length;i++){
+    if(String(entradas[i].notaId||'')===notaId){ent=entradas[i];break;}
+  }
+  if(!ent){
+    if(typeof mostrarToast==='function')mostrarToast('Não foi possível localizar esta nota. Atualize o Boss Vision e tente novamente.','erro');
+    return;
+  }
+
+  _ecNotaEditando=notaId;
+  _ecConfigurarModoModal_(true);
+
+  var d=document.getElementById('ecData');if(d)d.value=ent.data||bossHoje();
+  var f=document.getElementById('ecFornecedor');if(f)f.value=ent.fornecedor||'';
+  var wrap=document.getElementById('ecLinhas');if(wrap)wrap.innerHTML='';
+  _ecLinhaSeq=0;
+
+  (ent.itens||[]).forEach(function(it){
+    entradaCeasaAddLinha({
+      cod:it.cod||'',
+      nome:it.nome||'',
+      unidade:it.unidade||'kg',
+      peso:Number(it.pesoTotal)||0,
+      valor:Number(it.valorTotal)||0
+    });
+  });
+  if(!(ent.itens||[]).length)entradaCeasaAddLinha();
+
   var erro=document.getElementById('ecErro');if(erro){erro.style.display='none';erro.textContent='';}
   entradaCeasaAtualizarTotal();
   document.getElementById('entradaCeasaModal').classList.add('open');
@@ -5403,7 +5460,9 @@ function salvarEntradaCeasa(){
   var url=bossApiUrl();
   if(!url)return erro('URL da API principal da AURA não configurada.');
   var btn=document.getElementById('ecBtnSalvar');
-  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Salvando...';}
+  var notaEditando=_ecNotaEditando;
+  var ehEdicao=!!notaEditando;
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> '+(ehEdicao?'Atualizando...':'Salvando...');}
 
   // O Apps Script pode bloquear a leitura da resposta por CORS no GitHub Pages.
   // mode:no-cors envia a gravação normalmente; depois confirmamos visualmente
@@ -5412,15 +5471,26 @@ function salvarEntradaCeasa(){
     method:'POST',
     mode:'no-cors',
     headers:{'Content-Type':'text/plain;charset=UTF-8'},
-    body:JSON.stringify({action:'lancarEntradaCeasa',data:data,fornecedor:fornecedor,itens:itens})
+    body:JSON.stringify({
+      action:ehEdicao?'editarEntradaCeasa':'lancarEntradaCeasa',
+      notaId:notaEditando||'',
+      data:data,
+      fornecedor:fornecedor,
+      itens:itens
+    })
   }).then(function(){
     closeModal('entradaCeasaModal');
-    if(typeof mostrarToast==='function')mostrarToast('Entrada CEASA enviada. Atualizando Boss Vision...','ok');
+    _ecNotaEditando=null;
+    if(typeof mostrarToast==='function')mostrarToast(ehEdicao?'Nota CEASA atualizada. Recalculando custos...':'Entrada CEASA enviada. Atualizando Boss Vision...','ok');
     setTimeout(function(){if(currentTabName==='bossvision')bossCarregar(true);},1200);
   }).catch(function(e){
     erro((e&&e.message)||'Erro de rede ao enviar a entrada. Tente novamente.');
   }).finally(function(){
-    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-check"></i> Salvar nota';}
+    if(btn){
+      btn.disabled=false;
+      btn.innerHTML='<i class="ti ti-check"></i> Salvar nota';
+    }
+    _ecConfigurarModoModal_(false);
   });
 }
 function bossMesLabelDados_(dados){
@@ -5501,7 +5571,10 @@ function bossRenderEntradaCeasa_(dados){
           +'<div class="boss-ceasa-nota-hd">'
           +'<div class="boss-ceasa-nota-titulo"><i class="ti ti-truck-delivery"></i> Entrada '+(idxEnt+1)+'</div>'
           +'<div class="boss-ceasa-forn">'+forn+'</div>'
+          +'<div class="boss-ceasa-nota-actions">'
           +'<div class="boss-ceasa-nota-total">'+bossFmtBRL(ent.totalValor||0)+'</div>'
+          +'<button type="button" class="boss-ceasa-edit" data-nota-id="'+bossEscapeHtml(ent.notaId||'')+'" onclick="editarEntradaCeasaNota(this.getAttribute(\'data-nota-id\'))"><i class="ti ti-edit"></i> Editar nota</button>'
+          +'</div>'
           +'</div>';
 
         (ent.itens||[]).forEach(function(it,i){
