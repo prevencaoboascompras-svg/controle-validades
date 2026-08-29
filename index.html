@@ -225,6 +225,20 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .urg-lote-qtde{font-size:11px;color:var(--tx2);white-space:nowrap}
 .urg-lote-more{font-size:11px;color:var(--tx2);text-align:center;padding:4px 0;cursor:pointer}
 .urg-lote-more:hover{color:var(--tx)}
+.tarefa-lotes-box{margin-top:8px;border:1px solid var(--bd);border-radius:8px;overflow:hidden;background:var(--bg2)}
+.tarefa-lotes-title{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px;border-bottom:1px solid var(--bd);font-size:9.5px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:.035em}
+.tarefa-lote-row{display:grid;grid-template-columns:minmax(118px,1fr) 70px 92px;gap:7px;align-items:center;padding:6px 8px;border-bottom:1px solid var(--bd);font-size:10.5px}
+.tarefa-lote-row:last-child{border-bottom:none}
+.tarefa-lote-row.alvo{background:rgba(55,138,221,.09);box-shadow:inset 3px 0 0 var(--blue)}
+.tarefa-lote-row.zerado{opacity:.68}
+.tarefa-lote-data{font-weight:700;white-space:nowrap}
+.tarefa-lote-qtd{text-align:right;font-weight:800;white-space:nowrap}
+.tarefa-lote-qtd.zero{color:var(--red)}
+.tarefa-lote-tag{text-align:right;font-size:9px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tarefa-lote-tag.alvo{color:var(--blue);font-weight:700}
+.tarefa-lotes-total{padding:6px 8px;border-top:1px solid var(--bd);font-size:10px;color:var(--tx2);text-align:right}
+.tarefa-lotes-total b{color:var(--tx)}
+@media(max-width:520px){.tarefa-lote-row{grid-template-columns:minmax(92px,1fr) 58px 72px;gap:5px;padding:6px}.tarefa-lote-tag{font-size:8px}}
 .urg-card-body{padding:12px 13px;display:flex;flex-direction:column;gap:10px;flex:1}
 .urg-card-mid{display:flex;align-items:center;gap:10px}
 .urg-speedo-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -3363,16 +3377,26 @@ async function syncAll(){
       var custoBanco=cod?bancoCusto[cod]||0:0;
       // Custo: preferir o da planilha principal se existir, senão usar o do banco
       var custoFinal=cellNum(cells[ci.custo])||custoBanco;
-      // Quantidade: prioriza o valor NUMÉRICO da coluna QTD TROCA (é o que o app
-      // atualiza de verdade ao confirmar tarefas). Só cai no "{n}" extraído do nome
-      // se a coluna não foi detectada nesta planilha — mantém compatibilidade com
-      // layouts antigos, mas evita o card ficar preso ao texto desatualizado.
-      // cellNum() sempre retorna 0 pra célula vazia/inválida (nunca null/NaN),
-      // então só confiamos na coluna quando o valor é > 0 — evita que linhas
-      // antigas/manuais (ex: acima de CFG.LINHA_ESCRITA) sem essa coluna
-      // preenchida virem "0 unidades" por engano em vez de cair no fallback.
-      var qtdeColuna=ci.qtde>=0?cellNum(cells[ci.qtde]):0;
-      var qtdeFinal=qtdeColuna>0?qtdeColuna:(function(n){var m=n.match(/\{(\d+)\}/);return m?parseInt(m[1]):1;})(nome);
+      // Quantidade: QTD TROCA/QTD ATUAL é a fonte real do estoque do lote.
+      // CORREÇÃO TAREFAS/LOTES: 0 explícito é um valor válido e precisa continuar 0.
+      // Antes, "0" caía no fallback do nome ("{n}") e o lote voltava a aparecer com
+      // a quantidade antiga depois que o colaborador confirmava zero.
+      var qtdeFinal;
+      if(ci.qtde>=0){
+        var celQtde=cells[ci.qtde];
+        var rawQtde=celQtde
+          ? (celQtde.v!==null&&celQtde.v!==undefined&&celQtde.v!=='' ? celQtde.v : celQtde.f)
+          : null;
+        var temQtdeExplicita=rawQtde!==null&&rawQtde!==undefined&&String(rawQtde).trim()!=='';
+        if(temQtdeExplicita){
+          var nQtde=Number(String(rawQtde).replace(',','.'));
+          qtdeFinal=isFinite(nQtde)?nQtde:0;
+        }else{
+          qtdeFinal=(function(n){var m=n.match(/\{(\d+)\}/);return m?parseInt(m[1],10):1;})(nome);
+        }
+      }else{
+        qtdeFinal=(function(n){var m=n.match(/\{(\d+)\}/);return m?parseInt(m[1],10):1;})(nome);
+      }
       sheetsData.push({cod:cod,nome:nome,setor:cellStr(cells[ci.setor]),validade:validade,status:status,qtde:qtdeFinal,custo:custoFinal,fornecedor:fornBanco,precoNormal:cellNum(cells[ci.venda]),precoPromo:cellNum(cells[ci.precodia]),pctDesc:cellNum(cells[ci.pct]),valorDesc:cellNum(cells[ci.valordesc]),src:'sheets'});
     }
     products=sheetsData.concat(local);
@@ -8311,6 +8335,81 @@ function reenviarFilaTarefas(){
   if(pendentes.length>0)mostrarToast(pendentes.length+' tarefa(s) offline enviada(s) ao Sheets!','ok');
 }
 
+// Lotes do mesmo EAN usados pela tela de Tarefas.
+// Mantém cada validade separada e preserva quantidade 0 explícita.
+function _tarefasLotesDoProduto_(cod){
+  cod=String(cod||'').trim();
+  if(!cod||typeof products==='undefined'||!Array.isArray(products))return [];
+  return products.filter(function(p){
+    return String(p.cod||'').trim()===cod && p.validade;
+  }).slice().sort(function(a,b){
+    var da=a.validade?new Date(a.validade+'T00:00:00').getTime():Number.MAX_SAFE_INTEGER;
+    var db=b.validade?new Date(b.validade+'T00:00:00').getTime():Number.MAX_SAFE_INTEGER;
+    return da-db;
+  });
+}
+
+function _tarefasLotesHtml_(cod,validadeAlvo,quantidadeConfirmada){
+  var lotes=_tarefasLotesDoProduto_(cod);
+  if(!lotes.length)return '';
+
+  var totalDisponivel=0;
+  var rows=lotes.map(function(p){
+    var q=typeof qtdeEfetiva==='function'?qtdeEfetiva(p.qtde):(isNaN(Number(p.qtde))?1:Number(p.qtde));
+    q=Number(q)||0;
+    if(q>0)totalDisponivel+=q;
+    var alvo=!!validadeAlvo && String(p.validade||'')===String(validadeAlvo);
+    var confirmadoZero=alvo && quantidadeConfirmada!==null && quantidadeConfirmada!==undefined && Number(quantidadeConfirmada)===0;
+    var tag=alvo?(confirmadoZero?'Confirmado 0':'Lote da tarefa'):'Outro lote';
+    return '<div class="tarefa-lote-row'+(alvo?' alvo':'')+(q===0?' zerado':'')+'">'
+      +'<div class="tarefa-lote-data"><i class="ti ti-calendar" style="font-size:11px;opacity:.65"></i> '+fmtDataExtenso(p.validade)+'</div>'
+      +'<div class="tarefa-lote-qtd'+(q===0?' zero':'')+'">'+q+' un.</div>'
+      +'<div class="tarefa-lote-tag'+(alvo?' alvo':'')+'">'+tag+'</div>'
+      +'</div>';
+  }).join('');
+
+  return '<div class="tarefa-lotes-box">'
+    +'<div class="tarefa-lotes-title"><span><i class="ti ti-packages"></i> Lotes separados</span><span>'+lotes.length+' lote'+(lotes.length===1?'':'s')+'</span></div>'
+    +rows
+    +'<div class="tarefa-lotes-total">Total disponível nos outros/lotes ativos: <b>'+totalDisponivel+' un.</b></div>'
+    +'</div>';
+}
+
+// Quando uma tarefa concluída chega do Sheets, atualiza imediatamente o lote local
+// correspondente (EAN + validade). Assim a tela do gestor não continua exibindo
+// a quantidade antiga até a próxima sincronização geral da aba 2025.
+function _sincronizarQuantidadesTarefasNosLotes_(tarefas){
+  if(typeof products==='undefined'||!Array.isArray(products))return false;
+  var ultimas={};
+
+  (tarefas||[]).forEach(function(t){
+    if(!t||t.status!=='concluida'||!t.cod||!t.validade)return;
+    if(t.quantidadeConfirmada===null||t.quantidadeConfirmada===undefined)return;
+    var k=String(t.cod).trim()+'||'+String(t.validade);
+    var ts=new Date(t.confirmadoEm||t.criadoEm||0).getTime()||0;
+    if(!ultimas[k]||ts>=ultimas[k].ts)ultimas[k]={t:t,ts:ts};
+  });
+
+  var mudou=false;
+  Object.keys(ultimas).forEach(function(k){
+    var t=ultimas[k].t;
+    var nova=Number(t.quantidadeConfirmada);
+    if(!isFinite(nova))return;
+    products.forEach(function(p){
+      if(String(p.cod||'').trim()!==String(t.cod||'').trim())return;
+      if(String(p.validade||'')!==String(t.validade||''))return;
+      var atual=typeof qtdeEfetiva==='function'?qtdeEfetiva(p.qtde):Number(p.qtde);
+      if(Number(atual)!==nova){
+        p.qtde=nova;
+        mudou=true;
+      }
+    });
+  });
+
+  if(mudou&&typeof saveProd==='function')saveProd();
+  return mudou;
+}
+
 // Sincroniza todas as tarefas do Sheets com o localStorage
 function sincronizarTarefasCompleto(){
   var cfg=loadCfg();
@@ -8341,7 +8440,9 @@ function sincronizarTarefasCompleto(){
       var mapaLocal={};
       getTarefas().forEach(function(t){mapaLocal[t.id]=t;});
       tarefasSheets.forEach(function(t){mapaLocal[t.id]=t;});
-      saveTarefas(Object.values(mapaLocal));
+      var tarefasMescladas=Object.values(mapaLocal);
+      saveTarefas(tarefasMescladas);
+      _sincronizarQuantidadesTarefasNosLotes_(tarefasMescladas);
       renderTarefas();
       // Tarefas confirmadas com 0 unidades: baixa automática do estoque/pendências
       processarTarefasConcluidasZero();
@@ -8407,6 +8508,9 @@ function processarTarefasConcluidasZero(){
     }
 
     lotes.forEach(function(p){
+      // O backend já zerou este lote específico na planilha. Espelha o 0 também
+      // no estado local para a tela do gestor refletir a resposta imediatamente.
+      p.qtde=0;
       var chave=produtoChave(p);
       if(!resolvidos.includes(chave)){resolvidos.push(chave);houveMudanca=true;}
       var qtdeLote=qtdeEfetiva(p.qtde);
@@ -8430,6 +8534,7 @@ function processarTarefasConcluidasZero(){
   });
 
   saveTarefasZeroProcessadas(jaProcessadas);
+  if(alvo.length&&typeof saveProd==='function')saveProd();
   if(houveMudanca){
     saveResolvidos(resolvidos);
     savePromoAtivas(promoAtivas);
@@ -8670,7 +8775,8 @@ function preencherLotesValidade(cod) {
   lotes.forEach(function(prod) {
     var opt = document.createElement('option');
     opt.value = prod.validade;
-    opt.textContent = fmtDataExtenso(prod.validade) + (prod.qtde ? ' — ' + prod.qtde + ' un.' : '');
+    var qLote=typeof qtdeEfetiva==='function'?qtdeEfetiva(prod.qtde):(isNaN(Number(prod.qtde))?1:Number(prod.qtde));
+    opt.textContent = fmtDataExtenso(prod.validade) + ' — ' + qLote + ' un.';
     sel.appendChild(opt);
   });
   wrap.style.display = lotes.length ? 'block' : 'none';
@@ -8850,6 +8956,7 @@ function renderTarefas() {
       + '<div class="tarefa-card-nome" style="font-size:14px;font-weight:600;margin-bottom:4px">' + escHtml(t.produto) + '</div>'
       + (t.cod ? '<div class="tarefa-card-cod" style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:6px">' + t.cod + '</div>' : '')
       + validadeInfo
+      + _tarefasLotesHtml_(t.cod,t.validade,t.quantidadeConfirmada)
       + (t.descricao ? '<div class="tarefa-card-desc" style="font-size:12px;color:var(--tx2);margin-bottom:6px;line-height:1.4"><i class="ti ti-arrows-exchange" style="font-size:12px;opacity:.7"></i> ' + escHtml(t.descricao) + '</div>' : '')
       + '<div class="tarefa-card-colab" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)">'
       +   '<i class="ti ti-user" style="font-size:14px"></i> '
@@ -8946,10 +9053,17 @@ function renderTarefasProntos() {
       return d === null || d >= 0;
     });
     if (!lotesValidos.length) return null; // só sobrou lote vencido — sem estoque válido
+    lotesValidos.sort(function(a,b){
+      var da=a.validade?new Date(a.validade+'T00:00:00').getTime():Number.MAX_SAFE_INTEGER;
+      var db=b.validade?new Date(b.validade+'T00:00:00').getTime():Number.MAX_SAFE_INTEGER;
+      return da-db;
+    });
     var idx = products.indexOf(lotesValidos[0]);
-    var estoqueTotal = lotesValidos.reduce(function(s, p) { return s + (parseInt(p.qtde) || 1); }, 0);
+    // CORREÇÃO: zero explícito não pode virar 1. qtdeEfetiva preserva 0 e só
+    // assume 1 quando o registro realmente não possui quantidade.
+    var estoqueTotal = lotesValidos.reduce(function(s, p) { return s + qtdeEfetiva(p.qtde); }, 0);
     if (estoqueTotal <= 0) return null;
-    return { t: t, idx: idx, estoqueTotal: estoqueTotal, cod: cod };
+    return { t: t, idx: idx, estoqueTotal: estoqueTotal, cod: cod, lotes: lotesValidos };
   }).filter(Boolean);
 
   var prontos = prontosTodos.filter(function(item) { return !ignoradosMap[item.cod]; });
@@ -9004,11 +9118,12 @@ function renderTarefasProntos() {
       +   (item.cod ? '<div style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:4px">' + item.cod + '</div>' : '')
       +   validadeInfo
       +   '<div style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--tx2);flex-wrap:wrap">'
-      +     '<span><i class="ti ti-package" style="font-size:13px"></i> ' + item.estoqueTotal + ' em estoque</span>'
+      +     '<span><i class="ti ti-package" style="font-size:13px"></i> <b>' + item.estoqueTotal + ' un. disponíveis</b></span>'
       +     (ignorado ? motivoTag : (item.t.carrinhoStatus === 'nao'
               ? '<span style="color:var(--amber)"><i class="ti ti-alert-triangle" style="font-size:13px"></i> Colaborador confirmou: ainda sem desconto</span>'
               : '<span><i class="ti ti-circle-check" style="font-size:13px;color:var(--green)"></i> Tarefa concluída</span>'))
       +   '</div>'
+      +   _tarefasLotesHtml_(item.cod,item.t.validade,item.t.quantidadeConfirmada)
       + '</div>'
       + acoes
       + '</div>';
