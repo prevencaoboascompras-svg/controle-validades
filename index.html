@@ -1332,6 +1332,11 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-kpi-clicavel .boss-kpi-lbl{display:flex;align-items:center;gap:4px}
 .boss-kpi-clicavel .ti-chevron-down{transition:transform .18s;font-size:14px}
 .boss-kpi-clicavel.aberto .ti-chevron-down{transform:rotate(180deg)}
+.boss-setores-kpis{grid-template-columns:repeat(2,minmax(200px,1fr))}
+.boss-kpi-embreve{cursor:pointer;opacity:.72;border-style:dashed}
+.boss-kpi-embreve:hover{opacity:1;border-color:var(--bds)}
+.boss-kpi-toast{font-size:11px;color:var(--amber);margin-top:6px;display:none}
+.boss-kpi-toast.show{display:block}
 .boss-kpi-lbl{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:7px}
 .boss-kpi-val{font-size:25px;font-weight:800;line-height:1}
 .boss-kpi-sub{font-size:11px;color:var(--tx2);margin-top:6px}
@@ -2229,14 +2234,23 @@ function toggleTheme() {
       </div>
 
       <div class="boss-kpis">
-        <div class="boss-kpi"><div class="boss-kpi-lbl">Quebras</div><div class="boss-kpi-val" id="bossKpiQuebras">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasSub">Horti + Padaria</div></div>
-        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPerdasCard" onclick="bossToggleGrupo('bossGrupoPerdas','bossKpiPerdasCard','bossPerdasChevron')"><div class="boss-kpi-lbl">Perdas <i class="ti ti-chevron-down" id="bossPerdasChevron"></i></div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Produtos vencidos</div></div>
-        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossToggleGrupo('bossGrupoConsumo','bossKpiConsumoCard','bossConsumoChevron')"><div class="boss-kpi-lbl">Consumo interno <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção Padaria + Uso e consumo</div></div>
-        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiEntradaCard" onclick="bossToggleGrupo('bossGrupoEntrada','bossKpiEntradaCard','bossEntradaChevron')"><div class="boss-kpi-lbl">Compras Horti <i class="ti ti-chevron-down" id="bossEntradaChevron"></i></div><div class="boss-kpi-val" id="bossKpiEntrada">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiEntradaSub">NF + CEASA dinheiro</div></div>
-        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiVendasCard" onclick="bossToggleGrupo('bossGrupoVendasHorti','bossKpiVendasCard','bossVendasChevron')"><div class="boss-kpi-lbl">Vendas Horti <i class="ti ti-chevron-down" id="bossVendasChevron"></i></div><div class="boss-kpi-val" id="bossKpiVendas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiVendasSub">Qtd vendida + valor vendido</div></div>
+        <div class="boss-kpi"><div class="boss-kpi-lbl">Quebras</div><div class="boss-kpi-val" id="bossKpiQuebras">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasSub">O que foi perdido em produtos vencidos ou descartados no Horti e na Padaria</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPerdasCard" onclick="bossToggleGrupo('bossGrupoPerdas','bossKpiPerdasCard','bossPerdasChevron')"><div class="boss-kpi-lbl">Perdas <i class="ti ti-chevron-down" id="bossPerdasChevron"></i></div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Valor de produtos que venceram na loja hoje. Toque para ver a lista</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossToggleGrupo('bossGrupoConsumo','bossKpiConsumoCard','bossConsumoChevron')"><div class="boss-kpi-lbl">Consumo interno <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">O que a loja usou de estoque no mês, sem ser venda: produção da padaria e uso e consumo interno. Toque para detalhar</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiEntradaCard" onclick="bossToggleGrupo('bossGrupoEntrada','bossKpiEntradaCard','bossEntradaChevron')"><div class="boss-kpi-lbl">Compras Horti <i class="ti ti-chevron-down" id="bossEntradaChevron"></i></div><div class="boss-kpi-val" id="bossKpiEntrada">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiEntradaSub">Quanto foi gasto comprando hortifrúti no mês, somando nota fiscal e CEASA em dinheiro. Toque para detalhar</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiVendasCard" onclick="bossToggleGrupo('bossGrupoVendasHorti','bossKpiVendasCard','bossVendasChevron')"><div class="boss-kpi-lbl">Vendas Horti <i class="ti ti-chevron-down" id="bossVendasChevron"></i></div><div class="boss-kpi-val" id="bossKpiVendas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiVendasSub">Quanto o Horti vendeu no mês, em quantidade e em reais. Toque para ver por produto</div></div>
       </div>
 
-      <div class="boss-group" id="bossGrupoGerencialHorti">
+      <div class="boss-group-title" style="margin-top:4px">
+        <span><i class="ti ti-building-store" style="color:var(--tx2)"></i> Setores</span>
+        <span class="boss-line"></span>
+      </div>
+      <div class="boss-kpis boss-setores-kpis">
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiHortiCard" onclick="bossToggleGrupo('bossGrupoGerencialHorti','bossKpiHortiCard','bossHortiChevron')"><div class="boss-kpi-lbl"><i class="ti ti-leaf" style="color:var(--green)"></i> Hortifrúti <i class="ti ti-chevron-down" id="bossHortiChevron"></i></div><div class="boss-kpi-val" style="color:var(--blue);font-size:15px">Ver análise completa</div><div class="boss-kpi-sub">Compra, venda, quebra e margem cruzados. Toque para abrir</div></div>
+        <div class="boss-kpi boss-kpi-embreve" id="bossKpiPadariaCard" onclick="bossKpiEmBreve('bossKpiPadariaCard')"><div class="boss-kpi-lbl"><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria</div><div class="boss-kpi-val" style="color:var(--tx2);font-size:15px">Dados detalhados em breve</div><div class="boss-kpi-sub">Por enquanto disponível só no resumo de Quebras e Consumo interno acima</div><div class="boss-kpi-toast" id="bossKpiPadariaToast">Estamos organizando os dados da Padaria pra mostrar aqui do mesmo jeito que o Hortifrúti.</div></div>
+      </div>
+
+      <div class="boss-group boss-group-collapsible" id="bossGrupoGerencialHorti" style="display:none">
         <div class="boss-group-title">
           <span><i class="ti ti-chart-dots-3" style="color:var(--green)"></i> Horti — Visão Gerencial</span>
           <span class="boss-period-badge boss-period-mes" id="bossPeriodoGerencialHorti"></span>
@@ -5784,6 +5798,13 @@ function bossToggleGrupo(grupoId,cardId,chevronId){
   if(abrir)grp.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
+function bossKpiEmBreve(cardId){
+  var card=document.getElementById(cardId);
+  if(!card)return;
+  var toast=card.querySelector('.boss-kpi-toast');
+  if(toast)toast.classList.toggle('show');
+}
+
 function bossRenderGerencialHorti_(dados){
   var g=(dados&&dados.grupos&&dados.grupos.gerencialHorti)||null;
   var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
@@ -6321,9 +6342,9 @@ function bossRender(dados){
   var a=document.getElementById('bossKpiQuebras');if(a)a.textContent=bossFmtBRL(q);
   var b=document.getElementById('bossKpiPerdas');if(b)b.textContent=bossFmtBRL(p);
   var c=document.getElementById('bossKpiConsumo');if(c)c.textContent=bossFmtBRL(ci);
-  var as=document.getElementById('bossKpiQuebrasSub');if(as)as.textContent=(horti.length+padaria.length)+' itens · Horti + Padaria';
-  var ps=document.getElementById('bossKpiPerdasSub');if(ps)ps.textContent=vencidos.length+' itens vencidos';
-  var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(prodPad.length+uso.length)+' itens · Produção + Uso/Consumo · mês todo';
+  var as=document.getElementById('bossKpiQuebrasSub');if(as)as.textContent='Perdido em '+(horti.length+padaria.length)+' itens do Horti e da Padaria';
+  var ps=document.getElementById('bossKpiPerdasSub');if(ps)ps.textContent=vencidos.length+' itens venceram na loja hoje. Toque para ver a lista';
+  var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(prodPad.length+uso.length)+' itens usados no mês em produção da padaria e uso/consumo';
 }
 var bossPeriodoAtual='mes';
 function bossSetPeriodo(p){
