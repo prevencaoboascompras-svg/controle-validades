@@ -6438,7 +6438,12 @@ function goTab(name){
   // Na aba Dashboard, o próprio dashboard já mostra os totais (dash-tiles).
   // Esconde a barra de métricas global pra não duplicar.
   var metricsEl=document.getElementById('metrics');
-  if(metricsEl) metricsEl.style.display = (name==='dashboard') ? 'none' : '';
+  if(metricsEl) metricsEl.style.display = (name==='dashboard'||name==='bossvision') ? 'none' : '';
+  // A barra fixa "Por setor" é sobre estoque/vencimento — não faz sentido
+  // dentro do Boss Vision, que já tem sua própria seção "Setores" com
+  // dados financeiros (compra/venda/quebra). Escondida só ali.
+  var setorWrapEl=document.getElementById('setorStickyWrap');
+  if(setorWrapEl) setorWrapEl.style.display = (name==='bossvision') ? 'none' : '';
   if(name==='bossvision')bossCarregar(false);
   if(name==='relatorio'){
     var selFiltro=document.getElementById('filtroNegTipo');
