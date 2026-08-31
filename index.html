@@ -2211,7 +2211,7 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Eventos organizados por impacto financeiro. Por padrão mostra o <strong>mês inteiro</strong>; use "Dia específico" para consultar o dia escolhido. O painel <strong>Horti — Visão Gerencial</strong> cruza <strong>Entradas por NF + compras CEASA em dinheiro + Quebra Horti</strong>. As NFs vêm do relatório mensal acumulado; como esse relatório não informa a data individual da nota, no modo Dia específico entram somente as compras CEASA manuais e a quebra daquele dia.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti por NF, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
+          <div class="boss-sub">Eventos organizados por impacto financeiro. Por padrão mostra o <strong>mês inteiro</strong>; use "Dia específico" para consultar o dia escolhido. O painel <strong>Horti — Visão Gerencial</strong> cruza <strong>Entradas por NF + compras CEASA em dinheiro + Vendas Horti + Quebra Horti</strong>. As NFs vêm do relatório mensal acumulado; como esse relatório não informa a data individual da nota, no modo Dia específico entram somente as compras CEASA manuais e a quebra daquele dia.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti por NF, Vendas Horti, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
@@ -2233,6 +2233,7 @@ function toggleTheme() {
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPerdasCard" onclick="bossToggleGrupo('bossGrupoPerdas','bossKpiPerdasCard','bossPerdasChevron')"><div class="boss-kpi-lbl">Perdas <i class="ti ti-chevron-down" id="bossPerdasChevron"></i></div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Produtos vencidos</div></div>
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossToggleGrupo('bossGrupoConsumo','bossKpiConsumoCard','bossConsumoChevron')"><div class="boss-kpi-lbl">Consumo interno <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção Padaria + Uso e consumo</div></div>
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiEntradaCard" onclick="bossToggleGrupo('bossGrupoEntrada','bossKpiEntradaCard','bossEntradaChevron')"><div class="boss-kpi-lbl">Compras Horti <i class="ti ti-chevron-down" id="bossEntradaChevron"></i></div><div class="boss-kpi-val" id="bossKpiEntrada">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiEntradaSub">NF + CEASA dinheiro</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiVendasCard" onclick="bossToggleGrupo('bossGrupoVendasHorti','bossKpiVendasCard','bossVendasChevron')"><div class="boss-kpi-lbl">Vendas Horti <i class="ti ti-chevron-down" id="bossVendasChevron"></i></div><div class="boss-kpi-val" id="bossKpiVendas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiVendasSub">Qtd vendida + valor vendido</div></div>
       </div>
 
       <div class="boss-group" id="bossGrupoGerencialHorti">
@@ -2257,6 +2258,21 @@ function toggleTheme() {
               <div class="gh-label">CEASA dinheiro</div>
               <div class="gh-value" id="ghComprasCeasa">—</div>
               <div class="gh-sub" id="ghComprasCeasaSub">Lançamentos manuais</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Vendas Horti</div>
+              <div class="gh-value pos" id="ghVendasTotal">—</div>
+              <div class="gh-sub" id="ghVendasTotalSub">Venda real do relatório ABC</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Quebra / Venda</div>
+              <div class="gh-value" id="ghQuebraVenda">—</div>
+              <div class="gh-sub" id="ghQuebraVendaSub">R$ quebra ÷ R$ vendas</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Margem estimada das vendas*</div>
+              <div class="gh-value" id="ghMargemVendas">—</div>
+              <div class="gh-sub" id="ghMargemVendasSub">Venda real × custo médio das compras</div>
             </div>
             <div class="boss-horti-card">
               <div class="gh-label">Quebra / Compra</div>
@@ -2312,7 +2328,25 @@ function toggleTheme() {
           <div class="boss-horti-metodo" id="ghMetodo">
             <i class="ti ti-calculator"></i>
             No mês: Compras Horti = NFs do relatório mensal + lançamentos CEASA em dinheiro. No dia específico, as NFs não entram porque o relatório não informa a data individual de cada nota.
-            Resultado potencial é gerencial, não lucro contábil: considera o volume comprado não quebrado e o preço de venda disponível, mas não estoque final, impostos, despesas, descontos nem vendas efetivamente realizadas.
+            O relatório ABC entra somente com <strong>QTD vendida</strong> e <strong>Venda Total R$</strong>; estoque, compra, CMV, custos, margem e markup desse relatório são ignorados. A margem estimada das vendas usa o custo médio das entradas do período e é gerencial, não lucro contábil, pois não considera estoque inicial/final, impostos, despesas ou descontos.
+          </div>
+        </div>
+      </div>
+
+      <div class="boss-group boss-group-collapsible" id="bossGrupoVendasHorti" style="display:none">
+        <div class="boss-group-title">
+          <span><i class="ti ti-cash-banknote" style="color:var(--green)"></i> Vendas Horti</span>
+          <span class="boss-period-badge boss-period-mes" id="bossPeriodoVendasHorti"></span>
+          <span class="boss-line"></span>
+        </div>
+        <div class="boss-grid one">
+          <div class="boss-panel">
+            <div class="boss-panel-hd">
+              <div class="boss-panel-title"><i class="ti ti-chart-bar" style="color:var(--green)"></i> ABC de Mercadorias — somente QTD e Venda Total</div>
+              <div class="boss-panel-total"><strong id="bossTotalVendasHorti">R$ 0,00</strong><span id="bossCountVendasHorti">0 produtos</span></div>
+            </div>
+            <div class="boss-nf-info" id="bossInfoVendasHorti"></div>
+            <div class="boss-list" id="bossListVendasHorti"></div>
           </div>
         </div>
       </div>
@@ -5789,7 +5823,7 @@ function bossRenderGerencialHorti_(dados){
   var margemEl=document.getElementById('ghMargem');
 
   if(!g){
-    ['ghComprasTotal','ghComprasNF','ghComprasCeasa','ghResultado','ghIndiceQuebra','ghAproveitamento','ghMargem','ghCobertura']
+    ['ghComprasTotal','ghComprasNF','ghComprasCeasa','ghVendasTotal','ghQuebraVenda','ghMargemVendas','ghResultado','ghIndiceQuebra','ghAproveitamento','ghMargem','ghCobertura']
       .forEach(function(id){setTxt_(id,'—');});
     setTxt_('ghStatusTitulo','Sem dados gerenciais');
     setTxt_('ghStatusDesc','Atualize o Boss Vision após publicar o Code.gs com a leitura das entradas Horti por NF.');
@@ -5822,6 +5856,27 @@ function bossRenderGerencialHorti_(dados){
   setTxt_('ghComprasCeasa',bossFmtBRL(totalCeasa));
   setTxt_('ghComprasCeasaSub',
     (Number(g.totalEntradasCeasa)||0)+' '+((Number(g.totalEntradasCeasa)||0)===1?'entrada manual':'entradas manuais')
+  );
+
+  var vendasOk=!!g.vendasIncluidaNoCalculo;
+  var totalVendas=Number(g.totalVendas)||0;
+  setTxt_('ghVendasTotal',vendasOk?bossFmtBRL(totalVendas):'—');
+  setTxt_('ghVendasTotalSub',
+    vendasOk
+      ?((Number(g.totalProdutosVenda)||0)+' produtos · '+(g.vendasPeriodoInicio&&g.vendasPeriodoFim?(dataBR_(g.vendasPeriodoInicio)+' a '+dataBR_(g.vendasPeriodoFim)):'relatório ABC'))
+      :(g.vendasMotivo||'Vendas indisponíveis para o período')
+  );
+  setTxt_('ghQuebraVenda',vendasOk?pct_(g.quebraSobreVendaPct):'—');
+  setTxt_('ghQuebraVendaSub',
+    vendasOk
+      ?(bossFmtBRL(g.totalQuebra||0)+' de quebra · '+bossFmtBRL(totalVendas)+' vendidos')
+      :'Necessita relatório de vendas compatível'
+  );
+  setTxt_('ghMargemVendas',vendasOk&&g.margemVendasEstimadaPct!==null?pct_(g.margemVendasEstimadaPct):'—');
+  setTxt_('ghMargemVendasSub',
+    vendasOk&&Number(g.vendaCruzadaValor)>0
+      ?('Cobertura '+pct_(g.coberturaVendasPct)+' das vendas · margem estimada '+bossFmtBRL(g.margemVendasEstimadaValor||0))
+      :'Cruzamento com compras insuficiente'
   );
 
   setTxt_('ghResultado',g.compraComPreco>0?bossFmtBRL(resultado):'—');
@@ -5894,18 +5949,19 @@ function bossRenderGerencialHorti_(dados){
   }
 
   var coberturaTxt=cobertura===null?'':(' Cobertura da projeção: '+pct_(cobertura)+'.');
+  var vendasTxt=vendasOk?(' Vendas reais do relatório ABC: '+bossFmtBRL(totalVendas)+'.'):(' '+(g.vendasMotivo||'Vendas Horti não disponíveis para este período.'));
   var origemTxt=periodoEfetivo==='dia'
     ?' Neste modo, as NFs não entram porque o relatório mensal não possui data individual por nota.'
     :(nfIncluida?' Compras do mês incluem NF + CEASA dinheiro.':' '+(g.nfMotivo||'As NFs não entraram no cálculo.'));
   if(status==='positivo'){
     setTxt_('ghStatusTitulo','Cenário potencial POSITIVO');
-    setTxt_('ghStatusDesc','Pelo preço de venda disponível, o volume comprado e não quebrado projeta resultado positivo de '+bossFmtBRL(resultado)+'.'+coberturaTxt+origemTxt);
+    setTxt_('ghStatusDesc','Pelo preço de venda disponível, o volume comprado e não quebrado projeta resultado positivo de '+bossFmtBRL(resultado)+'.'+vendasTxt+coberturaTxt+origemTxt);
   }else if(status==='negativo'){
     setTxt_('ghStatusTitulo','Cenário potencial NEGATIVO');
     setTxt_('ghStatusDesc','Mesmo assumindo venda de todo o volume aproveitável ao preço disponível, a projeção fica negativa em '+bossFmtBRL(Math.abs(resultado))+'. Revise custo de compra, preço e quebra.'+coberturaTxt+origemTxt);
   }else if(status==='equilibrio'){
     setTxt_('ghStatusTitulo','Cenário próximo do EQUILÍBRIO');
-    setTxt_('ghStatusDesc','As compras analisadas estão praticamente no ponto de equilíbrio após a quebra registrada.'+coberturaTxt+origemTxt);
+    setTxt_('ghStatusDesc','As compras analisadas estão praticamente no ponto de equilíbrio após a quebra registrada.'+vendasTxt+coberturaTxt+origemTxt);
   }else{
     setTxt_('ghStatusTitulo','Ainda não dá para concluir ganho ou perda');
     setTxt_('ghStatusDesc',
@@ -6171,6 +6227,79 @@ function bossRenderEntradaCeasa_(dados){
     pEl.textContent=periodoEfetivo==='dia'?(dataSel?('dia '+dataSel):'dia específico'):(mesLabel?('mês inteiro · '+mesLabel):'mês inteiro');
   }
 }
+
+function bossRenderVendasHorti_(dados){
+  var vh=(dados&&dados.grupos&&dados.grupos.vendasHorti)||{
+    porProduto:[],totalVenda:0,totalQtd:0,totalProdutos:0,
+    incluidaNoCalculo:false,motivo:'Relatório de vendas não carregado.'
+  };
+  var lista=Array.isArray(vh.porProduto)?vh.porProduto:[];
+  var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
+  var dataSel=bossFmtDataBR_(dados&&dados.data);
+  var mesLabel=bossMesLabelDados_(dados);
+
+  var per=document.getElementById('bossPeriodoVendasHorti');
+  if(per){
+    per.classList.toggle('boss-period-dia',periodoEfetivo==='dia');
+    per.classList.toggle('boss-period-mes',periodoEfetivo!=='dia');
+    per.textContent=periodoEfetivo==='dia'
+      ?(dataSel?('dia '+dataSel):'dia específico')
+      :(mesLabel?('mês inteiro · '+mesLabel):'mês inteiro');
+  }
+
+  var totalEl=document.getElementById('bossTotalVendasHorti');
+  var countEl=document.getElementById('bossCountVendasHorti');
+  var infoEl=document.getElementById('bossInfoVendasHorti');
+  var listEl=document.getElementById('bossListVendasHorti');
+
+  if(totalEl)totalEl.textContent=vh.incluidaNoCalculo?bossFmtBRL(vh.totalVenda||0):'—';
+  if(countEl)countEl.textContent=(Number(vh.totalProdutos)||0)+' '+((Number(vh.totalProdutos)||0)===1?'produto':'produtos');
+
+  if(infoEl){
+    if(vh.incluidaNoCalculo){
+      var p1=vh.periodoInicio?bossFmtDataBR_(vh.periodoInicio):'';
+      var p2=vh.periodoFim?bossFmtDataBR_(vh.periodoFim):'';
+      infoEl.innerHTML='<i class="ti ti-info-circle"></i> Período do ABC: <strong>'+bossEscapeHtml(p1)+(p1&&p2?' a ':'')+bossEscapeHtml(p2)+'</strong>. '
+        +'AURA utiliza somente <strong>QTD vendida</strong> e <strong>Venda Total R$</strong>. As demais colunas do relatório são ignoradas.';
+    }else{
+      infoEl.innerHTML='<i class="ti ti-alert-triangle"></i> '+bossEscapeHtml(vh.motivo||'Vendas não disponíveis para este período.');
+    }
+  }
+
+  if(listEl){
+    if(!vh.incluidaNoCalculo || !lista.length){
+      listEl.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhuma venda Horti válida para o período.</div>';
+    }else{
+      listEl.innerHTML=lista.map(function(x,i){
+        var cod=String(x.cod||'').replace(/[^0-9]/g,'');
+        var nome=bossEscapeHtml(x.nome||('Produto '+cod));
+        var photo=cod
+          ?'<div class="boss-photo"><img data-boss-cod="'+bossEscapeHtml(cod)+'" data-boss-nome="'+nome+'" alt="" loading="lazy"></div>'
+          :'<div class="boss-photo"><i class="ti ti-photo-off"></i></div>';
+        var pm=Number(x.qtde)>0?(Number(x.valor)/Number(x.qtde)):0;
+        return '<div class="boss-row">'
+          +'<div class="boss-rank">'+(i+1)+'</div>'
+          +photo
+          +'<div class="boss-prod"><div class="boss-prod-name" title="'+nome+'">'+nome+'</div>'+(cod?'<div class="boss-prod-cod">'+cod+'</div>':'')+'</div>'
+          +'<div class="boss-num boss-qtd"><small>Qtd vendida</small><strong>'+bossFmtQtd(x.qtde||0)+'</strong></div>'
+          +'<div class="boss-num"><small>Preço médio realizado</small><strong>'+bossFmtBRL(pm)+'</strong></div>'
+          +'<div class="boss-num"><small>Venda Total</small><strong>'+bossFmtBRL(x.valor||0)+'</strong></div>'
+          +'</div>';
+      }).join('');
+      bossResolverFotos(listEl);
+    }
+  }
+
+  var k=document.getElementById('bossKpiVendas');
+  if(k)k.textContent=vh.incluidaNoCalculo?bossFmtBRL(vh.totalVenda||0):'—';
+  var ks=document.getElementById('bossKpiVendasSub');
+  if(ks){
+    ks.textContent=vh.incluidaNoCalculo
+      ?((Number(vh.totalQtd)||0).toLocaleString('pt-BR',{maximumFractionDigits:2})+' qtd vendida · '+(Number(vh.totalProdutos)||0)+' produtos')
+      :(vh.motivo||'Relatório ABC indisponível');
+  }
+}
+
 function bossRender(dados){
   _bossDados=dados||{};
   bossAtualizaPeriodos_(dados);
@@ -6186,6 +6315,7 @@ function bossRender(dados){
   bossRenderLista('bossListUsoConsumo',uso);bossAtualizaCabecalho('UsoConsumo',uso);
   bossRenderEntradaHortiNF_(dados);
   bossRenderEntradaCeasa_(dados);
+  bossRenderVendasHorti_(dados);
   bossRenderGerencialHorti_(dados);
   var q=bossTotal(horti)+bossTotal(padaria),p=bossTotal(vencidos),ci=bossTotal(prodPad)+bossTotal(uso);
   var a=document.getElementById('bossKpiQuebras');if(a)a.textContent=bossFmtBRL(q);
