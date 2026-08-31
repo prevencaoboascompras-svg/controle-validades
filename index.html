@@ -1499,8 +1499,9 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-config-grid{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
 .boss-config label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--tx2);display:block;margin-bottom:4px}
 .boss-config input{width:100%;height:34px;padding:0 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg2);color:var(--tx);font-size:12px}
-@media(max-width:900px){.boss-kpis{grid-template-columns:1fr}.boss-grid{grid-template-columns:1fr}.boss-row{grid-template-columns:24px 42px minmax(90px,1fr) 62px 80px 86px;gap:6px;padding:8px}.boss-photo{width:38px;height:38px}.boss-num strong{font-size:11px}}
+@media(max-width:900px){.boss-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.boss-grid{grid-template-columns:1fr}.boss-row{grid-template-columns:24px 42px minmax(90px,1fr) 62px 80px 86px;gap:6px;padding:8px}.boss-photo{width:38px;height:38px}.boss-num strong{font-size:11px}}
 @media(max-width:620px){.boss-row{grid-template-columns:22px 38px minmax(0,1fr) 72px 82px}.boss-row .boss-qtd{display:none}.boss-photo{width:34px;height:34px}.boss-prod-name{font-size:11px}.boss-panel-hd{padding:11px 12px}.boss-kpi-val{font-size:22px}}
+@media(max-width:360px){.boss-kpis{grid-template-columns:1fr}}
 
 </style>
 </head>
@@ -2233,7 +2234,7 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Eventos organizados por impacto financeiro. Por padrão mostra o <strong>mês inteiro</strong>; use "Dia específico" para consultar o dia escolhido. O painel <strong>Horti — Visão Gerencial</strong> cruza <strong>Entradas por NF + compras CEASA em dinheiro + Vendas Horti + Quebra Horti</strong>. As NFs vêm do relatório mensal acumulado; como esse relatório não informa a data individual da nota, no modo Dia específico entram somente as compras CEASA manuais e a quebra daquele dia.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti por NF, Vendas Horti, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
+          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão mostra o <strong>mês inteiro</strong>; use "Dia específico" para consultar o dia escolhido. Os setores com dados suficientes podem ser abertos abaixo para uma análise mais profunda.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti por NF, Vendas Horti, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
@@ -2261,7 +2262,7 @@ function toggleTheme() {
 
       <div class="boss-charts-row">
         <div class="boss-panel boss-chart-card">
-          <div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-chart-bar" style="color:var(--blue)"></i> Compras x Vendas x Quebra</div><div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Toque numa barra</div></div>
+          <div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-chart-bar" style="color:var(--blue)"></i> Horti — Compras x Vendas x Quebra</div><div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Toque numa barra</div></div>
           <div style="padding:14px;height:220px"><canvas id="bossChartGeral"></canvas></div>
         </div>
         <div class="boss-panel boss-chart-card">
@@ -2281,7 +2282,7 @@ function toggleTheme() {
       </div>
       <div class="boss-kpis boss-setores-kpis">
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiHortiCard" onclick="bossToggleGrupo('bossGrupoGerencialHorti','bossKpiHortiCard','bossHortiChevron')"><div class="boss-kpi-lbl"><i class="ti ti-leaf" style="color:var(--green)"></i> Hortifrúti <i class="ti ti-chevron-down" id="bossHortiChevron"></i></div><div class="boss-kpi-val" style="color:var(--blue);font-size:15px">Ver análise completa</div><div class="boss-kpi-sub">Compra, venda, quebra e margem cruzados. Toque para abrir</div></div>
-        <div class="boss-kpi boss-kpi-embreve" id="bossKpiPadariaCard" onclick="bossKpiEmBreve('bossKpiPadariaCard')"><div class="boss-kpi-lbl"><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria</div><div class="boss-kpi-val" style="color:var(--tx2);font-size:15px">Dados detalhados em breve</div><div class="boss-kpi-sub">Por enquanto disponível só no resumo de Quebras e Consumo interno acima</div><div class="boss-kpi-toast" id="bossKpiPadariaToast">Estamos organizando os dados da Padaria pra mostrar aqui do mesmo jeito que o Hortifrúti.</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPadariaCard" onclick="bossAbrirPadariaDados()"><div class="boss-kpi-lbl"><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria <i class="ti ti-arrow-down-right"></i></div><div class="boss-kpi-val" id="bossKpiPadariaResumo" style="color:var(--amber);font-size:15px">Ver dados disponíveis</div><div class="boss-kpi-sub" id="bossKpiPadariaResumoSub">Quebras, produção e consumo interno. Toque para abrir</div></div>
       </div>
 
       <div class="boss-group boss-group-collapsible" id="bossGrupoGerencialHorti" style="display:none">
@@ -5847,6 +5848,27 @@ function bossKpiEmBreve(cardId){
   if(toast)toast.classList.toggle('show');
 }
 
+function bossAbrirPadariaDados(){
+  var consumo=document.getElementById('bossGrupoConsumo');
+  var consumoCard=document.getElementById('bossKpiConsumoCard');
+  if(consumo){
+    consumo.style.display='';
+    if(consumoCard)consumoCard.classList.add('aberto');
+  }
+
+  var quebra=document.getElementById('bossPanelQuebraPadaria');
+  if(quebra){
+    quebra.scrollIntoView({behavior:'smooth',block:'center'});
+    quebra.classList.add('boss-flash');
+    setTimeout(function(){quebra.classList.remove('boss-flash');},1600);
+  }
+
+  if(consumo){
+    consumo.classList.add('boss-flash');
+    setTimeout(function(){consumo.classList.remove('boss-flash');},1600);
+  }
+}
+
 function bossRenderGerencialHorti_(dados){
   var g=(dados&&dados.grupos&&dados.grupos.gerencialHorti)||null;
   var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
@@ -6440,7 +6462,7 @@ function bossGerarInsights_(dados){
     var shareP=(quebraPadaria/quebraTotal*100);
     if(shareP>=25){
       add('info','ti-bread','Padaria também pesa na quebra geral',
-        'A Padaria responde por '+shareP.toLocaleString('pt-BR',{maximumFractionDigits:0})+'% da quebra total do dia ('+bossFmtBRL(quebraPadaria)+'). Vale olhar de perto, mesmo sem o detalhamento gerencial completo desse setor ainda.');
+        'A Padaria responde por '+shareP.toLocaleString('pt-BR',{maximumFractionDigits:0})+'% da quebra total do período ('+bossFmtBRL(quebraPadaria)+'). Vale olhar de perto com os dados de quebra, produção e consumo disponíveis.');
     }
   }
 
@@ -6467,11 +6489,14 @@ function bossRenderInsights_(dados){
 
 function bossRenderCharts_(dados){
   if(typeof Chart==='undefined')return;
+  var g=(dados&&dados.grupos&&dados.grupos.gerencialHorti)||null;
   var ec=(dados&&dados.grupos&&dados.grupos.entradaCeasa)||{totalValor:0};
   var vh=(dados&&dados.grupos&&dados.grupos.vendasHorti)||{totalVenda:0,incluidaNoCalculo:false};
   var horti=bossLista(dados,'horti');
   var padaria=bossLista(dados,'padaria');
-  var compras=Number(ec.totalValor)||0;
+  // Compra do Horti = NF + CEASA, usando o total já consolidado pelo gerencial.
+  // Fallback para CEASA apenas se o gerencial ainda não estiver disponível.
+  var compras=g?(Number(g.totalCompra)||0):(Number(ec.totalValor)||0);
   var vendas=vh.incluidaNoCalculo?(Number(vh.totalVenda)||0):0;
   var quebraHorti=bossTotal(horti);
   var quebraPadaria=bossTotal(padaria);
@@ -6483,7 +6508,7 @@ function bossRenderCharts_(dados){
     _bossCharts.geral=new Chart(elGeral.getContext('2d'),{
       type:'bar',
       data:{labels:['Compras','Vendas','Quebra'],datasets:[{
-        data:[compras,vendas,quebraHorti+quebraPadaria],
+        data:[compras,vendas,quebraHorti],
         backgroundColor:['#378ADD','#1D9E75','#E24B4A'],
         borderRadius:6,borderWidth:0,maxBarThickness:56
       }]},
@@ -6496,7 +6521,7 @@ function bossRenderCharts_(dados){
           var idx=els[0].index;
           if(idx===0)bossToggleGrupo('bossGrupoEntrada','bossKpiEntradaCard','bossEntradaChevron');
           else if(idx===1)bossToggleGrupo('bossGrupoVendasHorti','bossKpiVendasCard','bossVendasChevron');
-          else bossScrollHighlight('bossGrupoQuebraSetores');
+          else bossScrollHighlight('bossPanelQuebraHorti');
         },
         plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return bossFmtBRL(ctx.parsed.y||0)+' · toque para ver detalhes';}}}},
         scales:{y:{beginAtZero:true,ticks:{font:{size:10},callback:function(v){return bossFmtBRL(v);}}},x:{ticks:{font:{size:11}}}}
@@ -6562,6 +6587,12 @@ function bossRender(dados){
   var asP=document.getElementById('bossKpiQuebrasPadariaSub');if(asP)asP.textContent=padaria.length+' '+(padaria.length===1?'item perdido':'itens perdidos')+' na Padaria. Toque para ver';
   var ps=document.getElementById('bossKpiPerdasSub');if(ps)ps.textContent=vencidos.length+' itens venceram na loja hoje. Toque para ver a lista';
   var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(prodPad.length+uso.length)+' itens usados no mês em produção da padaria e uso/consumo';
+
+  var pr=document.getElementById('bossKpiPadariaResumo');
+  if(pr)pr.textContent=bossFmtBRL(qPadaria)+' em quebra';
+  var prs=document.getElementById('bossKpiPadariaResumoSub');
+  if(prs)prs.textContent=(prodPad.length+uso.length)+' itens em produção/consumo · toque para abrir os dados disponíveis';
+
   bossRenderCharts_(dados);
   bossRenderInsights_(dados);
 }
@@ -6592,7 +6623,7 @@ function bossFetch(url,data,periodo){
     var sep=url.indexOf('?')>=0?'&':'?';
     script.src=url+sep+'action=buscarBossVision&data='+encodeURIComponent(data)+'&periodo='+encodeURIComponent(periodo||'mes')+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();
     script.async=true;
-    timer=setTimeout(function(){limpar();reject(new Error('Tempo esgotado ao consultar os relatórios pela AURA.'));},30000);
+    timer=setTimeout(function(){limpar();reject(new Error('Tempo esgotado ao consultar os relatórios pela AURA após 120 segundos.'));},120000);
     document.head.appendChild(script);
   });
 }
@@ -6604,7 +6635,7 @@ function bossCarregar(force){
   var url=bossApiUrl();
   var btn=document.getElementById('bossBtnAtualizar');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
-  bossSetStatus('',periodo==='mes'?'Atualizando o mês completo até '+data.split('-').reverse().join('/')+'...':'Atualizando eventos de '+data.split('-').reverse().join('/')+'...');
+  bossSetStatus('',periodo==='mes'?'Atualizando o mês completo até '+data.split('-').reverse().join('/')+'... A primeira leitura de um XLS grande pode levar mais tempo.':'Atualizando eventos de '+data.split('-').reverse().join('/')+'...');
   if(!url){
     bossRender(_bossDados||{}); // mesmo sem Drive, Vencidos continua vindo da AURA
     bossSetStatus('warn','Dados locais atualizados. A API principal da AURA ainda não está disponível para carregar Entradas NF, Quebras e Consumo Interno.');
@@ -6625,13 +6656,18 @@ function bossCarregar(force){
     try{localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({data:data,periodo:periodo,dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
     var avisos=(res.avisos||dados.avisos||[]);
     if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);
-    else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Entradas NF + CEASA + Quebras');
+    else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Entradas NF + CEASA + Vendas + Quebras');
   }).catch(function(err){
     console.timeEnd('[Boss Vision] tempo total (fetch+render)');
     console.warn('[Boss Vision] falhou após',(performance.now()-_bossT0).toFixed(0)+'ms:',err.message);
     var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
-    if(cache&&cache.data===data&&cache.periodo===periodo&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','Drive indisponível; exibindo o último snapshot salvo deste período.');}
-    else{bossRender({});bossSetStatus('warn','Vencidos atualizados; relatórios do Drive pela AURA indisponíveis. '+err.message);}
+    if(cache&&cache.data===data&&cache.periodo===periodo&&cache.dados){
+      bossRender(cache.dados);
+      bossSetStatus('warn','A atualização pela API falhou ('+err.message+'). Exibindo o último snapshot salvo deste período.');
+    }else{
+      bossRender({});
+      bossSetStatus('warn','A atualização pela API falhou. '+err.message);
+    }
   }).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}});
 }
 function bossInit(){
