@@ -1338,66 +1338,6 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-kpi-toast{font-size:11px;color:var(--amber);margin-top:6px;display:none}
 .boss-kpi-toast.show{display:block}
 .boss-charts-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
-
-/* ── Boss Vision — dashboard setorial sequencial ───────────── */
-.boss-sector-block{
-  background:var(--bg);
-  border:1px solid var(--bd);
-  border-radius:var(--rl);
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.boss-sector-block.horti{border-top:3px solid var(--green)}
-.boss-sector-block.padaria{border-top:3px solid var(--amber)}
-.boss-sector-head{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  padding-bottom:10px;
-  border-bottom:1px solid var(--bd);
-}
-.boss-sector-icon{
-  width:34px;height:34px;border-radius:9px;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;font-size:18px;
-}
-.boss-sector-block.horti .boss-sector-icon{background:rgba(29,158,117,.12);color:var(--green)}
-.boss-sector-block.padaria .boss-sector-icon{background:rgba(186,117,23,.12);color:var(--amber)}
-.boss-sector-title{font-size:15px;font-weight:850;line-height:1.1}
-.boss-sector-sub{font-size:10.5px;color:var(--tx2);margin-top:3px}
-.boss-sector-head .boss-period-badge{margin-left:auto}
-.boss-sector-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.boss-sector-kpis .boss-kpi{min-width:0}
-.boss-sector-kpis .boss-kpi-val{font-size:23px}
-.boss-sector-chart{width:100%}
-.boss-sector-chart .boss-panel-hd{background:var(--bg2)}
-.boss-sector-chart-body{height:235px;padding:14px}
-.boss-sector-insights{width:100%}
-.boss-sector-action{
-  display:flex;align-items:center;gap:12px;
-  padding:12px 14px;border:1px dashed var(--bds);
-  border-radius:10px;background:var(--bg2);
-  cursor:pointer;transition:border-color .15s,background .15s,transform .1s;
-}
-.boss-sector-action:hover{border-color:var(--blue);background:var(--bg);transform:translateY(-1px)}
-.boss-sector-action-icon{
-  width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
-  background:var(--bg);border:1px solid var(--bd);flex-shrink:0
-}
-.boss-sector-action-text{flex:1;min-width:0}
-.boss-sector-action-title{font-size:12px;font-weight:800}
-.boss-sector-action-sub{font-size:10.5px;color:var(--tx2);margin-top:2px}
-.boss-geral-block{display:flex;flex-direction:column;gap:12px}
-.boss-geral-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.boss-comparativo-chart{width:100%}
-@media(max-width:760px){
-  .boss-sector-kpis{grid-template-columns:1fr}
-  .boss-geral-kpis{grid-template-columns:1fr}
-  .boss-sector-block{padding:12px}
-  .boss-sector-chart-body{height:210px;padding:10px}
-}
 .boss-insights-card{margin-bottom:20px}
 .boss-insights-list{display:flex;flex-direction:column}
 .boss-insight-item{display:flex;gap:11px;padding:12px 15px;border-bottom:1px solid var(--bd)}
@@ -2348,150 +2288,43 @@ function toggleTheme() {
         </div>
       </div>
 
-      <!-- ═════════════════════════════════════════════════════
-           HORTIFRÚTI — resumo executivo em sequência
-           ═════════════════════════════════════════════════════ -->
-      <section class="boss-sector-block horti" id="bossResumoHorti">
-        <div class="boss-sector-head">
-          <div class="boss-sector-icon"><i class="ti ti-leaf"></i></div>
-          <div>
-            <div class="boss-sector-title">Hortifrúti</div>
-            <div class="boss-sector-sub">Compras, vendas, quebra e sinais de ação do período</div>
-          </div>
-          <span class="boss-period-badge boss-period-mes" id="bossPeriodoResumoHorti"></span>
-        </div>
+      <div class="boss-kpis">
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiQuebrasHortiCard" onclick="bossScrollHighlight('bossPanelQuebraHorti')"><div class="boss-kpi-lbl"><i class="ti ti-leaf" style="color:var(--green)"></i> Quebras Horti</div><div class="boss-kpi-val" id="bossKpiQuebrasHorti">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasHortiSub">Toque para ver os itens</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiQuebrasPadariaCard" onclick="bossScrollHighlight('bossPanelQuebraPadaria')"><div class="boss-kpi-lbl"><i class="ti ti-bread" style="color:var(--amber)"></i> Quebras Padaria</div><div class="boss-kpi-val" id="bossKpiQuebrasPadaria">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiQuebrasPadariaSub">Toque para ver os itens</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPerdasCard" onclick="bossToggleGrupo('bossGrupoPerdas','bossKpiPerdasCard','bossPerdasChevron')"><div class="boss-kpi-lbl">Perdas <i class="ti ti-chevron-down" id="bossPerdasChevron"></i></div><div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiPerdasSub">Valor de produtos que venceram na loja hoje. Toque para ver a lista</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossToggleGrupo('bossGrupoConsumo','bossKpiConsumoCard','bossConsumoChevron')"><div class="boss-kpi-lbl">Consumo interno <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div><div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiConsumoSub">O que a loja usou de estoque no mês, sem ser venda: produção da padaria e uso e consumo interno. Toque para detalhar</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiEntradaCard" onclick="bossToggleGrupo('bossGrupoEntrada','bossKpiEntradaCard','bossEntradaChevron')"><div class="boss-kpi-lbl">Compras Horti <i class="ti ti-chevron-down" id="bossEntradaChevron"></i></div><div class="boss-kpi-val" id="bossKpiEntrada">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiEntradaSub">Quanto foi gasto comprando hortifrúti no mês, somando nota fiscal e CEASA em dinheiro. Toque para detalhar</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiVendasCard" onclick="bossToggleGrupo('bossGrupoVendasHorti','bossKpiVendasCard','bossVendasChevron')"><div class="boss-kpi-lbl">Vendas Horti <i class="ti ti-chevron-down" id="bossVendasChevron"></i></div><div class="boss-kpi-val" id="bossKpiVendas">R$ 0,00</div><div class="boss-kpi-sub" id="bossKpiVendasSub">Quanto o Horti vendeu no mês, em quantidade e em reais. Toque para ver por produto</div></div>
+      </div>
 
-        <div class="boss-sector-kpis">
-          <div class="boss-kpi boss-kpi-clicavel" id="bossKpiEntradaCard" onclick="bossToggleGrupo('bossGrupoEntrada','bossKpiEntradaCard','bossEntradaChevron')">
-            <div class="boss-kpi-lbl"><i class="ti ti-shopping-cart" style="color:var(--blue)"></i> Compras Horti <i class="ti ti-chevron-down" id="bossEntradaChevron"></i></div>
-            <div class="boss-kpi-val" id="bossKpiEntrada">R$ 0,00</div>
-            <div class="boss-kpi-sub" id="bossKpiEntradaSub">NF + CEASA. Toque para detalhar</div>
-          </div>
-          <div class="boss-kpi boss-kpi-clicavel" id="bossKpiVendasCard" onclick="bossToggleGrupo('bossGrupoVendasHorti','bossKpiVendasCard','bossVendasChevron')">
-            <div class="boss-kpi-lbl"><i class="ti ti-cash-banknote" style="color:var(--green)"></i> Vendas Horti <i class="ti ti-chevron-down" id="bossVendasChevron"></i></div>
-            <div class="boss-kpi-val" id="bossKpiVendas">R$ 0,00</div>
-            <div class="boss-kpi-sub" id="bossKpiVendasSub">ABC Horti. Toque para ver os produtos</div>
-          </div>
-          <div class="boss-kpi boss-kpi-clicavel" id="bossKpiQuebrasHortiCard" onclick="bossScrollHighlight('bossPanelQuebraHorti')">
-            <div class="boss-kpi-lbl"><i class="ti ti-trash" style="color:var(--red)"></i> Quebra Horti</div>
-            <div class="boss-kpi-val" id="bossKpiQuebrasHorti">R$ 0,00</div>
-            <div class="boss-kpi-sub" id="bossKpiQuebrasHortiSub">Toque para ver os itens</div>
-          </div>
+      <div class="boss-charts-row">
+        <div class="boss-panel boss-chart-card">
+          <div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-chart-bar" style="color:var(--blue)"></i> Horti — Compras x Vendas x Quebra</div><div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Toque numa barra</div></div>
+          <div style="padding:14px;height:220px"><canvas id="bossChartGeral"></canvas></div>
         </div>
+        <div class="boss-panel boss-chart-card">
+          <div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-chart-bar" style="color:var(--amber)"></i> Padaria — Compras x Produção x Vendas x Quebra</div><div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Toque numa barra</div></div>
+          <div style="padding:14px;height:220px"><canvas id="bossChartPadaria"></canvas></div>
+        </div>
+        <div class="boss-panel boss-chart-card">
+          <div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-chart-donut" style="color:var(--green)"></i> Quebra por setor</div><div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Toque numa fatia</div></div>
+          <div style="padding:14px;height:220px"><canvas id="bossChartSetor"></canvas></div>
+        </div>
+      </div>
 
-        <div class="boss-panel boss-chart-card boss-sector-chart">
-          <div class="boss-panel-hd">
-            <div class="boss-panel-title"><i class="ti ti-chart-bar" style="color:var(--green)"></i> Gráfico Horti — Compras x Vendas x Quebra</div>
-            <div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Toque numa barra</div>
-          </div>
-          <div class="boss-sector-chart-body"><canvas id="bossChartGeral"></canvas></div>
-        </div>
+      <div class="boss-panel boss-insights-card">
+        <div class="boss-panel-hd"><div class="boss-panel-title"><i class="ti ti-bulb" style="color:var(--amber)"></i> Onde agir</div><div class="boss-panel-total" style="font-size:11px;color:var(--tx2)">Gerado a partir dos dados do período</div></div>
+        <div id="bossInsightsList" class="boss-insights-list"></div>
+      </div>
 
-        <div class="boss-panel boss-insights-card boss-sector-insights">
-          <div class="boss-panel-hd">
-            <div class="boss-panel-title"><i class="ti ti-bulb" style="color:var(--green)"></i> Onde agir — Horti</div>
-            <div class="boss-panel-total" style="font-size:11px;color:var(--tx2)">Prioridades do período</div>
-          </div>
-          <div id="bossInsightsHortiList" class="boss-insights-list"></div>
-        </div>
-
-        <div class="boss-sector-action" id="bossKpiHortiCard" onclick="bossToggleGrupo('bossGrupoGerencialHorti','bossKpiHortiCard','bossHortiChevron')">
-          <div class="boss-sector-action-icon"><i class="ti ti-chart-dots-3" style="color:var(--green)"></i></div>
-          <div class="boss-sector-action-text">
-            <div class="boss-sector-action-title">Abrir análise gerencial completa do Horti</div>
-            <div class="boss-sector-action-sub">Margem, aproveitamento, fornecedores, variações de custo e produtos críticos</div>
-          </div>
-          <i class="ti ti-chevron-down" id="bossHortiChevron"></i>
-        </div>
-      </section>
-
-      <!-- ═════════════════════════════════════════════════════
-           PADARIA — mesma estrutura visual do Horti
-           ═════════════════════════════════════════════════════ -->
-      <section class="boss-sector-block padaria" id="bossResumoPadaria">
-        <div class="boss-sector-head">
-          <div class="boss-sector-icon"><i class="ti ti-bread"></i></div>
-          <div>
-            <div class="boss-sector-title">Padaria</div>
-            <div class="boss-sector-sub">Compras, vendas, quebra e conta de padeiro do período</div>
-          </div>
-          <span class="boss-period-badge boss-period-mes" id="bossPeriodoResumoPadaria"></span>
-        </div>
-
-        <div class="boss-sector-kpis">
-          <div class="boss-kpi boss-kpi-clicavel" id="bossKpiComprasPadariaCard" onclick="bossToggleGrupo('bossGrupoGerencialPadaria','bossKpiPadariaCard','bossPadariaChevron')">
-            <div class="boss-kpi-lbl"><i class="ti ti-shopping-cart" style="color:var(--blue)"></i> Compras Padaria</div>
-            <div class="boss-kpi-val" id="bossKpiComprasPadaria">R$ 0,00</div>
-            <div class="boss-kpi-sub" id="bossKpiComprasPadariaSub">Entradas por NF. Toque para análise</div>
-          </div>
-          <div class="boss-kpi boss-kpi-clicavel" id="bossKpiVendasPadariaCard" onclick="bossToggleGrupo('bossGrupoVendasPadaria','bossKpiVendasPadariaCard')">
-            <div class="boss-kpi-lbl"><i class="ti ti-cash-banknote" style="color:var(--green)"></i> Vendas Padaria</div>
-            <div class="boss-kpi-val" id="bossKpiVendasPadaria">R$ 0,00</div>
-            <div class="boss-kpi-sub" id="bossKpiVendasPadariaSub">ABC Padaria. Toque para ver os produtos</div>
-          </div>
-          <div class="boss-kpi boss-kpi-clicavel" id="bossKpiQuebrasPadariaCard" onclick="bossScrollHighlight('bossPanelQuebraPadaria')">
-            <div class="boss-kpi-lbl"><i class="ti ti-trash" style="color:var(--red)"></i> Quebra Padaria</div>
-            <div class="boss-kpi-val" id="bossKpiQuebrasPadaria">R$ 0,00</div>
-            <div class="boss-kpi-sub" id="bossKpiQuebrasPadariaSub">Toque para ver os itens</div>
-          </div>
-        </div>
-
-        <div class="boss-panel boss-chart-card boss-sector-chart">
-          <div class="boss-panel-hd">
-            <div class="boss-panel-title"><i class="ti ti-chart-bar" style="color:var(--amber)"></i> Gráfico Padaria — Compras x Vendas x Quebra + Produção</div>
-            <div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Toque numa barra</div>
-          </div>
-          <div class="boss-sector-chart-body"><canvas id="bossChartPadaria"></canvas></div>
-        </div>
-
-        <div class="boss-panel boss-insights-card boss-sector-insights">
-          <div class="boss-panel-hd">
-            <div class="boss-panel-title"><i class="ti ti-bulb" style="color:var(--amber)"></i> Onde agir — Padaria</div>
-            <div class="boss-panel-total" style="font-size:11px;color:var(--tx2)">Prioridades do período</div>
-          </div>
-          <div id="bossInsightsPadariaList" class="boss-insights-list"></div>
-        </div>
-
-        <div class="boss-sector-action" id="bossKpiPadariaCard" onclick="bossToggleGrupo('bossGrupoGerencialPadaria','bossKpiPadariaCard','bossPadariaChevron')">
-          <div class="boss-sector-action-icon"><i class="ti ti-calculator" style="color:var(--amber)"></i></div>
-          <div class="boss-sector-action-text">
-            <div class="boss-sector-action-title" id="bossKpiPadariaResumo">Abrir análise gerencial completa da Padaria</div>
-            <div class="boss-sector-action-sub" id="bossKpiPadariaResumoSub">Conta de padeiro, produção, cobertura de custos e receitas pendentes</div>
-          </div>
-          <i class="ti ti-chevron-down" id="bossPadariaChevron"></i>
-        </div>
-      </section>
-
-      <!-- ═════════════════════════════════════════════════════
-           LOJA — indicadores gerais, depois dos setores
-           ═════════════════════════════════════════════════════ -->
-      <section class="boss-geral-block">
-        <div class="boss-group-title">
-          <span><i class="ti ti-building-store" style="color:var(--tx2)"></i> Loja — acompanhamento geral</span>
-          <span class="boss-line"></span>
-        </div>
-
-        <div class="boss-geral-kpis">
-          <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPerdasCard" onclick="bossToggleGrupo('bossGrupoPerdas','bossKpiPerdasCard','bossPerdasChevron')">
-            <div class="boss-kpi-lbl"><i class="ti ti-calendar-x" style="color:var(--red)"></i> Perdas <i class="ti ti-chevron-down" id="bossPerdasChevron"></i></div>
-            <div class="boss-kpi-val" id="bossKpiPerdas">R$ 0,00</div>
-            <div class="boss-kpi-sub" id="bossKpiPerdasSub">Produtos vencidos. Toque para a lista</div>
-          </div>
-          <div class="boss-kpi boss-kpi-clicavel" id="bossKpiConsumoCard" onclick="bossToggleGrupo('bossGrupoConsumo','bossKpiConsumoCard','bossConsumoChevron')">
-            <div class="boss-kpi-lbl"><i class="ti ti-building-warehouse" style="color:var(--blue)"></i> Consumo interno <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div>
-            <div class="boss-kpi-val" id="bossKpiConsumo">R$ 0,00</div>
-            <div class="boss-kpi-sub" id="bossKpiConsumoSub">Produção + uso/consumo. Toque para detalhar</div>
-          </div>
-        </div>
-
-        <div class="boss-panel boss-chart-card boss-comparativo-chart">
-          <div class="boss-panel-hd">
-            <div class="boss-panel-title"><i class="ti ti-chart-donut" style="color:var(--blue)"></i> Comparativo de quebra — Horti x Padaria</div>
-            <div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Toque numa fatia</div>
-          </div>
-          <div class="boss-sector-chart-body"><canvas id="bossChartSetor"></canvas></div>
-        </div>
-      </section>
+      <div class="boss-group-title" style="margin-top:4px">
+        <span><i class="ti ti-building-store" style="color:var(--tx2)"></i> Setores</span>
+        <span class="boss-line"></span>
+      </div>
+      <div class="boss-kpis boss-setores-kpis">
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiHortiCard" onclick="bossToggleGrupo('bossGrupoGerencialHorti','bossKpiHortiCard','bossHortiChevron')"><div class="boss-kpi-lbl"><i class="ti ti-leaf" style="color:var(--green)"></i> Hortifrúti <i class="ti ti-chevron-down" id="bossHortiChevron"></i></div><div class="boss-kpi-val" style="color:var(--blue);font-size:15px">Ver análise completa</div><div class="boss-kpi-sub">Compra, venda, quebra e margem cruzados. Toque para abrir</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPadariaCard" onclick="bossToggleGrupo('bossGrupoGerencialPadaria','bossKpiPadariaCard','bossPadariaChevron')"><div class="boss-kpi-lbl"><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria <i class="ti ti-chevron-down" id="bossPadariaChevron"></i></div><div class="boss-kpi-val" id="bossKpiPadariaResumo" style="color:var(--amber);font-size:15px">Ver análise da Padaria</div><div class="boss-kpi-sub" id="bossKpiPadariaResumoSub">Compras, produção, vendas e quebra. Toque para abrir</div></div>
+      </div>
 
       <div class="boss-group boss-group-collapsible" id="bossGrupoGerencialHorti" style="display:none">
         <div class="boss-group-title">
@@ -5714,7 +5547,7 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8.11-dashboard-setorial-sequencial';
+var BOSS_VISION_BUILD='v8.10-foto-central-compartilhada';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
 function bossFmtBRL(v){
@@ -6882,9 +6715,7 @@ function bossRenderVendasPadaria_(dados){
     totalId:'bossTotalVendasPadaria',
     countId:'bossCountVendasPadaria',
     infoId:'bossInfoVendasPadaria',
-    listId:'bossListVendasPadaria',
-    kpiId:'bossKpiVendasPadaria',
-    kpiSubId:'bossKpiVendasPadariaSub'
+    listId:'bossListVendasPadaria'
   });
 }
 
@@ -6892,18 +6723,26 @@ function bossRenderVendasPadaria_(dados){
 var _bossCharts={geral:null,setor:null,padaria:null};
 
 function bossGerarInsights_(dados){
-  var saida={horti:[],padaria:[]};
-  function add(setor,sev,icone,titulo,desc){
-    if(!saida[setor])return;
-    saida[setor].push({sev:sev,icone:icone,titulo:titulo,desc:desc});
-  }
+  var itens=[];
+  function add(sev,icone,titulo,desc){itens.push({sev:sev,icone:icone,titulo:titulo,desc:desc});}
 
   var g=(dados&&dados.grupos&&dados.grupos.gerencialHorti)||null;
   var horti=bossLista(dados,'horti');
   var padaria=bossLista(dados,'padaria');
+  var vencidos=bossVencidosAura();
   var quebraHorti=bossTotal(horti);
   var quebraPadaria=bossTotal(padaria);
   var quebraTotal=quebraHorti+quebraPadaria;
+
+  // Maior produto vencido hoje.
+  if(vencidos&&vencidos.length){
+    var vOrdenados=vencidos.slice().sort(function(a,b){return (Number(b.valor)||0)-(Number(a.valor)||0);});
+    var vTop=vOrdenados[0];
+    if(vTop&&Number(vTop.valor)>0){
+      add('alerta','ti-alert-triangle','Produto vencido hoje com maior impacto',
+        bossEscapeHtml(vTop.nome||vTop.cod||'Produto')+' respondeu por '+bossFmtBRL(vTop.valor||0)+' da perda de hoje'+(vOrdenados.length>1?' (de '+vOrdenados.length+' itens vencidos no total)':'')+'.');
+    }
+  }
 
   if(g){
     var status=String(g.status||'sem_base');
@@ -6912,32 +6751,35 @@ function bossGerarInsights_(dados){
     var aproveitamento=Number(g.aproveitamentoPct);
 
     if(status==='negativo'){
-      add('horti','alerta','ti-trending-down','Hortifrúti projetado no negativo',
-        'Considerando o preço de venda disponível, a projeção do período fica negativa em '+bossFmtBRL(Math.abs(Number(g.resultadoPotencial)||0))+'. Vale revisar preço de compra e de venda dos itens com mais quebra.');
+      add('alerta','ti-trending-down','Hortifrúti projetado no negativo',
+        'Considerando o preço de venda disponível, a projeção do período fica negativa em '+bossFmtBRL(Math.abs(Number(g.resultadoPotencial)||0))+'. Vale revisar preço de compra e de venda dos itens com mais quebra abaixo.');
     }
+
     if(isFinite(indiceQuebra)&&indiceQuebra>=8){
-      add('horti','alerta','ti-percentage','Índice de quebra alto no Horti',
-        indiceQuebra.toLocaleString('pt-BR',{maximumFractionDigits:1})+'% do valor comprado virou quebra ('+bossFmtBRL(g.totalQuebra||0)+' de '+bossFmtBRL(g.totalCompra||0)+').');
+      add('alerta','ti-percentage','Índice de quebra alto no Horti',
+        (indiceQuebra).toLocaleString('pt-BR',{maximumFractionDigits:1})+'% do valor comprado virou quebra ('+bossFmtBRL(g.totalQuebra||0)+' de '+bossFmtBRL(g.totalCompra||0)+'). Acima de 8% costuma indicar excesso de compra ou giro lento.');
     }
+
     if(isFinite(quebraVenda)&&quebraVenda>=10){
-      add('horti','atencao','ti-scale','Quebra pesando nas vendas',
-        'A quebra equivale a '+quebraVenda.toLocaleString('pt-BR',{maximumFractionDigits:1})+'% do valor vendido no Horti no período. Revisar reposição dos itens mais críticos pode reduzir esse peso.');
+      add('atencao','ti-scale','Quebra pesando nas vendas',
+        'A quebra equivale a '+(quebraVenda).toLocaleString('pt-BR',{maximumFractionDigits:1})+'% do valor vendido no Horti no período. Revisar reposição dos itens mais críticos abaixo pode reduzir esse peso.');
     }
+
     if(status==='positivo'&&isFinite(aproveitamento)&&aproveitamento>=95){
-      add('horti','positivo','ti-trending-up','Aproveitamento sob controle',
-        'Aproveitamento de '+aproveitamento.toLocaleString('pt-BR',{maximumFractionDigits:1})+'% no Horti, com resultado projetado positivo de '+bossFmtBRL(Number(g.resultadoPotencial)||0)+'.');
+      add('positivo','ti-trending-up','Aproveitamento sob controle',
+        'Aproveitamento de '+aproveitamento.toLocaleString('pt-BR',{maximumFractionDigits:1})+'% no Horti, com resultado projetado positivo de '+bossFmtBRL(Number(g.resultadoPotencial)||0)+'. Quebra dentro do esperado.');
     }
 
     var crit=Array.isArray(g.criticos)?g.criticos:[];
     if(crit.length){
       var c=crit[0];
-      var pctFrase=g.totalQuebra>0?(' ('+((Number(c.quebraValor)||0)/g.totalQuebra*100).toLocaleString('pt-BR',{maximumFractionDigits:0})+'% da quebra do Horti)'):'';
-      add('horti','atencao','ti-alert-circle','Maior impacto de quebra do Horti',
-        bossEscapeHtml(c.nome||c.cod||'Produto')+' concentrou '+bossFmtBRL(c.quebraValor||0)+' em quebra'+pctFrase+'.');
+      var pctFrase=g.totalQuebra>0?(' ('+((Number(c.quebraValor)||0)/g.totalQuebra*100).toLocaleString('pt-BR',{maximumFractionDigits:0})+'% de toda a quebra do Horti)'):'';
+      add('atencao','ti-alert-circle','Produto que mais pesa na quebra do Horti',
+        bossEscapeHtml(c.nome||c.cod||'Produto')+' concentrou '+bossFmtBRL(c.quebraValor||0)+' em quebra no período'+pctFrase+'. É o primeiro candidato a ajustar quantidade de compra.');
       if(crit.length>1){
         var c2=crit[1];
-        add('horti','info','ti-list-details','Segundo maior impacto de quebra',
-          bossEscapeHtml(c2.nome||c2.cod||'Produto')+' também se destaca, com '+bossFmtBRL(c2.quebraValor||0)+' em quebra.');
+        add('info','ti-list-details','Segundo maior impacto de quebra',
+          bossEscapeHtml(c2.nome||c2.cod||'Produto')+' também se destaca, com '+bossFmtBRL(c2.quebraValor||0)+' em quebra no período.');
       }
     }
 
@@ -6946,73 +6788,73 @@ function bossGerarInsights_(dados){
       .sort(function(a,b){return Number(b.variacaoPct)-Number(a.variacaoPct);});
     if(altas.length){
       var m=altas[0];
-      add('horti','atencao','ti-arrow-up-right','Maior alta de custo de compra',
-        bossEscapeHtml(m.nome||'Produto')+' subiu de '+bossFmtBRL(m.custoAnterior||0)+' para '+bossFmtBRL(m.custoAtual||0)+' ('+Number(m.variacaoPct).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%).');
+      add('atencao','ti-arrow-up-right','Maior alta de custo de compra',
+        bossEscapeHtml(m.nome||'Produto')+' subiu de '+bossFmtBRL(m.custoAnterior||0)+' para '+bossFmtBRL(m.custoAtual||0)+' ('+(Number(m.variacaoPct)).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%). Vale conferir se o preço de venda já foi reajustado.');
+    }
+  }
+
+  if(quebraTotal>0&&quebraPadaria>0){
+    var shareP=(quebraPadaria/quebraTotal*100);
+    if(shareP>=25){
+      add('info','ti-bread','Padaria também pesa na quebra geral',
+        'A Padaria responde por '+shareP.toLocaleString('pt-BR',{maximumFractionDigits:0})+'% da quebra total do período ('+bossFmtBRL(quebraPadaria)+'). Vale olhar de perto com os dados de quebra, produção e consumo disponíveis.');
     }
   }
 
   var gp=(dados&&dados.grupos&&dados.grupos.gerencialPadaria)||null;
   if(gp){
     var stP=String(gp.status||'sem_base');
-    var comprasOk=!!gp.comprasIncluidasNoCalculo;
-    var vendasOk=!!gp.vendasIncluidasNoCalculo;
-    var producaoOk=!!gp.producaoIncluidaNoCalculo;
+    var comprasOk=!!gp.comprasIncluidasNoCalculo,vendasOk=!!gp.vendasIncluidasNoCalculo,producaoOk=!!gp.producaoIncluidaNoCalculo;
     var quebraVendaP=Number(gp.quebraSobreVendaPct);
     var indiceQuebraP=(comprasOk&&Number(gp.totalCompra)>0)?((Number(gp.totalQuebra)||0)/Number(gp.totalCompra)*100):NaN;
 
     if(stP==='negativo'){
-      add('padaria','alerta','ti-trending-down','Conta de padeiro no negativo',
-        'Considerando vendas, produção e quebra do período, a conta de padeiro fecha negativa em '+bossFmtBRL(Math.abs(Number(gp.resultadoConservador)||0))+'.');
+      add('alerta','ti-trending-down','Conta de padeiro no negativo',
+        'Considerando vendas, produção e quebra do período, a conta de padeiro fecha negativa em '+bossFmtBRL(Math.abs(Number(gp.resultadoConservador)||0))+'. Vale revisar custo de produção e preço de venda dos itens com mais quebra.');
     }
+
     if(isFinite(indiceQuebraP)&&indiceQuebraP>=8){
-      add('padaria','alerta','ti-percentage','Índice de quebra alto na Padaria',
+      add('alerta','ti-percentage','Índice de quebra alto na Padaria',
         indiceQuebraP.toLocaleString('pt-BR',{maximumFractionDigits:1})+'% do valor comprado de insumos virou quebra ('+bossFmtBRL(gp.totalQuebra||0)+' de '+bossFmtBRL(gp.totalCompra||0)+').');
     }
+
     if(vendasOk&&isFinite(quebraVendaP)&&quebraVendaP>=10){
-      add('padaria','atencao','ti-scale','Quebra pesando nas vendas da Padaria',
-        'A quebra equivale a '+quebraVendaP.toLocaleString('pt-BR',{maximumFractionDigits:1})+'% do valor vendido na Padaria. Vale revisar produção dos itens mais críticos.');
+      add('atencao','ti-scale','Quebra pesando nas vendas da Padaria',
+        'A quebra equivale a '+quebraVendaP.toLocaleString('pt-BR',{maximumFractionDigits:1})+'% do valor vendido na Padaria no período. Vale revisar produção dos itens mais críticos.');
     }
+
     if(stP==='positivo'&&vendasOk&&producaoOk){
-      add('padaria','positivo','ti-trending-up','Conta de padeiro positiva',
-        'Resultado conservador de '+bossFmtBRL(Number(gp.resultadoConservador)||0)+' com margem estimada de '+Number(gp.margemConservadoraPct||0).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%.');
+      add('positivo','ti-trending-up','Conta de padeiro positiva',
+        'Resultado conservador de '+bossFmtBRL(Number(gp.resultadoConservador)||0)+' na Padaria, com margem estimada de '+((Number(gp.margemConservadoraPct)||0).toLocaleString('pt-BR',{maximumFractionDigits:1}))+'%.');
     }
 
     var detP=Array.isArray(gp.detalheProdutos)?gp.detalheProdutos:[];
-    var critP=detP.filter(function(x){return (Number(x.quebraValor)||0)>0;})
-      .sort(function(a,b){return (Number(b.quebraValor)||0)-(Number(a.quebraValor)||0);});
+    var critP=detP.filter(function(x){return (Number(x.quebraValor)||0)>0;}).sort(function(a,b){return (Number(b.quebraValor)||0)-(Number(a.quebraValor)||0);});
     if(critP.length){
       var cp=critP[0];
-      var pctFraseP=gp.totalQuebra>0?(' ('+((Number(cp.quebraValor)||0)/gp.totalQuebra*100).toLocaleString('pt-BR',{maximumFractionDigits:0})+'% da quebra da Padaria)'):'';
-      add('padaria','atencao','ti-alert-circle','Maior impacto de quebra da Padaria',
-        bossEscapeHtml(cp.nome||cp.cod||'Produto')+' concentrou '+bossFmtBRL(cp.quebraValor||0)+' em quebra'+pctFraseP+'.');
+      var pctFraseP=gp.totalQuebra>0?(' ('+((Number(cp.quebraValor)||0)/gp.totalQuebra*100).toLocaleString('pt-BR',{maximumFractionDigits:0})+'% de toda a quebra da Padaria)'):'';
+      add('atencao','ti-alert-circle','Produto que mais pesa na quebra da Padaria',
+        bossEscapeHtml(cp.nome||cp.cod||'Produto')+' concentrou '+bossFmtBRL(cp.quebraValor||0)+' em quebra no período'+pctFraseP+'.');
     }
 
     if(vendasOk){
       var pend=Number(gp.produtosAguardandoReceita)||0;
       if(pend>0){
-        add('padaria','info','ti-chef-hat','Receitas ainda não mapeadas',
-          pend+' produto(s) vendido(s) ainda usam custo médio provisório da produção. Cobertura direta atual: '+Number(gp.coberturaDiretaPct||0).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%.');
-      }
-    }
-
-    if(quebraTotal>0&&quebraPadaria>0){
-      var shareP=(quebraPadaria/quebraTotal*100);
-      if(shareP>=25){
-        add('padaria','info','ti-bread','Peso da Padaria na quebra geral',
-          'A Padaria responde por '+shareP.toLocaleString('pt-BR',{maximumFractionDigits:0})+'% da quebra total do período ('+bossFmtBRL(quebraPadaria)+').');
+        add('info','ti-chef-hat','Padaria com receitas ainda não mapeadas',
+          pend+' produto(s) vendido(s) ainda usam custo médio provisório da produção. Cadastre as receitas para aumentar a cobertura de custo direto, hoje em '+((Number(gp.coberturaDiretaPct)||0).toLocaleString('pt-BR',{maximumFractionDigits:1}))+'%.');
       }
     }
   }
 
-  return saida;
+  return itens;
 }
 
-function bossRenderInsightsLista_(boxId,itens,vazioTxt){
-  var box=document.getElementById(boxId);
+function bossRenderInsights_(dados){
+  var box=document.getElementById('bossInsightsList');
   if(!box)return;
-  itens=Array.isArray(itens)?itens:[];
+  var itens=bossGerarInsights_(dados);
   if(!itens.length){
-    box.innerHTML='<div class="boss-insights-empty"><i class="ti ti-mood-smile"></i> '+bossEscapeHtml(vazioTxt||'Nada fora do padrão identificado para este período.')+'</div>';
+    box.innerHTML='<div class="boss-insights-empty"><i class="ti ti-mood-smile"></i> Nada fora do padrão identificado para este período.</div>';
     return;
   }
   var ordem={alerta:0,atencao:1,info:2,positivo:3};
@@ -7024,13 +6866,6 @@ function bossRenderInsightsLista_(boxId,itens,vazioTxt){
       +'</div>';
   }).join('');
 }
-
-function bossRenderInsights_(dados){
-  var grupos=bossGerarInsights_(dados);
-  bossRenderInsightsLista_('bossInsightsHortiList',grupos.horti,'Nenhuma ação prioritária identificada no Horti para este período.');
-  bossRenderInsightsLista_('bossInsightsPadariaList',grupos.padaria,'Nenhuma ação prioritária identificada na Padaria para este período.');
-}
-
 
 function bossRenderCharts_(dados){
   if(typeof Chart==='undefined')return;
@@ -7084,9 +6919,9 @@ function bossRenderCharts_(dados){
     elPadaria.classList.add('boss-chart-clicavel');
     _bossCharts.padaria=new Chart(elPadaria.getContext('2d'),{
       type:'bar',
-      data:{labels:['Compras','Vendas','Quebra','Produção'],datasets:[{
-        data:[comprasPadaria,vendasPadaria,quebraPadaria,producaoPadaria],
-        backgroundColor:['#378ADD','#1D9E75','#E24B4A','#BA7517'],
+      data:{labels:['Compras','Produção','Vendas','Quebra'],datasets:[{
+        data:[comprasPadaria,producaoPadaria,vendasPadaria,quebraPadaria],
+        backgroundColor:['#378ADD','#BA7517','#1D9E75','#E24B4A'],
         borderRadius:6,borderWidth:0,maxBarThickness:48
       }]},
       options:{
@@ -7096,9 +6931,8 @@ function bossRenderCharts_(dados){
         onClick:function(evt,els){
           if(!els.length)return;
           var idx=els[0].index;
-          if(idx===0)bossToggleGrupo('bossGrupoGerencialPadaria','bossKpiPadariaCard','bossPadariaChevron');
-          else if(idx===1)bossToggleGrupo('bossGrupoVendasPadaria','bossKpiVendasPadariaCard');
-          else if(idx===2)bossScrollHighlight('bossPanelQuebraPadaria');
+          if(idx===2)bossToggleGrupo('bossGrupoVendasPadaria','bossKpiPadariaCard','bossPadariaChevron');
+          else if(idx===3)bossScrollHighlight('bossPanelQuebraPadaria');
           else bossToggleGrupo('bossGrupoGerencialPadaria','bossKpiPadariaCard','bossPadariaChevron');
         },
         plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return bossFmtBRL(ctx.parsed.y||0)+' · toque para ver detalhes';}}}},
@@ -7168,36 +7002,20 @@ function bossRender(dados){
   var ps=document.getElementById('bossKpiPerdasSub');if(ps)ps.textContent=vencidos.length+' itens venceram na loja hoje. Toque para ver a lista';
   var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(prodPad.length+uso.length)+' itens usados no mês em produção da padaria e uso/consumo';
 
-  var kcp=document.getElementById('bossKpiComprasPadaria');
-  if(kcp)kcp.textContent=(gerPadaria&&gerPadaria.comprasIncluidasNoCalculo)?bossFmtBRL(gerPadaria.totalCompra||0):'—';
-  var kcps=document.getElementById('bossKpiComprasPadariaSub');
-  if(kcps){
-    kcps.textContent=(gerPadaria&&gerPadaria.comprasIncluidasNoCalculo)
-      ?('Compras do período · toque para análise')
-      :((gerPadaria&&gerPadaria.comprasMotivo)||'Compras Padaria indisponíveis no período');
-  }
-
-  var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
-  var dataSel=bossFmtDataBR_(dados&&dados.data);
-  var mesLabel=bossMesLabelDados_(dados);
-  ['bossPeriodoResumoHorti','bossPeriodoResumoPadaria'].forEach(function(id){
-    var el=document.getElementById(id);if(!el)return;
-    el.classList.toggle('boss-period-dia',periodoEfetivo==='dia');
-    el.classList.toggle('boss-period-mes',periodoEfetivo!=='dia');
-    el.textContent=periodoEfetivo==='dia'
-      ?(dataSel?('dia '+dataSel):'dia específico')
-      :(mesLabel?('mês inteiro · '+mesLabel):'mês inteiro');
-  });
-
   var pr=document.getElementById('bossKpiPadariaResumo');
-  if(pr)pr.textContent='Abrir análise gerencial completa da Padaria';
+  if(pr){
+    pr.textContent=(gerPadaria&&gerPadaria.vendasIncluidasNoCalculo)
+      ?(bossFmtBRL(gerPadaria.totalVendas||0)+' em vendas')
+      :(bossFmtBRL(qPadaria)+' em quebra');
+  }
   var prs=document.getElementById('bossKpiPadariaResumoSub');
   if(prs){
     if(gerPadaria&&gerPadaria.vendasIncluidasNoCalculo){
-      prs.textContent='Conta de padeiro · Produção '+bossFmtBRL(gerPadaria.totalProducao||0)
-        +' · '+(Number(gerPadaria.produtosAguardandoReceita)||0)+' aguardando receita';
+      prs.textContent='Produção '+bossFmtBRL(gerPadaria.totalProducao||0)
+        +' · Quebra '+bossFmtBRL(gerPadaria.totalQuebra||0)
+        +' · '+(Number(gerPadaria.produtosAguardandoReceita)||0)+' aguardando receita · toque para abrir';
     }else{
-      prs.textContent='Conta de padeiro, produção, cobertura de custos e receitas pendentes';
+      prs.textContent='Quebra '+bossFmtBRL(qPadaria)+' · '+(prodPad.length+uso.length)+' itens em produção/consumo · toque para abrir';
     }
   }
 
