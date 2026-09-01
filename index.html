@@ -1646,6 +1646,80 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-clean-charts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .boss-clean-chart{min-width:0}
 .boss-clean-chart-body{height:245px;padding:14px}
+.boss-clean-chart-panel{display:flex;flex-direction:column}
+.boss-clean-chart-body{height:245px;padding:14px}
+.boss-health-card{
+  margin:0 14px 14px;background:linear-gradient(180deg,var(--bg2),var(--bg));
+  border:1px solid var(--bd);border-radius:14px;padding:12px 14px;cursor:pointer;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;
+}
+.boss-health-card:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 20px rgba(0,0,0,.08);
+  border-color:var(--bds);
+  background:linear-gradient(180deg,var(--bg2),#fff);
+}
+.boss-health-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.boss-health-title{font-size:11px;font-weight:850;letter-spacing:.05em;text-transform:uppercase;color:var(--tx2)}
+.boss-health-badge{
+  font-size:10px;font-weight:800;border-radius:999px;padding:4px 8px;border:1px solid var(--bd);
+  background:#fff;color:var(--tx2);white-space:nowrap
+}
+.boss-health-badge.ok{color:var(--green);border-color:rgba(29,158,117,.22);background:rgba(29,158,117,.08)}
+.boss-health-badge.warn{color:var(--amber);border-color:rgba(239,159,39,.22);background:rgba(239,159,39,.08)}
+.boss-health-badge.bad{color:var(--red);border-color:rgba(226,75,74,.22);background:rgba(226,75,74,.08)}
+.boss-health-content{display:grid;grid-template-columns:138px 1fr;gap:12px;align-items:center}
+.boss-gauge{
+  --gauge-angle:-90deg;
+  position:relative;width:138px;height:78px;overflow:hidden;flex-shrink:0
+}
+.boss-gauge-track,.boss-gauge-progress{
+  position:absolute;left:0;top:0;width:138px;height:138px;border-radius:50%;
+  clip-path:inset(0 0 50% 0);
+}
+.boss-gauge-track{
+  background:conic-gradient(from 180deg at 50% 50%, #E24B4A 0deg, #EF9F27 90deg, #1D9E75 180deg);
+  opacity:.18;
+}
+.boss-gauge-progress{
+  background:conic-gradient(from 180deg at 50% 50%, #E24B4A 0deg, #EF9F27 90deg, #1D9E75 180deg);
+  transform:rotate(var(--gauge-angle));
+  transform-origin:50% 50%;
+  transition:transform 1.25s cubic-bezier(.22,1,.36,1);
+}
+.boss-gauge-cover{
+  position:absolute;left:15px;top:15px;width:108px;height:108px;border-radius:50%;
+  background:var(--bg);clip-path:inset(0 0 50% 0)
+}
+.boss-gauge-needle{
+  position:absolute;left:50%;bottom:7px;width:3px;height:52px;background:#1a1a1a;border-radius:3px;
+  transform-origin:50% calc(100% - 4px);transform:translateX(-50%) rotate(var(--gauge-angle));
+  transition:transform 1.25s cubic-bezier(.22,1,.36,1);box-shadow:0 1px 2px rgba(0,0,0,.18)
+}
+.boss-gauge-center{
+  position:absolute;left:50%;bottom:3px;width:14px;height:14px;border-radius:50%;
+  background:#1a1a1a;transform:translateX(-50%);box-shadow:0 0 0 4px rgba(255,255,255,.95)
+}
+.boss-gauge-score{
+  position:absolute;left:0;right:0;bottom:14px;text-align:center;font-size:24px;font-weight:850;line-height:1;color:var(--tx)
+}
+.boss-gauge-scale-labels{
+  position:absolute;left:6px;right:6px;bottom:0;display:flex;justify-content:space-between;
+  font-size:9px;font-weight:700;color:var(--tx2);letter-spacing:.03em
+}
+.boss-health-copy{min-width:0}
+.boss-health-status{font-size:18px;font-weight:850;line-height:1.1}
+.boss-health-status.ok{color:var(--green)}
+.boss-health-status.warn{color:var(--amber)}
+.boss-health-status.bad{color:var(--red)}
+.boss-health-desc{margin-top:6px;font-size:11px;line-height:1.45;color:var(--tx2)}
+.boss-health-tip{margin-top:7px;font-size:10px;color:var(--tx2)}
+@media(max-width:680px){
+  .boss-health-content{grid-template-columns:1fr}
+  .boss-gauge{margin:0 auto}
+  .boss-health-card{margin:0 10px 10px}
+}
+
 .boss-clean-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .boss-clean-kpis-two{grid-template-columns:repeat(2,minmax(0,1fr))}
 .boss-clean-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -2445,20 +2519,64 @@ function toggleTheme() {
 
         <!-- 1) GRÁFICO HORTI | GRÁFICO PADARIA -->
         <div class="boss-clean-charts">
-          <div class="boss-panel boss-chart-card boss-clean-chart">
+          <div class="boss-panel boss-chart-card boss-clean-chart boss-clean-chart-panel">
             <div class="boss-panel-hd">
               <div class="boss-panel-title"><i class="ti ti-leaf" style="color:var(--green)"></i> Horti — Compras x Vendas x Quebra</div>
               <div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Clique numa barra</div>
             </div>
             <div class="boss-clean-chart-body"><canvas id="bossChartGeral"></canvas></div>
+            <div class="boss-health-card" id="bossHealthHortiCard" onclick="bossToggleGrupo('bossGrupoGerencialHorti','bossKpiHortiCard','bossHortiChevron')">
+              <div class="boss-health-head">
+                <div class="boss-health-title">Velocímetro Horti</div>
+                <div class="boss-health-badge" id="bossGaugeHortiBadge">Analisando</div>
+              </div>
+              <div class="boss-health-content">
+                <div class="boss-gauge" id="bossGaugeHorti">
+                  <div class="boss-gauge-track"></div>
+                  <div class="boss-gauge-progress"></div>
+                  <div class="boss-gauge-cover"></div>
+                  <div class="boss-gauge-needle"></div>
+                  <div class="boss-gauge-center"></div>
+                  <div class="boss-gauge-score">0</div>
+                  <div class="boss-gauge-scale-labels"><span>Ruim</span><span>OK</span><span>Ótimo</span></div>
+                </div>
+                <div class="boss-health-copy">
+                  <div class="boss-health-status" id="bossGaugeHortiStatus">Analisando...</div>
+                  <div class="boss-health-desc" id="bossGaugeHortiDesc">Quebra x venda e margem potencial do setor</div>
+                  <div class="boss-health-tip">Clique para abrir a análise completa do Horti.</div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div class="boss-panel boss-chart-card boss-clean-chart">
+          <div class="boss-panel boss-chart-card boss-clean-chart boss-clean-chart-panel">
             <div class="boss-panel-hd">
               <div class="boss-panel-title"><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria — Compras x Vendas x Quebra x Produção</div>
               <div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Clique numa barra</div>
             </div>
             <div class="boss-clean-chart-body"><canvas id="bossChartPadaria"></canvas></div>
+            <div class="boss-health-card" id="bossHealthPadariaCard" onclick="bossToggleGrupo('bossGrupoGerencialPadaria','bossKpiPadariaCard','bossPadariaChevron')">
+              <div class="boss-health-head">
+                <div class="boss-health-title">Velocímetro Padaria</div>
+                <div class="boss-health-badge" id="bossGaugePadariaBadge">Analisando</div>
+              </div>
+              <div class="boss-health-content">
+                <div class="boss-gauge" id="bossGaugePadaria">
+                  <div class="boss-gauge-track"></div>
+                  <div class="boss-gauge-progress"></div>
+                  <div class="boss-gauge-cover"></div>
+                  <div class="boss-gauge-needle"></div>
+                  <div class="boss-gauge-center"></div>
+                  <div class="boss-gauge-score">0</div>
+                  <div class="boss-gauge-scale-labels"><span>Ruim</span><span>OK</span><span>Ótimo</span></div>
+                </div>
+                <div class="boss-health-copy">
+                  <div class="boss-health-status" id="bossGaugePadariaStatus">Analisando...</div>
+                  <div class="boss-health-desc" id="bossGaugePadariaDesc">Quebra x venda e margem estimada da Padaria</div>
+                  <div class="boss-health-tip">Clique para abrir a análise completa da Padaria.</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -5822,7 +5940,7 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8.15-ordem-cards-executiva';
+var BOSS_VISION_BUILD='v8.16-animacao-suave-gauges';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
 function bossFmtBRL(v){
@@ -7160,6 +7278,116 @@ function bossRenderInsights_(dados){
 }
 
 
+
+function bossClamp_(n,min,max){
+  n=Number(n);
+  if(!isFinite(n))n=0;
+  return Math.max(min,Math.min(max,n));
+}
+function bossStatusSaude_(score){
+  score=Number(score)||0;
+  if(score>=75)return {label:'Saudável',tone:'ok'};
+  if(score>=55)return {label:'Atenção',tone:'warn'};
+  return {label:'Crítico',tone:'bad'};
+}
+function bossSaudeHorti_(dados){
+  var g=(dados&&dados.grupos&&dados.grupos.gerencialHorti)||{};
+  var vh=(dados&&dados.grupos&&dados.grupos.vendasHorti)||{};
+  var vendas=vh.incluidaNoCalculo?(Number(vh.totalVenda)||0):0;
+  var quebra=bossTotal(bossLista(dados,'horti'));
+  var margem=Number(g.margemPotencialPct)||0;
+
+  var scoreQuebra=vendas>0?bossClamp_(100-(((quebra/vendas)*100)*2),0,100):(quebra>0?35:70);
+  var scoreMargem=margem>0?bossClamp_(margem*2.5,0,100):50;
+  var score=Math.round((scoreQuebra*0.65)+(scoreMargem*0.35));
+  var st=bossStatusSaude_(score);
+  var quebraPct=vendas>0?((quebra/vendas)*100):0;
+
+  return {
+    score:score,
+    label:st.label,
+    tone:st.tone,
+    desc:(vendas>0
+      ?('Quebra '+quebraPct.toLocaleString('pt-BR',{maximumFractionDigits:1})+'% da venda · Margem '+margem.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%')
+      :('Sem vendas suficientes no período · Margem '+margem.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%'))
+  };
+}
+function bossSaudePadaria_(dados){
+  var gp=(dados&&dados.grupos&&dados.grupos.gerencialPadaria)||{};
+  var vendas=gp&&gp.vendasIncluidasNoCalculo?(Number(gp.totalVendas)||0):0;
+  var quebra=bossTotal(bossLista(dados,'padaria'));
+  var margem=Number(gp.margemConservadoraPct)||0;
+
+  var scoreQuebra=vendas>0?bossClamp_(100-(((quebra/vendas)*100)*2),0,100):(quebra>0?35:70);
+  var scoreMargem=margem>0?bossClamp_(margem*2.5,0,100):50;
+  var score=Math.round((scoreQuebra*0.65)+(scoreMargem*0.35));
+  var st=bossStatusSaude_(score);
+  var quebraPct=vendas>0?((quebra/vendas)*100):0;
+
+  return {
+    score:score,
+    label:st.label,
+    tone:st.tone,
+    desc:(vendas>0
+      ?('Quebra '+quebraPct.toLocaleString('pt-BR',{maximumFractionDigits:1})+'% da venda · Margem '+margem.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%')
+      :('Sem vendas suficientes no período · Margem '+margem.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%'))
+  };
+}
+function bossAnimarGauge_(gaugeId,badgeId,statusId,descId,info){
+  var gauge=document.getElementById(gaugeId);
+  if(!gauge||!info)return;
+  var badge=document.getElementById(badgeId);
+  var status=document.getElementById(statusId);
+  var desc=document.getElementById(descId);
+  var scoreEl=gauge.querySelector('.boss-gauge-score');
+  var score=bossClamp_(info.score,0,100);
+  var angle=(-90+(score*1.8)).toFixed(2)+'deg';
+
+  if(badge){
+    badge.textContent=info.label;
+    badge.className='boss-health-badge '+info.tone;
+  }
+  if(status){
+    status.textContent=info.label+' · '+score;
+    status.className='boss-health-status '+info.tone;
+  }
+  if(desc)desc.textContent=info.desc||'';
+
+  gauge.style.setProperty('--gauge-angle','-90deg');
+  if(scoreEl)scoreEl.textContent='0';
+
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      gauge.style.setProperty('--gauge-angle',angle);
+      var ini=performance.now(),dur=1100;
+      function step(t){
+        var p=Math.min(1,(t-ini)/dur);
+        var eased=1-Math.pow(1-p,3);
+        var v=Math.round(score*eased);
+        if(scoreEl)scoreEl.textContent=String(v);
+        if(p<1)requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+  });
+}
+function bossRenderHealth_(dados){
+  bossAnimarGauge_('bossGaugeHorti','bossGaugeHortiBadge','bossGaugeHortiStatus','bossGaugeHortiDesc',bossSaudeHorti_(dados));
+  bossAnimarGauge_('bossGaugePadaria','bossGaugePadariaBadge','bossGaugePadariaStatus','bossGaugePadariaDesc',bossSaudePadaria_(dados));
+}
+function bossReanimarGraficosBoss_(){
+  if(currentTabName!=='bossvision')return;
+  var sec=document.getElementById('sec-bossvision');
+  if(!sec||!sec.classList.contains('active'))return;
+  if(!_bossDados)return;
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      bossRenderCharts_(_bossDados);
+      bossRenderHealth_(_bossDados);
+    });
+  });
+}
+
 function bossRenderCharts_(dados){
   if(typeof Chart==='undefined')return;
   var g=(dados&&dados.grupos&&dados.grupos.gerencialHorti)||null;
@@ -7187,7 +7415,7 @@ function bossRenderCharts_(dados){
       }]},
       options:{
         responsive:true,maintainAspectRatio:false,
-        animation:{duration:900,easing:'easeOutQuart'},
+        animation:{duration:1250,easing:'easeInOutQuart',delay:function(ctx){return ctx.type==='data'?(ctx.dataIndex*90):0;}},
         onHover:function(evt,els){evt.native.target.style.cursor=els.length?'pointer':'default';},
         onClick:function(evt,els){
           if(!els.length)return;
@@ -7219,7 +7447,7 @@ function bossRenderCharts_(dados){
       }]},
       options:{
         responsive:true,maintainAspectRatio:false,
-        animation:{duration:900,easing:'easeOutQuart'},
+        animation:{duration:1250,easing:'easeInOutQuart',delay:function(ctx){return ctx.type==='data'?(ctx.dataIndex*90):0;}},
         onHover:function(evt,els){evt.native.target.style.cursor=els.length?'pointer':'default';},
         onClick:function(evt,els){
           if(!els.length)return;
@@ -7249,7 +7477,7 @@ function bossRenderCharts_(dados){
       }]},
       options:{
         responsive:true,maintainAspectRatio:false,
-        animation:{duration:900,easing:'easeOutQuart'},
+        animation:{duration:1250,easing:'easeInOutQuart',delay:function(ctx){return ctx.type==='data'?(ctx.dataIndex*90):0;}},
         cutout:'62%',
         onHover:function(evt,els){evt.native.target.style.cursor=(els.length&&temDados)?'pointer':'default';},
         onClick:function(evt,els){
@@ -7361,6 +7589,7 @@ function bossRender(dados){
   }
 
   bossRenderCharts_(dados);
+  bossRenderHealth_(dados);
   bossRenderInsights_(dados);
 }
 var bossPeriodoAtual='mes';
@@ -7553,6 +7782,13 @@ function bossInit(){
 }
 setTimeout(bossInit,0);
 
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden && currentTabName==='bossvision')bossReanimarGraficosBoss_();
+});
+window.addEventListener('focus',function(){
+  if(currentTabName==='bossvision')bossReanimarGraficosBoss_();
+});
+
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
@@ -7571,7 +7807,7 @@ function goTab(name){
   // dados financeiros (compra/venda/quebra). Escondida só ali.
   var setorWrapEl=document.getElementById('setorStickyWrap');
   if(setorWrapEl) setorWrapEl.style.display = (name==='bossvision') ? 'none' : '';
-  if(name==='bossvision')bossCarregar(false);
+  if(name==='bossvision'){if(_bossDados)bossReanimarGraficosBoss_();bossCarregar(false);}
   if(name==='relatorio'){
     var selFiltro=document.getElementById('filtroNegTipo');
     if(selFiltro)selFiltro.value='sobras';
