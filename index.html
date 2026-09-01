@@ -1354,6 +1354,40 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 @keyframes bossFlash{0%,100%{box-shadow:0 0 0 0 rgba(29,158,117,0)}30%{box-shadow:0 0 0 3px rgba(29,158,117,.45)}}
 .boss-flash{animation:bossFlash 1.6s ease-out;border-color:var(--green)!important}
 .boss-chart-clicavel{cursor:pointer}
+
+/* Padaria — conta de padeiro */
+.boss-padaria-summary{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.boss-padaria-summary-card{border:1px solid var(--bd);border-radius:10px;padding:11px 13px;background:var(--bg)}
+.boss-padaria-summary-card span{display:block;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.045em;color:var(--tx2)}
+.boss-padaria-summary-card strong{display:block;font-size:18px;margin-top:4px}
+.boss-padaria-summary-card small{display:block;font-size:9.5px;color:var(--tx2);margin-top:4px}
+.boss-padaria-summary-card.ok{border-color:rgba(29,158,117,.32)}
+.boss-padaria-summary-card.ok strong{color:var(--green)}
+.boss-padaria-summary-card.pend{border-color:rgba(186,117,23,.35)}
+.boss-padaria-summary-card.pend strong{color:var(--amber)}
+.boss-padaria-custos-head,.boss-padaria-custo-row{display:grid;grid-template-columns:minmax(180px,1.5fr) 125px 95px 110px 90px;gap:8px;align-items:center}
+.boss-padaria-custos-head{padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--bd);font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2)}
+.boss-padaria-custo-row{padding:9px 12px;border-bottom:1px solid var(--bd);font-size:10.5px}
+.boss-padaria-custo-row:last-child{border-bottom:none}
+.boss-padaria-prod{min-width:0}
+.boss-padaria-prod strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boss-padaria-prod small{display:block;color:var(--tx2);font-size:8.8px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boss-padaria-status{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:99px;font-size:9px;font-weight:800;white-space:nowrap}
+.boss-padaria-status.direto{background:rgba(29,158,117,.12);color:var(--green)}
+.boss-padaria-status.pendente{background:rgba(186,117,23,.12);color:var(--amber)}
+.boss-padaria-num{text-align:right;white-space:nowrap;font-weight:700}
+.boss-padaria-num small{display:block;color:var(--tx2);font-size:8px;font-weight:500}
+.boss-padaria-compra-row{display:grid;grid-template-columns:minmax(180px,1fr) 90px 110px 100px;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--bd);font-size:10.5px}
+.boss-padaria-compra-row:last-child{border-bottom:none}
+@media(max-width:760px){
+  .boss-padaria-summary{grid-template-columns:1fr}
+  .boss-padaria-custos-head{display:none}
+  .boss-padaria-custo-row{grid-template-columns:minmax(0,1fr) 110px;gap:6px}
+  .boss-padaria-custo-row>.boss-padaria-num:nth-of-type(n+2){text-align:left}
+  .boss-padaria-compra-row{grid-template-columns:minmax(0,1fr) 82px 92px}
+  .boss-padaria-compra-row>.boss-padaria-num:last-child{display:none}
+}
+
 .boss-kpi-lbl{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin-bottom:7px}
 .boss-kpi-val{font-size:25px;font-weight:800;line-height:1}
 .boss-kpi-sub{font-size:11px;color:var(--tx2);margin-top:6px}
@@ -2234,7 +2268,7 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão mostra o <strong>mês inteiro</strong>; use "Dia específico" para consultar o dia escolhido. Os setores com dados suficientes podem ser abertos abaixo para uma análise mais profunda.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti por NF, Vendas Horti, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
+          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão mostra o <strong>mês inteiro</strong>; use "Dia específico" para consultar o dia escolhido. Os setores com dados suficientes podem ser abertos abaixo para uma análise mais profunda.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti/Padaria por NF, ABC Horti, ABC Padaria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
@@ -2282,7 +2316,7 @@ function toggleTheme() {
       </div>
       <div class="boss-kpis boss-setores-kpis">
         <div class="boss-kpi boss-kpi-clicavel" id="bossKpiHortiCard" onclick="bossToggleGrupo('bossGrupoGerencialHorti','bossKpiHortiCard','bossHortiChevron')"><div class="boss-kpi-lbl"><i class="ti ti-leaf" style="color:var(--green)"></i> Hortifrúti <i class="ti ti-chevron-down" id="bossHortiChevron"></i></div><div class="boss-kpi-val" style="color:var(--blue);font-size:15px">Ver análise completa</div><div class="boss-kpi-sub">Compra, venda, quebra e margem cruzados. Toque para abrir</div></div>
-        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPadariaCard" onclick="bossAbrirPadariaDados()"><div class="boss-kpi-lbl"><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria <i class="ti ti-arrow-down-right"></i></div><div class="boss-kpi-val" id="bossKpiPadariaResumo" style="color:var(--amber);font-size:15px">Ver dados disponíveis</div><div class="boss-kpi-sub" id="bossKpiPadariaResumoSub">Quebras, produção e consumo interno. Toque para abrir</div></div>
+        <div class="boss-kpi boss-kpi-clicavel" id="bossKpiPadariaCard" onclick="bossToggleGrupo('bossGrupoGerencialPadaria','bossKpiPadariaCard','bossPadariaChevron')"><div class="boss-kpi-lbl"><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria <i class="ti ti-chevron-down" id="bossPadariaChevron"></i></div><div class="boss-kpi-val" id="bossKpiPadariaResumo" style="color:var(--amber);font-size:15px">Ver análise da Padaria</div><div class="boss-kpi-sub" id="bossKpiPadariaResumoSub">Compras, produção, vendas e quebra. Toque para abrir</div></div>
       </div>
 
       <div class="boss-group boss-group-collapsible" id="bossGrupoGerencialHorti" style="display:none">
@@ -2382,6 +2416,123 @@ function toggleTheme() {
         </div>
       </div>
 
+      <div class="boss-group boss-group-collapsible" id="bossGrupoGerencialPadaria" style="display:none">
+        <div class="boss-group-title">
+          <span><i class="ti ti-bread" style="color:var(--amber)"></i> Padaria — Conta de Padeiro</span>
+          <span class="boss-period-badge boss-period-mes" id="bossPeriodoGerencialPadaria"></span>
+          <span class="boss-line"></span>
+        </div>
+
+        <div class="boss-horti-gerencial">
+          <div class="boss-horti-kpis">
+            <div class="boss-horti-card">
+              <div class="gh-label">Compras Padaria</div>
+              <div class="gh-value neutro" id="gpCompras">—</div>
+              <div class="gh-sub" id="gpComprasSub">Entradas por NF</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Vendas Padaria</div>
+              <div class="gh-value pos" id="gpVendas">—</div>
+              <div class="gh-sub" id="gpVendasSub">ABC Padaria</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Custo de produção</div>
+              <div class="gh-value" id="gpProducao">—</div>
+              <div class="gh-sub" id="gpProducaoSub">Insumos consumidos na produção</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Quebra Padaria</div>
+              <div class="gh-value neg" id="gpQuebra">—</div>
+              <div class="gh-sub" id="gpQuebraSub">Custo da quebra registrada</div>
+            </div>
+
+            <div class="boss-horti-card">
+              <div class="gh-label">Produção / Venda</div>
+              <div class="gh-value" id="gpProducaoVenda">—</div>
+              <div class="gh-sub">Custo de produção ÷ vendas</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Quebra / Venda</div>
+              <div class="gh-value" id="gpQuebraVenda">—</div>
+              <div class="gh-sub">Quebra ÷ vendas</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Compra x Produção</div>
+              <div class="gh-value" id="gpProducaoCompra">—</div>
+              <div class="gh-sub" id="gpProducaoCompraSub">Produção ÷ compras do mês</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Diferença Compra − Produção</div>
+              <div class="gh-value neutro" id="gpFluxo">—</div>
+              <div class="gh-sub">Fluxo do mês; não representa estoque</div>
+            </div>
+
+            <div class="boss-horti-card">
+              <div class="gh-label">Resultado antes da quebra</div>
+              <div class="gh-value" id="gpResultadoAntes">—</div>
+              <div class="gh-sub">Vendas − custo de produção</div>
+            </div>
+            <div class="boss-horti-card" id="gpCardResultado">
+              <div class="gh-label">Resultado conservador</div>
+              <div class="gh-value" id="gpResultado">—</div>
+              <div class="gh-sub">Vendas − produção − quebra</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Margem conservadora</div>
+              <div class="gh-value" id="gpMargem">—</div>
+              <div class="gh-sub">Resultado conservador ÷ vendas</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Cobertura custo direto</div>
+              <div class="gh-value neutro" id="gpCobertura">—</div>
+              <div class="gh-sub" id="gpCoberturaSub">Vendas com vínculo óbvio de custo</div>
+            </div>
+          </div>
+
+          <div class="boss-horti-status sem-base" id="gpStatus">
+            <i class="ti ti-calculator"></i>
+            <div class="boss-horti-status-text">
+              <div class="boss-horti-status-title" id="gpStatusTitulo">Aguardando dados</div>
+              <div class="boss-horti-status-desc" id="gpStatusDesc">A Padaria cruza compras, produção, vendas e quebra.</div>
+            </div>
+          </div>
+
+          <div class="boss-padaria-summary">
+            <div class="boss-padaria-summary-card ok">
+              <span>Custo direto aproximado</span>
+              <strong id="gpDiretos">0 produtos</strong>
+              <small>Ex.: congelado → mesmo produto final</small>
+            </div>
+            <div class="boss-padaria-summary-card pend">
+              <span>Aguardando receita</span>
+              <strong id="gpPendentes">0 produtos</strong>
+              <small>Usa média provisória do custo de produção</small>
+            </div>
+          </div>
+
+          <div class="boss-horti-criticos" id="gpCustosBox">
+            <div class="boss-horti-criticos-hd"><i class="ti ti-receipt-2"></i> Vendas x custo estimado por produto</div>
+            <div class="boss-padaria-custos-head">
+              <span>Produto vendido</span><span>Vínculo</span><span>Venda</span><span>Custo estimado</span><span>Quebra</span>
+            </div>
+            <div id="gpCustos"></div>
+          </div>
+
+          <div class="boss-horti-criticos" id="gpComprasBox">
+            <div class="boss-horti-criticos-hd"><i class="ti ti-shopping-cart"></i> Principais compras / insumos da Padaria</div>
+            <div id="gpComprasLista"></div>
+          </div>
+
+          <div class="boss-horti-metodo">
+            <i class="ti ti-calculator"></i>
+            <strong>Conta de padeiro:</strong> Compras mostram o que entrou no estoque; Produção mostra o custo dos insumos consumidos na fabricação; por isso <strong>compras não são subtraídas novamente</strong> do resultado.
+            Produtos com vínculo óbvio, como <strong>Pão Francês Congelado → Pão Francês</strong>, recebem custo direto aproximado 1:1.
+            Os demais ficam <strong>Aguardando receita</strong> e recebem somente uma estimativa provisória usando a média <strong>Custo de Produção ÷ Vendas da Padaria</strong>.
+            O resultado conservador é gerencial e não contábil; não considera estoque inicial/final, impostos, despesas e pode existir sobreposição entre produção e quebra.
+          </div>
+        </div>
+      </div>
+
       <div class="boss-group boss-group-collapsible" id="bossGrupoVendasHorti" style="display:none">
         <div class="boss-group-title">
           <span><i class="ti ti-cash-banknote" style="color:var(--green)"></i> Vendas Horti</span>
@@ -2396,6 +2547,24 @@ function toggleTheme() {
             </div>
             <div class="boss-nf-info" id="bossInfoVendasHorti"></div>
             <div class="boss-list" id="bossListVendasHorti"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="boss-group boss-group-collapsible" id="bossGrupoVendasPadaria" style="display:none">
+        <div class="boss-group-title">
+          <span><i class="ti ti-bread" style="color:var(--amber)"></i> Vendas Padaria</span>
+          <span class="boss-period-badge boss-period-mes" id="bossPeriodoVendasPadaria"></span>
+          <span class="boss-line"></span>
+        </div>
+        <div class="boss-grid one">
+          <div class="boss-panel">
+            <div class="boss-panel-hd">
+              <div class="boss-panel-title"><i class="ti ti-cash-banknote" style="color:var(--amber)"></i> ABC de Mercadorias Padaria — somente QTD e Venda Total</div>
+              <div class="boss-panel-total"><strong id="bossTotalVendasPadaria">R$ 0,00</strong><span id="bossCountVendasPadaria">0 produtos</span></div>
+            </div>
+            <div class="boss-nf-info" id="bossInfoVendasPadaria"></div>
+            <div class="boss-list" id="bossListVendasPadaria"></div>
           </div>
         </div>
       </div>
@@ -5848,26 +6017,150 @@ function bossKpiEmBreve(cardId){
   if(toast)toast.classList.toggle('show');
 }
 
-function bossAbrirPadariaDados(){
-  var consumo=document.getElementById('bossGrupoConsumo');
-  var consumoCard=document.getElementById('bossKpiConsumoCard');
-  if(consumo){
-    consumo.style.display='';
-    if(consumoCard)consumoCard.classList.add('aberto');
+
+
+function bossRenderGerencialPadaria_(dados){
+  var g=(dados&&dados.grupos&&dados.grupos.gerencialPadaria)||null;
+  var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
+  var dataSel=bossFmtDataBR_(dados&&dados.data);
+  var mesLabel=bossMesLabelDados_(dados);
+
+  function setTxt_(id,txt){var el=document.getElementById(id);if(el)el.textContent=txt;}
+  function pct_(v){
+    if(v===null||v===undefined||!isFinite(Number(v)))return '—';
+    return Number(v).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
   }
 
-  var quebra=document.getElementById('bossPanelQuebraPadaria');
-  if(quebra){
-    quebra.scrollIntoView({behavior:'smooth',block:'center'});
-    quebra.classList.add('boss-flash');
-    setTimeout(function(){quebra.classList.remove('boss-flash');},1600);
+  var per=document.getElementById('bossPeriodoGerencialPadaria');
+  if(per){
+    per.classList.toggle('boss-period-dia',periodoEfetivo==='dia');
+    per.classList.toggle('boss-period-mes',periodoEfetivo!=='dia');
+    per.textContent=periodoEfetivo==='dia'
+      ?(dataSel?('dia '+dataSel):'dia específico')
+      :(mesLabel?('mês inteiro · '+mesLabel):'mês inteiro');
   }
 
-  if(consumo){
-    consumo.classList.add('boss-flash');
-    setTimeout(function(){consumo.classList.remove('boss-flash');},1600);
+  var statusEl=document.getElementById('gpStatus');
+  var cardResultado=document.getElementById('gpCardResultado');
+
+  if(!g){
+    ['gpCompras','gpVendas','gpProducao','gpQuebra','gpProducaoVenda','gpQuebraVenda','gpProducaoCompra','gpFluxo','gpResultadoAntes','gpResultado','gpMargem','gpCobertura']
+      .forEach(function(id){setTxt_(id,'—');});
+    setTxt_('gpStatusTitulo','Sem dados gerenciais');
+    setTxt_('gpStatusDesc','Atualize o Boss Vision com Compras, ABC, Produção e Quebra da Padaria.');
+    setTxt_('gpDiretos','0 produtos');
+    setTxt_('gpPendentes','0 produtos');
+    var c=document.getElementById('gpCustos');if(c)c.innerHTML='<div class="boss-empty">Sem dados.</div>';
+    var l=document.getElementById('gpComprasLista');if(l)l.innerHTML='<div class="boss-empty">Sem dados.</div>';
+    return null;
   }
+
+  setTxt_('gpCompras',g.comprasIncluidasNoCalculo?bossFmtBRL(g.totalCompra||0):'—');
+  setTxt_('gpComprasSub',g.comprasIncluidasNoCalculo
+    ?((Number(g.totalNotasCompra)||0)+' NF · '+(g.comprasPeriodoRelatorio||'mês'))
+    :(g.comprasMotivo||'Compras mensais não disponíveis'));
+
+  setTxt_('gpVendas',g.vendasIncluidasNoCalculo?bossFmtBRL(g.totalVendas||0):'—');
+  setTxt_('gpVendasSub',g.vendasIncluidasNoCalculo
+    ?((Number(g.totalProdutosVenda)||0)+' produtos · '+(g.vendasPeriodoRelatorio||'ABC'))
+    :(g.vendasMotivo||'ABC Padaria indisponível'));
+
+  setTxt_('gpProducao',g.producaoIncluidaNoCalculo?bossFmtBRL(g.totalProducao||0):'—');
+  setTxt_('gpProducaoSub',g.producaoIncluidaNoCalculo
+    ?((Number(g.totalItensProducao)||0)+' itens consumidos na produção')
+    :'Produção é mensal; não entra no modo Dia');
+
+  setTxt_('gpQuebra',bossFmtBRL(g.totalQuebra||0));
+  setTxt_('gpQuebraSub',(Number(g.totalQuebraQtd)||0).toLocaleString('pt-BR',{maximumFractionDigits:2})+' qtd registrada');
+
+  setTxt_('gpProducaoVenda',pct_(g.custoProducaoSobreVendaPct));
+  setTxt_('gpQuebraVenda',pct_(g.quebraSobreVendaPct));
+  setTxt_('gpProducaoCompra',pct_(g.producaoSobreCompraPct));
+  setTxt_('gpProducaoCompraSub','Consumo da produção ÷ compras; pode usar estoque de meses anteriores');
+  setTxt_('gpFluxo',g.comprasIncluidasNoCalculo&&g.producaoIncluidaNoCalculo?bossFmtBRL(g.diferencaCompraProducao||0):'—');
+
+  setTxt_('gpResultadoAntes',g.resultadoAntesQuebra===null||g.resultadoAntesQuebra===undefined?'—':bossFmtBRL(g.resultadoAntesQuebra));
+  setTxt_('gpResultado',g.resultadoConservador===null||g.resultadoConservador===undefined?'—':bossFmtBRL(g.resultadoConservador));
+  setTxt_('gpMargem',pct_(g.margemConservadoraPct));
+  setTxt_('gpCobertura',pct_(g.coberturaDiretaPct));
+  setTxt_('gpCoberturaSub',(Number(g.produtosDiretos)||0)+' custo direto · '+(Number(g.produtosAguardandoReceita)||0)+' aguardando receita');
+
+  setTxt_('gpDiretos',(Number(g.produtosDiretos)||0)+' '+((Number(g.produtosDiretos)||0)===1?'produto':'produtos'));
+  setTxt_('gpPendentes',(Number(g.produtosAguardandoReceita)||0)+' '+((Number(g.produtosAguardandoReceita)||0)===1?'produto':'produtos'));
+
+  var st=String(g.status||'sem_base');
+  if(statusEl){
+    statusEl.className='boss-horti-status '+(st==='positivo'?'positivo':(st==='negativo'?'negativo':(st==='equilibrio'?'equilibrio':'sem-base')));
+  }
+  if(cardResultado){
+    cardResultado.classList.remove('status-positivo','status-negativo','status-equilibrio');
+    if(st==='positivo')cardResultado.classList.add('status-positivo');
+    else if(st==='negativo')cardResultado.classList.add('status-negativo');
+    else if(st==='equilibrio')cardResultado.classList.add('status-equilibrio');
+  }
+
+  if(periodoEfetivo==='dia'){
+    setTxt_('gpStatusTitulo','Dia específico: análise parcial');
+    setTxt_('gpStatusDesc','Compras por NF e Produção Padaria são relatórios mensais e não entram no cálculo diário. Vendas e quebra só entram quando o relatório permite data segura.');
+  }else if(!g.vendasIncluidasNoCalculo){
+    setTxt_('gpStatusTitulo','Aguardando ABC Padaria válido');
+    setTxt_('gpStatusDesc',g.vendasMotivo||'Sem vendas para cruzar com produção e quebra.');
+  }else if(!g.producaoIncluidaNoCalculo){
+    setTxt_('gpStatusTitulo','Aguardando Produção Padaria');
+    setTxt_('gpStatusDesc','Sem custo mensal de produção não calculamos a conta de padeiro.');
+  }else{
+    setTxt_('gpStatusTitulo',st==='positivo'?'Conta de padeiro positiva':(st==='negativo'?'Conta de padeiro pede atenção':'Conta de padeiro equilibrada'));
+    setTxt_('gpStatusDesc',
+      'Vendas '+bossFmtBRL(g.totalVendas||0)+' · Produção '+bossFmtBRL(g.totalProducao||0)+' · Quebra '+bossFmtBRL(g.totalQuebra||0)
+      +' · '+(Number(g.produtosAguardandoReceita)||0)+' produto(s) ainda aguardando receita.'
+    );
+  }
+
+  var custos=document.getElementById('gpCustos');
+  var det=Array.isArray(g.detalheProdutos)?g.detalheProdutos:[];
+  if(custos){
+    if(!det.length){
+      custos.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Sem produtos de venda para cruzar.</div>';
+    }else{
+      custos.innerHTML=det.map(function(x){
+        var direto=x.statusCusto==='direto_aprox';
+        var vinculo=direto
+          ?('<span class="boss-padaria-status direto"><i class="ti ti-link"></i> Direto aprox.</span>')
+          :('<span class="boss-padaria-status pendente"><i class="ti ti-chef-hat"></i> Aguardando receita</span>');
+        var sub=direto
+          ?('Compra: '+bossEscapeHtml(x.entradaNome||'')+(x.custoEntradaUnitario!=null?' · '+bossFmtBRL(x.custoEntradaUnitario)+'/qtd':''))
+          :('Média provisória: '+pct_(x.taxaMediaProducaoPct)+' das vendas');
+        return '<div class="boss-padaria-custo-row">'
+          +'<div class="boss-padaria-prod"><strong>'+bossEscapeHtml(x.nome||x.cod||'Produto')+'</strong><small>'+sub+'</small></div>'
+          +'<div>'+vinculo+'</div>'
+          +'<div class="boss-padaria-num"><small>Venda</small>'+bossFmtBRL(x.valorVenda||0)+'</div>'
+          +'<div class="boss-padaria-num"><small>Custo</small>'+(x.custoEstimadoUsado==null?'—':bossFmtBRL(x.custoEstimadoUsado))+'</div>'
+          +'<div class="boss-padaria-num"><small>Quebra</small>'+bossFmtBRL(x.quebraValor||0)+'</div>'
+          +'</div>';
+      }).join('');
+    }
+  }
+
+  var compras=document.getElementById('gpComprasLista');
+  var mc=Array.isArray(g.maioresCompras)?g.maioresCompras:[];
+  if(compras){
+    if(!mc.length){
+      compras.innerHTML='<div class="boss-empty">Nenhuma compra Padaria disponível no período.</div>';
+    }else{
+      compras.innerHTML=mc.map(function(x){
+        return '<div class="boss-padaria-compra-row">'
+          +'<div class="boss-padaria-prod"><strong>'+bossEscapeHtml(x.nome||x.cod||'Insumo')+'</strong><small>'+bossEscapeHtml(x.codigoInterno||x.cod||'')+'</small></div>'
+          +'<div class="boss-padaria-num"><small>Qtd</small>'+bossFmtQtd(x.pesoTotal||0)+'</div>'
+          +'<div class="boss-padaria-num"><small>Custo médio</small>'+bossFmtBRL(x.custoMedio||0)+'</div>'
+          +'<div class="boss-padaria-num"><small>Total</small>'+bossFmtBRL(x.valorTotal||0)+'</div>'
+          +'</div>';
+      }).join('');
+    }
+  }
+
+  return g;
 }
+
 
 function bossRenderGerencialHorti_(dados){
   var g=(dados&&dados.grupos&&dados.grupos.gerencialHorti)||null;
@@ -6313,8 +6606,10 @@ function bossRenderEntradaCeasa_(dados){
   }
 }
 
-function bossRenderVendasHorti_(dados){
-  var vh=(dados&&dados.grupos&&dados.grupos.vendasHorti)||{
+function bossRenderVendasABCSetor_(dados,opts){
+  opts=opts||{};
+  var chave=opts.chave||'vendasHorti';
+  var vh=(dados&&dados.grupos&&dados.grupos[chave])||{
     porProduto:[],totalVenda:0,totalQtd:0,totalProdutos:0,
     incluidaNoCalculo:false,motivo:'Relatório de vendas não carregado.'
   };
@@ -6323,7 +6618,7 @@ function bossRenderVendasHorti_(dados){
   var dataSel=bossFmtDataBR_(dados&&dados.data);
   var mesLabel=bossMesLabelDados_(dados);
 
-  var per=document.getElementById('bossPeriodoVendasHorti');
+  var per=document.getElementById(opts.periodoId);
   if(per){
     per.classList.toggle('boss-period-dia',periodoEfetivo==='dia');
     per.classList.toggle('boss-period-mes',periodoEfetivo!=='dia');
@@ -6332,10 +6627,10 @@ function bossRenderVendasHorti_(dados){
       :(mesLabel?('mês inteiro · '+mesLabel):'mês inteiro');
   }
 
-  var totalEl=document.getElementById('bossTotalVendasHorti');
-  var countEl=document.getElementById('bossCountVendasHorti');
-  var infoEl=document.getElementById('bossInfoVendasHorti');
-  var listEl=document.getElementById('bossListVendasHorti');
+  var totalEl=document.getElementById(opts.totalId);
+  var countEl=document.getElementById(opts.countId);
+  var infoEl=document.getElementById(opts.infoId);
+  var listEl=document.getElementById(opts.listId);
 
   if(totalEl)totalEl.textContent=vh.incluidaNoCalculo?bossFmtBRL(vh.totalVenda||0):'—';
   if(countEl)countEl.textContent=(Number(vh.totalProdutos)||0)+' '+((Number(vh.totalProdutos)||0)===1?'produto':'produtos');
@@ -6353,7 +6648,7 @@ function bossRenderVendasHorti_(dados){
 
   if(listEl){
     if(!vh.incluidaNoCalculo || !lista.length){
-      listEl.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhuma venda Horti válida para o período.</div>';
+      listEl.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhuma venda '+bossEscapeHtml(opts.label||'setorial')+' válida para o período.</div>';
     }else{
       listEl.innerHTML=lista.map(function(x,i){
         var cod=String(x.cod||'').replace(/[^0-9]/g,'');
@@ -6375,15 +6670,48 @@ function bossRenderVendasHorti_(dados){
     }
   }
 
-  var k=document.getElementById('bossKpiVendas');
-  if(k)k.textContent=vh.incluidaNoCalculo?bossFmtBRL(vh.totalVenda||0):'—';
-  var ks=document.getElementById('bossKpiVendasSub');
-  if(ks){
-    ks.textContent=vh.incluidaNoCalculo
-      ?((Number(vh.totalQtd)||0).toLocaleString('pt-BR',{maximumFractionDigits:2})+' qtd vendida · '+(Number(vh.totalProdutos)||0)+' produtos')
-      :(vh.motivo||'Relatório ABC indisponível');
+  if(opts.kpiId){
+    var k=document.getElementById(opts.kpiId);
+    if(k)k.textContent=vh.incluidaNoCalculo?bossFmtBRL(vh.totalVenda||0):'—';
   }
+  if(opts.kpiSubId){
+    var ks=document.getElementById(opts.kpiSubId);
+    if(ks){
+      ks.textContent=vh.incluidaNoCalculo
+        ?((Number(vh.totalQtd)||0).toLocaleString('pt-BR',{maximumFractionDigits:2})+' qtd vendida · '+(Number(vh.totalProdutos)||0)+' produtos')
+        :(vh.motivo||'Relatório ABC indisponível');
+    }
+  }
+
+  return vh;
 }
+
+function bossRenderVendasHorti_(dados){
+  return bossRenderVendasABCSetor_(dados,{
+    chave:'vendasHorti',
+    label:'Horti',
+    periodoId:'bossPeriodoVendasHorti',
+    totalId:'bossTotalVendasHorti',
+    countId:'bossCountVendasHorti',
+    infoId:'bossInfoVendasHorti',
+    listId:'bossListVendasHorti',
+    kpiId:'bossKpiVendas',
+    kpiSubId:'bossKpiVendasSub'
+  });
+}
+
+function bossRenderVendasPadaria_(dados){
+  return bossRenderVendasABCSetor_(dados,{
+    chave:'vendasPadaria',
+    label:'Padaria',
+    periodoId:'bossPeriodoVendasPadaria',
+    totalId:'bossTotalVendasPadaria',
+    countId:'bossCountVendasPadaria',
+    infoId:'bossInfoVendasPadaria',
+    listId:'bossListVendasPadaria'
+  });
+}
+
 
 var _bossCharts={geral:null,setor:null};
 
@@ -6463,6 +6791,15 @@ function bossGerarInsights_(dados){
     if(shareP>=25){
       add('info','ti-bread','Padaria também pesa na quebra geral',
         'A Padaria responde por '+shareP.toLocaleString('pt-BR',{maximumFractionDigits:0})+'% da quebra total do período ('+bossFmtBRL(quebraPadaria)+'). Vale olhar de perto com os dados de quebra, produção e consumo disponíveis.');
+    }
+  }
+
+  var gp=(dados&&dados.grupos&&dados.grupos.gerencialPadaria)||null;
+  if(gp&&gp.vendasIncluidasNoCalculo){
+    var pend=Number(gp.produtosAguardandoReceita)||0;
+    if(pend>0){
+      add('info','ti-chef-hat','Padaria com receitas ainda não mapeadas',
+        pend+' produto(s) vendido(s) ainda usam custo médio provisório da produção. Cadastre as receitas para aumentar a cobertura de custo direto, hoje em '+((Number(gp.coberturaDiretaPct)||0).toLocaleString('pt-BR',{maximumFractionDigits:1}))+'%.');
     }
   }
 
@@ -6576,7 +6913,9 @@ function bossRender(dados){
   bossRenderEntradaHortiNF_(dados);
   bossRenderEntradaCeasa_(dados);
   bossRenderVendasHorti_(dados);
+  var vendasPadaria=bossRenderVendasPadaria_(dados);
   bossRenderGerencialHorti_(dados);
+  var gerPadaria=bossRenderGerencialPadaria_(dados);
   var q=bossTotal(horti)+bossTotal(padaria),p=bossTotal(vencidos),ci=bossTotal(prodPad)+bossTotal(uso);
   var qHorti=bossTotal(horti),qPadaria=bossTotal(padaria);
   var aH=document.getElementById('bossKpiQuebrasHorti');if(aH)aH.textContent=bossFmtBRL(qHorti);
@@ -6589,9 +6928,21 @@ function bossRender(dados){
   var cs=document.getElementById('bossKpiConsumoSub');if(cs)cs.textContent=(prodPad.length+uso.length)+' itens usados no mês em produção da padaria e uso/consumo';
 
   var pr=document.getElementById('bossKpiPadariaResumo');
-  if(pr)pr.textContent=bossFmtBRL(qPadaria)+' em quebra';
+  if(pr){
+    pr.textContent=(gerPadaria&&gerPadaria.vendasIncluidasNoCalculo)
+      ?(bossFmtBRL(gerPadaria.totalVendas||0)+' em vendas')
+      :(bossFmtBRL(qPadaria)+' em quebra');
+  }
   var prs=document.getElementById('bossKpiPadariaResumoSub');
-  if(prs)prs.textContent=(prodPad.length+uso.length)+' itens em produção/consumo · toque para abrir os dados disponíveis';
+  if(prs){
+    if(gerPadaria&&gerPadaria.vendasIncluidasNoCalculo){
+      prs.textContent='Produção '+bossFmtBRL(gerPadaria.totalProducao||0)
+        +' · Quebra '+bossFmtBRL(gerPadaria.totalQuebra||0)
+        +' · '+(Number(gerPadaria.produtosAguardandoReceita)||0)+' aguardando receita · toque para abrir';
+    }else{
+      prs.textContent='Quebra '+bossFmtBRL(qPadaria)+' · '+(prodPad.length+uso.length)+' itens em produção/consumo · toque para abrir';
+    }
+  }
 
   bossRenderCharts_(dados);
   bossRenderInsights_(dados);
