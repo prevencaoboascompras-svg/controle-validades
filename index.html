@@ -2623,7 +2623,7 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre o <strong>último mês fechado</strong>. Você pode escolher qualquer mês, abrir o <strong>mês atual</strong> ou consultar um <strong>dia específico</strong>. O mês atual só terá análise completa quando os relatórios desse mês já tiverem sido gerados.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti/Padaria por NF, ABC Horti, ABC Padaria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
+          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre o <strong>último mês fechado</strong>. Você pode escolher qualquer mês, abrir o <strong>mês atual</strong> ou consultar um <strong>dia específico</strong>. O mês atual só terá análise completa quando os relatórios desse mês já tiverem sido gerados.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti/Padaria por NF, ABC Horti, ABC Padaria, ABC Fiambreria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
@@ -2808,7 +2808,7 @@ function toggleTheme() {
           <div class="boss-clean-card" id="bossKpiVendasPadariaCard" onclick="bossToggleGrupo('bossGrupoVendasPadaria','bossKpiVendasPadariaCard','bossVendasPadariaChevron')">
             <div class="boss-clean-card-head"><i class="ti ti-cash-banknote" style="color:var(--green)"></i> Vendas Padaria <i class="ti ti-chevron-down" id="bossVendasPadariaChevron"></i></div>
             <div class="boss-clean-card-value green" id="bossKpiVendasPadaria">R$ 0,00</div>
-            <div class="boss-clean-card-sub" id="bossKpiVendasPadariaSub">ABC Padaria · clique para detalhar</div>
+            <div class="boss-clean-card-sub" id="bossKpiVendasPadariaSub">ABC Padaria + Fiambreria · clique para detalhar</div>
           </div>
         </div>
 
@@ -2999,7 +2999,7 @@ function toggleTheme() {
             <div class="boss-horti-card">
               <div class="gh-label">Vendas Padaria</div>
               <div class="gh-value pos" id="gpVendas">—</div>
-              <div class="gh-sub" id="gpVendasSub">ABC Padaria</div>
+              <div class="gh-sub" id="gpVendasSub">ABC Padaria + Fiambreria</div>
             </div>
             <div class="boss-horti-card">
               <div class="gh-label">Custo de produção</div>
@@ -6130,7 +6130,7 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8.20-raio-x-consolidar-codigos';
+var BOSS_VISION_BUILD='v8.21-abc-fiambreria-integrado';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
 function bossFmtBRL(v){
@@ -6659,8 +6659,8 @@ function bossRenderGerencialPadaria_(dados){
 
   setTxt_('gpVendas',g.vendasIncluidasNoCalculo?bossFmtBRL(g.totalVendas||0):'—');
   setTxt_('gpVendasSub',g.vendasIncluidasNoCalculo
-    ?((Number(g.totalProdutosVenda)||0)+' produtos · '+(g.vendasPeriodoRelatorio||'ABC'))
-    :(g.vendasMotivo||'ABC Padaria indisponível'));
+    ?((Number(g.totalProdutosVenda)||0)+' produtos · Padaria + Fiambreria · '+(g.vendasPeriodoRelatorio||'ABC'))
+    :(g.vendasMotivo||'ABC Padaria + Fiambreria indisponíveis'));
 
   setTxt_('gpProducao',g.producaoIncluidaNoCalculo?bossFmtBRL(g.totalProducao||0):'—');
   setTxt_('gpProducaoSub',g.producaoIncluidaNoCalculo
@@ -6700,7 +6700,7 @@ function bossRenderGerencialPadaria_(dados){
     setTxt_('gpStatusTitulo','Dia específico: análise parcial');
     setTxt_('gpStatusDesc','Compras por NF e Produção Padaria são relatórios mensais e não entram no cálculo diário. Vendas e quebra só entram quando o relatório permite data segura.');
   }else if(!g.vendasIncluidasNoCalculo){
-    setTxt_('gpStatusTitulo','Aguardando ABC Padaria válido');
+    setTxt_('gpStatusTitulo','Aguardando ABC Padaria + Fiambreria válidos');
     setTxt_('gpStatusDesc',g.vendasMotivo||'Sem vendas para cruzar com produção e quebra.');
   }else if(!g.producaoIncluidaNoCalculo){
     setTxt_('gpStatusTitulo','Aguardando Produção Padaria');
@@ -7257,7 +7257,11 @@ function bossRenderVendasABCSetor_(dados,opts){
         return '<div class="boss-row">'
           +'<div class="boss-rank">'+(i+1)+'</div>'
           +photo
-          +'<div class="boss-prod"><div class="boss-prod-name" title="'+nome+'">'+nome+'</div>'+(cod?'<div class="boss-prod-cod">'+cod+'</div>':'')+'</div>'
+          +'<div class="boss-prod"><div class="boss-prod-name" title="'+nome+'">'+nome+'</div>'
+          +((cod||((x.origens||[]).length))
+            ?'<div class="boss-prod-cod">'+(cod?bossEscapeHtml(cod):'')+((x.origens||[]).length?((cod?' · ':'')+bossEscapeHtml((x.origens||[]).join(' + '))):'')+'</div>'
+            :'')
+          +'</div>'
           +'<div class="boss-num boss-qtd"><small>Qtd vendida</small><strong>'+bossFmtQtd(x.qtde||0)+'</strong></div>'
           +'<div class="boss-num"><small>Preço médio realizado</small><strong>'+bossFmtBRL(pm)+'</strong></div>'
           +'<div class="boss-num"><small>Venda Total</small><strong>'+bossFmtBRL(x.valor||0)+'</strong></div>'
@@ -7300,7 +7304,7 @@ function bossRenderVendasHorti_(dados){
 function bossRenderVendasPadaria_(dados){
   return bossRenderVendasABCSetor_(dados,{
     chave:'vendasPadaria',
-    label:'Padaria',
+    label:'Padaria + Fiambreria',
     periodoId:'bossPeriodoVendasPadaria',
     totalId:'bossTotalVendasPadaria',
     countId:'bossCountVendasPadaria',
@@ -7673,8 +7677,25 @@ function bossRxAtividades_(){
 
   var vh=g.vendasHorti||{};
   (Array.isArray(vh.porProduto)?vh.porProduto:[]).forEach(function(x){bossRxAdd_(arr,'Vendas Horti','horti',{cod:x.cod,nome:x.nome,qtde:x.qtde,valor:x.valor,unidade:x.unidade});});
-  var vp=g.vendasPadaria||{};
-  (Array.isArray(vp.porProduto)?vp.porProduto:[]).forEach(function(x){bossRxAdd_(arr,'Vendas Padaria','padaria',{cod:x.cod,nome:x.nome,qtde:x.qtde,valor:x.valor,unidade:x.unidade});});
+  // Raio-X usa os dois ABCs brutos separadamente para não somar duas vezes
+  // o grupo vendasPadaria, que já é consolidado no backend novo.
+  var vpBase=g.vendasPadariaBase||{};
+  var vf=g.vendasFiambreria||{};
+  var backendNovo=!!(g.vendasPadariaBase||g.vendasFiambreria);
+
+  if(backendNovo){
+    (Array.isArray(vpBase.porProduto)?vpBase.porProduto:[]).forEach(function(x){
+      bossRxAdd_(arr,'Vendas Padaria','padaria',{cod:x.cod,nome:x.nome,qtde:x.qtde,valor:x.valor,unidade:x.unidade});
+    });
+    (Array.isArray(vf.porProduto)?vf.porProduto:[]).forEach(function(x){
+      bossRxAdd_(arr,'Vendas Fiambreria','padaria',{cod:x.cod,nome:x.nome,qtde:x.qtde,valor:x.valor,unidade:x.unidade});
+    });
+  }else{
+    var vp=g.vendasPadaria||{};
+    (Array.isArray(vp.porProduto)?vp.porProduto:[]).forEach(function(x){
+      bossRxAdd_(arr,'Vendas Padaria','padaria',{cod:x.cod,nome:x.nome,qtde:x.qtde,valor:x.valor,unidade:x.unidade});
+    });
+  }
 
   bossLista(dados,'horti').forEach(function(x){bossRxAdd_(arr,'Quebras Horti','horti',x);});
   bossLista(dados,'padaria').forEach(function(x){bossRxAdd_(arr,'Quebras Padaria','padaria',x);});
