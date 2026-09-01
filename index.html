@@ -1707,6 +1707,30 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-rx-summary{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0 12px
 }
+.boss-rx-linker{border:1px solid var(--bd);border-radius:10px;background:var(--bg2);padding:11px 12px;margin:10px 0 12px}
+.boss-rx-linker-head{display:flex;align-items:flex-start;gap:8px}
+.boss-rx-linker-head i{color:var(--blue);font-size:17px;margin-top:1px}
+.boss-rx-linker-title{font-size:11px;font-weight:850}
+.boss-rx-linker-sub{font-size:9.5px;color:var(--tx2);line-height:1.4;margin-top:2px}
+.boss-rx-linker-selected{display:flex;gap:5px;flex-wrap:wrap;margin:9px 0 8px}
+.boss-rx-rel-chip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--bd);background:var(--bg);border-radius:999px;padding:4px 7px;font-size:9px;font-weight:750}
+.boss-rx-rel-chip.primary{border-color:rgba(55,138,221,.28);background:rgba(55,138,221,.07)}
+.boss-rx-rel-chip button{border:none;background:transparent;color:var(--tx2);padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px}
+.boss-rx-rel-search{display:grid;grid-template-columns:1fr auto;gap:6px}
+.boss-rx-rel-search input{height:34px;border:1px solid var(--bds);border-radius:8px;background:var(--bg);color:var(--tx);font-size:11px;padding:0 10px;outline:none}
+.boss-rx-rel-search input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(55,138,221,.12)}
+.boss-rx-rel-results{display:none;margin-top:7px;border:1px solid var(--bd);border-radius:8px;max-height:190px;overflow:auto;background:var(--bg)}
+.boss-rx-rel-results.show{display:block}
+.boss-rx-rel-row{display:grid;grid-template-columns:24px minmax(150px,1fr) minmax(75px,.45fr);gap:7px;align-items:center;padding:7px 9px;border-bottom:1px solid var(--bd);cursor:pointer}
+.boss-rx-rel-row:last-child{border-bottom:none}
+.boss-rx-rel-row:hover{background:var(--bg2)}
+.boss-rx-rel-row input{width:15px;height:15px;accent-color:var(--blue)}
+.boss-rx-rel-prod strong{display:block;font-size:10.5px}
+.boss-rx-rel-prod small{display:block;font-size:8.5px;color:var(--tx2);margin-top:2px}
+.boss-rx-rel-unit{font-size:9px;color:var(--tx2);text-align:right}
+.boss-rx-consolidated-note{margin:0 0 9px;padding:7px 9px;border-radius:8px;background:rgba(55,138,221,.07);border:1px solid rgba(55,138,221,.18);font-size:9.5px;color:var(--tx2);line-height:1.4}
+.boss-rx-consolidated-note strong{color:var(--blue)}
+
 .boss-rx-kpi{background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:10px 11px;min-width:0}
 .boss-rx-kpi span{display:block;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2)}
 .boss-rx-kpi strong{display:block;font-size:15px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1765,44 +1789,52 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-health-badge.ok{color:var(--green);border-color:rgba(29,158,117,.22);background:rgba(29,158,117,.08)}
 .boss-health-badge.warn{color:var(--amber);border-color:rgba(239,159,39,.22);background:rgba(239,159,39,.08)}
 .boss-health-badge.bad{color:var(--red);border-color:rgba(226,75,74,.22);background:rgba(226,75,74,.08)}
-.boss-health-content{display:grid;grid-template-columns:138px 1fr;gap:12px;align-items:center}
+.boss-health-content{display:grid;grid-template-columns:156px 1fr;gap:16px;align-items:center}
 .boss-gauge{
   --gauge-angle:-90deg;
-  position:relative;width:138px;height:78px;overflow:hidden;flex-shrink:0
+  position:relative;width:156px;height:116px;flex-shrink:0
+}
+.boss-gauge-dial{
+  position:absolute;left:9px;top:0;width:138px;height:78px;overflow:hidden
 }
 .boss-gauge-track,.boss-gauge-progress{
   position:absolute;left:0;top:0;width:138px;height:138px;border-radius:50%;
-  clip-path:inset(0 0 50% 0);
+  clip-path:inset(0 0 50% 0)
 }
 .boss-gauge-track{
   background:conic-gradient(from 180deg at 50% 50%, #E24B4A 0deg, #EF9F27 90deg, #1D9E75 180deg);
-  opacity:.18;
+  opacity:.18
 }
 .boss-gauge-progress{
   background:conic-gradient(from 180deg at 50% 50%, #E24B4A 0deg, #EF9F27 90deg, #1D9E75 180deg);
   transform:rotate(var(--gauge-angle));
   transform-origin:50% 50%;
-  transition:transform 1.25s cubic-bezier(.22,1,.36,1);
+  transition:transform 1.25s cubic-bezier(.22,1,.36,1)
 }
 .boss-gauge-cover{
   position:absolute;left:15px;top:15px;width:108px;height:108px;border-radius:50%;
   background:var(--bg);clip-path:inset(0 0 50% 0)
 }
 .boss-gauge-needle{
-  position:absolute;left:50%;bottom:7px;width:3px;height:52px;background:#1a1a1a;border-radius:3px;
+  position:absolute;left:50%;bottom:7px;width:3px;height:48px;background:#1a1a1a;border-radius:3px;
   transform-origin:50% calc(100% - 4px);transform:translateX(-50%) rotate(var(--gauge-angle));
-  transition:transform 1.25s cubic-bezier(.22,1,.36,1);box-shadow:0 1px 2px rgba(0,0,0,.18)
+  transition:transform 1.25s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 1px 2px rgba(0,0,0,.18);z-index:5
 }
 .boss-gauge-center{
   position:absolute;left:50%;bottom:3px;width:14px;height:14px;border-radius:50%;
-  background:#1a1a1a;transform:translateX(-50%);box-shadow:0 0 0 4px rgba(255,255,255,.95)
+  background:#1a1a1a;transform:translateX(-50%);
+  box-shadow:0 0 0 4px rgba(255,255,255,.95);z-index:6
+}
+.boss-gauge-readout{
+  position:absolute;left:0;right:0;top:80px;text-align:center;z-index:8
 }
 .boss-gauge-score{
-  position:absolute;left:0;right:0;bottom:14px;text-align:center;font-size:24px;font-weight:850;line-height:1;color:var(--tx)
+  display:inline-block;min-width:38px;font-size:21px;font-weight:900;line-height:1;color:var(--tx)
 }
 .boss-gauge-scale-labels{
-  position:absolute;left:6px;right:6px;bottom:0;display:flex;justify-content:space-between;
-  font-size:9px;font-weight:700;color:var(--tx2);letter-spacing:.03em
+  position:absolute;left:12px;right:12px;top:101px;display:flex;justify-content:space-between;
+  font-size:8.5px;font-weight:800;color:var(--tx2);letter-spacing:.03em;z-index:7
 }
 .boss-health-copy{min-width:0}
 .boss-health-status{font-size:18px;font-weight:850;line-height:1.1}
@@ -1813,7 +1845,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-health-tip{margin-top:7px;font-size:10px;color:var(--tx2)}
 @media(max-width:680px){
   .boss-health-content{grid-template-columns:1fr}
-  .boss-gauge{margin:0 auto}
+  .boss-gauge{margin:0 auto;transform:scale(.94);transform-origin:top center}
   .boss-health-card{margin:0 10px 10px}
 }
 
@@ -2686,12 +2718,14 @@ function toggleTheme() {
               </div>
               <div class="boss-health-content">
                 <div class="boss-gauge" id="bossGaugeHorti">
-                  <div class="boss-gauge-track"></div>
-                  <div class="boss-gauge-progress"></div>
-                  <div class="boss-gauge-cover"></div>
-                  <div class="boss-gauge-needle"></div>
-                  <div class="boss-gauge-center"></div>
-                  <div class="boss-gauge-score">0</div>
+                  <div class="boss-gauge-dial">
+                    <div class="boss-gauge-track"></div>
+                    <div class="boss-gauge-progress"></div>
+                    <div class="boss-gauge-cover"></div>
+                    <div class="boss-gauge-needle"></div>
+                    <div class="boss-gauge-center"></div>
+                  </div>
+                  <div class="boss-gauge-readout"><span class="boss-gauge-score">0</span></div>
                   <div class="boss-gauge-scale-labels"><span>Ruim</span><span>OK</span><span>Ótimo</span></div>
                 </div>
                 <div class="boss-health-copy">
@@ -2716,12 +2750,14 @@ function toggleTheme() {
               </div>
               <div class="boss-health-content">
                 <div class="boss-gauge" id="bossGaugePadaria">
-                  <div class="boss-gauge-track"></div>
-                  <div class="boss-gauge-progress"></div>
-                  <div class="boss-gauge-cover"></div>
-                  <div class="boss-gauge-needle"></div>
-                  <div class="boss-gauge-center"></div>
-                  <div class="boss-gauge-score">0</div>
+                  <div class="boss-gauge-dial">
+                    <div class="boss-gauge-track"></div>
+                    <div class="boss-gauge-progress"></div>
+                    <div class="boss-gauge-cover"></div>
+                    <div class="boss-gauge-needle"></div>
+                    <div class="boss-gauge-center"></div>
+                  </div>
+                  <div class="boss-gauge-readout"><span class="boss-gauge-score">0</span></div>
                   <div class="boss-gauge-scale-labels"><span>Ruim</span><span>OK</span><span>Ótimo</span></div>
                 </div>
                 <div class="boss-health-copy">
@@ -6094,7 +6130,7 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8.17-raio-x-gerencial-a4';
+var BOSS_VISION_BUILD='v8.20-raio-x-consolidar-codigos';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
 function bossFmtBRL(v){
@@ -7545,6 +7581,9 @@ function bossReanimarGraficosBoss_(){
 
 var _bossRxTimer=null;
 var _bossRxSelecionado=null;
+var _bossRxRelacionados=[];
+var _bossRxRelMapa={};
+var _bossRxRelTimer=null;
 var _bossRxBancoNomeIdx=null;
 
 function bossRxNorm_(v){
@@ -7824,22 +7863,139 @@ function bossRxSelecionarPorDados_(key){
   var p=box&&box._bossRxMapa?box._bossRxMapa[key]:null;
   if(!p)return;
   _bossRxSelecionado=p;
+  _bossRxRelacionados=[];
+  _bossRxRelMapa={};
   bossRxRenderDetalhe_(p);
 }
+
+function bossRxMesmoProduto_(a,b){
+  if(!a||!b)return false;
+  var ac=bossRxCodigoCanonico_(a.cod,a.nome),bc=bossRxCodigoCanonico_(b.cod,b.nome);
+  if(ac&&bc&&bossRxCod_(ac)===bossRxCod_(bc))return true;
+  return bossRxNorm_(a.nome||'')===bossRxNorm_(b.nome||'');
+}
+function bossRxGrupoAtivo_(sel){
+  var out=[];
+  [sel].concat(_bossRxRelacionados||[]).forEach(function(x){
+    if(!x)return;
+    if(!out.some(function(y){return bossRxMesmoProduto_(x,y);})){out.push(x);}
+  });
+  return out;
+}
+function bossRxMatchGrupo_(item,grupo){
+  return (grupo||[]).some(function(sel){return bossRxMatch_(item,sel);});
+}
+function bossRxCatalogoRelacionados_(){
+  var mapa={};
+  function add(cod,nome,unidade,fornecedor,setor){
+    cod=bossRxCodigoCanonico_(cod,nome);
+    nome=String(nome||(cod&&typeof banco!=='undefined'?banco[cod]:'')||'').trim();
+    if(!nome&&!cod)return;
+    var key=cod?('C:'+bossRxCod_(cod)):('N:'+bossRxNorm_(nome));
+    if(!mapa[key]){
+      mapa[key]={key:key,cod:bossRxCod_(cod),nome:nome,
+        unidade:String(unidade||(cod&&typeof bancoUnidade!=='undefined'?bancoUnidade[cod]:'')||'').trim(),
+        fornecedor:String(fornecedor||(cod&&typeof bancoFornecedor!=='undefined'?bancoFornecedor[cod]:'')||'').trim(),
+        setor:setor||'',atividade:0};
+    }
+    mapa[key].atividade++;
+    if(!mapa[key].unidade&&unidade)mapa[key].unidade=unidade;
+    if(!mapa[key].fornecedor&&fornecedor)mapa[key].fornecedor=fornecedor;
+  }
+  bossRxAtividades_().forEach(function(a){add(a.cod,a.nome,a.unidade,a.fornecedor,a.setor);});
+  if(typeof banco!=='undefined'){
+    Object.keys(banco).forEach(function(cod){
+      add(cod,banco[cod],
+        typeof bancoUnidade!=='undefined'?bancoUnidade[cod]:'',
+        typeof bancoFornecedor!=='undefined'?bancoFornecedor[cod]:'',
+        '');
+    });
+  }
+  return mapa;
+}
+function bossRxRelPesquisarDebounce_(){
+  clearTimeout(_bossRxRelTimer);
+  _bossRxRelTimer=setTimeout(bossRxRelPesquisar_,150);
+}
+function bossRxRelPesquisar_(){
+  var input=document.getElementById('bossRxRelBusca');
+  var box=document.getElementById('bossRxRelResultados');
+  if(!input||!box)return;
+  var raw=String(input.value||'').trim(),norm=bossRxNorm_(raw),cod=bossRxCod_(raw);
+  if(!cod&&norm.length<2){box.classList.remove('show');box.innerHTML='';return;}
+  var tokens=norm?norm.split(' ').filter(Boolean):[];
+  var mapa=bossRxCatalogoRelacionados_();
+  var grupo=bossRxGrupoAtivo_(_bossRxSelecionado);
+  var lista=Object.keys(mapa).map(function(k){return mapa[k];}).filter(function(p){
+    if(grupo.some(function(x){return bossRxMesmoProduto_(x,p);}))return false;
+    var hay=[bossRxCod_(p.cod),bossRxNorm_(p.nome),bossRxNorm_(p.unidade),bossRxNorm_(p.fornecedor),bossRxNorm_(p.setor)].join(' ');
+    return tokens.every(function(t){return hay.indexOf(t)>=0;});
+  }).sort(function(a,b){
+    var ac=bossRxCod_(a.cod),bc=bossRxCod_(b.cod);
+    if(cod&&ac===cod)return -1;if(cod&&bc===cod)return 1;
+    var an=bossRxNorm_(a.nome),bn=bossRxNorm_(b.nome);
+    if(norm&&an===norm)return -1;if(norm&&bn===norm)return 1;
+    return (b.atividade||0)-(a.atividade||0)||a.nome.localeCompare(b.nome,'pt-BR');
+  }).slice(0,30);
+
+  _bossRxRelMapa={};lista.forEach(function(p){_bossRxRelMapa[p.key]=p;});
+  box.innerHTML=lista.length?lista.map(function(p){
+    return '<label class="boss-rx-rel-row">'
+      +'<input type="checkbox" onchange="bossRxRelToggle_(this,\''+bossEscapeHtml(p.key)+'\')">'
+      +'<span class="boss-rx-rel-prod"><strong>'+bossEscapeHtml(p.nome||('Produto '+p.cod))+'</strong><small>'+(p.cod?'Cód. '+bossEscapeHtml(p.cod):'Sem código')+(p.fornecedor?' · '+bossEscapeHtml(p.fornecedor):'')+'</small></span>'
+      +'<span class="boss-rx-rel-unit">'+bossEscapeHtml(p.unidade||'')+'</span></label>';
+  }).join(''):'<div class="boss-rx-empty" style="padding:12px">Nenhum produto relacionado encontrado.</div>';
+  box.classList.add('show');
+}
+function bossRxRelToggle_(checkbox,key){
+  var p=_bossRxRelMapa&&_bossRxRelMapa[key];if(!p)return;
+  if(checkbox.checked){
+    if(!_bossRxRelacionados.some(function(x){return bossRxMesmoProduto_(x,p);})){_bossRxRelacionados.push(p);}
+  }else{
+    _bossRxRelacionados=_bossRxRelacionados.filter(function(x){return !bossRxMesmoProduto_(x,p);});
+  }
+  bossRxRenderDetalhe_(_bossRxSelecionado);
+}
+function bossRxRelRemover_(idx){
+  idx=Number(idx);
+  if(idx>=0&&idx<_bossRxRelacionados.length)_bossRxRelacionados.splice(idx,1);
+  bossRxRenderDetalhe_(_bossRxSelecionado);
+}
+function bossRxRelLimpar_(){
+  _bossRxRelacionados=[];
+  bossRxRenderDetalhe_(_bossRxSelecionado);
+}
+function bossRxRelacionadosHtml_(r){
+  var grupo=r.grupo||bossRxGrupoAtivo_(_bossRxSelecionado);
+  var chips=grupo.map(function(p,idx){
+    var nome=p.nome||(p.cod&&typeof banco!=='undefined'?banco[p.cod]:'Produto');
+    if(idx===0)return '<span class="boss-rx-rel-chip primary"><i class="ti ti-pin"></i>'+bossEscapeHtml(nome)+(p.cod?' · '+bossEscapeHtml(p.cod):'')+'</span>';
+    return '<span class="boss-rx-rel-chip">'+bossEscapeHtml(nome)+(p.cod?' · '+bossEscapeHtml(p.cod):'')
+      +'<button type="button" onclick="bossRxRelRemover_('+(idx-1)+')" title="Remover"><i class="ti ti-x"></i></button></span>';
+  }).join('');
+  return '<div class="boss-rx-linker">'
+    +'<div class="boss-rx-linker-head"><i class="ti ti-arrows-join"></i><div><div class="boss-rx-linker-title">Consolidar códigos relacionados</div>'
+    +'<div class="boss-rx-linker-sub">Marque códigos que representam o mesmo produto físico ou uma venda alternativa. Ex.: <strong>Salgado Grande</strong> + <strong>Saldão Salgado Grande</strong>. O Raio-X soma as vendas e quebras dos códigos marcados.</div></div></div>'
+    +'<div class="boss-rx-linker-selected">'+chips+'</div>'
+    +'<div class="boss-rx-rel-search"><input id="bossRxRelBusca" placeholder="Buscar outro código/nome para somar..." oninput="bossRxRelPesquisarDebounce_()">'
+    +(_bossRxRelacionados.length?'<button class="btn btn-sm" type="button" onclick="bossRxRelLimpar_()"><i class="ti ti-unlink"></i> Limpar vínculos</button>':'<button class="btn btn-sm" type="button" onclick="bossRxRelPesquisar_()"><i class="ti ti-search"></i> Buscar</button>')
+    +'</div><div class="boss-rx-rel-results" id="bossRxRelResultados"></div></div>';
+}
+
 function bossRxResumo_(sel){
-  var ats=bossRxAtividades_().filter(function(a){return bossRxMatch_(a,sel);});
+  var grupo=bossRxGrupoAtivo_(sel);
+  var ats=bossRxAtividades_().filter(function(a){return bossRxMatchGrupo_(a,grupo);});
+
   function somaFonte(cls){
     var xs=ats.filter(function(a){return bossRxClasseFonte_(a.src)===cls;});
-    return {
-      lista:xs,
-      qtd:xs.reduce(function(s,x){return s+bossRxNum_(x.qtd);},0),
-      valor:xs.reduce(function(s,x){return s+bossRxNum_(x.valor);},0)
-    };
+    var units={};xs.forEach(function(x){var u=bossRxNorm_(x.unidade||'');if(u)units[u]=1;});
+    return {lista:xs,qtd:xs.reduce(function(s,x){return s+bossRxNum_(x.qtd);},0),
+      valor:xs.reduce(function(s,x){return s+bossRxNum_(x.valor);},0),
+      qtdCompativel:Object.keys(units).length<=1};
   }
   var compras=somaFonte('compras'),vendas=somaFonte('vendas'),quebras=somaFonte('quebras'),
       producao=somaFonte('producao'),consumo=somaFonte('consumo'),validades=somaFonte('validades');
 
-  // remove duplicidade de compras agregadas + notas: prefere notas detalhadas quando existem
   function semDuplicarCompra(xs){
     var detalhadas=xs.filter(function(x){return /^NF Horti$|^NF Padaria$|^CEASA Horti$/.test(x.src);});
     return detalhadas.length?detalhadas:xs;
@@ -7847,54 +8003,64 @@ function bossRxResumo_(sel){
   compras.lista=semDuplicarCompra(compras.lista);
   compras.qtd=compras.lista.reduce(function(s,x){return s+bossRxNum_(x.qtd);},0);
   compras.valor=compras.lista.reduce(function(s,x){return s+bossRxNum_(x.valor);},0);
+  var cup={};compras.lista.forEach(function(x){var u=bossRxNorm_(x.unidade||'');if(u)cup[u]=1;});
+  compras.qtdCompativel=Object.keys(cup).length<=1;
 
   var cod=bossRxCodigoCanonico_(sel.cod,sel.nome);
-  var bancoInfo={
-    cod:cod,
-    nome:(cod&&typeof banco!=='undefined'&&banco[cod])?banco[cod]:sel.nome,
+  var bancoInfo={cod:cod,nome:(cod&&typeof banco!=='undefined'&&banco[cod])?banco[cod]:sel.nome,
     unidade:(cod&&typeof bancoUnidade!=='undefined'?bancoUnidade[cod]:'')||sel.unidade||'',
     custo:(cod&&typeof bancoCusto!=='undefined'?bossRxNum_(bancoCusto[cod]):0),
-    fornecedor:(cod&&typeof bancoFornecedor!=='undefined'?bancoFornecedor[cod]:'')||sel.fornecedor||''
-  };
+    fornecedor:(cod&&typeof bancoFornecedor!=='undefined'?bancoFornecedor[cod]:'')||sel.fornecedor||''};
 
   var dados=_bossDados||{},gg=(dados.grupos&&dados.grupos.gerencialHorti)||{},gp=(dados.grupos&&dados.grupos.gerencialPadaria)||{};
   var ghDet=(Array.isArray(gg.detalheProdutos)?gg.detalheProdutos:[]).find(function(x){return bossRxMatch_(x,sel);})||null;
   var ghVenda=(Array.isArray(gg.vendasDetalhe)?gg.vendasDetalhe:[]).find(function(x){return bossRxMatch_(x,sel);})||null;
-  var ghMov=(Array.isArray(gg.movimentosCusto)?gg.movimentosCusto:[]).filter(function(x){return bossRxMatch_(x,sel);});
+  var ghMov=(Array.isArray(gg.movimentosCusto)?gg.movimentosCusto:[]).filter(function(x){return bossRxMatchGrupo_(x,grupo);});
   var gpDet=(Array.isArray(gp.detalheProdutos)?gp.detalheProdutos:[]).find(function(x){return bossRxMatch_(x,sel);})||null;
 
   var setor='Loja';
   if(ats.some(function(x){return x.setor==='horti';}))setor='Horti';
   if(ats.some(function(x){return x.setor==='padaria';}))setor=(setor==='Horti'?'Horti + Padaria':'Padaria');
 
-  var vendaMed=vendas.qtd>0?vendas.valor/vendas.qtd:0;
-  var compraMed=compras.qtd>0?compras.valor/compras.qtd:0;
+  var vendaMed=(vendas.qtdCompativel&&vendas.qtd>0)?vendas.valor/vendas.qtd:0;
+  var compraMed=(compras.qtdCompativel&&compras.qtd>0)?compras.valor/compras.qtd:0;
   var quebraVenda=vendas.valor>0?quebras.valor/vendas.valor*100:null;
   var margem=null,margemLabel='',custoEstimado=null,statusCusto='';
-  if(gpDet){
-    margem=gpDet.margemEstimadaPct;
-    margemLabel='Margem estimada Padaria';
-    custoEstimado=gpDet.custoEstimadoUsado;
+
+  if(grupo.length>1){
+    statusCusto='Análise consolidada de '+grupo.length+' códigos. Vendas e quebras foram somadas; margem individual não é agregada automaticamente.';
+  }else if(gpDet){
+    margem=gpDet.margemEstimadaPct;margemLabel='Margem estimada Padaria';custoEstimado=gpDet.custoEstimadoUsado;
     statusCusto=gpDet.statusCusto==='direto_aprox'?'Custo direto aproximado':'Aguardando receita / custo provisório';
   }else if(ghVenda&&ghVenda.margemEstimadaPct!==null&&ghVenda.margemEstimadaPct!==undefined){
-    margem=ghVenda.margemEstimadaPct;
-    margemLabel='Margem estimada Horti';
-    custoEstimado=ghVenda.custoTeoricoVendido;
+    margem=ghVenda.margemEstimadaPct;margemLabel='Margem estimada Horti';custoEstimado=ghVenda.custoTeoricoVendido;
     statusCusto='Custo médio de compra aplicado à venda';
   }else if(ghDet&&ghDet.margemPotencialPct!==null&&ghDet.margemPotencialPct!==undefined){
-    margem=ghDet.margemPotencialPct;
-    margemLabel='Margem potencial Horti';
-    custoEstimado=ghDet.valorCompra;
+    margem=ghDet.margemPotencialPct;margemLabel='Margem potencial Horti';custoEstimado=ghDet.valorCompra;
     statusCusto='Projeção sobre compras do período';
   }
 
-  return {
-    sel:sel,banco:bancoInfo,setor:setor,atividades:ats,
-    compras:compras,vendas:vendas,quebras:quebras,producao:producao,consumo:consumo,validades:validades,
-    vendaMed:vendaMed,compraMed:compraMed,quebraVenda:quebraVenda,
-    margem:margem,margemLabel:margemLabel,custoEstimado:custoEstimado,statusCusto:statusCusto,
-    ghDet:ghDet,ghVenda:ghVenda,ghMov:ghMov,gpDet:gpDet
-  };
+  function resumoItem(s){
+    var ia=bossRxAtividades_().filter(function(a){return bossRxMatch_(a,s);});
+    function sm(cls){
+      var xs=ia.filter(function(a){return bossRxClasseFonte_(a.src)===cls;});
+      var det=cls==='compras'?xs.filter(function(x){return /^NF Horti$|^NF Padaria$|^CEASA Horti$/.test(x.src);}):[];
+      if(cls==='compras'&&det.length)xs=det;
+      return {qtd:xs.reduce(function(t,x){return t+bossRxNum_(x.qtd);},0),
+        valor:xs.reduce(function(t,x){return t+bossRxNum_(x.valor);},0)};
+    }
+    var vs=sm('vendas'),qs=sm('quebras'),cs=sm('compras');
+    var cc=bossRxCodigoCanonico_(s.cod,s.nome);
+    return {cod:bossRxCod_(cc||s.cod),nome:(cc&&typeof banco!=='undefined'&&banco[cc])?banco[cc]:(s.nome||'Produto'),
+      unidade:(cc&&typeof bancoUnidade!=='undefined'?bancoUnidade[cc]:'')||s.unidade||'',
+      compras:cs,vendas:vs,quebras:qs,participacaoVenda:vendas.valor>0?(vs.valor/vendas.valor*100):0};
+  }
+
+  return {sel:sel,grupo:grupo,consolidado:grupo.length>1,comparacaoItens:grupo.map(resumoItem),
+    banco:bancoInfo,setor:setor,atividades:ats,compras:compras,vendas:vendas,quebras:quebras,
+    producao:producao,consumo:consumo,validades:validades,vendaMed:vendaMed,compraMed:compraMed,
+    quebraVenda:quebraVenda,margem:margem,margemLabel:margemLabel,custoEstimado:custoEstimado,
+    statusCusto:statusCusto,ghDet:ghDet,ghVenda:ghVenda,ghMov:ghMov,gpDet:gpDet};
 }
 function bossRxKpiHtml_(label,valor,sub){
   return '<div class="boss-rx-kpi"><span>'+bossEscapeHtml(label)+'</span><strong>'+valor+'</strong><small>'+bossEscapeHtml(sub||'')+'</small></div>';
@@ -7903,13 +8069,15 @@ function bossRxRenderDetalhe_(sel){
   var box=document.getElementById('bossRxDetalhe');if(!box)return;
   var r=bossRxResumo_(sel),cod=bossRxCod_(r.banco.cod);
   var photo=cod?'<div class="boss-rx-detail-photo"><img data-boss-cod="'+bossEscapeHtml(cod)+'" data-boss-nome="'+bossEscapeHtml(r.banco.nome||'')+'" alt=""></div>':'<div class="boss-rx-detail-photo"><i class="ti ti-photo-off" style="font-size:28px;color:var(--tx2)"></i></div>';
+  var relHtml=bossRxRelacionadosHtml_(r);
+  var consolNote=r.consolidado?('<div class="boss-rx-consolidated-note"><strong>Análise consolidada:</strong> '+r.grupo.length+' códigos marcados. Venda e quebra abaixo representam a soma desses códigos.</div>'):'';
 
   var kpis='';
-  kpis+=bossRxKpiHtml_('Compras',r.compras.valor?bossFmtBRL(r.compras.valor):'—',r.compras.qtd?bossFmtQtd(r.compras.qtd)+' '+(r.banco.unidade||'qtd'):'Sem compra no período');
+  kpis+=bossRxKpiHtml_(r.consolidado?'Compras consolidadas':'Compras',r.compras.valor?bossFmtBRL(r.compras.valor):'—',r.compras.qtd?(r.compras.qtdCompativel?bossFmtQtd(r.compras.qtd)+' '+(r.banco.unidade||'qtd'):'Qtd não somada: unidades diferentes'):'Sem compra no período');
   kpis+=bossRxKpiHtml_('Custo médio compra',r.compraMed?bossFmtBRL(r.compraMed):'—',r.banco.custo?('Banco atual '+bossFmtBRL(r.banco.custo)):'Sem custo banco');
-  kpis+=bossRxKpiHtml_('Vendas',r.vendas.valor?bossFmtBRL(r.vendas.valor):'—',r.vendas.qtd?bossFmtQtd(r.vendas.qtd)+' qtd vendida':'Sem venda no período');
+  kpis+=bossRxKpiHtml_(r.consolidado?'Vendas consolidadas':'Vendas',r.vendas.valor?bossFmtBRL(r.vendas.valor):'—',r.vendas.qtd?(r.vendas.qtdCompativel?bossFmtQtd(r.vendas.qtd)+' qtd vendida':'Qtd não somada: unidades diferentes'):'Sem venda no período');
   kpis+=bossRxKpiHtml_('Preço médio realizado',r.vendaMed?bossFmtBRL(r.vendaMed):'—','Venda total ÷ quantidade');
-  kpis+=bossRxKpiHtml_('Quebra',r.quebras.valor?bossFmtBRL(r.quebras.valor):'R$ 0,00',r.quebras.qtd?bossFmtQtd(r.quebras.qtd)+' qtd':'Sem quebra registrada');
+  kpis+=bossRxKpiHtml_(r.consolidado?'Quebra consolidada':'Quebra',r.quebras.valor?bossFmtBRL(r.quebras.valor):'R$ 0,00',r.quebras.qtd?(r.quebras.qtdCompativel?bossFmtQtd(r.quebras.qtd)+' qtd':'Qtd não somada: unidades diferentes'):'Sem quebra registrada');
   kpis+=bossRxKpiHtml_('Quebra / venda',r.quebraVenda!==null?bossRxFmtPct_(r.quebraVenda):'—','Peso da quebra no faturamento do item');
   kpis+=bossRxKpiHtml_('Produção Padaria',r.producao.valor?bossFmtBRL(r.producao.valor):'—',r.producao.qtd?bossFmtQtd(r.producao.qtd)+' qtd/insumo':'Não consta em produção');
   kpis+=bossRxKpiHtml_('Uso e consumo loja',r.consumo.valor?bossFmtBRL(r.consumo.valor):'—',r.consumo.qtd?bossFmtQtd(r.consumo.qtd)+' qtd':'Não consta em uso interno');
@@ -7935,6 +8103,10 @@ function bossRxRenderDetalhe_(sel){
       +(r.gpDet.custoEstimadoUsado!=null?' · custo estimado usado '+bossFmtBRL(r.gpDet.custoEstimadoUsado):'')+'.</p>';
   }
 
+  var comparacaoRows=(r.comparacaoItens||[]).map(function(it){
+    return '<tr><td>'+bossEscapeHtml(it.cod||'—')+'</td><td>'+bossEscapeHtml(it.nome||'Produto')+'</td><td>'+bossEscapeHtml(it.unidade||'—')+'</td><td>'+bossFmtQtd(it.compras.qtd||0)+'</td><td>'+(it.compras.valor?bossFmtBRL(it.compras.valor):'—')+'</td><td>'+bossFmtQtd(it.vendas.qtd||0)+'</td><td>'+(it.vendas.valor?bossFmtBRL(it.vendas.valor):'—')+'</td><td>'+(it.quebras.valor?bossFmtBRL(it.quebras.valor):'R$ 0,00')+'</td><td>'+bossRxFmtPct_(it.participacaoVenda)+'</td></tr>';
+  }).join('');
+
   var rows=r.atividades.slice().sort(function(a,b){return String(a.src).localeCompare(String(b.src),'pt-BR');}).map(function(a){
     var cu=a.custo||((a.qtd>0&&a.valor>0)?a.valor/a.qtd:0);
     return '<tr><td>'+bossEscapeHtml(a.src)+'</td><td>'+bossEscapeHtml(bossRxSetorLabel_(a.setor))+'</td><td>'+bossEscapeHtml(a.data||a.nf||'—')+'</td><td>'+bossEscapeHtml(a.fornecedor||'—')+'</td><td>'+bossFmtQtd(a.qtd||0)+'</td><td>'+bossEscapeHtml(a.unidade||r.banco.unidade||'')+'</td><td>'+(cu?bossFmtBRL(cu):'—')+'</td><td>'+(a.valor?bossFmtBRL(a.valor):'—')+'</td></tr>';
@@ -7955,8 +8127,10 @@ function bossRxRenderDetalhe_(sel){
     +'<div class="boss-rx-tags" style="margin-top:6px">'+Array.from(new Set(r.atividades.map(function(a){return a.src;}))).slice(0,8).map(function(x){return '<span class="boss-rx-tag">'+bossEscapeHtml(x)+'</span>';}).join('')+'</div></div>'
     +'<div class="boss-rx-detail-actions"><button class="btn" onclick="bossRxImprimirA4_()"><i class="ti ti-printer"></i> Imprimir relatório A4</button><button class="btn" onclick="bossRxFecharDetalhe_()"><i class="ti ti-x"></i> Fechar</button></div>'
     +'</div>'
+    +relHtml+consolNote
     +'<div class="boss-rx-summary">'+kpis+'</div>'
     +'<div class="boss-rx-analysis"><div class="boss-rx-analysis-card">'+analise1+'</div><div class="boss-rx-analysis-card">'+analise2+'</div></div>'
+    +(r.consolidado?('<div class="boss-rx-section-title">Comparação dos códigos marcados</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Código</th><th>Produto</th><th>Un.</th><th>Compra qtd</th><th>Compra R$</th><th>Venda qtd</th><th>Venda R$</th><th>Quebra R$</th><th>% vendas</th></tr></thead><tbody>'+comparacaoRows+'</tbody></table></div>'):'')
     +'<div class="boss-rx-section-title">Movimentação encontrada no período</div>'
     +'<div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Origem</th><th>Setor</th><th>Data/NF</th><th>Fornecedor</th><th>Qtd</th><th>Un.</th><th>Custo unit.</th><th>Valor</th></tr></thead><tbody>'+(rows||'<tr><td colspan="8">Nenhuma movimentação encontrada.</td></tr>')+'</tbody></table></div>'
     +(movimentos?'<div class="boss-rx-section-title">Histórico / variação de custo disponível</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Data</th><th>Origem</th><th>Custo anterior</th><th>Custo atual</th><th>Variação</th></tr></thead><tbody>'+movimentos+'</tbody></table></div>':'')
@@ -7969,7 +8143,7 @@ function bossRxRenderDetalhe_(sel){
 }
 function bossRxFecharDetalhe_(){
   var box=document.getElementById('bossRxDetalhe');if(box){box.classList.remove('show');box.innerHTML='';}
-  _bossRxSelecionado=null;
+  _bossRxSelecionado=null;_bossRxRelacionados=[];_bossRxRelMapa={};
 }
 function bossRxLimpar_(){
   var b=document.getElementById('bossRxBusca');if(b)b.value='';
@@ -7980,18 +8154,29 @@ function bossRxLimpar_(){
   var st=document.getElementById('bossRxStatus');if(st)st.textContent='Digite ao menos 2 caracteres ou um código para pesquisar.';
   bossRxFecharDetalhe_();
 }
-function bossRxHtmlPrint_(r){
+function bossRxFotoAtualSrc_(){
+  var img=document.querySelector('#bossRxDetalhe .boss-rx-detail-photo img');
+  var src=img?(img.currentSrc||img.getAttribute('src')||''):'';
+  return String(src||'').trim();
+}
+function bossRxHtmlPrint_(r,fotoSrc){
   function brl(v){return Number(v)>0?bossFmtBRL(v):'—';}
   function qtd(v){return Number(v)>0?bossFmtQtd(v):'—';}
+  fotoSrc=String(fotoSrc||'').trim();
+  var comparacao=(r.comparacaoItens||[]).map(function(it){
+    return '<tr><td>'+bossEscapeHtml(it.cod||'—')+'</td><td>'+bossEscapeHtml(it.nome||'Produto')+'</td><td>'+bossEscapeHtml(it.unidade||'—')+'</td><td>'+qtd(it.compras.qtd)+'</td><td>'+brl(it.compras.valor)+'</td><td>'+qtd(it.vendas.qtd)+'</td><td>'+brl(it.vendas.valor)+'</td><td>'+brl(it.quebras.valor)+'</td><td>'+bossRxFmtPct_(it.participacaoVenda)+'</td></tr>';
+  }).join('');
+
   var linhas=r.atividades.slice().sort(function(a,b){return String(a.src).localeCompare(String(b.src),'pt-BR');}).map(function(a){
     var cu=a.custo||((a.qtd>0&&a.valor>0)?a.valor/a.qtd:0);
     return '<tr><td>'+bossEscapeHtml(a.src)+'</td><td>'+bossEscapeHtml(bossRxSetorLabel_(a.setor))+'</td><td>'+bossEscapeHtml(a.data||a.nf||'—')+'</td><td>'+bossEscapeHtml(a.fornecedor||'—')+'</td><td>'+qtd(a.qtd)+'</td><td>'+bossEscapeHtml(a.unidade||r.banco.unidade||'')+'</td><td>'+brl(cu)+'</td><td>'+brl(a.valor)+'</td></tr>';
   }).join('');
   var periodo=(document.getElementById('bossPeriodoAtualLabel')||{}).textContent||((document.getElementById('bossData')||{}).value||'');
   var margem=(r.margem!==null&&r.margem!==undefined)?bossRxFmtPct_(r.margem):'—';
+  var fotoHtml=fotoSrc?('<div class="photoBox"><img src="'+bossEscapeHtml(fotoSrc)+'" alt="'+bossEscapeHtml(r.banco.nome||r.sel.nome||'Produto')+'"></div>'):'';
   return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Raio-X Gerencial - '+bossEscapeHtml(r.banco.nome||r.sel.nome||'Produto')+'</title>'
-    +'<style>@page{size:A4 portrait;margin:11mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#222;font-size:10px;margin:0}.hdr{border-bottom:3px solid #D4001A;padding-bottom:8px;margin-bottom:10px;display:flex;justify-content:space-between;gap:12px}.hdr h1{font-size:18px;margin:0 0 3px}.muted{color:#666}.badge{display:inline-block;border:1px solid #bbb;border-radius:99px;padding:2px 6px;margin-right:3px;font-size:8px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}.k{border:1px solid #ccc;border-radius:6px;padding:7px}.k span{display:block;color:#666;text-transform:uppercase;font-size:7px;font-weight:bold}.k b{display:block;font-size:13px;margin-top:3px}.k small{display:block;color:#666;margin-top:2px}.sec{font-size:9px;font-weight:bold;text-transform:uppercase;letter-spacing:.04em;margin:11px 0 4px;border-bottom:1px solid #ddd;padding-bottom:3px}.analysis{border:1px solid #ccc;border-radius:6px;padding:8px;line-height:1.45}.two{display:grid;grid-template-columns:1fr 1fr;gap:6px}table{width:100%;border-collapse:collapse;font-size:8px}th{background:#eee;text-align:left;padding:5px;border:1px solid #ccc}td{padding:5px;border:1px solid #ddd}.foot{margin-top:10px;border-top:1px solid #ccc;padding-top:6px;color:#666;font-size:8px;line-height:1.4}.no-print{display:none}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'
-    +'<div class="hdr"><div><h1>Raio-X Gerencial do Item</h1><div><strong>'+bossEscapeHtml(r.banco.nome||r.sel.nome||'Produto')+'</strong></div><div class="muted">Código: '+bossEscapeHtml(r.banco.cod||'—')+' · Unidade: '+bossEscapeHtml(r.banco.unidade||'—')+' · Setor: '+bossEscapeHtml(r.setor)+'</div></div><div style="text-align:right"><strong>Boss Vision AURA</strong><div class="muted">Período: '+bossEscapeHtml(periodo||'selecionado')+'</div><div class="muted">Emitido: '+new Date().toLocaleString('pt-BR')+'</div></div></div>'
+    +'<style>@page{size:A4 portrait;margin:11mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#222;font-size:10px;margin:0}.hdr{border-bottom:3px solid #D4001A;padding-bottom:10px;margin-bottom:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:start}.hdr h1{font-size:18px;margin:0 0 3px}.muted{color:#666}.hero{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:12px;align-items:start}.heroInfo{min-width:0}.photoBox{width:110px;height:110px;border:1px solid #d9d9d9;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:6px}.photoBox img{max-width:100%;max-height:100%;object-fit:contain;display:block}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}.k{border:1px solid #ccc;border-radius:6px;padding:7px}.k span{display:block;color:#666;text-transform:uppercase;font-size:7px;font-weight:bold}.k b{display:block;font-size:13px;margin-top:3px}.k small{display:block;color:#666;margin-top:2px}.sec{font-size:9px;font-weight:bold;text-transform:uppercase;letter-spacing:.04em;margin:11px 0 4px;border-bottom:1px solid #ddd;padding-bottom:3px}.analysis{border:1px solid #ccc;border-radius:6px;padding:8px;line-height:1.45}.two{display:grid;grid-template-columns:1fr 1fr;gap:6px}table{width:100%;border-collapse:collapse;font-size:8px}th{background:#eee;text-align:left;padding:5px;border:1px solid #ccc}td{padding:5px;border:1px solid #ddd}.foot{margin-top:10px;border-top:1px solid #ccc;padding-top:6px;color:#666;font-size:8px;line-height:1.4}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'
+    +'<div class="hdr"><div class="hero"><div class="heroInfo"><h1>Raio-X Gerencial do Item</h1><div><strong>'+bossEscapeHtml(r.banco.nome||r.sel.nome||'Produto')+'</strong></div><div class="muted">Código: '+bossEscapeHtml(r.banco.cod||'—')+' · Unidade: '+bossEscapeHtml(r.banco.unidade||'—')+' · Setor: '+bossEscapeHtml(r.setor)+'</div><div class="muted" style="margin-top:4px">Fornecedor: '+bossEscapeHtml(r.banco.fornecedor||'—')+'</div></div>'+fotoHtml+'</div><div style="text-align:right"><strong>Boss Vision AURA</strong><div class="muted">Período: '+bossEscapeHtml(periodo||'selecionado')+'</div><div class="muted">Emitido: '+new Date().toLocaleString('pt-BR')+'</div></div></div>'
     +'<div class="kpis">'
     +'<div class="k"><span>Compras</span><b>'+brl(r.compras.valor)+'</b><small>'+qtd(r.compras.qtd)+' '+bossEscapeHtml(r.banco.unidade||'qtd')+'</small></div>'
     +'<div class="k"><span>Vendas</span><b>'+brl(r.vendas.valor)+'</b><small>'+qtd(r.vendas.qtd)+' qtd</small></div>'
@@ -8007,6 +8192,7 @@ function bossRxHtmlPrint_(r){
     +(r.quebraVenda!==null?('Quebra/Venda: '+bossRxFmtPct_(r.quebraVenda)+'. '):'')
     +bossEscapeHtml(r.statusCusto||'Sem metodologia individual adicional disponível.')+'</div>'
     +'<div class="analysis"><strong>Cadastro</strong><br>Fornecedor: '+bossEscapeHtml(r.banco.fornecedor||'—')+'<br>Custo atual no banco: '+brl(r.banco.custo)+'<br>Unidade: '+bossEscapeHtml(r.banco.unidade||'—')+'</div></div>'
+    +(r.consolidado?('<div class="sec">Comparação dos códigos marcados</div><table><thead><tr><th>Código</th><th>Produto</th><th>Un.</th><th>Compra qtd</th><th>Compra R$</th><th>Venda qtd</th><th>Venda R$</th><th>Quebra R$</th><th>% vendas</th></tr></thead><tbody>'+comparacao+'</tbody></table>'):'')
     +'<div class="sec">Movimentação encontrada no período</div><table><thead><tr><th>Origem</th><th>Setor</th><th>Data/NF</th><th>Fornecedor</th><th>Qtd</th><th>Un.</th><th>Custo unit.</th><th>Valor</th></tr></thead><tbody>'+(linhas||'<tr><td colspan="8">Nenhuma movimentação encontrada.</td></tr>')+'</tbody></table>'
     +'<div class="foot"><strong>Observação:</strong> relatório gerencial baseado nas fontes disponíveis no período. Custos transformados da Padaria podem ser provisórios enquanto a receita não estiver cadastrada. Margens do Horti são estimativas por cruzamento de compra e venda. Use este relatório para análise gerencial e confronto operacional; não substitui contabilidade ou inventário físico.</div>'
     +'</body></html>';
@@ -8014,11 +8200,12 @@ function bossRxHtmlPrint_(r){
 function bossRxImprimirA4_(){
   if(!_bossRxSelecionado){alert('Selecione um item primeiro.');return;}
   var r=bossRxResumo_(_bossRxSelecionado);
+  var fotoSrc=bossRxFotoAtualSrc_();
   var w=window.open('','_blank','width=960,height=720');
   if(!w){alert('O navegador bloqueou a janela de impressão. Libere pop-ups para este site.');return;}
-  w.document.open();w.document.write(bossRxHtmlPrint_(r));w.document.close();
+  w.document.open();w.document.write(bossRxHtmlPrint_(r,fotoSrc));w.document.close();
   w.focus();
-  setTimeout(function(){try{w.print();}catch(e){}},350);
+  setTimeout(function(){try{w.print();}catch(e){}},450);
 }
 
 
