@@ -1647,6 +1647,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-clean-chart{min-width:0}
 .boss-clean-chart-body{height:245px;padding:14px}
 .boss-clean-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.boss-clean-kpis-two{grid-template-columns:repeat(2,minmax(0,1fr))}
 .boss-clean-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .boss-clean-insights{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .boss-clean-card{
@@ -1683,7 +1684,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .boss-clean-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:680px){
-  .boss-clean-kpis{grid-template-columns:1fr}
+  .boss-clean-kpis,.boss-clean-kpis-two{grid-template-columns:1fr}
   .boss-clean-actions,.boss-clean-insights{grid-template-columns:1fr}
   .boss-clean-chart-body{height:215px;padding:10px}
 }
@@ -2461,8 +2462,14 @@ function toggleTheme() {
           </div>
         </div>
 
-        <!-- 2) CARDS PRINCIPAIS -->
+        <!-- 2) COMPRAS HORTI | QUEBRAS HORTI | VENDAS HORTI -->
         <div class="boss-clean-kpis">
+          <div class="boss-clean-card" id="bossKpiEntradaCard" onclick="bossToggleGrupo('bossGrupoEntrada','bossKpiEntradaCard','bossEntradaChevron')">
+            <div class="boss-clean-card-head"><i class="ti ti-shopping-cart" style="color:var(--blue)"></i> Compras Horti <i class="ti ti-chevron-down" id="bossEntradaChevron"></i></div>
+            <div class="boss-clean-card-value blue" id="bossKpiEntrada">R$ 0,00</div>
+            <div class="boss-clean-card-sub" id="bossKpiEntradaSub">NF + CEASA · clique para detalhar</div>
+          </div>
+
           <div class="boss-clean-card" id="bossKpiQuebrasHortiCard" onclick="bossAbrirQuebraSetor('bossPanelQuebraHorti')">
             <div class="boss-clean-card-head"><i class="ti ti-trash" style="color:var(--red)"></i> Quebras Horti</div>
             <div class="boss-clean-card-value red" id="bossKpiQuebrasHorti">R$ 0,00</div>
@@ -2474,11 +2481,14 @@ function toggleTheme() {
             <div class="boss-clean-card-value green" id="bossKpiVendas">R$ 0,00</div>
             <div class="boss-clean-card-sub" id="bossKpiVendasSub">ABC Horti · clique para detalhar</div>
           </div>
+        </div>
 
-          <div class="boss-clean-card" id="bossKpiProducaoPadariaCard" onclick="bossToggleGrupo('bossGrupoProducaoPadaria','bossKpiProducaoPadariaCard','bossProducaoPadariaChevron')">
-            <div class="boss-clean-card-head"><i class="ti ti-chef-hat" style="color:var(--amber)"></i> Insumos produção Padaria <i class="ti ti-chevron-down" id="bossProducaoPadariaChevron"></i></div>
-            <div class="boss-clean-card-value amber" id="bossKpiProducaoPadaria">R$ 0,00</div>
-            <div class="boss-clean-card-sub" id="bossKpiProducaoPadariaSub">Insumos consumidos para fabricar e vender</div>
+        <!-- 3) COMPRAS PADARIA | QUEBRAS PADARIA | VENDAS PADARIA -->
+        <div class="boss-clean-kpis">
+          <div class="boss-clean-card" id="bossKpiComprasPadariaCard" onclick="bossToggleGrupo('bossGrupoGerencialPadaria','bossKpiPadariaCard','bossPadariaChevron')">
+            <div class="boss-clean-card-head"><i class="ti ti-shopping-cart" style="color:var(--blue)"></i> Compras Padaria</div>
+            <div class="boss-clean-card-value blue" id="bossKpiComprasPadaria">R$ 0,00</div>
+            <div class="boss-clean-card-sub" id="bossKpiComprasPadariaSub">Entradas do período · clique para análise</div>
           </div>
 
           <div class="boss-clean-card" id="bossKpiQuebrasPadariaCard" onclick="bossAbrirQuebraSetor('bossPanelQuebraPadaria')">
@@ -2492,15 +2502,9 @@ function toggleTheme() {
             <div class="boss-clean-card-value green" id="bossKpiVendasPadaria">R$ 0,00</div>
             <div class="boss-clean-card-sub" id="bossKpiVendasPadariaSub">ABC Padaria · clique para detalhar</div>
           </div>
-
-          <div class="boss-clean-card" id="bossKpiConsumoCard" onclick="bossToggleGrupo('bossGrupoConsumo','bossKpiConsumoCard','bossConsumoChevron')">
-            <div class="boss-clean-card-head"><i class="ti ti-building-warehouse" style="color:var(--blue)"></i> Material uso e consumo loja <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div>
-            <div class="boss-clean-card-value blue" id="bossKpiConsumo">R$ 0,00</div>
-            <div class="boss-clean-card-sub" id="bossKpiConsumoSub">Uso interno da loja · sem finalidade de venda</div>
-          </div>
         </div>
 
-        <!-- 3) ANÁLISE COMPLETA HORTI | PADARIA -->
+        <!-- 4) ANÁLISE COMPLETA HORTI | ANÁLISE COMPLETA PADARIA -->
         <div class="boss-clean-actions">
           <div class="boss-clean-action" id="bossKpiHortiCard" onclick="bossToggleGrupo('bossGrupoGerencialHorti','bossKpiHortiCard','bossHortiChevron')">
             <div class="boss-clean-action-icon"><i class="ti ti-chart-dots-3" style="color:var(--green)"></i></div>
@@ -2523,7 +2527,7 @@ function toggleTheme() {
           </div>
         </div>
 
-        <!-- 4) ONDE AGIR HORTI | PADARIA -->
+        <!-- 5) ONDE AGIR HORTI | ONDE AGIR PADARIA -->
         <div class="boss-clean-insights">
           <div class="boss-clean-action" id="bossOndeAgirHortiCard" onclick="bossToggleGrupo('bossGrupoInsightsHorti','bossOndeAgirHortiCard','bossOndeAgirHortiChevron')">
             <div class="boss-clean-action-icon"><i class="ti ti-bulb" style="color:var(--green)"></i></div>
@@ -2543,6 +2547,21 @@ function toggleTheme() {
               <div class="boss-clean-action-sub" id="bossOndeAgirPadariaSub">Clique para abrir as prioridades</div>
             </div>
             <i class="ti ti-chevron-down" id="bossOndeAgirPadariaChevron"></i>
+          </div>
+        </div>
+
+        <!-- 6) MATERIAL USO/CONSUMO LOJA | INSUMOS PRODUÇÃO PADARIA -->
+        <div class="boss-clean-kpis boss-clean-kpis-two">
+          <div class="boss-clean-card" id="bossKpiConsumoCard" onclick="bossToggleGrupo('bossGrupoConsumo','bossKpiConsumoCard','bossConsumoChevron')">
+            <div class="boss-clean-card-head"><i class="ti ti-building-warehouse" style="color:var(--blue)"></i> Material uso e consumo loja <i class="ti ti-chevron-down" id="bossConsumoChevron"></i></div>
+            <div class="boss-clean-card-value blue" id="bossKpiConsumo">R$ 0,00</div>
+            <div class="boss-clean-card-sub" id="bossKpiConsumoSub">Uso interno da loja · sem finalidade de venda</div>
+          </div>
+
+          <div class="boss-clean-card" id="bossKpiProducaoPadariaCard" onclick="bossToggleGrupo('bossGrupoProducaoPadaria','bossKpiProducaoPadariaCard','bossProducaoPadariaChevron')">
+            <div class="boss-clean-card-head"><i class="ti ti-chef-hat" style="color:var(--amber)"></i> Insumos produção Padaria <i class="ti ti-chevron-down" id="bossProducaoPadariaChevron"></i></div>
+            <div class="boss-clean-card-value amber" id="bossKpiProducaoPadaria">R$ 0,00</div>
+            <div class="boss-clean-card-sub" id="bossKpiProducaoPadariaSub">Insumos consumidos para fabricar e vender</div>
           </div>
         </div>
       </div>
@@ -5803,7 +5822,7 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8.14-dashboard-limpo-insights';
+var BOSS_VISION_BUILD='v8.15-ordem-cards-executiva';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
 function bossFmtBRL(v){
