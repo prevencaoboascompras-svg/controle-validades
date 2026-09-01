@@ -2268,17 +2268,21 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão mostra o <strong>mês inteiro</strong>; use "Dia específico" para consultar o dia escolhido. Os setores com dados suficientes podem ser abertos abaixo para uma análise mais profunda.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti/Padaria por NF, ABC Horti, ABC Padaria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
+          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre o <strong>último mês fechado</strong>. Você pode escolher qualquer mês, abrir o <strong>mês atual</strong> ou consultar um <strong>dia específico</strong>. O mês atual só terá análise completa quando os relatórios desse mês já tiverem sido gerados.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti/Padaria por NF, ABC Horti, ABC Padaria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
         <div>
           <div class="boss-controls">
             <div class="boss-periodo-toggle" id="bossPeriodoToggle">
-              <button type="button" class="boss-periodo-opt active" data-periodo="mes" onclick="bossSetPeriodo('mes')">Mês completo</button>
+              <button type="button" class="boss-periodo-opt active" data-periodo="mes" onclick="bossSetPeriodo('mes')">Mês</button>
               <button type="button" class="boss-periodo-opt" data-periodo="dia" onclick="bossSetPeriodo('dia')">Dia específico</button>
             </div>
-            <input id="bossData" class="boss-date" type="date" onchange="bossCarregar(true)">
+            <input id="bossData" class="boss-date" type="month" onchange="bossCarregar(true)">
+            <div id="bossAtalhosMes" style="display:flex;gap:6px;align-items:center">
+              <button type="button" class="btn btn-sm" onclick="bossUsarUltimoMesFechado()" title="Abre o mês anterior ao mês atual"><i class="ti ti-calendar-check"></i> Último fechado</button>
+              <button type="button" class="btn btn-sm" onclick="bossUsarMesAtual()" title="Abre o mês corrente"><i class="ti ti-calendar"></i> Mês atual</button>
+            </div>
             <button class="btn" onclick="abrirEntradaCeasaModal()"><i class="ti ti-truck-delivery"></i> Entrada CEASA</button>
             <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
           </div>
@@ -6948,16 +6952,95 @@ function bossRender(dados){
   bossRenderInsights_(dados);
 }
 var bossPeriodoAtual='mes';
+
+function bossMesAtualValor_(){
+  return bossHoje().slice(0,7);
+}
+
+function bossUltimoMesFechadoValor_(){
+  var h=bossHoje().split('-');
+  var d=new Date(Number(h[0]),Number(h[1])-2,1,12,0,0,0);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+
+function bossMesLabelValor_(ym){
+  var p=String(ym||'').match(/^(\d{4})-(\d{2})$/);
+  if(!p)return String(ym||'');
+  var nomes=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  return nomes[Math.max(0,Math.min(11,Number(p[2])-1))]+'/'+p[1];
+}
+
+function bossDataApiSelecionada_(){
+  var inp=document.getElementById('bossData');
+  if(!inp)return '';
+  var v=String(inp.value||'');
+  if(bossPeriodoAtual==='dia'){
+    return /^\d{4}-\d{2}-\d{2}$/.test(v)?v:bossHoje();
+  }
+  var ym=/^\d{4}-\d{2}$/.test(v)?v:(/^\d{4}-\d{2}-\d{2}$/.test(v)?v.slice(0,7):bossUltimoMesFechadoValor_());
+  // O backend trabalha com AAAA-MM-DD, mas no modo mensal usa apenas o mês.
+  return ym+'-01';
+}
+
+function bossConfigurarCampoPeriodo_(p,valorPreferido){
+  var inp=document.getElementById('bossData');
+  var atalhos=document.getElementById('bossAtalhosMes');
+  if(!inp)return;
+
+  if(p==='dia'){
+    var dia=/^\d{4}-\d{2}-\d{2}$/.test(String(valorPreferido||''))?String(valorPreferido):bossHoje();
+    inp.type='date';
+    inp.value=dia;
+    if(atalhos)atalhos.style.display='none';
+  }else{
+    var mes='';
+    var pref=String(valorPreferido||'');
+    if(/^\d{4}-\d{2}$/.test(pref))mes=pref;
+    else if(/^\d{4}-\d{2}-\d{2}$/.test(pref))mes=pref.slice(0,7);
+    if(!mes)mes=bossUltimoMesFechadoValor_();
+    inp.type='month';
+    inp.value=mes;
+    if(atalhos)atalhos.style.display='flex';
+  }
+}
+
 function bossSetPeriodo(p){
-  if(bossPeriodoAtual===p)return;
+  p=(p==='dia')?'dia':'mes';
+  var antigo=bossPeriodoAtual;
+  if(antigo===p){
+    bossConfigurarCampoPeriodo_(p,document.getElementById('bossData')&&document.getElementById('bossData').value);
+    return;
+  }
+
   bossPeriodoAtual=p;
   document.querySelectorAll('.boss-periodo-opt').forEach(function(b){
     b.classList.toggle('active',b.getAttribute('data-periodo')===p);
   });
-  var inp=document.getElementById('bossData');
-  if(inp)inp.disabled=false; // data continua editável: define o mês de referência mesmo no modo "mês completo"
+
+  // Ao entrar no modo mensal, usa o último mês fechado como ponto seguro.
+  // Ao entrar no modo diário, abre hoje.
+  bossConfigurarCampoPeriodo_(p,p==='dia'?bossHoje():bossUltimoMesFechadoValor_());
   bossCarregar(true);
 }
+
+function bossUsarUltimoMesFechado(){
+  bossPeriodoAtual='mes';
+  document.querySelectorAll('.boss-periodo-opt').forEach(function(b){
+    b.classList.toggle('active',b.getAttribute('data-periodo')==='mes');
+  });
+  bossConfigurarCampoPeriodo_('mes',bossUltimoMesFechadoValor_());
+  bossCarregar(true);
+}
+
+function bossUsarMesAtual(){
+  bossPeriodoAtual='mes';
+  document.querySelectorAll('.boss-periodo-opt').forEach(function(b){
+    b.classList.toggle('active',b.getAttribute('data-periodo')==='mes');
+  });
+  bossConfigurarCampoPeriodo_('mes',bossMesAtualValor_());
+  bossCarregar(true);
+}
+
 function bossFetch(url,data,periodo){
   return new Promise(function(resolve,reject){
     if(!url){reject(new Error('URL /exec principal da AURA não configurada.'));return;}
@@ -6980,13 +7063,15 @@ function bossFetch(url,data,periodo){
 }
 function bossCarregar(force){
   var inp=document.getElementById('bossData');if(!inp)return;
-  if(!inp.value)inp.value=bossHoje();
-  var data=inp.value;
+  if(!inp.value)bossConfigurarCampoPeriodo_(bossPeriodoAtual,bossPeriodoAtual==='dia'?bossHoje():bossUltimoMesFechadoValor_());
+  var data=bossDataApiSelecionada_();
   var periodo=bossPeriodoAtual;
   var url=bossApiUrl();
   var btn=document.getElementById('bossBtnAtualizar');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
-  bossSetStatus('',periodo==='mes'?'Atualizando o mês completo até '+data.split('-').reverse().join('/')+'... A primeira leitura de um XLS grande pode levar mais tempo.':'Atualizando eventos de '+data.split('-').reverse().join('/')+'...');
+  bossSetStatus('',periodo==='mes'
+    ?('Atualizando '+bossMesLabelValor_(data.slice(0,7))+'... A primeira leitura de um XLS grande pode levar mais tempo.')
+    :('Atualizando eventos de '+data.split('-').reverse().join('/')+'...'));
   if(!url){
     bossRender(_bossDados||{}); // mesmo sem Drive, Vencidos continua vindo da AURA
     bossSetStatus('warn','Dados locais atualizados. A API principal da AURA ainda não está disponível para carregar Entradas NF, Quebras e Consumo Interno.');
@@ -7004,7 +7089,15 @@ function bossCarregar(force){
     var _bossTRender=performance.now();
     console.log('[Boss Vision] render:',(_bossTRender-_bossTFetch).toFixed(0)+'ms');
     console.timeEnd('[Boss Vision] tempo total (fetch+render)');
-    try{localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({data:data,periodo:periodo,dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
+    try{
+      localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({
+        data:data,
+        periodo:periodo,
+        valorFiltro:(periodo==='mes'?data.slice(0,7):data),
+        dados:dados,
+        salvoEm:new Date().toISOString()
+      }));
+    }catch(e){}
     var avisos=(res.avisos||dados.avisos||[]);
     if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);
     else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Entradas NF + CEASA + Vendas + Quebras');
@@ -7022,13 +7115,29 @@ function bossCarregar(force){
   }).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}});
 }
 function bossInit(){
-  var inp=document.getElementById('bossData');if(inp&&!inp.value)inp.value=bossHoje();
   var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
-  if(cache&&cache.periodo)bossPeriodoAtual=cache.periodo;
+
+  // Regra gerencial:
+  // - abre sempre no modo MÊS;
+  // - mês padrão = último mês fechado;
+  // - mês atual fica disponível por atalho quando os relatórios já existirem.
+  bossPeriodoAtual='mes';
+  var mesPadrao=bossUltimoMesFechadoValor_();
+  bossConfigurarCampoPeriodo_('mes',mesPadrao);
+
   document.querySelectorAll('.boss-periodo-opt').forEach(function(b){
-    b.classList.toggle('active',b.getAttribute('data-periodo')===bossPeriodoAtual);
+    b.classList.toggle('active',b.getAttribute('data-periodo')==='mes');
   });
-  if(cache&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','Snapshot local exibido; abra o Boss Vision para atualizar o Drive.');}
+
+  // Não exibe snapshot de outro mês. Isso evita abrir setembro mostrando
+  // silenciosamente dados salvos de agosto ou vice-versa.
+  if(cache&&cache.dados&&cache.periodo==='mes'){
+    var cacheMes=String(cache.valorFiltro||cache.data||'').slice(0,7);
+    if(cacheMes===mesPadrao){
+      bossRender(cache.dados);
+      bossSetStatus('warn','Snapshot de '+bossMesLabelValor_(mesPadrao)+' exibido; abra o Boss Vision para atualizar os relatórios.');
+    }
+  }
 }
 setTimeout(bossInit,0);
 
