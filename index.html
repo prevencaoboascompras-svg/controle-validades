@@ -1631,6 +1631,30 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-empty{padding:26px 14px;text-align:center;color:var(--tx2);font-size:12px}
 .boss-empty i{font-size:24px;display:block;margin-bottom:7px;opacity:.45}
 .boss-source-note{font-size:10px;color:var(--tx2);padding:8px 12px;background:var(--bg2);border-top:1px solid var(--bd)}
+.boss-fontes-bar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:7px}
+.boss-fontes-comp{font-size:9.5px;color:var(--tx2);font-weight:700}
+.boss-fontes-panel{
+  display:none;margin-top:7px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);
+  overflow:hidden;max-width:760px
+}
+.boss-fontes-panel.show{display:block}
+.boss-fontes-head{padding:8px 10px;background:var(--bg2);border-bottom:1px solid var(--bd);font-size:10px;font-weight:850}
+.boss-fontes-list{max-height:250px;overflow:auto}
+.boss-fonte-row{
+  display:grid;grid-template-columns:minmax(150px,1fr) minmax(170px,1.25fr) minmax(90px,.65fr) auto;
+  gap:8px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--bd);font-size:9px
+}
+.boss-fonte-row:last-child{border-bottom:none}
+.boss-fonte-cat{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boss-fonte-file{color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boss-fonte-period{color:var(--tx2)}
+.boss-fonte-ok{color:var(--green);font-weight:850}
+.boss-fonte-warn{padding:7px 10px;border-top:1px solid var(--bd);background:rgba(239,159,39,.06);font-size:9px;color:var(--tx2);line-height:1.4}
+@media(max-width:680px){
+  .boss-fonte-row{grid-template-columns:1fr auto}
+  .boss-fonte-file,.boss-fonte-period{grid-column:1/-1}
+}
+
 .boss-config{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--bd)}
 .boss-config.open{display:block}
 .boss-config-grid{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
@@ -2623,8 +2647,17 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre o <strong>último mês fechado</strong>. Você pode escolher qualquer mês, abrir o <strong>mês atual</strong> ou consultar um <strong>dia específico</strong>. O mês atual só terá análise completa quando os relatórios desse mês já tiverem sido gerados.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: Entradas Horti/Padaria por NF, ABC Horti, ABC Padaria, ABC Fiambreria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
+          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre o <strong>último mês fechado</strong>. Você pode escolher qualquer mês, abrir o <strong>mês atual</strong> ou consultar um <strong>dia específico</strong>. O mês atual só terá análise completa quando os relatórios desse mês já tiverem sido gerados.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: BANCO DE DADOS/AAAA-MM · Entradas Horti, Entradas Padaria, Entradas Fiambreria, ABC Horti, ABC Padaria, ABC Fiambreria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
+          <div class="boss-fontes-bar">
+            <button type="button" class="btn btn-sm" onclick="bossToggleFontes_()"><i class="ti ti-folder-check"></i> Verificar fontes</button>
+            <span class="boss-fontes-comp" id="bossCompetenciaDrive">Pasta mensal será definida pelo período selecionado</span>
+          </div>
+          <div class="boss-fontes-panel" id="bossFontesPanel">
+            <div class="boss-fontes-head" id="bossFontesHead">Fontes do Boss Vision</div>
+            <div class="boss-fontes-list" id="bossFontesList"></div>
+            <div class="boss-fonte-warn" id="bossFontesAvisos" style="display:none"></div>
+          </div>
           <div style="font-size:10px;color:var(--green);margin-top:6px"><i class="ti ti-link"></i> Integrado à API principal da AURA · uma única conexão</div>
         </div>
         <div>
@@ -2796,7 +2829,7 @@ function toggleTheme() {
           <div class="boss-clean-card" id="bossKpiComprasPadariaCard" onclick="bossToggleGrupo('bossGrupoGerencialPadaria','bossKpiPadariaCard','bossPadariaChevron')">
             <div class="boss-clean-card-head"><i class="ti ti-shopping-cart" style="color:var(--blue)"></i> Compras Padaria</div>
             <div class="boss-clean-card-value blue" id="bossKpiComprasPadaria">R$ 0,00</div>
-            <div class="boss-clean-card-sub" id="bossKpiComprasPadariaSub">Entradas do período · clique para análise</div>
+            <div class="boss-clean-card-sub" id="bossKpiComprasPadariaSub">Entradas Padaria + Fiambreria · clique para análise</div>
           </div>
 
           <div class="boss-clean-card" id="bossKpiQuebrasPadariaCard" onclick="bossAbrirQuebraSetor('bossPanelQuebraPadaria')">
@@ -2992,9 +3025,9 @@ function toggleTheme() {
         <div class="boss-horti-gerencial">
           <div class="boss-horti-kpis">
             <div class="boss-horti-card">
-              <div class="gh-label">Compras Padaria</div>
+              <div class="gh-label">Compras Padaria + Fiambreria</div>
               <div class="gh-value neutro" id="gpCompras">—</div>
-              <div class="gh-sub" id="gpComprasSub">Entradas por NF</div>
+              <div class="gh-sub" id="gpComprasSub">Entradas Padaria + Fiambreria por NF</div>
             </div>
             <div class="boss-horti-card">
               <div class="gh-label">Vendas Padaria</div>
@@ -6130,7 +6163,7 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8.21-abc-fiambreria-integrado';
+var BOSS_VISION_BUILD='v8.23-pastas-mensais-seguras';
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
 function bossFmtBRL(v){
@@ -6169,6 +6202,62 @@ function bossSetStatus(tipo,msg){
   var ico=tipo==='ok'?'ti-circle-check':tipo==='err'?'ti-alert-circle':tipo==='warn'?'ti-alert-triangle':'ti-point-filled';
   el.innerHTML='<i class="ti '+ico+'"></i> '+msg;
 }
+
+function bossToggleFontes_(){
+  var p=document.getElementById('bossFontesPanel');if(!p)return;
+  p.classList.toggle('show');
+}
+function bossFonteTitulo_(f){
+  var c=String((f&&f.categoria)||'fonte').replace(/_/g,' ');
+  var s=String((f&&f.setor)||'').trim();
+  return s?(s+' · '+c):c;
+}
+function bossRenderFontes_(dados){
+  dados=dados||{};
+  var comp=String(dados.competencia||'').trim();
+  var pasta=String(dados.pastaRelatorios||'').trim();
+  var label=document.getElementById('bossCompetenciaDrive');
+  if(label){
+    label.textContent=comp
+      ?('Competência '+comp+' · '+(pasta||('BANCO DE DADOS/'+comp)))
+      :'Pasta mensal será definida pelo período selecionado';
+  }
+
+  var head=document.getElementById('bossFontesHead');
+  if(head)head.textContent=comp?('Fontes carregadas de '+(pasta||('BANCO DE DADOS/'+comp))):'Fontes do Boss Vision';
+
+  var list=document.getElementById('bossFontesList');
+  if(list){
+    var fontes=Array.isArray(dados.fontes)?dados.fontes:[];
+    if(!fontes.length){
+      list.innerHTML='<div class="boss-empty" style="padding:12px">Nenhum relatório do Drive carregado para esta competência.</div>';
+    }else{
+      list.innerHTML=fontes.map(function(f){
+        var ok=f.incluidaNoCalculo===false?false:true;
+        return '<div class="boss-fonte-row">'
+          +'<div class="boss-fonte-cat">'+bossEscapeHtml(bossFonteTitulo_(f))+'</div>'
+          +'<div class="boss-fonte-file" title="'+bossEscapeHtml((f.pasta||'')+'/'+(f.arquivo||''))+'">'+bossEscapeHtml(f.arquivo||'—')+'</div>'
+          +'<div class="boss-fonte-period">'+bossEscapeHtml(f.periodoRelatorio||f.competencia||comp||'—')+'</div>'
+          +'<div class="'+(ok?'boss-fonte-ok':'')+'">'+(ok?'OK':'NÃO USADO')+'</div>'
+          +'</div>';
+      }).join('');
+    }
+  }
+
+  var avisos=document.getElementById('bossFontesAvisos');
+  if(avisos){
+    var arr=Array.isArray(dados.avisos)?dados.avisos:[];
+    if(arr.length){
+      avisos.style.display='';
+      avisos.innerHTML='<strong><i class="ti ti-alert-triangle"></i> Atenção:</strong><br>'
+        +arr.map(function(x){return '• '+bossEscapeHtml(x);}).join('<br>');
+    }else{
+      avisos.style.display='none';
+      avisos.innerHTML='';
+    }
+  }
+}
+
 function bossGetPath(obj,path,def){
   var cur=obj;
   for(var i=0;i<path.length;i++){if(cur==null)return def;cur=cur[path[i]];}
@@ -6644,7 +6733,7 @@ function bossRenderGerencialPadaria_(dados){
     ['gpCompras','gpVendas','gpProducao','gpQuebra','gpProducaoVenda','gpQuebraVenda','gpProducaoCompra','gpFluxo','gpResultadoAntes','gpResultado','gpMargem','gpCobertura']
       .forEach(function(id){setTxt_(id,'—');});
     setTxt_('gpStatusTitulo','Sem dados gerenciais');
-    setTxt_('gpStatusDesc','Atualize o Boss Vision com Compras, ABC, Produção e Quebra da Padaria.');
+    setTxt_('gpStatusDesc','Atualize o Boss Vision com Entradas Padaria + Fiambreria, ABC Padaria + Fiambreria, Produção e Quebra.');
     setTxt_('gpDiretos','0 produtos');
     setTxt_('gpPendentes','0 produtos');
     var c=document.getElementById('gpCustos');if(c)c.innerHTML='<div class="boss-empty">Sem dados.</div>';
@@ -6654,8 +6743,8 @@ function bossRenderGerencialPadaria_(dados){
 
   setTxt_('gpCompras',g.comprasIncluidasNoCalculo?bossFmtBRL(g.totalCompra||0):'—');
   setTxt_('gpComprasSub',g.comprasIncluidasNoCalculo
-    ?((Number(g.totalNotasCompra)||0)+' NF · '+(g.comprasPeriodoRelatorio||'mês'))
-    :(g.comprasMotivo||'Compras mensais não disponíveis'));
+    ?((Number(g.totalNotasCompra)||0)+' NF · Padaria + Fiambreria · '+(g.comprasPeriodoRelatorio||'mês'))
+    :(g.comprasMotivo||'Compras Padaria + Fiambreria não disponíveis'));
 
   setTxt_('gpVendas',g.vendasIncluidasNoCalculo?bossFmtBRL(g.totalVendas||0):'—');
   setTxt_('gpVendasSub',g.vendasIncluidasNoCalculo
@@ -6742,11 +6831,14 @@ function bossRenderGerencialPadaria_(dados){
   var mc=Array.isArray(g.maioresCompras)?g.maioresCompras:[];
   if(compras){
     if(!mc.length){
-      compras.innerHTML='<div class="boss-empty">Nenhuma compra Padaria disponível no período.</div>';
+      compras.innerHTML='<div class="boss-empty">Nenhuma compra Padaria/Fiambreria disponível no período.</div>';
     }else{
       compras.innerHTML=mc.map(function(x){
         return '<div class="boss-padaria-compra-row">'
-          +'<div class="boss-padaria-prod"><strong>'+bossEscapeHtml(x.nome||x.cod||'Insumo')+'</strong><small>'+bossEscapeHtml(x.codigoInterno||x.cod||'')+'</small></div>'
+          +'<div class="boss-padaria-prod"><strong>'+bossEscapeHtml(x.nome||x.cod||'Insumo')+'</strong><small>'
+          +bossEscapeHtml(x.codigoInterno||x.cod||'')
+          +((x.origens||[]).length?((x.codigoInterno||x.cod)?' · ':'')+bossEscapeHtml((x.origens||[]).join(' + ')):'')
+          +'</small></div>'
           +'<div class="boss-padaria-num"><small>Qtd</small>'+bossFmtQtd(x.pesoTotal||0)+'</div>'
           +'<div class="boss-padaria-num"><small>Custo médio</small>'+bossFmtBRL(x.custoMedio||0)+'</div>'
           +'<div class="boss-padaria-num"><small>Total</small>'+bossFmtBRL(x.valorTotal||0)+'</div>'
@@ -7669,11 +7761,30 @@ function bossRxAtividades_(){
     (ent.itens||[]).forEach(function(x){bossRxAdd_(arr,'CEASA Horti','horti',x,{fornecedor:ent.fornecedor||'CEASA',nf:ent.notaId||'',data:ent.data||''});});
   });
 
-  var nfP=g.entradaPadariaNF||{};
-  (Array.isArray(nfP.porProduto)?nfP.porProduto:[]).forEach(function(x){bossRxAdd_(arr,'Compras NF Padaria','padaria',x);});
-  (Array.isArray(nfP.notas)?nfP.notas:[]).forEach(function(n){
-    (n.itens||[]).forEach(function(x){bossRxAdd_(arr,'NF Padaria','padaria',x,{fornecedor:n.fornecedor||n.fantasia||'',nf:n.nf||'',data:n.data||''});});
-  });
+  // Entradas da Padaria e Fiambreria são lidas separadamente no Raio-X.
+  // O grupo entradaPadariaNF já é consolidado no backend novo e não deve ser
+  // lido novamente, para não duplicar compras.
+  var nfPBase=g.entradaPadariaNFBase||{};
+  var nfF=g.entradaFiambreriaNF||{};
+  var backendEntradasNovo=!!(g.entradaPadariaNFBase||g.entradaFiambreriaNF);
+
+  if(backendEntradasNovo){
+    (Array.isArray(nfPBase.porProduto)?nfPBase.porProduto:[]).forEach(function(x){bossRxAdd_(arr,'Compras NF Padaria','padaria',x);});
+    (Array.isArray(nfPBase.notas)?nfPBase.notas:[]).forEach(function(n){
+      (n.itens||[]).forEach(function(x){bossRxAdd_(arr,'NF Padaria','padaria',x,{fornecedor:n.fornecedor||n.fantasia||'',nf:n.nf||'',data:n.data||''});});
+    });
+
+    (Array.isArray(nfF.porProduto)?nfF.porProduto:[]).forEach(function(x){bossRxAdd_(arr,'Compras NF Fiambreria','padaria',x);});
+    (Array.isArray(nfF.notas)?nfF.notas:[]).forEach(function(n){
+      (n.itens||[]).forEach(function(x){bossRxAdd_(arr,'NF Fiambreria','padaria',x,{fornecedor:n.fornecedor||n.fantasia||'',nf:n.nf||'',data:n.data||''});});
+    });
+  }else{
+    var nfP=g.entradaPadariaNF||{};
+    (Array.isArray(nfP.porProduto)?nfP.porProduto:[]).forEach(function(x){bossRxAdd_(arr,'Compras NF Padaria','padaria',x);});
+    (Array.isArray(nfP.notas)?nfP.notas:[]).forEach(function(n){
+      (n.itens||[]).forEach(function(x){bossRxAdd_(arr,'NF Padaria','padaria',x,{fornecedor:n.fornecedor||n.fantasia||'',nf:n.nf||'',data:n.data||''});});
+    });
+  }
 
   var vh=g.vendasHorti||{};
   (Array.isArray(vh.porProduto)?vh.porProduto:[]).forEach(function(x){bossRxAdd_(arr,'Vendas Horti','horti',{cod:x.cod,nome:x.nome,qtde:x.qtde,valor:x.valor,unidade:x.unidade});});
@@ -8338,6 +8449,7 @@ function bossRenderCharts_(dados){
 
 function bossRender(dados){
   _bossDados=dados||{};
+  bossRenderFontes_(_bossDados);
   bossAtualizaPeriodos_(dados);
   var horti=bossLista(_bossDados,'horti');
   var padaria=bossLista(_bossDados,'padaria');
@@ -8375,8 +8487,8 @@ function bossRender(dados){
   var kcps=document.getElementById('bossKpiComprasPadariaSub');
   if(kcps){
     kcps.textContent=(gerPadaria&&gerPadaria.comprasIncluidasNoCalculo)
-      ?('Compras do período · toque para análise')
-      :((gerPadaria&&gerPadaria.comprasMotivo)||'Compras Padaria indisponíveis no período');
+      ?('Padaria + Fiambreria · compras do período · toque para análise')
+      :((gerPadaria&&gerPadaria.comprasMotivo)||'Compras Padaria + Fiambreria indisponíveis no período');
   }
 
   var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
@@ -8552,6 +8664,9 @@ function bossCarregar(force){
   if(!inp.value)bossConfigurarCampoPeriodo_(bossPeriodoAtual,bossPeriodoAtual==='dia'?bossHoje():bossUltimoMesFechadoValor_());
   var data=bossDataApiSelecionada_();
   var periodo=bossPeriodoAtual;
+  var compPrev=String(data||'').slice(0,7);
+  var compEl=document.getElementById('bossCompetenciaDrive');
+  if(compEl&&compPrev)compEl.textContent='Competência '+compPrev+' · BANCO DE DADOS/'+compPrev;
   var url=bossApiUrl();
   var btn=document.getElementById('bossBtnAtualizar');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
