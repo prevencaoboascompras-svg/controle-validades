@@ -1916,6 +1916,96 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .boss-clean-chart-body{height:215px;padding:10px}
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   COBERTURA FORNECEDOR
+   ═══════════════════════════════════════════════════════════════ */
+.cf-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.cf-title{font-size:18px;font-weight:850;color:var(--tx);display:flex;align-items:center;gap:8px}
+.cf-sub{font-size:11px;color:var(--tx2);margin-top:4px;max-width:760px;line-height:1.45}
+.cf-actions{display:flex;gap:7px;flex-wrap:wrap}
+.cf-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:14px}
+.cf-kpi{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:12px}
+.cf-kpi-label{font-size:9px;text-transform:uppercase;letter-spacing:.055em;color:var(--tx2);font-weight:750}
+.cf-kpi-val{font-size:21px;font-weight:900;margin-top:5px;color:var(--tx)}
+.cf-kpi-val.money{color:var(--green)}
+.cf-editor{display:none;background:var(--bg2);border:1px solid var(--bds);border-radius:12px;padding:14px;margin-bottom:14px}
+.cf-editor.open{display:block}
+.cf-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.cf-field label{display:block;font-size:9px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.cf-field input,.cf-field select,.cf-field textarea{
+  width:100%;box-sizing:border-box;background:var(--bg);color:var(--tx);
+  border:1px solid var(--bds);border-radius:8px;padding:8px 9px;font-size:12px;outline:none
+}
+.cf-field textarea{min-height:58px;resize:vertical;font-family:inherit}
+.cf-field input:focus,.cf-field select:focus,.cf-field textarea:focus{border-color:#8b5cf6}
+.cf-span2{grid-column:span 2}.cf-span4{grid-column:1/-1}
+.cf-product-box{margin-top:13px;padding-top:13px;border-top:1px solid var(--bd)}
+.cf-product-search{position:relative}
+.cf-sugs{display:none;position:absolute;z-index:70;left:0;right:0;top:calc(100% + 3px);max-height:280px;overflow:auto;background:var(--bg);border:1px solid var(--bds);border-radius:9px;box-shadow:0 10px 28px rgba(0,0,0,.28)}
+.cf-sugs.show{display:block}
+.cf-sug{padding:9px 10px;border-bottom:1px solid var(--bd);cursor:pointer}
+.cf-sug:last-child{border-bottom:none}.cf-sug:hover{background:var(--bg3)}
+.cf-sug-name{font-size:11px;font-weight:750;color:var(--tx)}
+.cf-sug-meta{font-size:9px;color:var(--tx2);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.cf-ref{font-size:9px;color:var(--tx2);margin-top:5px;line-height:1.4}
+.cf-table-wrap{overflow:auto;border:1px solid var(--bd);border-radius:10px;margin-top:11px}
+.cf-table{width:100%;min-width:1030px;border-collapse:collapse;font-size:10px;table-layout:auto}
+.cf-table th{background:var(--bg3);color:var(--tx2);font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;padding:7px 8px;text-align:left;position:static}
+.cf-table td{padding:8px;border-top:1px solid var(--bd);vertical-align:middle}
+.cf-table input{width:82px;background:var(--bg);color:var(--tx);border:1px solid var(--bds);border-radius:6px;padding:5px 6px;font-size:10px}
+.cf-table .cf-num{text-align:right;font-variant-numeric:tabular-nums}
+.cf-over{color:var(--amber);font-weight:800}
+.cf-total-row{font-weight:900;background:rgba(124,58,237,.07)}
+.cf-savebar{display:flex;justify-content:flex-end;gap:7px;flex-wrap:wrap;margin-top:12px}
+.cf-list{display:flex;flex-direction:column;gap:9px}
+.cf-card{background:var(--bg2);border:1px solid var(--bd);border-radius:11px;padding:12px}
+.cf-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.cf-card-title{font-size:13px;font-weight:850;color:var(--tx)}
+.cf-card-sub{font-size:10px;color:var(--tx2);margin-top:3px;line-height:1.4}
+.cf-card-tools{display:flex;gap:6px;flex-wrap:wrap}
+.cf-card-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px}
+.cf-mini{border:1px solid var(--bd);border-radius:8px;padding:8px;background:var(--bg)}
+.cf-mini span{display:block;font-size:8px;text-transform:uppercase;color:var(--tx2);font-weight:800}
+.cf-mini b{display:block;font-size:12px;margin-top:3px;color:var(--tx)}
+.cf-status{display:inline-flex;align-items:center;padding:3px 7px;border-radius:999px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.045em}
+.cf-status.aberta{background:rgba(245,158,11,.13);color:#f59e0b}
+.cf-status.fechada{background:rgba(59,130,246,.13);color:#60a5fa}
+.cf-status.paga{background:rgba(16,185,129,.13);color:#34d399}
+.cf-empty{text-align:center;padding:36px 14px;color:var(--tx2);border:1px dashed var(--bds);border-radius:10px}
+@media(max-width:900px){
+  .cf-kpis{grid-template-columns:repeat(2,1fr)}
+  .cf-grid{grid-template-columns:repeat(2,1fr)}
+  .cf-span2{grid-column:span 2}.cf-span4{grid-column:1/-1}
+  .cf-card-kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:520px){
+  .cf-grid{grid-template-columns:1fr}.cf-span2,.cf-span4{grid-column:1}
+  .cf-kpis{grid-template-columns:repeat(2,1fr)}
+  .cf-kpi-val{font-size:18px}
+}
+
+
+/* COBERTURA FORNECEDOR v2 — negociação + fechamento */
+.cf-flow{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin:0 0 14px}
+.cf-step{border:1px solid var(--bd);border-radius:10px;background:var(--bg2);padding:10px 11px}
+.cf-step-num{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#7c3aed;color:#fff;font-weight:900;font-size:11px;margin-right:6px}
+.cf-step-title{font-size:11px;font-weight:900;color:var(--tx)}
+.cf-step-sub{font-size:9px;color:var(--tx2);margin-top:4px;line-height:1.4}
+.cf-step-arrow{color:var(--tx2);font-size:18px}
+.cf-report-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.cf-btn-neg{background:#7c3aed!important;color:#fff!important;border-color:#7c3aed!important}
+.cf-btn-result{background:#0f766e!important;color:#fff!important;border-color:#0f766e!important}
+.cf-ref-box{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cf-ref-main{flex:1;min-width:240px}
+.cf-suggest-btn{height:30px;padding:0 9px;border:1px solid #7c3aed;border-radius:7px;background:rgba(124,58,237,.10);color:#a78bfa;font-size:9px;font-weight:900;cursor:pointer}
+.cf-stage-badge{display:inline-flex;align-items:center;gap:5px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;padding:3px 7px;border-radius:999px;background:rgba(124,58,237,.11);color:#a78bfa}
+.cf-table .cf-potential{color:#a78bfa;font-weight:850}
+.cf-table .cf-due{color:var(--green);font-weight:900}
+@media(max-width:700px){
+  .cf-flow{grid-template-columns:1fr}.cf-step-arrow{display:none}
+}
+
 </style>
 </head>
 <body>
@@ -2263,6 +2353,10 @@ function tentarLogin() {
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <span>Antecipação Encarte</span>
       <span class="sb-nav-badge" id="asBadgeAnt" style="display:none">0</span>
+    </button>
+    <button onclick="auraNav(this,'cobertura')">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+      <span>Cobertura Fornecedor</span>
     </button>
     <button onclick="auraNav(this,'relatorio')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -2641,6 +2735,168 @@ function toggleTheme() {
     <div id="antMesesContainer"></div>
   </div>
 
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       COBERTURA FORNECEDOR
+       ═══════════════════════════════════════════════════════ -->
+  <div id="sec-cobertura" class="sec">
+    <div class="cf-head">
+      <div>
+        <div class="cf-title"><i class="ti ti-arrows-diff"></i> Cobertura Fornecedor <span class="cf-stage-badge">Negociação + Resultado</span></div>
+        <div class="cf-sub">Primeiro monte o <b>Relatório de Negociação</b>: bipe os códigos, a AURA puxa os valores do Banco de Dados e você informa quantas unidades existem no estoque e qual será o preço da ação. Depois da campanha, lance as vendas dos mesmos itens e gere o <b>Relatório de Resultado</b> com o ressarcimento efetivamente devido pelo fornecedor.</div>
+      </div>
+      <div class="cf-actions">
+        <button class="btn" onclick="cfCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
+        <button class="btn btn-green" onclick="cfNovaAcao()"><i class="ti ti-plus"></i> Nova negociação</button>
+      </div>
+    </div>
+
+    <div class="cf-flow">
+      <div class="cf-step">
+        <span class="cf-step-num">1</span><span class="cf-step-title">Negociação com o fornecedor</span>
+        <div class="cf-step-sub">Código/EAN → produto, custo e preço normal → estoque atual → preço da ação → cobertura por unidade → PDF de negociação.</div>
+      </div>
+      <i class="ti ti-arrow-right cf-step-arrow"></i>
+      <div class="cf-step">
+        <span class="cf-step-num">2</span><span class="cf-step-title">Fechamento das vendas</span>
+        <div class="cf-step-sub">Abra a mesma negociação → lance a quantidade vendida por item → AURA limita ao estoque negociado → PDF final de resultado/ressarcimento.</div>
+      </div>
+    </div>
+
+    <div class="cf-kpis">
+      <div class="cf-kpi"><div class="cf-kpi-label">Negociações abertas</div><div class="cf-kpi-val" id="cfKpiAbertas">0</div></div>
+      <div class="cf-kpi"><div class="cf-kpi-label">Estoque em negociação</div><div class="cf-kpi-val" id="cfKpiProdutos">0</div></div>
+      <div class="cf-kpi"><div class="cf-kpi-label">Cobertura máxima negociada</div><div class="cf-kpi-val money" id="cfKpiPotencial">R$ 0,00</div></div>
+      <div class="cf-kpi"><div class="cf-kpi-label">Ressarcimento apurado</div><div class="cf-kpi-val money" id="cfKpiReceber">R$ 0,00</div></div>
+    </div>
+
+    <div class="cf-editor" id="cfEditor">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:11px">
+        <div style="font-size:13px;font-weight:850" id="cfEditorTitulo">Nova negociação</div>
+        <button class="btn btn-sm" onclick="cfFecharEditor()"><i class="ti ti-x"></i> Fechar</button>
+      </div>
+
+      <div class="cf-grid">
+        <div class="cf-field cf-span2">
+          <label>Nome da negociação / campanha</label>
+          <input id="cfCampanha" placeholder="Ex.: Pipocas Yoki Micro-ondas">
+        </div>
+        <div class="cf-field">
+          <label>Fornecedor que dará a cobertura</label>
+          <input id="cfFornecedor" placeholder="Preenchido automaticamente quando possível">
+        </div>
+        <div class="cf-field">
+          <label>Status</label>
+          <select id="cfStatus">
+            <option value="ABERTA">Negociação / ação aberta</option>
+            <option value="FECHADA">Resultado fechado / enviado</option>
+            <option value="PAGA">Ressarcimento recebido</option>
+          </select>
+        </div>
+        <div class="cf-field">
+          <label>Início da ação</label>
+          <input type="date" id="cfInicio">
+        </div>
+        <div class="cf-field">
+          <label>Fim da ação</label>
+          <input type="date" id="cfFim">
+        </div>
+        <div class="cf-field cf-span2">
+          <label>Observações / condição negociada</label>
+          <input id="cfObs" placeholder="Ex.: Yoki cobrirá a diferença por unidade vendida durante o período">
+        </div>
+      </div>
+
+      <div class="cf-product-box">
+        <div style="font-size:11px;font-weight:850;margin-bottom:8px"><i class="ti ti-report-money"></i> 1. Itens da negociação</div>
+        <div class="cf-grid">
+          <div class="cf-field cf-span2 cf-product-search">
+            <label>Bipe / digite o código de barras</label>
+            <input id="cfBuscaProduto" placeholder="Bipe o EAN ou pesquise pelo nome/sabor..." autocomplete="off" oninput="cfBuscarProdutos_()" onkeydown="cfBuscaKeydown_(event)">
+            <div class="cf-sugs" id="cfSugestoes"></div>
+          </div>
+          <div class="cf-field">
+            <label>Quantas unidades tem no estoque?</label>
+            <input type="number" min="0" step="1" id="cfEstoqueInicial" value="1">
+          </div>
+          <div class="cf-field">
+            <label>Unidade</label>
+            <input id="cfUnidade" placeholder="UN">
+          </div>
+          <div class="cf-field">
+            <label>Custo atual</label>
+            <input type="number" min="0" step="0.01" id="cfCusto" placeholder="R$">
+          </div>
+          <div class="cf-field">
+            <label>Preço normal atual</label>
+            <input type="number" min="0" step="0.01" id="cfPrecoNormal" placeholder="R$" oninput="cfAtualizarReferencia_()">
+          </div>
+          <div class="cf-field">
+            <label>Preço que será praticado na ação</label>
+            <input type="number" min="0" step="0.01" id="cfPrecoAcao" placeholder="R$" oninput="cfAtualizarReferencia_()">
+          </div>
+          <div class="cf-field">
+            <label>Cobertura acordada / unidade</label>
+            <input type="number" min="0" step="0.01" id="cfCoberturaUnit" placeholder="R$" oninput="cfAtualizarReferencia_()">
+          </div>
+        </div>
+
+        <div class="cf-ref-box">
+          <div class="cf-ref cf-ref-main" id="cfReferencia">Selecione o produto. A AURA mostrará a diferença entre o preço normal e o preço da ação como sugestão de cobertura.</div>
+          <button class="cf-suggest-btn" id="cfUsarSugestao" onclick="cfUsarCoberturaSugerida_()" style="display:none"><i class="ti ti-wand"></i> Usar diferença sugerida</button>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-top:8px">
+          <button class="btn btn-green" onclick="cfAdicionarProduto_()"><i class="ti ti-plus"></i> Adicionar item</button>
+        </div>
+
+        <div class="cf-table-wrap">
+          <table class="cf-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Código</th>
+                <th>Estoque inicial</th>
+                <th>Custo</th>
+                <th>Preço normal</th>
+                <th>Preço ação</th>
+                <th>Cobertura/un.</th>
+                <th>Cobertura máxima</th>
+                <th>Qtd vendida</th>
+                <th>Qtd reconhecida</th>
+                <th>Ressarcimento</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cfProdutosBody"></tbody>
+            <tfoot id="cfProdutosFoot"></tfoot>
+          </table>
+        </div>
+
+        <div class="cf-ref"><strong>Como funciona:</strong> no relatório de negociação, o fornecedor verá o estoque inicial e a <b>cobertura máxima</b> se todo esse estoque for vendido. No fechamento, você informa a <b>Qtd vendida</b>; o ressarcimento final considera apenas a quantidade efetivamente vendida, limitada ao estoque inicial negociado.</div>
+      </div>
+
+      <div class="cf-savebar" style="justify-content:space-between">
+        <div class="cf-report-actions">
+          <button class="btn cf-btn-neg" onclick="cfImprimirNegociacaoAtual_()"><i class="ti ti-file-invoice"></i> PDF Negociação</button>
+          <button class="btn cf-btn-result" onclick="cfImprimirResultadoAtual_()"><i class="ti ti-report-analytics"></i> PDF Resultado</button>
+        </div>
+        <div class="cf-report-actions">
+          <button class="btn" onclick="cfFecharEditor()">Cancelar</button>
+          <button class="btn btn-green" id="cfSalvarBtn" onclick="cfSalvarAcao_()"><i class="ti ti-device-floppy"></i> Salvar negociação</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:16px 0 8px">
+      <div style="font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)">Negociações cadastradas</div>
+      <div style="font-size:10px;color:var(--tx2)" id="cfInfo"></div>
+    </div>
+    <div class="cf-list" id="cfLista">
+      <div class="cf-empty"><i class="ti ti-loader-2"></i><div style="margin-top:6px">Carregando...</div></div>
+    </div>
+  </div>
 
   <div id="sec-bossvision" class="sec">
     <div class="boss-wrap">
@@ -4157,6 +4413,7 @@ function parseDate(v){
 
 var banco={};
 var bancoCusto={};
+var bancoVenda={}; // VALOR DE VENDA oficial do BANCO DE DADOS
 var bancoFornecedor={};
 var bancoFornecedorNome={}; // índice: nome normalizado → fornecedor (fallback sem código de barras)
 var bancoUnidade={}; // unidade do BANCO DE DADOS (usada também nas Entradas CEASA)
@@ -4191,13 +4448,14 @@ async function loadBanco(cfg){
   if(!cfg.idBanco)return;
   try{
     var table=await fetchSheet(cfg.idBanco,cfg.abaBanco);
-    var rows=rawRows(table);banco={};bancoCusto={};bancoFornecedor={};bancoFornecedorNome={};bancoUnidade={};
-    var hIdx=-1,ciCod=-1,ciNome=-1,ciCusto=-1,ciForn=-1,ciUnid=-1;
+    var rows=rawRows(table);banco={};bancoCusto={};bancoVenda={};bancoFornecedor={};bancoFornecedorNome={};bancoUnidade={};
+    var hIdx=-1,ciCod=-1,ciNome=-1,ciCusto=-1,ciVenda=-1,ciForn=-1,ciUnid=-1;
 
     // Funções de detecção de coluna
     function isCod(t){return/\bEAN\b|\bGTIN\b|\bPLU\b|COD[\s._\-]?BARRA|BARRAS?\b|C[OÓ]D(IGO)?/.test(t);}
     function isNome(t){return/DESC(RI)?|NOME|PRODUTO|ITEM\b/.test(t);}
     function isCusto(t){return/CUSTO/.test(t);}
+    function isVenda(t){return/VALOR\s*DE\s*VENDA|PRE[CÇ]O\s*DE\s*VENDA|PRE[CÇ]O\s*VENDA|P\.?\s*VENDA|VENDA\s*R\$/.test(t);}
     function isForn(t){return/FORNEC|\bFORN\b|SUPPLIER|FABRICANTE|RAZ[AÃ]O|REPRESENT|DISTRIBU/.test(t);}
     function isUnid(t){return/UNID(ADE)?|\bUN\b/.test(t);}
 
@@ -4210,6 +4468,7 @@ async function loadBanco(cfg){
         hIdx=-1; // -1 = cabeçalho veio dos metadados, dados começam na row 0
         ciCod=ci2;ciNome=ni2;
         ciCusto=colTexts.findIndex(isCusto);
+        ciVenda=colTexts.findIndex(isVenda);
         ciForn=colTexts.findIndex(isForn);
         ciUnid=colTexts.findIndex(isUnid);
         console.log('Banco cabecalho via table.cols | cod:',ciCod,'| nome:',ciNome,'| custo:',ciCusto,'| fornec:',ciForn,'| headers:',colTexts.filter(Boolean));
@@ -4226,6 +4485,7 @@ async function loadBanco(cfg){
         if(ci>=0&&ni>=0){
           hIdx=i;ciCod=ci;ciNome=ni;
           ciCusto=rowTexts.findIndex(isCusto);
+          ciVenda=rowTexts.findIndex(isVenda);
           ciForn=rowTexts.findIndex(isForn);
           ciUnid=rowTexts.findIndex(isUnid);
           console.log('Banco cabecalho linha',i,'| cod:',ciCod,'| nome:',ciNome,'| custo:',ciCusto,'| fornec:',ciForn,'| headers:',rowTexts.filter(Boolean));
@@ -4237,7 +4497,7 @@ async function loadBanco(cfg){
     if(ciCod<0||ciNome<0){
       // Fallback: assume posição fixa conforme layout padrão (A=cod, B=produto, C=unid, D=custo, E=fornecedor)
       console.warn('Banco: cabecalho nao detectado — usando posicao fixa (A=cod,B=produto,D=custo,E=fornecedor)');
-      hIdx=0;ciCod=0;ciNome=1;ciCusto=3;ciForn=4;ciUnid=2;
+      hIdx=0;ciCod=0;ciNome=1;ciCusto=3;ciForn=4;ciUnid=2;ciVenda=5;
     }
     for(var i=hIdx+1;i<rows.length;i++){
       var cells=rows[i].c||[];
@@ -4246,6 +4506,7 @@ async function loadBanco(cfg){
       if(cod&&nome){
         banco[cod]=nome;
         if(ciCusto>=0){var cv=cellNum(cells[ciCusto]);if(cv)bancoCusto[cod]=cv;}
+        if(ciVenda>=0){var vv=cellNum(cells[ciVenda]);if(vv)bancoVenda[cod]=vv;}
         if(ciForn>=0){var fv=String((cells[ciForn]&&cells[ciForn].f)||(cells[ciForn]&&cells[ciForn].v)||'').trim();if(fv)bancoFornecedor[cod]=fv;}
         if(ciUnid>=0){var uv=String((cells[ciUnid]&&cells[ciUnid].f)||(cells[ciUnid]&&cells[ciUnid].v)||'').trim();if(uv)bancoUnidade[cod]=uv;}
       }
@@ -6164,6 +6425,8 @@ function addManual(){
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
 var BOSS_VISION_BUILD='v8.23-pastas-mensais-seguras';
+var AURA_COBERTURA_BUILD='v2-negociacao-e-resultado';
+console.info('[AURA] Cobertura Fornecedor',AURA_COBERTURA_BUILD);
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
 function bossFmtBRL(v){
@@ -8749,6 +9012,419 @@ window.addEventListener('focus',function(){
   if(currentTabName==='bossvision')bossReanimarGraficosBoss_();
 });
 
+
+// ═══════════════════════════════════════════════════════════════
+// COBERTURA FORNECEDOR v2 — NEGOCIAÇÃO + RESULTADO
+// ═══════════════════════════════════════════════════════════════
+var cfAcoes=[];
+var cfEditId=null;
+var cfProdutos=[];
+var cfProdutoSelecionado=null;
+var cfCarregado=false;
+var cfSugestaoCobertura=0;
+
+function cfNum_(v){
+  if(typeof v==='number')return isFinite(v)?v:0;
+  var s=String(v==null?'':v).trim().replace(/\s/g,'');
+  if(!s)return 0;
+  if(s.indexOf(',')>=0)s=s.replace(/\./g,'').replace(',','.');
+  var n=Number(s);
+  return isFinite(n)?n:0;
+}
+function cfMoney_(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function cfQtd_(v){return Number(v||0).toLocaleString('pt-BR',{maximumFractionDigits:3});}
+function cfEsc_(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function cfId_(){return 'cf_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);}
+function cfHoje_(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function cfFmtData_(iso){return iso?String(iso).split('-').reverse().join('/'):'—';}
+function cfEstoque_(p){return cfNum_(p&&p.estoqueInicial!=null?p.estoqueInicial:(p&&p.qtdCoberta));}
+
+async function cfGet_(action){
+  var cfg=loadCfg();
+  if(!cfg.url)return {ok:false,erro:'Configure a URL do Apps Script.'};
+  try{
+    var r=await fetch(cfg.url+'?action='+encodeURIComponent(action)+'&_='+Date.now(),{cache:'no-store'});
+    var txt=await r.text();
+    try{return JSON.parse(txt);}catch(e){return {ok:false,erro:'Resposta inválida do servidor.'};}
+  }catch(e){return {ok:false,erro:e.message};}
+}
+async function cfPost_(body){
+  var cfg=loadCfg();
+  if(!cfg.url)return {ok:false,erro:'Configure a URL do Apps Script.'};
+  try{
+    var r=await fetch(cfg.url,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=UTF-8'},
+      body:JSON.stringify(body)
+    });
+    var txt=await r.text();
+    try{return JSON.parse(txt);}catch(e){return {ok:false,erro:'Resposta inválida do servidor.'};}
+  }catch(e){return {ok:false,erro:e.message};}
+}
+
+async function cfCarregar(forcar){
+  if(cfCarregado&&!forcar){cfRenderLista_();return;}
+  var lista=document.getElementById('cfLista'),info=document.getElementById('cfInfo');
+  if(lista)lista.innerHTML='<div class="cf-empty"><i class="ti ti-loader-2"></i><div style="margin-top:6px">Carregando negociações...</div></div>';
+  var r=await cfGet_('buscarCoberturasFornecedor');
+  if(!r||!r.ok){
+    if(lista)lista.innerHTML='<div class="cf-empty"><i class="ti ti-alert-circle"></i><div style="margin-top:6px">Falha ao carregar: '+cfEsc_((r&&r.erro)||'erro')+'</div></div>';
+    return;
+  }
+  cfAcoes=Array.isArray(r.dados)?r.dados:[];
+  cfCarregado=true;
+  if(info)info.textContent=cfAcoes.length+' negociação(ões)';
+  cfRenderLista_();
+  cfAtualizarKpis_();
+}
+
+function cfResumoAcao_(a){
+  var p=a.produtos||[],pot=0,receber=0,estoque=0,qv=0,reconhecida=0;
+  p.forEach(function(x){
+    var est=cfEstoque_(x),vend=cfNum_(x.qtdVendida),rec=Math.min(est,vend),cob=cfNum_(x.coberturaUnit);
+    estoque+=est;qv+=vend;reconhecida+=rec;pot+=est*cob;receber+=rec*cob;
+  });
+  return {produtos:p.length,estoque:estoque,qtdVendida:qv,qtdReconhecida:reconhecida,potencial:pot,receber:receber};
+}
+function cfAtualizarKpis_(){
+  var abertas=0,estoque=0,pot=0,receber=0;
+  cfAcoes.forEach(function(a){
+    if((a.status||'ABERTA')==='ABERTA')abertas++;
+    var r=cfResumoAcao_(a);estoque+=r.estoque;pot+=r.potencial;receber+=r.receber;
+  });
+  var e=document.getElementById('cfKpiAbertas');if(e)e.textContent=abertas;
+  e=document.getElementById('cfKpiProdutos');if(e)e.textContent=cfQtd_(estoque);
+  e=document.getElementById('cfKpiPotencial');if(e)e.textContent=cfMoney_(pot);
+  e=document.getElementById('cfKpiReceber');if(e)e.textContent=cfMoney_(receber);
+}
+
+function cfNovaAcao(){
+  cfEditId=null;cfProdutos=[];cfProdutoSelecionado=null;cfSugestaoCobertura=0;
+  document.getElementById('cfEditorTitulo').textContent='Nova negociação com fornecedor';
+  document.getElementById('cfCampanha').value='';
+  document.getElementById('cfFornecedor').value='';
+  document.getElementById('cfStatus').value='ABERTA';
+  document.getElementById('cfInicio').value=cfHoje_();
+  document.getElementById('cfFim').value='';
+  document.getElementById('cfObs').value='';
+  cfLimparProduto_();
+  cfRenderProdutos_();
+  document.getElementById('cfEditor').classList.add('open');
+  setTimeout(function(){document.getElementById('cfCampanha').focus();},80);
+}
+function cfFecharEditor(){document.getElementById('cfEditor').classList.remove('open');cfFecharSugestoes_();}
+
+function cfBuscaKeydown_(event){
+  if(event.key==='Escape'){cfFecharSugestoes_();return;}
+  if(event.key==='Enter'){
+    event.preventDefault();
+    var raw=String(document.getElementById('cfBuscaProduto').value||'').replace(/\D/g,'');
+    if(raw&&banco&&banco[raw]){cfSelecionarProduto_(raw);return;}
+    var sug=document.querySelector('#cfSugestoes .cf-sug[data-cod]');
+    if(sug){sug.click();}
+  }
+}
+function cfBuscarProdutos_(){
+  var inp=document.getElementById('cfBuscaProduto');
+  var sug=document.getElementById('cfSugestoes');
+  var q=String(inp.value||'').trim();
+  if(q.length<2){sug.classList.remove('show');sug.innerHTML='';return;}
+  var qn=normalizarTexto(q),qcod=q.replace(/\D/g,'');
+  if(qcod&&banco&&banco[qcod]){cfSelecionarProduto_(qcod);return;}
+  var itens=[];
+  Object.keys(banco||{}).forEach(function(cod){
+    var nome=banco[cod]||'',nn=normalizarTexto(nome),score=99;
+    if(qcod&&cod.indexOf(qcod)===0)score=0;
+    else if(qcod&&cod.indexOf(qcod)>=0)score=1;
+    else if(nn.indexOf(qn)===0)score=2;
+    else if(nn.indexOf(qn)>=0)score=3;
+    else return;
+    itens.push({cod:cod,nome:nome,score:score});
+  });
+  itens.sort(function(a,b){return a.score-b.score||a.nome.localeCompare(b.nome,'pt-BR');});
+  itens=itens.slice(0,18);
+  sug.innerHTML=itens.map(function(p){
+    return '<div class="cf-sug" data-cod="'+cfEsc_(p.cod)+'" onclick="cfSelecionarProduto_(\''+p.cod+'\')">'
+      +'<div class="cf-sug-name">'+cfEsc_(p.nome)+'</div>'
+      +'<div class="cf-sug-meta"><span>'+cfEsc_(p.cod)+'</span>'
+      +(bancoFornecedor[p.cod]?'<span>'+cfEsc_(bancoFornecedor[p.cod])+'</span>':'')
+      +(bancoCusto[p.cod]?'<span>Custo '+cfMoney_(bancoCusto[p.cod])+'</span>':'')
+      +(bancoVenda[p.cod]?'<span>Venda '+cfMoney_(bancoVenda[p.cod])+'</span>':'')
+      +'</div></div>';
+  }).join('')||'<div class="cf-sug"><div class="cf-sug-name">Nenhum produto encontrado.</div></div>';
+  sug.classList.add('show');
+}
+function cfFecharSugestoes_(){var e=document.getElementById('cfSugestoes');if(e)e.classList.remove('show');}
+
+function cfSelecionarProduto_(cod){
+  var fornecedor=bancoFornecedor[cod]||'';
+  cfProdutoSelecionado={
+    cod:cod,
+    nome:banco[cod]||'',
+    unidade:bancoUnidade[cod]||'UN',
+    custo:cfNum_(bancoCusto[cod]),
+    precoNormal:cfNum_(bancoVenda[cod]),
+    fornecedor:fornecedor
+  };
+  document.getElementById('cfBuscaProduto').value=cfProdutoSelecionado.nome;
+  document.getElementById('cfCusto').value=cfProdutoSelecionado.custo||'';
+  document.getElementById('cfPrecoNormal').value=cfProdutoSelecionado.precoNormal||'';
+  document.getElementById('cfUnidade').value=cfProdutoSelecionado.unidade||'UN';
+  document.getElementById('cfEstoqueInicial').value='1';
+  var forn=document.getElementById('cfFornecedor');
+  if(forn&&!forn.value&&fornecedor)forn.value=fornecedor;
+  cfFecharSugestoes_();
+  cfAtualizarReferencia_();
+  setTimeout(function(){document.getElementById('cfEstoqueInicial').focus();document.getElementById('cfEstoqueInicial').select();},80);
+}
+
+function cfAtualizarReferencia_(){
+  var pn=cfNum_(document.getElementById('cfPrecoNormal').value);
+  var pa=cfNum_(document.getElementById('cfPrecoAcao').value);
+  var cu=cfNum_(document.getElementById('cfCusto').value);
+  var cob=cfNum_(document.getElementById('cfCoberturaUnit').value);
+  var est=cfNum_(document.getElementById('cfEstoqueInicial').value);
+  cfSugestaoCobertura=(pn>0&&pa>0)?Math.max(0,pn-pa):0;
+  var ref=[];
+  if(pn>0&&pa>0)ref.push('Diferença preço normal → preço ação: '+cfMoney_(cfSugestaoCobertura)+'/un');
+  if(cu>0&&pa>0)ref.push('Preço ação − custo: '+cfMoney_(pa-cu)+'/un');
+  if(cob>0&&est>0)ref.push('Cobertura máxima deste item: '+cfMoney_(cob*est));
+  ref.push('A cobertura/un pode ser ajustada conforme o acordo comercial.');
+  document.getElementById('cfReferencia').textContent=ref.join(' · ');
+  var b=document.getElementById('cfUsarSugestao');
+  if(b)b.style.display=cfSugestaoCobertura>0?'inline-flex':'none';
+}
+function cfUsarCoberturaSugerida_(){
+  if(cfSugestaoCobertura<=0){mostrarToast('Informe preço normal e preço da ação.','warn');return;}
+  document.getElementById('cfCoberturaUnit').value=cfSugestaoCobertura.toFixed(2);
+  cfAtualizarReferencia_();
+}
+function cfLimparProduto_(){
+  cfProdutoSelecionado=null;cfSugestaoCobertura=0;
+  ['cfBuscaProduto','cfCoberturaUnit','cfCusto','cfPrecoNormal','cfPrecoAcao'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('cfEstoqueInicial').value='1';
+  document.getElementById('cfUnidade').value='UN';
+  document.getElementById('cfReferencia').textContent='Selecione o produto. A AURA mostrará a diferença entre o preço normal e o preço da ação como sugestão de cobertura.';
+  var b=document.getElementById('cfUsarSugestao');if(b)b.style.display='none';
+}
+
+function cfAdicionarProduto_(){
+  if(!cfProdutoSelecionado||!cfProdutoSelecionado.cod){mostrarToast('Selecione um produto do Banco de Dados.','warn');return;}
+  var estoque=cfNum_(document.getElementById('cfEstoqueInicial').value);
+  var cobertura=cfNum_(document.getElementById('cfCoberturaUnit').value);
+  var precoAcao=cfNum_(document.getElementById('cfPrecoAcao').value);
+  if(estoque<=0){mostrarToast('Informe quantas unidades existem no estoque.','warn');return;}
+  if(precoAcao<=0){mostrarToast('Informe o preço que será praticado na ação.','warn');return;}
+  if(cobertura<=0){mostrarToast('Informe a cobertura acordada por unidade.','warn');return;}
+  var p={
+    cod:cfProdutoSelecionado.cod,
+    nome:cfProdutoSelecionado.nome,
+    fornecedor:cfProdutoSelecionado.fornecedor||'',
+    unidade:(document.getElementById('cfUnidade').value||'UN').trim(),
+    estoqueInicial:estoque,
+    qtdCoberta:estoque, // compatibilidade com a v1
+    custo:cfNum_(document.getElementById('cfCusto').value),
+    precoNormal:cfNum_(document.getElementById('cfPrecoNormal').value),
+    precoAcao:precoAcao,
+    coberturaUnit:cobertura,
+    qtdVendida:0
+  };
+  var idx=cfProdutos.findIndex(function(x){return x.cod===p.cod;});
+  if(idx>=0){
+    p.qtdVendida=cfNum_(cfProdutos[idx].qtdVendida);
+    cfProdutos[idx]=Object.assign({},cfProdutos[idx],p);
+  }else cfProdutos.push(p);
+  cfLimparProduto_();
+  cfRenderProdutos_();
+}
+
+function cfRenderProdutos_(){
+  var body=document.getElementById('cfProdutosBody'),foot=document.getElementById('cfProdutosFoot');
+  if(!body||!foot)return;
+  if(!cfProdutos.length){
+    body.innerHTML='<tr><td colspan="12" style="text-align:center;color:var(--tx2);padding:22px">Nenhum produto adicionado. Bipe o primeiro código para montar a negociação.</td></tr>';
+    foot.innerHTML='';return;
+  }
+  body.innerHTML=cfProdutos.map(function(p,i){
+    var estoque=cfEstoque_(p),vend=cfNum_(p.qtdVendida),reconhecida=Math.min(estoque,vend);
+    var potencial=estoque*cfNum_(p.coberturaUnit),receber=reconhecida*cfNum_(p.coberturaUnit);
+    var excedeu=vend>estoque;
+    return '<tr>'
+      +'<td><b>'+cfEsc_(p.nome)+'</b><div style="font-size:8px;color:var(--tx2)">'+cfEsc_(p.unidade||'')+(p.fornecedor?' · '+cfEsc_(p.fornecedor):'')+'</div></td>'
+      +'<td>'+cfEsc_(p.cod)+'</td>'
+      +'<td class="cf-num"><input type="number" step="1" min="0" value="'+estoque+'" onchange="cfAtualizarLinha_('+i+',\'estoqueInicial\',this.value)"></td>'
+      +'<td class="cf-num">'+cfMoney_(p.custo)+'</td>'
+      +'<td class="cf-num">'+cfMoney_(p.precoNormal)+'</td>'
+      +'<td class="cf-num"><input type="number" step="0.01" min="0" value="'+cfNum_(p.precoAcao)+'" onchange="cfAtualizarLinha_('+i+',\'precoAcao\',this.value)"></td>'
+      +'<td class="cf-num"><input type="number" step="0.01" min="0" value="'+cfNum_(p.coberturaUnit)+'" onchange="cfAtualizarLinha_('+i+',\'coberturaUnit\',this.value)"></td>'
+      +'<td class="cf-num cf-potential">'+cfMoney_(potencial)+'</td>'
+      +'<td class="cf-num"><input type="number" step="1" min="0" value="'+vend+'" onchange="cfAtualizarLinha_('+i+',\'qtdVendida\',this.value)"></td>'
+      +'<td class="cf-num '+(excedeu?'cf-over':'')+'">'+cfQtd_(reconhecida)+(excedeu?' *':'')+'</td>'
+      +'<td class="cf-num cf-due">'+cfMoney_(receber)+'</td>'
+      +'<td><button class="btn btn-sm" onclick="cfRemoverProduto_('+i+')" title="Remover"><i class="ti ti-trash"></i></button></td>'
+      +'</tr>';
+  }).join('');
+  var r=cfResumoAcao_({produtos:cfProdutos});
+  foot.innerHTML='<tr class="cf-total-row"><td colspan="2">TOTAL</td><td class="cf-num">'+cfQtd_(r.estoque)+'</td><td colspan="4"></td><td class="cf-num cf-potential">'+cfMoney_(r.potencial)+'</td><td class="cf-num">'+cfQtd_(r.qtdVendida)+'</td><td class="cf-num">'+cfQtd_(r.qtdReconhecida)+'</td><td class="cf-num cf-due">'+cfMoney_(r.receber)+'</td><td></td></tr>';
+}
+function cfAtualizarLinha_(i,campo,valor){
+  if(!cfProdutos[i])return;
+  cfProdutos[i][campo]=cfNum_(valor);
+  if(campo==='estoqueInicial')cfProdutos[i].qtdCoberta=cfProdutos[i][campo];
+  cfRenderProdutos_();
+}
+function cfRemoverProduto_(i){cfProdutos.splice(i,1);cfRenderProdutos_();}
+
+function cfAcaoForm_(){
+  return {
+    id:cfEditId||cfId_(),
+    versaoFluxo:2,
+    campanha:(document.getElementById('cfCampanha').value||'').trim(),
+    fornecedor:(document.getElementById('cfFornecedor').value||'').trim(),
+    status:document.getElementById('cfStatus').value||'ABERTA',
+    inicio:document.getElementById('cfInicio').value||'',
+    fim:document.getElementById('cfFim').value||'',
+    obs:(document.getElementById('cfObs').value||'').trim(),
+    produtos:cfProdutos.map(function(p){
+      var x=Object.assign({},p);
+      x.estoqueInicial=cfEstoque_(x);
+      x.qtdCoberta=x.estoqueInicial;
+      return x;
+    })
+  };
+}
+async function cfSalvarAcao_(){
+  var a=cfAcaoForm_();
+  if(!a.campanha){mostrarToast('Informe o nome da negociação/campanha.','warn');return;}
+  if(!a.fornecedor){mostrarToast('Informe o fornecedor responsável pela cobertura.','warn');return;}
+  if(!a.produtos.length){mostrarToast('Adicione pelo menos um produto.','warn');return;}
+  var btn=document.getElementById('cfSalvarBtn');
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Salvando...';
+  var r=await cfPost_({action:'salvarCoberturaFornecedor',acao:a});
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Salvar negociação';
+  if(!r||!r.ok){mostrarToast('Erro ao salvar: '+((r&&r.erro)||'falha'),'err');return;}
+  mostrarToast('Negociação salva.','ok');
+  cfEditId=a.id;cfCarregado=false;
+  await cfCarregar(true);
+  cfFecharEditor();
+}
+
+function cfEditar_(id){
+  var a=cfAcoes.find(function(x){return x.id===id;});
+  if(!a)return;
+  cfEditId=id;
+  cfProdutos=(a.produtos||[]).map(function(p){
+    var x=Object.assign({},p);
+    x.estoqueInicial=cfEstoque_(x);x.qtdCoberta=x.estoqueInicial;
+    return x;
+  });
+  document.getElementById('cfEditorTitulo').textContent='Negociação · '+(a.campanha||'');
+  document.getElementById('cfCampanha').value=a.campanha||'';
+  document.getElementById('cfFornecedor').value=a.fornecedor||'';
+  document.getElementById('cfStatus').value=a.status||'ABERTA';
+  document.getElementById('cfInicio').value=a.inicio||'';
+  document.getElementById('cfFim').value=a.fim||'';
+  document.getElementById('cfObs').value=a.obs||'';
+  cfLimparProduto_();cfRenderProdutos_();
+  document.getElementById('cfEditor').classList.add('open');
+  document.getElementById('cfEditor').scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function cfExcluir_(id){
+  var a=cfAcoes.find(function(x){return x.id===id;});
+  if(!a)return;
+  if(!confirm('Excluir a negociação "'+(a.campanha||'')+'"?'))return;
+  var r=await cfPost_({action:'excluirCoberturaFornecedor',id:id});
+  if(!r||!r.ok){mostrarToast('Erro ao excluir: '+((r&&r.erro)||'falha'),'err');return;}
+  mostrarToast('Negociação excluída.','ok');
+  cfCarregado=false;cfCarregar(true);
+}
+
+function cfRenderLista_(){
+  var lista=document.getElementById('cfLista'),info=document.getElementById('cfInfo');
+  if(!lista)return;
+  if(info)info.textContent=cfAcoes.length+' negociação(ões)';
+  if(!cfAcoes.length){
+    lista.innerHTML='<div class="cf-empty"><i class="ti ti-arrows-diff" style="font-size:30px"></i><div style="margin-top:8px"><b>Nenhuma negociação cadastrada.</b></div><div style="margin-top:4px">Crie a primeira, bipe os produtos e informe o estoque.</div></div>';
+    cfAtualizarKpis_();return;
+  }
+  lista.innerHTML=cfAcoes.map(function(a){
+    var r=cfResumoAcao_(a),st=(a.status||'ABERTA').toLowerCase();
+    return '<div class="cf-card">'
+      +'<div class="cf-card-head"><div><div class="cf-card-title">'+cfEsc_(a.campanha||'Negociação sem nome')+' <span class="cf-status '+st+'">'+cfEsc_(a.status||'ABERTA')+'</span></div>'
+      +'<div class="cf-card-sub"><b>'+cfEsc_(a.fornecedor||'')+'</b> · '+cfFmtData_(a.inicio)+' → '+cfFmtData_(a.fim)+(a.obs?'<br>'+cfEsc_(a.obs):'')+'</div></div>'
+      +'<div class="cf-card-tools">'
+      +'<button class="btn btn-sm" onclick="cfEditar_(\''+a.id+'\')"><i class="ti ti-pencil"></i> Abrir / lançar vendas</button>'
+      +'<button class="btn btn-sm cf-btn-neg" onclick="cfImprimirNegociacao_(\''+a.id+'\')"><i class="ti ti-file-invoice"></i> Negociação</button>'
+      +'<button class="btn btn-sm cf-btn-result" onclick="cfImprimirResultado_(\''+a.id+'\')"><i class="ti ti-report-analytics"></i> Resultado</button>'
+      +'<button class="btn btn-sm" onclick="cfExcluir_(\''+a.id+'\')"><i class="ti ti-trash"></i></button></div></div>'
+      +'<div class="cf-card-kpis">'
+      +'<div class="cf-mini"><span>Itens / estoque</span><b>'+r.produtos+' · '+cfQtd_(r.estoque)+' un.</b></div>'
+      +'<div class="cf-mini"><span>Vendidas</span><b>'+cfQtd_(r.qtdVendida)+' un.</b></div>'
+      +'<div class="cf-mini"><span>Cobertura máxima</span><b>'+cfMoney_(r.potencial)+'</b></div>'
+      +'<div class="cf-mini"><span>Ressarcimento apurado</span><b style="color:var(--green)">'+cfMoney_(r.receber)+'</b></div>'
+      +'</div></div>';
+  }).join('');
+  cfAtualizarKpis_();
+}
+
+function cfImprimirNegociacaoAtual_(){
+  var a=cfAcaoForm_();
+  if(!a.produtos.length){mostrarToast('Adicione produtos antes de gerar o relatório.','warn');return;}
+  cfAbrirRelatorio_(a,'NEGOCIACAO');
+}
+function cfImprimirResultadoAtual_(){
+  var a=cfAcaoForm_();
+  if(!a.produtos.length){mostrarToast('Adicione produtos antes de gerar o relatório.','warn');return;}
+  cfAbrirRelatorio_(a,'RESULTADO');
+}
+function cfImprimirNegociacao_(id){var a=cfAcoes.find(function(x){return x.id===id;});if(a)cfAbrirRelatorio_(a,'NEGOCIACAO');}
+function cfImprimirResultado_(id){var a=cfAcoes.find(function(x){return x.id===id;});if(a)cfAbrirRelatorio_(a,'RESULTADO');}
+
+function cfAbrirRelatorio_(a,tipo){
+  tipo=tipo==='RESULTADO'?'RESULTADO':'NEGOCIACAO';
+  var r=cfResumoAcao_(a);
+  var isResult=tipo==='RESULTADO';
+  var linhas=(a.produtos||[]).map(function(p){
+    var estoque=cfEstoque_(p),vend=cfNum_(p.qtdVendida),reconhecida=Math.min(estoque,vend);
+    var potencial=estoque*cfNum_(p.coberturaUnit),receber=reconhecida*cfNum_(p.coberturaUnit);
+    if(isResult){
+      return '<tr><td>'+cfEsc_(p.cod)+'</td><td>'+cfEsc_(p.nome)+'</td><td>'+cfEsc_(p.unidade||'')+'</td><td class="n">'+cfQtd_(estoque)+'</td><td class="n">'+cfMoney_(p.precoAcao)+'</td><td class="n">'+cfMoney_(p.coberturaUnit)+'</td><td class="n">'+cfQtd_(vend)+'</td><td class="n">'+cfQtd_(reconhecida)+'</td><td class="n"><b>'+cfMoney_(receber)+'</b></td></tr>';
+    }
+    return '<tr><td>'+cfEsc_(p.cod)+'</td><td>'+cfEsc_(p.nome)+'</td><td>'+cfEsc_(p.unidade||'')+'</td><td class="n">'+cfQtd_(estoque)+'</td><td class="n">'+cfMoney_(p.custo)+'</td><td class="n">'+cfMoney_(p.precoNormal)+'</td><td class="n">'+cfMoney_(p.precoAcao)+'</td><td class="n">'+cfMoney_(p.coberturaUnit)+'</td><td class="n"><b>'+cfMoney_(potencial)+'</b></td></tr>';
+  }).join('');
+
+  var titulo=isResult?'Relatório Final de Vendas e Ressarcimento':'Relatório de Negociação de Cobertura';
+  var kpis=isResult
+    ? '<div class="kpis"><div class="k"><span>Estoque negociado</span><b>'+cfQtd_(r.estoque)+'</b></div><div class="k"><span>Qtd vendida informada</span><b>'+cfQtd_(r.qtdVendida)+'</b></div><div class="k"><span>Qtd reconhecida</span><b>'+cfQtd_(r.qtdReconhecida)+'</b></div><div class="k"><span>Total a ressarcir</span><b>'+cfMoney_(r.receber)+'</b></div></div>'
+    : '<div class="kpis"><div class="k"><span>Produtos</span><b>'+r.produtos+'</b></div><div class="k"><span>Estoque negociado</span><b>'+cfQtd_(r.estoque)+'</b></div><div class="k"><span>Cobertura máxima</span><b>'+cfMoney_(r.potencial)+'</b></div><div class="k"><span>Período</span><b style="font-size:10px">'+cfFmtData_(a.inicio)+' a '+cfFmtData_(a.fim)+'</b></div></div>';
+
+  var cabeca=isResult
+    ? '<tr><th>Código</th><th>Produto</th><th>Un.</th><th>Estoque negociado</th><th>Preço ação</th><th>Cobertura/un.</th><th>Qtd vendida</th><th>Qtd reconhecida</th><th>Ressarcimento</th></tr>'
+    : '<tr><th>Código</th><th>Produto</th><th>Un.</th><th>Estoque atual</th><th>Custo</th><th>Preço normal</th><th>Preço ação</th><th>Cobertura/un.</th><th>Cobertura máxima</th></tr>';
+
+  var total=isResult
+    ? '<tr><th colspan="8" style="text-align:right">TOTAL A RESSARCIR PELO FORNECEDOR</th><th class="n">'+cfMoney_(r.receber)+'</th></tr>'
+    : '<tr><th colspan="8" style="text-align:right">COBERTURA MÁXIMA DA NEGOCIAÇÃO</th><th class="n">'+cfMoney_(r.potencial)+'</th></tr>';
+
+  var nota=isResult
+    ? 'Quantidade reconhecida = menor valor entre a quantidade vendida informada e o estoque inicial negociado. O total representa o ressarcimento apurado após as vendas.'
+    : 'Este relatório representa o limite máximo de cobertura caso todo o estoque informado seja vendido dentro da ação. O valor efetivo será apurado posteriormente no Relatório Final de Vendas.';
+
+  var rel='<!doctype html><html><head><meta charset="utf-8"><title>'+titulo+'</title><style>'
+    +'@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#222;font-size:9px;margin:0}.hdr{border-bottom:3px solid #7C3AED;padding-bottom:9px;margin-bottom:10px}.hdr h1{font-size:18px;margin:0 0 4px}.tag{display:inline-block;padding:3px 7px;border-radius:99px;background:#ede9fe;color:#5b21b6;font-size:7px;font-weight:bold;margin-left:6px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:8px 0 10px}.k{border:1px solid #ccc;border-radius:6px;padding:7px}.k span{display:block;color:#666;font-size:7px;text-transform:uppercase;font-weight:bold}.k b{display:block;font-size:13px;margin-top:3px}table{width:100%;border-collapse:collapse;font-size:7.5px}th{background:#eee;text-align:left;padding:5px;border:1px solid #ccc}td{padding:5px;border:1px solid #ddd}.n{text-align:right}.obs{margin-top:9px;border:1px solid #ccc;border-radius:6px;padding:7px;line-height:1.45}.foot{margin-top:8px;color:#666;font-size:7px}.print{margin-top:10px;padding:10px 14px;border:0;border-radius:6px;background:#7C3AED;color:#fff;font-weight:bold}@media print{.print{display:none}}</style></head><body>'
+    +'<div class="hdr"><h1>'+titulo+' <span class="tag">'+(isResult?'RESULTADO':'NEGOCIAÇÃO')+'</span></h1><div><b>'+cfEsc_(a.campanha||'')+'</b> · Fornecedor: <b>'+cfEsc_(a.fornecedor||'')+'</b> · Período: '+cfFmtData_(a.inicio)+' a '+cfFmtData_(a.fim)+' · Status: '+cfEsc_(a.status||'ABERTA')+'</div></div>'
+    +kpis
+    +'<table><thead>'+cabeca+'</thead><tbody>'+linhas+'</tbody><tfoot>'+total+'</tfoot></table>'
+    +(a.obs?'<div class="obs"><b>Condição / observações:</b> '+cfEsc_(a.obs)+'</div>':'')
+    +'<div class="foot"><b>'+nota+'</b><br>AURA · Cobertura Fornecedor v2 · Gerado em '+new Date().toLocaleString('pt-BR')+'</div>'
+    +'<button class="print" onclick="window.print()">Salvar / Imprimir PDF</button></body></html>';
+
+  var w=window.open('','_blank','width=1200,height=800');
+  if(!w){mostrarToast('Libere pop-ups para gerar o PDF.','warn');return;}
+  w.document.open();w.document.write(rel);w.document.close();w.focus();
+}
+
+
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
@@ -8776,6 +9452,7 @@ function goTab(name){
   if(name==='promocoes')renderPromos();
   if(name==='modalidades')renderModalidades();
   if(name==='antecipacao')renderAntecipacao();
+  if(name==='cobertura')cfCarregar(false);
   if(name==='dashboard')renderDashboard();
   if(name==='estoque')renderEstoque();
   if(name==='tarefas'){renderTarefas();sincronizarTarefasCompleto();}
