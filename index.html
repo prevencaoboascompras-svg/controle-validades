@@ -14,7 +14,6 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="AURA Venc.">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <!-- Android/PWA: manifest + cor do tema -->
@@ -2883,7 +2882,7 @@ function toggleTheme() {
 
       <div style="margin-top:9px;font-size:9px;color:var(--tx2);line-height:1.4">
         <i class="ti ti-database"></i>
-        Negociações antigas: ao abrir, a AURA completa os campos vazios primeiro pelo Banco carregado e, se o custo ainda não estiver disponível, consulta a API oficial por <b>JSONP</b>. Estoque, preço da ação, cobertura negociada e vendas não são alterados.
+        Negociações antigas: ao abrir, a AURA completa os campos vazios primeiro pelo Banco carregado e, se o custo ainda não estiver disponível, consulta a API oficial <b>buscarEANCompleto</b>. Estoque, preço da ação, cobertura negociada e vendas não são alterados.
       </div>
       <div class="cf-savebar" style="justify-content:space-between">
         <div class="cf-report-actions">
@@ -4372,7 +4371,80 @@ var GAS_URL='https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk
 var AURA_INDEX_BUILD='CEASA-AUTOCOMPLETE-20260825-1845';
 console.info('[AURA] index build',AURA_INDEX_BUILD,'— CEASA com autocomplete do BANCO DE DADOS + Boss periodo + imagens API AURA');
 function loadCfg(){var d={id:'1HDJvgbKqYRUh8YvKeNTJZ5PhjbqyqZTsYT3bUnjp0VQ',aba:'2025',idBanco:'1HDJvgbKqYRUh8YvKeNTJZ5PhjbqyqZTsYT3bUnjp0VQ',abaBanco:'BANCO DE DADOS',abaResp:'Respostas ao formulario 1',url:GAS_URL};var s=localStorage.getItem(CFG_KEY);if(!s)return d;var c=JSON.parse(s);return Object.assign(d,c);}
-function saveProd(){try{localStorage.setItem(PROD_KEY,JSON.stringify(products));}catch(e){console.warn('localStorage cheio — dados mantidos só em memória:',e.message);}}
+// v8 — libera SOMENTE caches reconstruíveis quando o localStorage lota.
+// Não apaga configurações, negociações, filas offline nem dados críticos.
+function _auraLiberarCachesReconstruiveis_(motivo){
+  var keys=[
+    'boascompras_thumb_cache_v4_api_drive_cosmos',
+    'boascompras_encartes_ativos',
+    'boascompras_promo_ativas',
+    'boascompras_biblioteca_v1',
+    'aura_setor_corrigido',
+    'boascompras_modalidades',
+    'boascompras_encerradas',
+    'boascompras_resolvidos',
+    'aura_boss_vision_v5_ceasa_periodo'
+  ];
+  var removidos=[],chars=0;
+  keys.forEach(function(k){
+    try{
+      var v=localStorage.getItem(k);
+      if(v!==null){
+        chars+=v.length;
+        localStorage.removeItem(k);
+        removidos.push(k);
+      }
+    }catch(e){}
+  });
+  if(removidos.length){
+    console.warn(
+      '[AURA storage] cota cheia ('+(motivo||'')+'). Removidos '+removidos.length+
+      ' cache(s) reconstruíveis (~'+Math.round(chars*2/1024)+' KB):',
+      removidos
+    );
+  }
+  return removidos.length>0;
+}
+
+function auraDiagnosticoStorage(){
+  var rows=[],total=0;
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i),v=localStorage.getItem(k)||'';
+      var bytes=(String(k).length+v.length)*2;
+      total+=bytes;
+      rows.push({chave:k,kb:Math.round(bytes/1024)});
+    }
+  }catch(e){}
+  rows.sort(function(a,b){return b.kb-a.kb;});
+  console.table(rows.slice(0,30));
+  console.info('[AURA storage] estimativa localStorage:',Math.round(total/1024),'KB');
+  if(navigator.storage&&navigator.storage.estimate){
+    navigator.storage.estimate().then(function(x){
+      console.info('[AURA storage] origin estimate:',{
+        usageMB:Math.round((x.usage||0)/1024/1024*10)/10,
+        quotaMB:Math.round((x.quota||0)/1024/1024*10)/10
+      });
+    }).catch(function(){});
+  }
+  return {kb:Math.round(total/1024),maiores:rows.slice(0,30)};
+}
+
+function saveProd(){
+  var json=JSON.stringify(products);
+  try{
+    localStorage.setItem(PROD_KEY,json);
+  }catch(e){
+    if(_auraLiberarCachesReconstruiveis_('aura_prod')){
+      try{
+        localStorage.setItem(PROD_KEY,json);
+        console.warn('localStorage recuperado — aura_prod gravado após limpeza segura de caches.');
+        return;
+      }catch(e2){}
+    }
+    console.warn('localStorage cheio — aura_prod mantido só em memória:',e.message);
+  }
+}
 
 function saveConfig(){
   var cfg={id:document.getElementById('cId').value.trim(),aba:document.getElementById('cAba').value.trim()||'2025',idBanco:document.getElementById('cIdBanco').value.trim(),abaBanco:document.getElementById('cAbaBanco').value.trim()||'BANCO DE DADOS',abaResp:document.getElementById('cAbaResp').value.trim()||'Respostas ao formulario 1'};
@@ -6492,7 +6564,7 @@ function addManual(){
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
 var BOSS_VISION_BUILD='v8.23-pastas-mensais-seguras';
-var AURA_COBERTURA_BUILD='v8-custos-jsonp-lote';
+var AURA_COBERTURA_BUILD='v8-custo-direto-storage-safe';
 console.info('[AURA] Cobertura Fornecedor',AURA_COBERTURA_BUILD);
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
@@ -9137,21 +9209,28 @@ async function cfPost_(body){
 // descricao, unidade, fornecedor, preco e custo.
 var cfEanCompletoCache_={};
 
-function cfBuscarEANCompletoApi_(ean,force){
+async function cfBuscarEANCompletoApi_(ean,force){
   ean=String(ean||'').replace(/\D/g,'');
-  if(!ean)return Promise.resolve({ok:false});
+  if(!ean)return {ok:false};
 
-  if(!force&&cfEanCompletoCache_[ean]){
-    return Promise.resolve(cfEanCompletoCache_[ean]);
-  }
+  if(!force&&cfEanCompletoCache_[ean])return cfEanCompletoCache_[ean];
 
-  // JSONP: não usa fetch. Assim não sofre com o redirect do Apps Script
-  // para script.googleusercontent.com / CORS.
-  return _gasGetJsonp(
-    'buscarEANCompleto',
-    '&ean='+encodeURIComponent(ean),
-    20000
-  ).then(function(j){
+  var cfg=loadCfg();
+  if(!cfg.url)return {ok:false,erro:'API AURA não configurada.'};
+
+  try{
+    var url=cfg.url
+      +'?action=buscarEANCompleto'
+      +'&ean='+encodeURIComponent(ean)
+      +'&_='+Date.now();
+
+    var r=await fetch(url,{cache:'no-store'});
+    if(!r.ok)return {ok:false,erro:'HTTP '+r.status};
+
+    var txt=await r.text();
+    var j;
+    try{j=JSON.parse(txt);}catch(e){return {ok:false,erro:'Resposta inválida da API.'};}
+
     if(j&&j.ok){
       var out={
         ok:true,
@@ -9159,60 +9238,34 @@ function cfBuscarEANCompletoApi_(ean,force){
         unidade:String(j.unidade||''),
         fornecedor:String(j.fornecedor||''),
         preco:cfNum_(j.preco),
-        custo:cfNum_(j.custo)
+        custo:cfNum_(j.custo),
+        fonte:String(j.fonte||''),
+        linhaBanco:j.linhaBanco||null
       };
+      console.info(
+        '[Cobertura Fornecedor] buscarEANCompleto',
+        ean,
+        'custo=',out.custo,
+        'preco=',out.preco,
+        'fonte=',out.fonte,
+        'linha=',out.linhaBanco
+      );
       cfEanCompletoCache_[ean]=out;
 
+      // Reforça também os mapas locais para os próximos usos.
       if(out.descricao&&!banco[ean])banco[ean]=out.descricao;
       if(out.unidade&&!bancoUnidade[ean])bancoUnidade[ean]=out.unidade;
       if(out.fornecedor&&!bancoFornecedor[ean])bancoFornecedor[ean]=out.fornecedor;
       if(out.preco>0)bancoVenda[ean]=out.preco;
       if(out.custo>0)bancoCusto[ean]=out.custo;
+
       return out;
     }
+
     return j||{ok:false};
-  }).catch(function(e){
+  }catch(e){
     return {ok:false,erro:e&&e.message||String(e)};
-  });
-}
-
-function cfBuscarEANsCoberturaApi_(eans){
-  eans=(eans||[]).map(function(x){return String(x||'').replace(/\D/g,'');})
-    .filter(Boolean)
-    .filter(function(x,i,a){return a.indexOf(x)===i;});
-
-  if(!eans.length)return Promise.resolve({ok:true,dados:{}});
-
-  return _gasGetJsonp(
-    'buscarEANsCobertura',
-    '&eans='+encodeURIComponent(eans.join(',')),
-    25000
-  ).then(function(j){
-    if(!j||!j.ok)return j||{ok:false};
-
-    var dados=j.dados||{};
-    Object.keys(dados).forEach(function(ean){
-      var d=dados[ean]||{};
-      var out={
-        ok:true,
-        descricao:String(d.descricao||''),
-        unidade:String(d.unidade||''),
-        fornecedor:String(d.fornecedor||''),
-        preco:cfNum_(d.preco),
-        custo:cfNum_(d.custo)
-      };
-      cfEanCompletoCache_[ean]=out;
-      if(out.descricao&&!banco[ean])banco[ean]=out.descricao;
-      if(out.unidade&&!bancoUnidade[ean])bancoUnidade[ean]=out.unidade;
-      if(out.fornecedor&&!bancoFornecedor[ean])bancoFornecedor[ean]=out.fornecedor;
-      if(out.preco>0)bancoVenda[ean]=out.preco;
-      if(out.custo>0)bancoCusto[ean]=out.custo;
-    });
-
-    return j;
-  }).catch(function(e){
-    return {ok:false,erro:e&&e.message||String(e)};
-  });
+  }
 }
 
 async function cfCompletarItemViaApi_(item){
@@ -9273,86 +9326,29 @@ async function cfCompletarNegociacaoViaApi_(){
            !String(p.nome||'').trim();
   });
 
-  if(!faltantes.length){
-    mostrarToast('Todos os itens já têm os dados do Banco.','ok');
-    return 0;
+  if(!faltantes.length)return 0;
+
+  console.info('[Cobertura Fornecedor] Consultando API AURA para completar '+faltantes.length+' item(ns) sem dados locais...');
+
+  var alterados=0, custos=0;
+  // Sequencial para não disparar muitas chamadas simultâneas no Apps Script.
+  for(var i=0;i<faltantes.length;i++){
+    var antesCusto=cfNum_(faltantes[i].custo);
+    var r=await cfCompletarItemViaApi_(faltantes[i]);
+    if(r&&r.alterou){
+      alterados++;
+      if(!(antesCusto>0)&&cfNum_(faltantes[i].custo)>0)custos++;
+    }
   }
-
-  console.info('[Cobertura Fornecedor] JSONP lote: consultando '+faltantes.length+' item(ns) no backend oficial...');
-
-  var eans=faltantes.map(function(p){return p.cod;});
-  var resp=await cfBuscarEANsCoberturaApi_(eans);
-
-  if(!resp||!resp.ok){
-    var motivo=(resp&&resp.erro)||'API não respondeu';
-    console.warn('[Cobertura Fornecedor] JSONP lote falhou:',motivo,resp);
-    mostrarToast('Não foi possível consultar o custo no backend. Atualize o Code.gs e a implantação do Web App.','err');
-    return 0;
-  }
-
-  var dados=resp.dados||{};
-  var alterados=0,custos=0;
-
-  faltantes.forEach(function(item){
-    var d=dados[String(item.cod||'')];
-    if(!d)return;
-
-    var mudou=false;
-
-    if(!(cfNum_(item.custo)>0)&&cfNum_(d.custo)>0){
-      item.custo=cfNum_(d.custo);
-      bancoCusto[item.cod]=item.custo;
-      custos++;mudou=true;
-    }
-    if(!(cfNum_(item.precoNormal)>0)&&cfNum_(d.preco)>0){
-      item.precoNormal=cfNum_(d.preco);
-      bancoVenda[item.cod]=item.precoNormal;
-      mudou=true;
-    }
-    if(!String(item.unidade||'').trim()&&String(d.unidade||'').trim()){
-      item.unidade=String(d.unidade||'').trim();
-      bancoUnidade[item.cod]=item.unidade;
-      mudou=true;
-    }
-    if(!String(item.fornecedor||'').trim()&&String(d.fornecedor||'').trim()){
-      item.fornecedor=String(d.fornecedor||'').trim();
-      bancoFornecedor[item.cod]=item.fornecedor;
-      mudou=true;
-    }
-    if(!String(item.nome||'').trim()&&String(d.descricao||'').trim()){
-      item.nome=String(d.descricao||'').trim();
-      banco[item.cod]=item.nome;
-      mudou=true;
-    }
-
-    if(mudou)alterados++;
-  });
-
-  cfCatalogoCache_=null;
-  cfRenderProdutos_();
 
   if(alterados){
-    mostrarToast(
-      alterados+' item(ns) atualizados pelo Banco'
-      +(custos?' · '+custos+' custo(s) recuperado(s)':'')
-      +'. Salve a negociação para gravar.',
-      'ok'
-    );
-  }else{
-    mostrarToast(
-      'O backend respondeu, mas estes EANs continuam sem custo cadastrado no Banco de Dados.',
-      'warn'
-    );
+    cfCatalogoCache_=null;
+    cfRenderProdutos_();
+    var msg=alterados+' item(ns) completado(s) pela API do Banco';
+    if(custos)msg+=' · '+custos+' custo(s) recuperado(s)';
+    msg+='. Salve a negociação para gravar.';
+    mostrarToast(msg,'ok');
   }
-
-  console.info(
-    '[Cobertura Fornecedor] JSONP lote concluído | solicitados=',
-    resp.solicitados,
-    '| encontrados=',
-    resp.encontrados,
-    '| custos recuperados=',
-    custos
-  );
 
   return alterados;
 }
@@ -11490,21 +11486,21 @@ function _gasGet(action,extra){
 // pra não guardar as imagens base64 localmente (ver comentário acima de
 // _semImagemParaCache).
 function _setCache_(key, value) {
-  try { localStorage.setItem(key, JSON.stringify(value)); }
-  catch (e) {
-    // v-fix: antes, quando a cota estourava, TODA escrita seguinte falhava
-    // pra sempre (o cache de thumbnails — boascompras_thumb_cache_v1 — cresce
-    // sem limite, um dataURL por produto, e sozinho já enche a cota do
-    // localStorage). Agora, na primeira falha de cota, libera espaço
-    // descartando o cache de thumbnails (é só um cache, refaz sozinho) e
-    // tenta gravar de novo uma vez antes de desistir.
-    try {
-      localStorage.removeItem(THUMB_CACHE_KEY);
-      localStorage.setItem(key, JSON.stringify(value));
-      console.warn('localStorage cheio — cache de thumbnails limpo pra liberar espaço; gravação de', key, 'refeita com sucesso.');
+  var json=JSON.stringify(value);
+  try{
+    localStorage.setItem(key,json);
+  }catch(e){
+    // v8: libera vários caches 100% reconstruíveis, preservando filas offline,
+    // configuração, negociações e demais dados críticos.
+    if(typeof _auraLiberarCachesReconstruiveis_==='function'){
+      _auraLiberarCachesReconstruiveis_(key);
+    }
+    try{
+      localStorage.setItem(key,json);
+      console.warn('localStorage recuperado — gravação de',key,'refeita após limpeza segura de caches.');
       return;
-    } catch (e2) {
-      console.warn('localStorage cheio, pulando cache de', key, e2);
+    }catch(e2){
+      console.warn('localStorage cheio, pulando cache reconstruível de',key,e2);
     }
   }
 }
@@ -12391,9 +12387,26 @@ var TAREFAS_KEY = 'boascompras_tarefas';
 var TAREFAS_FILA_KEY = 'boascompras_tarefas_fila';
 
 function getTarefas(){try{return JSON.parse(localStorage.getItem(TAREFAS_KEY)||'[]');}catch(e){return[];}}
-function saveTarefas(arr){try{localStorage.setItem(TAREFAS_KEY,JSON.stringify(arr));}catch(e){console.warn('localStorage cheio, pulando cache de tarefas:',e);}}
+function saveTarefas(arr){
+  // tarefas sincronizadas podem ser recarregadas, mas tentamos preservar o
+  // cache local depois de liberar caches menos importantes.
+  _setCache_(TAREFAS_KEY,arr);
+}
 function getFilaTarefas(){try{return JSON.parse(localStorage.getItem(TAREFAS_FILA_KEY)||'[]');}catch(e){return[];}}
-function saveFilaTarefas(arr){localStorage.setItem(TAREFAS_FILA_KEY,JSON.stringify(arr));}
+function saveFilaTarefas(arr){
+  // FILA offline é crítica: nunca removemos essa chave na limpeza automática.
+  var json=JSON.stringify(arr);
+  try{
+    localStorage.setItem(TAREFAS_FILA_KEY,json);
+  }catch(e){
+    _auraLiberarCachesReconstruiveis_('fila tarefas offline');
+    try{
+      localStorage.setItem(TAREFAS_FILA_KEY,json);
+    }catch(e2){
+      console.error('ATENÇÃO: não foi possível persistir a fila offline de tarefas por falta de espaço.',e2);
+    }
+  }
+}
 
 // Reenvia tarefas criadas offline quando a conexão voltar
 function reenviarFilaTarefas(){
