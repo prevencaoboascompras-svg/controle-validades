@@ -2880,6 +2880,10 @@ function toggleTheme() {
         <div class="cf-ref"><strong>Como funciona:</strong> no relatório de negociação, o fornecedor verá o estoque inicial e a <b>cobertura máxima</b> se todo esse estoque for vendido. No fechamento, você informa a <b>Qtd vendida</b>; o ressarcimento final considera apenas a quantidade efetivamente vendida, limitada ao estoque inicial negociado.</div>
       </div>
 
+      <div style="margin-top:9px;font-size:9px;color:var(--tx2);line-height:1.4">
+        <i class="ti ti-database"></i>
+        Negociações antigas: ao abrir, a AURA completa automaticamente <b>custo</b>, <b>preço normal</b>, unidade e fornecedor somente quando esses campos estiverem vazios. Estoque, preço da ação, cobertura negociada e vendas não são alterados.
+      </div>
       <div class="cf-savebar" style="justify-content:space-between">
         <div class="cf-report-actions">
           <button class="btn cf-btn-neg" onclick="cfImprimirNegociacaoAtual_()"><i class="ti ti-file-invoice"></i> PDF Negociação</button>
@@ -4399,6 +4403,25 @@ function cellNum(c){
   if(typeof v==='string')v=v.replace(/[R$\s%]/g,'').replace(',','.');
   return parseFloat(v)||0;
 }
+
+// BANCO DE DADOS: prefere o valor bruto numérico do Google Sheets.
+// Isso evita perder/interpretar errado o Custo Gerencial quando a célula
+// está formatada como moeda brasileira.
+function cellNumBanco_(c){
+  if(!c)return 0;
+  if(typeof c.v==='number' && isFinite(c.v))return c.v;
+
+  var v=(c.v!==undefined&&c.v!==null&&c.v!=='')?c.v:c.f;
+  if(v===undefined||v===null||v==='')return 0;
+
+  var s=String(v).trim().replace(/R\$/gi,'').replace(/\s/g,'').replace(/%/g,'');
+  // 1.234,56 -> 1234.56 | 5,49 -> 5.49
+  if(s.indexOf(',')>=0){
+    s=s.replace(/\./g,'').replace(',','.');
+  }
+  var n=Number(s);
+  return isFinite(n)?n:0;
+}
 function parseDate(v){
   if(!v&&v!==0)return'';
   var s=String(v);
@@ -4499,18 +4522,49 @@ async function loadBanco(cfg){
     }
 
     if(ciCod<0||ciNome<0){
-      // Fallback: assume posição fixa conforme layout padrão (A=cod, B=produto, C=unid, D=custo, E=fornecedor)
-      console.warn('Banco: cabecalho nao detectado — usando posicao fixa (A=cod,B=produto,D=custo,E=fornecedor)');
-      hIdx=0;ciCod=0;ciNome=1;ciCusto=3;ciForn=4;ciUnid=2;ciVenda=5;
+      // Fallback: estrutura oficial da aba BANCO DE DADOS.
+      console.warn('Banco: cabecalho nao detectado — usando estrutura oficial A:F');
+      hIdx=0;ciCod=0;ciNome=1;
     }
+
+    // Estrutura oficial do BANCO DE DADOS usada pelo próprio Code.gs:
+    // A = COD. BARRAS | B = PRODUTO | C = UNIDADE
+    // D = CUSTO GERENCIAL | E = FORNECEDOR | F = VALOR DE VENDA
+    //
+    // Antes a tela dependia da detecção do texto do cabeçalho para CUSTO.
+    // Em algumas respostas GViz esse label vinha diferente/vazio e apenas
+    // descrição + venda acabavam disponíveis. Para estes campos oficiais,
+    // usamos as posições conhecidas do banco.
+    if((table.cols&&table.cols.length>=6) || (rows&&rows.length)){
+      ciUnid=2;
+      ciCusto=3;
+      ciForn=4;
+      ciVenda=5;
+    }
+
+    console.log(
+      'BANCO OFICIAL A:F | cod=',ciCod,
+      '| nome=',ciNome,
+      '| unidade=',ciUnid,
+      '| CUSTO(D)=',ciCusto,
+      '| fornecedor(E)=',ciForn,
+      '| venda(F)=',ciVenda
+    );
+
     for(var i=hIdx+1;i<rows.length;i++){
       var cells=rows[i].c||[];
       var cod=String((cells[ciCod]&&cells[ciCod].f)||(cells[ciCod]&&cells[ciCod].v)||'').trim().replace(/[^0-9]/g,'');
       var nome=String((cells[ciNome]&&cells[ciNome].f)||(cells[ciNome]&&cells[ciNome].v)||'').replace(/^,\s*/,'').trim();
       if(cod&&nome){
         banco[cod]=nome;
-        if(ciCusto>=0){var cv=cellNum(cells[ciCusto]);if(cv)bancoCusto[cod]=cv;}
-        if(ciVenda>=0){var vv=cellNum(cells[ciVenda]);if(vv)bancoVenda[cod]=vv;}
+        if(ciCusto>=0){
+          var cv=cellNumBanco_(cells[ciCusto]);
+          if(cv>0)bancoCusto[cod]=cv;
+        }
+        if(ciVenda>=0){
+          var vv=cellNumBanco_(cells[ciVenda]);
+          if(vv>0)bancoVenda[cod]=vv;
+        }
         if(ciForn>=0){var fv=String((cells[ciForn]&&cells[ciForn].f)||(cells[ciForn]&&cells[ciForn].v)||'').trim();if(fv)bancoFornecedor[cod]=fv;}
         if(ciUnid>=0){var uv=String((cells[ciUnid]&&cells[ciUnid].f)||(cells[ciUnid]&&cells[ciUnid].v)||'').trim();if(uv)bancoUnidade[cod]=uv;}
       }
@@ -4520,7 +4574,14 @@ async function loadBanco(cfg){
         if(fvn)bancoFornecedorNome[normNome(nome)]=fvn;
       }
     }
-    console.log('Banco: produtos='+Object.keys(banco).length+' | fornec(cod)='+Object.keys(bancoFornecedor).length+' | fornec(nome)='+Object.keys(bancoFornecedorNome).length+' | ciForn='+ciForn);
+    console.log(
+      'Banco: produtos='+Object.keys(banco).length+
+      ' | custos='+Object.keys(bancoCusto).length+
+      ' | vendas='+Object.keys(bancoVenda).length+
+      ' | fornec(cod)='+Object.keys(bancoFornecedor).length+
+      ' | fornec(nome)='+Object.keys(bancoFornecedorNome).length+
+      ' | ciCusto='+ciCusto+' | ciVenda='+ciVenda+' | ciForn='+ciForn
+    );
     if(ciForn<0)console.warn('BANCO: coluna FORNECEDOR nao detectada — cabeçalhos encontrados: '+(hIdx>=0?(rawRows(table)[hIdx]&&rawRows(table)[hIdx].c||[]).map(function(c){return String((c&&c.f)||(c&&c.v)||'');}).filter(Boolean).join(', '):'nenhum'));
   }catch(e){console.warn('Banco:',e.message);}
 }
@@ -6429,7 +6490,7 @@ function addManual(){
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
 var BOSS_VISION_BUILD='v8.23-pastas-mensais-seguras';
-var AURA_COBERTURA_BUILD='v4-pdf-a4-vertical';
+var AURA_COBERTURA_BUILD='v6-compat-negociacoes-antigas';
 console.info('[AURA] Cobertura Fornecedor',AURA_COBERTURA_BUILD);
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
@@ -9278,6 +9339,7 @@ function cfRenderSugestoes_(lista,termo){
     var meta='Cód/EAN: '+cfEsc_(p.cod||'');
     if(p.unidade)meta+=' · '+cfEsc_(p.unidade);
     if(p.fornecedor)meta+=' · '+cfEsc_(p.fornecedor);
+    if(p.custo>0)meta+=' · Custo '+cfMoney_(p.custo);
 
     return '<div class="cf-sug '+(idx===cfSugestaoAtiva_?'active':'')+'" data-idx="'+idx+'" role="option" aria-selected="'+(idx===cfSugestaoAtiva_?'true':'false')+'">'
       +'<div class="cf-sug-row">'
@@ -9383,8 +9445,11 @@ function cfSelecionarProduto_(cod){
     fornecedor:fornecedor
   };
   document.getElementById('cfBuscaProduto').value=cfProdutoSelecionado.nome;
-  document.getElementById('cfCusto').value=cfProdutoSelecionado.custo||'';
-  document.getElementById('cfPrecoNormal').value=cfProdutoSelecionado.precoNormal||'';
+  document.getElementById('cfCusto').value=cfProdutoSelecionado.custo>0?cfProdutoSelecionado.custo.toFixed(2):'';
+  document.getElementById('cfPrecoNormal').value=cfProdutoSelecionado.precoNormal>0?cfProdutoSelecionado.precoNormal.toFixed(2):'';
+  if(!(cfProdutoSelecionado.custo>0)){
+    console.warn('[Cobertura Fornecedor] Produto encontrado, mas sem Custo Gerencial válido no BANCO:',cod,cfProdutoSelecionado.nome);
+  }
   document.getElementById('cfUnidade').value=cfProdutoSelecionado.unidade||'UN';
   document.getElementById('cfEstoqueInicial').value='1';
   var forn=document.getElementById('cfFornecedor');
@@ -9529,11 +9594,72 @@ function cfEditar_(id){
   var a=cfAcoes.find(function(x){return x.id===id;});
   if(!a)return;
   cfEditId=id;
+
+  var preenchidosCusto=0,preenchidosVenda=0,preenchidosUnidade=0,preenchidosFornecedor=0;
   cfProdutos=(a.produtos||[]).map(function(p){
     var x=Object.assign({},p);
-    x.estoqueInicial=cfEstoque_(x);x.qtdCoberta=x.estoqueInicial;
+    x.estoqueInicial=cfEstoque_(x);
+    x.qtdCoberta=x.estoqueInicial;
+
+    // COMPATIBILIDADE v6:
+    // negociações antigas podem ter sido salvas antes da correção da leitura
+    // do Custo Gerencial. Ao ABRIR a negociação, preenche SOMENTE campos
+    // cadastrais que estiverem vazios, usando o EAN no BANCO DE DADOS atual.
+    //
+    // NÃO altera:
+    // - estoqueInicial / qtdCoberta
+    // - precoAcao
+    // - coberturaUnit
+    // - qtdVendida
+    // - valores que já estavam gravados na negociação.
+    var cod=String(x.cod||'').trim();
+
+    if(cod){
+      if(!(cfNum_(x.custo)>0) && cfNum_(bancoCusto[cod])>0){
+        x.custo=cfNum_(bancoCusto[cod]);
+        preenchidosCusto++;
+      }
+
+      if(!(cfNum_(x.precoNormal)>0) && cfNum_(bancoVenda[cod])>0){
+        x.precoNormal=cfNum_(bancoVenda[cod]);
+        preenchidosVenda++;
+      }
+
+      if(!String(x.unidade||'').trim() && String(bancoUnidade[cod]||'').trim()){
+        x.unidade=String(bancoUnidade[cod]||'').trim();
+        preenchidosUnidade++;
+      }
+
+      if(!String(x.fornecedor||'').trim() && String(bancoFornecedor[cod]||'').trim()){
+        x.fornecedor=String(bancoFornecedor[cod]||'').trim();
+        preenchidosFornecedor++;
+      }
+
+      if(!String(x.nome||'').trim() && String(banco[cod]||'').trim()){
+        x.nome=String(banco[cod]||'').trim();
+      }
+    }
+
     return x;
   });
+
+  if(preenchidosCusto||preenchidosVenda||preenchidosUnidade||preenchidosFornecedor){
+    console.info(
+      '[Cobertura Fornecedor] Compatibilidade de negociação antiga:',
+      'custos='+preenchidosCusto,
+      'vendas='+preenchidosVenda,
+      'unidades='+preenchidosUnidade,
+      'fornecedores='+preenchidosFornecedor
+    );
+
+    var partes=[];
+    if(preenchidosCusto)partes.push(preenchidosCusto+' custo(s)');
+    if(preenchidosVenda)partes.push(preenchidosVenda+' preço(s) normal(is)');
+    if(preenchidosUnidade)partes.push(preenchidosUnidade+' unidade(s)');
+    if(preenchidosFornecedor)partes.push(preenchidosFornecedor+' fornecedor(es)');
+    mostrarToast('Dados antigos completados pelo Banco: '+partes.join(', ')+'. Salve a negociação para gravar.','ok');
+  }
+
   document.getElementById('cfEditorTitulo').textContent='Negociação · '+(a.campanha||'');
   document.getElementById('cfCampanha').value=a.campanha||'';
   document.getElementById('cfFornecedor').value=a.fornecedor||'';
