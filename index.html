@@ -2882,10 +2882,11 @@ function toggleTheme() {
 
       <div style="margin-top:9px;font-size:9px;color:var(--tx2);line-height:1.4">
         <i class="ti ti-database"></i>
-        Negociações antigas: ao abrir, a AURA completa automaticamente <b>custo</b>, <b>preço normal</b>, unidade e fornecedor somente quando esses campos estiverem vazios. Estoque, preço da ação, cobertura negociada e vendas não são alterados.
+        Negociações antigas: ao abrir, a AURA completa os campos vazios primeiro pelo Banco carregado e, se o custo ainda não estiver disponível, consulta a API oficial <b>buscarEANCompleto</b>. Estoque, preço da ação, cobertura negociada e vendas não são alterados.
       </div>
       <div class="cf-savebar" style="justify-content:space-between">
         <div class="cf-report-actions">
+          <button class="btn" onclick="cfCompletarNegociacaoViaApi_()"><i class="ti ti-database-search"></i> Atualizar dados do Banco</button>
           <button class="btn cf-btn-neg" onclick="cfImprimirNegociacaoAtual_()"><i class="ti ti-file-invoice"></i> PDF Negociação</button>
           <button class="btn cf-btn-result" onclick="cfImprimirResultadoAtual_()"><i class="ti ti-report-analytics"></i> PDF Resultado</button>
         </div>
@@ -6490,7 +6491,7 @@ function addManual(){
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
 var BOSS_VISION_BUILD='v8.23-pastas-mensais-seguras';
-var AURA_COBERTURA_BUILD='v6-compat-negociacoes-antigas';
+var AURA_COBERTURA_BUILD='v7-custo-fallback-buscarEANCompleto';
 console.info('[AURA] Cobertura Fornecedor',AURA_COBERTURA_BUILD);
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
@@ -9127,6 +9128,148 @@ async function cfPost_(body){
   }catch(e){return {ok:false,erro:e.message};}
 }
 
+
+// v7 — FALLBACK OFICIAL PARA CUSTO:
+// O carregamento direto via GViz pode trazer menos custos do que produtos.
+// Quando o custo não veio para um EAN, consultamos a action buscarEANCompleto,
+// que lê o cache oficial do BANCO DE DADOS no Apps Script e retorna:
+// descricao, unidade, fornecedor, preco e custo.
+var cfEanCompletoCache_={};
+
+async function cfBuscarEANCompletoApi_(ean,force){
+  ean=String(ean||'').replace(/\D/g,'');
+  if(!ean)return {ok:false};
+
+  if(!force&&cfEanCompletoCache_[ean])return cfEanCompletoCache_[ean];
+
+  var cfg=loadCfg();
+  if(!cfg.url)return {ok:false,erro:'API AURA não configurada.'};
+
+  try{
+    var url=cfg.url
+      +'?action=buscarEANCompleto'
+      +'&ean='+encodeURIComponent(ean)
+      +'&_='+Date.now();
+
+    var r=await fetch(url,{cache:'no-store'});
+    if(!r.ok)return {ok:false,erro:'HTTP '+r.status};
+
+    var txt=await r.text();
+    var j;
+    try{j=JSON.parse(txt);}catch(e){return {ok:false,erro:'Resposta inválida da API.'};}
+
+    if(j&&j.ok){
+      var out={
+        ok:true,
+        descricao:String(j.descricao||''),
+        unidade:String(j.unidade||''),
+        fornecedor:String(j.fornecedor||''),
+        preco:cfNum_(j.preco),
+        custo:cfNum_(j.custo)
+      };
+      cfEanCompletoCache_[ean]=out;
+
+      // Reforça também os mapas locais para os próximos usos.
+      if(out.descricao&&!banco[ean])banco[ean]=out.descricao;
+      if(out.unidade&&!bancoUnidade[ean])bancoUnidade[ean]=out.unidade;
+      if(out.fornecedor&&!bancoFornecedor[ean])bancoFornecedor[ean]=out.fornecedor;
+      if(out.preco>0)bancoVenda[ean]=out.preco;
+      if(out.custo>0)bancoCusto[ean]=out.custo;
+
+      return out;
+    }
+
+    return j||{ok:false};
+  }catch(e){
+    return {ok:false,erro:e&&e.message||String(e)};
+  }
+}
+
+async function cfCompletarItemViaApi_(item){
+  if(!item||!item.cod)return {alterou:false};
+
+  var precisaCusto=!(cfNum_(item.custo)>0);
+  var precisaVenda=!(cfNum_(item.precoNormal)>0);
+  var precisaUnidade=!String(item.unidade||'').trim();
+  var precisaFornecedor=!String(item.fornecedor||'').trim();
+  var precisaNome=!String(item.nome||'').trim();
+
+  if(!precisaCusto&&!precisaVenda&&!precisaUnidade&&!precisaFornecedor&&!precisaNome){
+    return {alterou:false};
+  }
+
+  var api=await cfBuscarEANCompletoApi_(item.cod,false);
+  if(!api||!api.ok)return {alterou:false,erro:api&&api.erro};
+
+  var alterou=false, campos=[];
+
+  if(precisaCusto&&api.custo>0){
+    item.custo=api.custo;
+    bancoCusto[item.cod]=api.custo;
+    alterou=true;campos.push('custo');
+  }
+  if(precisaVenda&&api.preco>0){
+    item.precoNormal=api.preco;
+    bancoVenda[item.cod]=api.preco;
+    alterou=true;campos.push('preço normal');
+  }
+  if(precisaUnidade&&api.unidade){
+    item.unidade=api.unidade;
+    bancoUnidade[item.cod]=api.unidade;
+    alterou=true;campos.push('unidade');
+  }
+  if(precisaFornecedor&&api.fornecedor){
+    item.fornecedor=api.fornecedor;
+    bancoFornecedor[item.cod]=api.fornecedor;
+    alterou=true;campos.push('fornecedor');
+  }
+  if(precisaNome&&api.descricao){
+    item.nome=api.descricao;
+    banco[item.cod]=api.descricao;
+    alterou=true;campos.push('descrição');
+  }
+
+  return {alterou:alterou,campos:campos,api:api};
+}
+
+async function cfCompletarNegociacaoViaApi_(){
+  if(!cfProdutos||!cfProdutos.length)return 0;
+
+  var faltantes=cfProdutos.filter(function(p){
+    return !(cfNum_(p.custo)>0) ||
+           !(cfNum_(p.precoNormal)>0) ||
+           !String(p.unidade||'').trim() ||
+           !String(p.fornecedor||'').trim() ||
+           !String(p.nome||'').trim();
+  });
+
+  if(!faltantes.length)return 0;
+
+  console.info('[Cobertura Fornecedor] Consultando API AURA para completar '+faltantes.length+' item(ns) sem dados locais...');
+
+  var alterados=0, custos=0;
+  // Sequencial para não disparar muitas chamadas simultâneas no Apps Script.
+  for(var i=0;i<faltantes.length;i++){
+    var antesCusto=cfNum_(faltantes[i].custo);
+    var r=await cfCompletarItemViaApi_(faltantes[i]);
+    if(r&&r.alterou){
+      alterados++;
+      if(!(antesCusto>0)&&cfNum_(faltantes[i].custo)>0)custos++;
+    }
+  }
+
+  if(alterados){
+    cfCatalogoCache_=null;
+    cfRenderProdutos_();
+    var msg=alterados+' item(ns) completado(s) pela API do Banco';
+    if(custos)msg+=' · '+custos+' custo(s) recuperado(s)';
+    msg+='. Salve a negociação para gravar.';
+    mostrarToast(msg,'ok');
+  }
+
+  return alterados;
+}
+
 async function cfCarregar(forcar){
   if(cfCarregado&&!forcar){cfRenderLista_();return;}
   var lista=document.getElementById('cfLista'),info=document.getElementById('cfInfo');
@@ -9448,7 +9591,45 @@ function cfSelecionarProduto_(cod){
   document.getElementById('cfCusto').value=cfProdutoSelecionado.custo>0?cfProdutoSelecionado.custo.toFixed(2):'';
   document.getElementById('cfPrecoNormal').value=cfProdutoSelecionado.precoNormal>0?cfProdutoSelecionado.precoNormal.toFixed(2):'';
   if(!(cfProdutoSelecionado.custo>0)){
-    console.warn('[Cobertura Fornecedor] Produto encontrado, mas sem Custo Gerencial válido no BANCO:',cod,cfProdutoSelecionado.nome);
+    console.warn('[Cobertura Fornecedor] Custo ausente no mapa GViz; consultando buscarEANCompleto:',cod,cfProdutoSelecionado.nome);
+
+    // Não bloqueia a interface: completa o custo em segundo plano.
+    cfBuscarEANCompletoApi_(cod,false).then(function(api){
+      if(!api||!api.ok)return;
+
+      // Só aplica se o usuário ainda estiver no mesmo produto.
+      if(!cfProdutoSelecionado||String(cfProdutoSelecionado.cod)!==String(cod))return;
+
+      if(api.custo>0){
+        cfProdutoSelecionado.custo=api.custo;
+        bancoCusto[cod]=api.custo;
+        document.getElementById('cfCusto').value=api.custo.toFixed(2);
+      }
+      if(!(cfProdutoSelecionado.precoNormal>0)&&api.preco>0){
+        cfProdutoSelecionado.precoNormal=api.preco;
+        bancoVenda[cod]=api.preco;
+        document.getElementById('cfPrecoNormal').value=api.preco.toFixed(2);
+      }
+      if((!cfProdutoSelecionado.unidade||cfProdutoSelecionado.unidade==='UN')&&api.unidade){
+        cfProdutoSelecionado.unidade=api.unidade;
+        bancoUnidade[cod]=api.unidade;
+        document.getElementById('cfUnidade').value=api.unidade;
+      }
+      if(!cfProdutoSelecionado.fornecedor&&api.fornecedor){
+        cfProdutoSelecionado.fornecedor=api.fornecedor;
+        bancoFornecedor[cod]=api.fornecedor;
+        var fornEl=document.getElementById('cfFornecedor');
+        if(fornEl&&!fornEl.value)fornEl.value=api.fornecedor;
+      }
+
+      cfAtualizarReferencia_();
+
+      if(api.custo>0){
+        mostrarToast('Custo recuperado do Banco via API: '+cfMoney_(api.custo),'ok');
+      }
+    }).catch(function(e){
+      console.warn('[Cobertura Fornecedor] buscarEANCompleto falhou:',e);
+    });
   }
   document.getElementById('cfUnidade').value=cfProdutoSelecionado.unidade||'UN';
   document.getElementById('cfEstoqueInicial').value='1';
@@ -9670,6 +9851,13 @@ function cfEditar_(id){
   cfLimparProduto_();cfRenderProdutos_();
   document.getElementById('cfEditor').classList.add('open');
   document.getElementById('cfEditor').scrollIntoView({behavior:'smooth',block:'start'});
+
+  // O preenchimento local acima é instantâneo. Em seguida, para qualquer
+  // campo que continue vazio (principalmente custo), consulta o backend
+  // oficial buscarEANCompleto e atualiza a negociação aberta.
+  cfCompletarNegociacaoViaApi_().catch(function(e){
+    console.warn('[Cobertura Fornecedor] Falha no fallback da API:',e);
+  });
 }
 async function cfExcluir_(id){
   var a=cfAcoes.find(function(x){return x.id===id;});
