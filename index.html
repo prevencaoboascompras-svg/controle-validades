@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-title" content="AURA Venc.">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <!-- Android/PWA: manifest + cor do tema -->
@@ -2882,7 +2883,7 @@ function toggleTheme() {
 
       <div style="margin-top:9px;font-size:9px;color:var(--tx2);line-height:1.4">
         <i class="ti ti-database"></i>
-        Negociações antigas: ao abrir, a AURA completa os campos vazios primeiro pelo Banco carregado e, se o custo ainda não estiver disponível, consulta a API oficial <b>buscarEANCompleto</b>. Estoque, preço da ação, cobertura negociada e vendas não são alterados.
+        Negociações antigas: ao abrir, a AURA completa os campos vazios primeiro pelo Banco carregado e, se o custo ainda não estiver disponível, consulta a API oficial por <b>JSONP</b>. Estoque, preço da ação, cobertura negociada e vendas não são alterados.
       </div>
       <div class="cf-savebar" style="justify-content:space-between">
         <div class="cf-report-actions">
@@ -6491,7 +6492,7 @@ function addManual(){
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
 var BOSS_VISION_BUILD='v8.23-pastas-mensais-seguras';
-var AURA_COBERTURA_BUILD='v7-custo-fallback-buscarEANCompleto';
+var AURA_COBERTURA_BUILD='v8-custos-jsonp-lote';
 console.info('[AURA] Cobertura Fornecedor',AURA_COBERTURA_BUILD);
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
@@ -9136,28 +9137,21 @@ async function cfPost_(body){
 // descricao, unidade, fornecedor, preco e custo.
 var cfEanCompletoCache_={};
 
-async function cfBuscarEANCompletoApi_(ean,force){
+function cfBuscarEANCompletoApi_(ean,force){
   ean=String(ean||'').replace(/\D/g,'');
-  if(!ean)return {ok:false};
+  if(!ean)return Promise.resolve({ok:false});
 
-  if(!force&&cfEanCompletoCache_[ean])return cfEanCompletoCache_[ean];
+  if(!force&&cfEanCompletoCache_[ean]){
+    return Promise.resolve(cfEanCompletoCache_[ean]);
+  }
 
-  var cfg=loadCfg();
-  if(!cfg.url)return {ok:false,erro:'API AURA não configurada.'};
-
-  try{
-    var url=cfg.url
-      +'?action=buscarEANCompleto'
-      +'&ean='+encodeURIComponent(ean)
-      +'&_='+Date.now();
-
-    var r=await fetch(url,{cache:'no-store'});
-    if(!r.ok)return {ok:false,erro:'HTTP '+r.status};
-
-    var txt=await r.text();
-    var j;
-    try{j=JSON.parse(txt);}catch(e){return {ok:false,erro:'Resposta inválida da API.'};}
-
+  // JSONP: não usa fetch. Assim não sofre com o redirect do Apps Script
+  // para script.googleusercontent.com / CORS.
+  return _gasGetJsonp(
+    'buscarEANCompleto',
+    '&ean='+encodeURIComponent(ean),
+    20000
+  ).then(function(j){
     if(j&&j.ok){
       var out={
         ok:true,
@@ -9169,20 +9163,56 @@ async function cfBuscarEANCompletoApi_(ean,force){
       };
       cfEanCompletoCache_[ean]=out;
 
-      // Reforça também os mapas locais para os próximos usos.
       if(out.descricao&&!banco[ean])banco[ean]=out.descricao;
       if(out.unidade&&!bancoUnidade[ean])bancoUnidade[ean]=out.unidade;
       if(out.fornecedor&&!bancoFornecedor[ean])bancoFornecedor[ean]=out.fornecedor;
       if(out.preco>0)bancoVenda[ean]=out.preco;
       if(out.custo>0)bancoCusto[ean]=out.custo;
-
       return out;
     }
-
     return j||{ok:false};
-  }catch(e){
+  }).catch(function(e){
     return {ok:false,erro:e&&e.message||String(e)};
-  }
+  });
+}
+
+function cfBuscarEANsCoberturaApi_(eans){
+  eans=(eans||[]).map(function(x){return String(x||'').replace(/\D/g,'');})
+    .filter(Boolean)
+    .filter(function(x,i,a){return a.indexOf(x)===i;});
+
+  if(!eans.length)return Promise.resolve({ok:true,dados:{}});
+
+  return _gasGetJsonp(
+    'buscarEANsCobertura',
+    '&eans='+encodeURIComponent(eans.join(',')),
+    25000
+  ).then(function(j){
+    if(!j||!j.ok)return j||{ok:false};
+
+    var dados=j.dados||{};
+    Object.keys(dados).forEach(function(ean){
+      var d=dados[ean]||{};
+      var out={
+        ok:true,
+        descricao:String(d.descricao||''),
+        unidade:String(d.unidade||''),
+        fornecedor:String(d.fornecedor||''),
+        preco:cfNum_(d.preco),
+        custo:cfNum_(d.custo)
+      };
+      cfEanCompletoCache_[ean]=out;
+      if(out.descricao&&!banco[ean])banco[ean]=out.descricao;
+      if(out.unidade&&!bancoUnidade[ean])bancoUnidade[ean]=out.unidade;
+      if(out.fornecedor&&!bancoFornecedor[ean])bancoFornecedor[ean]=out.fornecedor;
+      if(out.preco>0)bancoVenda[ean]=out.preco;
+      if(out.custo>0)bancoCusto[ean]=out.custo;
+    });
+
+    return j;
+  }).catch(function(e){
+    return {ok:false,erro:e&&e.message||String(e)};
+  });
 }
 
 async function cfCompletarItemViaApi_(item){
@@ -9243,29 +9273,86 @@ async function cfCompletarNegociacaoViaApi_(){
            !String(p.nome||'').trim();
   });
 
-  if(!faltantes.length)return 0;
-
-  console.info('[Cobertura Fornecedor] Consultando API AURA para completar '+faltantes.length+' item(ns) sem dados locais...');
-
-  var alterados=0, custos=0;
-  // Sequencial para não disparar muitas chamadas simultâneas no Apps Script.
-  for(var i=0;i<faltantes.length;i++){
-    var antesCusto=cfNum_(faltantes[i].custo);
-    var r=await cfCompletarItemViaApi_(faltantes[i]);
-    if(r&&r.alterou){
-      alterados++;
-      if(!(antesCusto>0)&&cfNum_(faltantes[i].custo)>0)custos++;
-    }
+  if(!faltantes.length){
+    mostrarToast('Todos os itens já têm os dados do Banco.','ok');
+    return 0;
   }
+
+  console.info('[Cobertura Fornecedor] JSONP lote: consultando '+faltantes.length+' item(ns) no backend oficial...');
+
+  var eans=faltantes.map(function(p){return p.cod;});
+  var resp=await cfBuscarEANsCoberturaApi_(eans);
+
+  if(!resp||!resp.ok){
+    var motivo=(resp&&resp.erro)||'API não respondeu';
+    console.warn('[Cobertura Fornecedor] JSONP lote falhou:',motivo,resp);
+    mostrarToast('Não foi possível consultar o custo no backend. Atualize o Code.gs e a implantação do Web App.','err');
+    return 0;
+  }
+
+  var dados=resp.dados||{};
+  var alterados=0,custos=0;
+
+  faltantes.forEach(function(item){
+    var d=dados[String(item.cod||'')];
+    if(!d)return;
+
+    var mudou=false;
+
+    if(!(cfNum_(item.custo)>0)&&cfNum_(d.custo)>0){
+      item.custo=cfNum_(d.custo);
+      bancoCusto[item.cod]=item.custo;
+      custos++;mudou=true;
+    }
+    if(!(cfNum_(item.precoNormal)>0)&&cfNum_(d.preco)>0){
+      item.precoNormal=cfNum_(d.preco);
+      bancoVenda[item.cod]=item.precoNormal;
+      mudou=true;
+    }
+    if(!String(item.unidade||'').trim()&&String(d.unidade||'').trim()){
+      item.unidade=String(d.unidade||'').trim();
+      bancoUnidade[item.cod]=item.unidade;
+      mudou=true;
+    }
+    if(!String(item.fornecedor||'').trim()&&String(d.fornecedor||'').trim()){
+      item.fornecedor=String(d.fornecedor||'').trim();
+      bancoFornecedor[item.cod]=item.fornecedor;
+      mudou=true;
+    }
+    if(!String(item.nome||'').trim()&&String(d.descricao||'').trim()){
+      item.nome=String(d.descricao||'').trim();
+      banco[item.cod]=item.nome;
+      mudou=true;
+    }
+
+    if(mudou)alterados++;
+  });
+
+  cfCatalogoCache_=null;
+  cfRenderProdutos_();
 
   if(alterados){
-    cfCatalogoCache_=null;
-    cfRenderProdutos_();
-    var msg=alterados+' item(ns) completado(s) pela API do Banco';
-    if(custos)msg+=' · '+custos+' custo(s) recuperado(s)';
-    msg+='. Salve a negociação para gravar.';
-    mostrarToast(msg,'ok');
+    mostrarToast(
+      alterados+' item(ns) atualizados pelo Banco'
+      +(custos?' · '+custos+' custo(s) recuperado(s)':'')
+      +'. Salve a negociação para gravar.',
+      'ok'
+    );
+  }else{
+    mostrarToast(
+      'O backend respondeu, mas estes EANs continuam sem custo cadastrado no Banco de Dados.',
+      'warn'
+    );
   }
+
+  console.info(
+    '[Cobertura Fornecedor] JSONP lote concluído | solicitados=',
+    resp.solicitados,
+    '| encontrados=',
+    resp.encontrados,
+    '| custos recuperados=',
+    custos
+  );
 
   return alterados;
 }
