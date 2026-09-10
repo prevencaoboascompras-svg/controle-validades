@@ -2009,6 +2009,24 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .cf-flow{grid-template-columns:1fr}.cf-step-arrow{display:none}
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   BOSS VISION — AÇOUGUE
+   ═══════════════════════════════════════════════════════════════ */
+.boss-acougue-chart{margin-top:12px}
+.boss-acougue-note{
+  display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border-radius:9px;
+  border:1px solid rgba(186,117,23,.32);background:rgba(186,117,23,.08);
+  color:var(--tx2);font-size:10.5px;line-height:1.45
+}
+.boss-acougue-note i{color:var(--amber);font-size:16px;flex-shrink:0;margin-top:1px}
+.boss-acougue-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.boss-acougue-list{display:flex;flex-direction:column}
+.boss-acougue-list .boss-row{grid-template-columns:28px 48px minmax(160px,1fr) 100px 110px 115px}
+@media(max-width:900px){
+  .boss-acougue-grid{grid-template-columns:1fr}
+}
+
 </style>
 </head>
 <body>
@@ -2911,7 +2929,7 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre sempre o <strong>mês atual completo</strong>. Você pode escolher qualquer outro mês, abrir o <strong>último mês fechado</strong> ou consultar um <strong>dia específico</strong>. A visão mensal usa a competência inteira selecionada; os números refletem os relatórios já disponíveis para aquele mês.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: BANCO DE DADOS/AAAA-MM · Entradas Horti, Entradas Padaria, Entradas Fiambreria, ABC Horti, ABC Padaria, ABC Fiambreria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
+          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre o <strong>último mês fechado</strong>. Você pode escolher qualquer mês, abrir o <strong>mês atual</strong> ou consultar um <strong>dia específico</strong>. O mês atual só terá análise completa quando os relatórios desse mês já tiverem sido gerados.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: BANCO DE DADOS/AAAA-MM · Entradas Horti, Entradas Padaria, Entradas Fiambreria, ABC Horti, ABC Padaria, ABC Fiambreria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div class="boss-fontes-bar">
             <button type="button" class="btn btn-sm" onclick="bossToggleFontes_()"><i class="ti ti-folder-check"></i> Verificar fontes</button>
@@ -2966,6 +2984,7 @@ function toggleTheme() {
               <option value="">Todos</option>
               <option value="horti">Horti</option>
               <option value="padaria">Padaria</option>
+              <option value="acougue">Açougue</option>
               <option value="loja">Loja / Uso e consumo</option>
             </select>
           </div>
@@ -3109,6 +3128,38 @@ function toggleTheme() {
           </div>
         </div>
 
+
+        <!-- AÇOUGUE — COMPRAS | VENDAS | MARGEM ESTIMADA -->
+        <div class="boss-clean-kpis">
+          <div class="boss-clean-card" id="bossKpiComprasAcougueCard" onclick="bossToggleGrupo('bossGrupoComprasAcougue','bossKpiComprasAcougueCard','bossComprasAcougueChevron')">
+            <div class="boss-clean-card-head"><i class="ti ti-shopping-cart" style="color:var(--blue)"></i> Compras Açougue <i class="ti ti-chevron-down" id="bossComprasAcougueChevron"></i></div>
+            <div class="boss-clean-card-value blue" id="bossKpiComprasAcougue">—</div>
+            <div class="boss-clean-card-sub" id="bossKpiComprasAcougueSub">Controle de entradas · clique para detalhar</div>
+          </div>
+
+          <div class="boss-clean-card" id="bossKpiVendasAcougueCard" onclick="bossToggleGrupo('bossGrupoVendasAcougue','bossKpiVendasAcougueCard','bossVendasAcougueChevron')">
+            <div class="boss-clean-card-head"><i class="ti ti-cash-banknote" style="color:var(--green)"></i> Vendas Açougue <i class="ti ti-chevron-down" id="bossVendasAcougueChevron"></i></div>
+            <div class="boss-clean-card-value green" id="bossKpiVendasAcougue">—</div>
+            <div class="boss-clean-card-sub" id="bossKpiVendasAcougueSub">ABC Açougue · clique para detalhar</div>
+          </div>
+
+          <div class="boss-clean-card" id="bossKpiMargemAcougueCard" onclick="bossToggleGrupo('bossGrupoGerencialAcougue','bossKpiMargemAcougueCard','bossAcougueChevron')">
+            <div class="boss-clean-card-head"><i class="ti ti-chart-line" style="color:var(--red)"></i> Margem estimada Açougue <i class="ti ti-chevron-down" id="bossAcougueChevron"></i></div>
+            <div class="boss-clean-card-value" id="bossKpiMargemAcougue">—</div>
+            <div class="boss-clean-card-sub" id="bossKpiMargemAcougueSub">Vendas cruzadas com custo médio das entradas</div>
+          </div>
+        </div>
+
+        <div class="boss-clean-charts boss-acougue-chart" style="grid-template-columns:1fr">
+          <div class="boss-panel boss-chart-card boss-clean-chart boss-clean-chart-panel">
+            <div class="boss-panel-hd">
+              <div class="boss-panel-title"><i class="ti ti-meat" style="color:var(--red)"></i> Açougue — Compras x Vendas</div>
+              <div class="boss-panel-total" style="font-size:10.5px;color:var(--tx2)">Quebra ainda sem lançamentos</div>
+            </div>
+            <div class="boss-clean-chart-body"><canvas id="bossChartAcougue"></canvas></div>
+          </div>
+        </div>
+
         <!-- 4) ANÁLISE COMPLETA HORTI | ANÁLISE COMPLETA PADARIA -->
         <div class="boss-clean-actions">
           <div class="boss-clean-action" id="bossKpiHortiCard" onclick="bossToggleGrupo('bossGrupoGerencialHorti','bossKpiHortiCard','bossHortiChevron')">
@@ -3129,6 +3180,19 @@ function toggleTheme() {
               <div class="boss-clean-action-sub" id="bossAnalisePadariaSub">Conta de padeiro, produção, margem e cobertura de custos</div>
             </div>
             <i class="ti ti-chevron-down" id="bossPadariaChevron"></i>
+          </div>
+        </div>
+
+
+        <div class="boss-clean-actions" style="grid-template-columns:1fr">
+          <div class="boss-clean-action" id="bossKpiAcougueCard" onclick="bossToggleGrupo('bossGrupoGerencialAcougue','bossKpiAcougueCard','bossAcougueAnaliseChevron')">
+            <div class="boss-clean-action-icon"><i class="ti ti-meat" style="color:var(--red)"></i></div>
+            <div class="boss-clean-action-main">
+              <div class="boss-clean-action-title">Análise completa Açougue</div>
+              <div class="boss-clean-action-value" id="bossAnaliseAcougueResumo">Abrir análise</div>
+              <div class="boss-clean-action-sub" id="bossAnaliseAcougueSub">Compras, vendas, margem estimada, fornecedores e produtos</div>
+            </div>
+            <i class="ti ti-chevron-down" id="bossAcougueAnaliseChevron"></i>
           </div>
         </div>
 
@@ -3447,6 +3511,109 @@ function toggleTheme() {
             <div class="boss-nf-info" id="bossInfoVendasPadaria"></div>
             <div class="boss-list" id="bossListVendasPadaria"></div>
           </div>
+        </div>
+      </div>
+
+
+      <div class="boss-group boss-group-collapsible" id="bossGrupoGerencialAcougue" style="display:none">
+        <div class="boss-group-title">
+          <span><i class="ti ti-meat" style="color:var(--red)"></i> Açougue — Visão Gerencial</span>
+          <span class="boss-period-badge boss-period-mes" id="bossPeriodoGerencialAcougue"></span>
+          <span class="boss-line"></span>
+        </div>
+
+        <div class="boss-horti-gerencial">
+          <div class="boss-acougue-grid">
+            <div class="boss-horti-card">
+              <div class="gh-label">Compras Açougue</div>
+              <div class="gh-value neutro" id="gaCompras">—</div>
+              <div class="gh-sub" id="gaComprasSub">Controle de entradas por NF</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Vendas Açougue</div>
+              <div class="gh-value pos" id="gaVendas">—</div>
+              <div class="gh-sub" id="gaVendasSub">ABC de Mercadorias</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Venda / Compra</div>
+              <div class="gh-value" id="gaVendaCompra">—</div>
+              <div class="gh-sub">R$ vendas ÷ R$ compras do período</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Margem estimada das vendas*</div>
+              <div class="gh-value" id="gaMargem">—</div>
+              <div class="gh-sub" id="gaMargemSub">Venda real × custo médio das entradas</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Cobertura da margem</div>
+              <div class="gh-value neutro" id="gaCobertura">—</div>
+              <div class="gh-sub" id="gaCoberturaSub">Parcela das vendas casada com compras</div>
+            </div>
+            <div class="boss-horti-card">
+              <div class="gh-label">Produtos vendidos</div>
+              <div class="gh-value neutro" id="gaProdutos">—</div>
+              <div class="gh-sub" id="gaProdutosSub">Itens encontrados no ABC</div>
+            </div>
+          </div>
+
+          <div class="boss-acougue-note">
+            <i class="ti ti-info-circle"></i>
+            <div><strong>Quebra do Açougue ainda não entra no Boss Vision.</strong> Como ainda não existem lançamentos de quebra desse setor, o painel não assume R$ 0,00 nem 0%. Os indicadores acima usam somente Controle de Entradas + ABC de Vendas.</div>
+          </div>
+
+          <div class="boss-grid">
+            <div class="boss-panel">
+              <div class="boss-panel-hd">
+                <div class="boss-panel-title"><i class="ti ti-trophy" style="color:var(--green)"></i> Maiores vendas do Açougue</div>
+                <div class="boss-panel-total"><span>por valor vendido</span></div>
+              </div>
+              <div class="boss-acougue-list" id="gaTopVendas"></div>
+            </div>
+            <div class="boss-panel">
+              <div class="boss-panel-hd">
+                <div class="boss-panel-title"><i class="ti ti-building-store" style="color:var(--blue)"></i> Compras por fornecedor</div>
+                <div class="boss-panel-total"><span>controle de entradas</span></div>
+              </div>
+              <div class="boss-list" id="gaFornecedores"></div>
+            </div>
+          </div>
+
+          <div class="boss-horti-metodo">
+            <i class="ti ti-calculator"></i>
+            A margem estimada do Açougue cruza a <strong>Venda Total e QTD do ABC</strong> com o <strong>custo médio das entradas do mesmo produto</strong>. É uma visão gerencial e não lucro contábil: não considera estoque inicial/final, impostos, despesas, descontos ou quebra. Quando começarmos a lançar Quebra Açougue, ela poderá ser incorporada sem alterar esta base.
+          </div>
+        </div>
+      </div>
+
+      <div class="boss-group boss-group-collapsible" id="bossGrupoComprasAcougue" style="display:none">
+        <div class="boss-group-title">
+          <span><i class="ti ti-shopping-cart" style="color:var(--blue)"></i> Compras Açougue</span>
+          <span class="boss-period-badge boss-period-mes" id="bossPeriodoComprasAcougue"></span>
+          <span class="boss-line"></span>
+        </div>
+        <div class="boss-panel">
+          <div class="boss-panel-hd">
+            <div class="boss-panel-title">Controle de Entradas Açougue</div>
+            <div class="boss-panel-total"><strong id="bossTotalComprasAcougue">—</strong><span id="bossCountComprasAcougue">0 produtos</span></div>
+          </div>
+          <div id="bossInfoComprasAcougue" class="boss-vendas-info"></div>
+          <div id="bossListComprasAcougue" class="boss-list"></div>
+        </div>
+      </div>
+
+      <div class="boss-group boss-group-collapsible" id="bossGrupoVendasAcougue" style="display:none">
+        <div class="boss-group-title">
+          <span><i class="ti ti-cash-banknote" style="color:var(--green)"></i> Vendas Açougue</span>
+          <span class="boss-period-badge boss-period-mes" id="bossPeriodoVendasAcougue"></span>
+          <span class="boss-line"></span>
+        </div>
+        <div class="boss-panel">
+          <div class="boss-panel-hd">
+            <div class="boss-panel-title">ABC Açougue</div>
+            <div class="boss-panel-total"><strong id="bossTotalVendasAcougue">—</strong><span id="bossCountVendasAcougue">0 produtos</span></div>
+          </div>
+          <div id="bossInfoVendasAcougue" class="boss-vendas-info"></div>
+          <div id="bossListVendasAcougue" class="boss-list"></div>
         </div>
       </div>
 
@@ -6490,9 +6657,8 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8.24-mes-atual-padrao';
-var BOSS_DEFAULT_PERIODO='mes_atual_completo';
-var AURA_COBERTURA_BUILD='v8-boss-mes-atual-padrao';
+var BOSS_VISION_BUILD='v8.24-acougue-compras-vendas-sem-quebra';
+var AURA_COBERTURA_BUILD='v7-custo-fallback-buscarEANCompleto';
 console.info('[AURA] Cobertura Fornecedor',AURA_COBERTURA_BUILD);
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
@@ -7738,7 +7904,193 @@ function bossRenderVendasPadaria_(dados){
 }
 
 
-var _bossCharts={geral:null,setor:null,padaria:null};
+function bossRenderVendasAcougue_(dados){
+  return bossRenderVendasABCSetor_(dados,{
+    chave:'vendasAcougue',
+    label:'Açougue',
+    periodoId:'bossPeriodoVendasAcougue',
+    totalId:'bossTotalVendasAcougue',
+    countId:'bossCountVendasAcougue',
+    infoId:'bossInfoVendasAcougue',
+    listId:'bossListVendasAcougue',
+    kpiId:'bossKpiVendasAcougue',
+    kpiSubId:'bossKpiVendasAcougueSub'
+  });
+}
+
+function bossRenderComprasAcougue_(dados){
+  var nf=(dados&&dados.grupos&&dados.grupos.entradaAcougueNF)||{
+    porProduto:[],totalValor:0,totalQtd:0,totalNotas:0,totalProdutos:0,
+    incluidaNoCalculo:false,motivo:'Controle de entradas do Açougue não carregado.'
+  };
+  var lista=Array.isArray(nf.porProduto)?nf.porProduto:[];
+  var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
+  var mesLabel=bossMesLabelDados_(dados);
+  var dataSel=bossFmtDataBR_(dados&&dados.data);
+
+  var per=document.getElementById('bossPeriodoComprasAcougue');
+  if(per){
+    per.classList.toggle('boss-period-dia',periodoEfetivo==='dia');
+    per.classList.toggle('boss-period-mes',periodoEfetivo!=='dia');
+    per.textContent=periodoEfetivo==='dia'
+      ?(dataSel?('dia '+dataSel):'dia específico')
+      :(mesLabel?('mês inteiro · '+mesLabel):'mês inteiro');
+  }
+
+  var total=document.getElementById('bossTotalComprasAcougue');
+  if(total)total.textContent=nf.incluidaNoCalculo?bossFmtBRL(nf.totalValor||0):'—';
+
+  var count=document.getElementById('bossCountComprasAcougue');
+  if(count)count.textContent=lista.length+' '+(lista.length===1?'produto':'produtos')+' · '+(Number(nf.totalNotas)||0)+' NF';
+
+  var info=document.getElementById('bossInfoComprasAcougue');
+  if(info){
+    if(periodoEfetivo==='dia'){
+      info.innerHTML='<i class="ti ti-info-circle"></i> O Controle de Entradas do Açougue é mensal acumulado e não informa a data individual de cada NF; por isso não é atribuído a um dia específico.';
+    }else if(nf.incluidaNoCalculo){
+      info.innerHTML='<i class="ti ti-calendar-month"></i> Período do relatório: <strong>'+bossEscapeHtml(bossFmtDataBR_(nf.periodoInicio||''))+' a '+bossEscapeHtml(bossFmtDataBR_(nf.periodoFim||''))+'</strong> · '+(Number(nf.totalFornecedores)||0)+' fornecedores · '+(Number(nf.totalNotas)||0)+' notas.';
+    }else{
+      info.innerHTML='<i class="ti ti-alert-triangle"></i> '+bossEscapeHtml(nf.motivo||'Controle de entradas do Açougue indisponível.');
+    }
+  }
+
+  var wrap=document.getElementById('bossListComprasAcougue');
+  if(wrap){
+    if(!nf.incluidaNoCalculo||!lista.length){
+      wrap.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>'+bossEscapeHtml(nf.motivo||'Nenhuma compra do Açougue encontrada para o período.')+'</div>';
+    }else{
+      wrap.innerHTML=lista.slice(0,100).map(function(x,i){
+        var cod=String(x.cod||x.codigoInterno||'').replace(/[^0-9]/g,'');
+        var nome=bossEscapeHtml(x.nome||('Produto '+cod));
+        var qtd=Number(x.pesoTotal!=null?x.pesoTotal:x.quantidade)||0;
+        var valor=Number(x.valorTotal)||0;
+        var custo=Number(x.custoMedio)||(qtd>0?valor/qtd:0);
+        var photo=cod
+          ?'<div class="boss-photo"><img data-boss-cod="'+bossEscapeHtml(cod)+'" data-boss-nome="'+nome+'" alt="" loading="lazy"></div>'
+          :'<div class="boss-photo"><i class="ti ti-meat"></i></div>';
+        return '<div class="boss-row">'
+          +'<div class="boss-rank">'+(i+1)+'</div>'
+          +photo
+          +'<div class="boss-prod"><div class="boss-prod-name" title="'+nome+'">'+nome+'</div><div class="boss-prod-cod">'+bossEscapeHtml(cod)+'</div></div>'
+          +'<div class="boss-num"><small>Qtd entrada</small><strong>'+bossFmtQtd(qtd)+'</strong></div>'
+          +'<div class="boss-num"><small>Custo médio</small><strong>'+bossFmtBRL(custo)+'</strong></div>'
+          +'<div class="boss-num"><small>Total comprado</small><strong>'+bossFmtBRL(valor)+'</strong></div>'
+          +'</div>';
+      }).join('');
+      bossResolverFotos(wrap);
+    }
+  }
+
+  var k=document.getElementById('bossKpiComprasAcougue');
+  if(k)k.textContent=nf.incluidaNoCalculo?bossFmtBRL(nf.totalValor||0):'—';
+  var ks=document.getElementById('bossKpiComprasAcougueSub');
+  if(ks)ks.textContent=nf.incluidaNoCalculo
+    ?((Number(nf.totalNotas)||0)+' NF · '+lista.length+' produtos · clique para detalhar')
+    :(nf.motivo||'Controle de entradas indisponível');
+
+  return nf;
+}
+
+function bossRenderGerencialAcougue_(dados){
+  var g=(dados&&dados.grupos&&dados.grupos.gerencialAcougue)||null;
+  var periodoEfetivo=(dados&&dados.periodo)||bossPeriodoAtual;
+  var per=document.getElementById('bossPeriodoGerencialAcougue');
+  if(per){
+    per.classList.toggle('boss-period-dia',periodoEfetivo==='dia');
+    per.classList.toggle('boss-period-mes',periodoEfetivo!=='dia');
+    per.textContent=periodoEfetivo==='dia'
+      ?('dia '+(bossFmtDataBR_(dados&&dados.data)||''))
+      :('mês inteiro · '+(bossMesLabelDados_(dados)||''));
+  }
+
+  function txt(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  function pct(v){return (v===null||v===undefined||!isFinite(Number(v)))?'—':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'%';}
+
+  if(!g){
+    ['gaCompras','gaVendas','gaVendaCompra','gaMargem','gaCobertura','gaProdutos'].forEach(function(id){txt(id,'—');});
+    return null;
+  }
+
+  var comprasOk=!!g.nfIncluidaNoCalculo;
+  var vendasOk=!!g.vendasIncluidaNoCalculo;
+
+  txt('gaCompras',comprasOk?bossFmtBRL(g.totalCompra||0):'—');
+  txt('gaComprasSub',comprasOk?((Number(g.totalNotasNF)||0)+' NF · compras do período'):(g.nfMotivo||'Compras indisponíveis'));
+  txt('gaVendas',vendasOk?bossFmtBRL(g.totalVendas||0):'—');
+  txt('gaVendasSub',vendasOk?(bossFmtQtd(g.totalQtdVendida||0)+' qtd vendida · ABC'):(g.vendasMotivo||'Vendas indisponíveis'));
+  txt('gaVendaCompra',(comprasOk&&vendasOk)?pct(g.vendaSobreCompraPct):'—');
+
+  var margemVal=(g.margemVendasEstimadaPct===null||g.margemVendasEstimadaPct===undefined)?null:Number(g.margemVendasEstimadaPct);
+  txt('gaMargem',margemVal===null?'—':pct(margemVal));
+  txt('gaMargemSub',margemVal===null?'Sem cruzamento suficiente de vendas x compras':('Margem estimada: '+bossFmtBRL(g.margemVendasEstimadaValor||0)));
+  txt('gaCobertura',pct(g.coberturaVendasPct));
+  txt('gaCoberturaSub',(Number(g.produtosVendaComCompra)||0)+' produtos vendidos com compra correspondente');
+  txt('gaProdutos',String(Number(g.totalProdutosVenda)||0));
+  txt('gaProdutosSub',(Number(g.produtosVendaSemCompra)||0)+' sem compra correspondente no período');
+
+  var km=document.getElementById('bossKpiMargemAcougue');
+  if(km){
+    km.textContent=margemVal===null?'—':pct(margemVal);
+    km.className='boss-clean-card-value '+(margemVal===null?'':(margemVal>=20?'green':(margemVal>=10?'amber':'red')));
+  }
+  var kms=document.getElementById('bossKpiMargemAcougueSub');
+  if(kms)kms.textContent=margemVal===null
+    ?'Aguardando cruzamento entre ABC e entradas'
+    :('Cobertura '+pct(g.coberturaVendasPct)+' das vendas · sem quebra');
+
+  var ar=document.getElementById('bossAnaliseAcougueResumo');
+  if(ar)ar.textContent=(comprasOk&&vendasOk)
+    ?('Vendas '+bossFmtBRL(g.totalVendas||0)+' · margem est. '+(margemVal===null?'—':pct(margemVal)))
+    :'Base parcial';
+  var ars=document.getElementById('bossAnaliseAcougueSub');
+  if(ars)ars.textContent='Compras + vendas + margem estimada · quebra ainda não lançada';
+
+  var top=document.getElementById('gaTopVendas');
+  if(top){
+    var vd=Array.isArray(g.vendasDetalhe)?g.vendasDetalhe:[];
+    if(!vd.length){
+      top.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhuma venda disponível.</div>';
+    }else{
+      top.innerHTML=vd.slice(0,10).map(function(x,i){
+        var cod=String(x.cod||'').replace(/[^0-9]/g,'');
+        var nome=bossEscapeHtml(x.nome||'Produto');
+        var marg=x.margemEstimadaPct;
+        return '<div class="boss-row">'
+          +'<div class="boss-rank">'+(i+1)+'</div>'
+          +(cod?'<div class="boss-photo"><img data-boss-cod="'+bossEscapeHtml(cod)+'" data-boss-nome="'+nome+'" alt="" loading="lazy"></div>':'<div class="boss-photo"><i class="ti ti-meat"></i></div>')
+          +'<div class="boss-prod"><div class="boss-prod-name">'+nome+'</div><div class="boss-prod-cod">'+bossEscapeHtml(cod)+'</div></div>'
+          +'<div class="boss-num"><small>Qtd venda</small><strong>'+bossFmtQtd(x.qtdeVendida||0)+'</strong></div>'
+          +'<div class="boss-num"><small>Venda</small><strong>'+bossFmtBRL(x.valorVenda||0)+'</strong></div>'
+          +'<div class="boss-num"><small>Margem est.</small><strong>'+(marg===null||marg===undefined?'—':pct(marg))+'</strong></div>'
+          +'</div>';
+      }).join('');
+      bossResolverFotos(top);
+    }
+  }
+
+  var forn=document.getElementById('gaFornecedores');
+  if(forn){
+    var fs=Array.isArray(g.fornecedores)?g.fornecedores:[];
+    if(!fs.length){
+      forn.innerHTML='<div class="boss-empty"><i class="ti ti-inbox"></i>Nenhum fornecedor disponível.</div>';
+    }else{
+      forn.innerHTML=fs.slice(0,12).map(function(f,i){
+        return '<div class="boss-row" style="grid-template-columns:28px minmax(160px,1fr) 120px 90px">'
+          +'<div class="boss-rank">'+(i+1)+'</div>'
+          +'<div class="boss-prod"><div class="boss-prod-name">'+bossEscapeHtml(f.fornecedor||'Fornecedor')+'</div><div class="boss-prod-cod">'+bossEscapeHtml(f.cnpj||'')+'</div></div>'
+          +'<div class="boss-num"><small>Compras</small><strong>'+bossFmtBRL(f.valor||0)+'</strong></div>'
+          +'<div class="boss-num"><small>Notas</small><strong>'+String(Number(f.notas)||0)+'</strong></div>'
+          +'</div>';
+      }).join('');
+    }
+  }
+
+  return g;
+}
+
+
+
+var _bossCharts={geral:null,setor:null,padaria:null,acougue:null};
 
 function bossGerarInsights_(dados){
   var saida={horti:[],padaria:[]};
@@ -8138,6 +8490,19 @@ function bossRxAtividades_(){
     });
   }
 
+
+  var nfA=g.entradaAcougueNF||{};
+  (Array.isArray(nfA.porProduto)?nfA.porProduto:[]).forEach(function(x){bossRxAdd_(arr,'Compras NF Açougue','acougue',x);});
+  (Array.isArray(nfA.notas)?nfA.notas:[]).forEach(function(n){
+    (n.itens||[]).forEach(function(x){
+      bossRxAdd_(arr,'NF Açougue','acougue',x,{fornecedor:n.fornecedor||n.fantasia||'',nf:n.nf||'',data:n.data||''});
+    });
+  });
+  var va=g.vendasAcougue||{};
+  (Array.isArray(va.porProduto)?va.porProduto:[]).forEach(function(x){
+    bossRxAdd_(arr,'Vendas Açougue','acougue',{cod:x.cod,nome:x.nome,qtde:x.qtde,valor:x.valor,unidade:x.unidade});
+  });
+
   bossLista(dados,'horti').forEach(function(x){bossRxAdd_(arr,'Quebras Horti','horti',x);});
   bossLista(dados,'padaria').forEach(function(x){bossRxAdd_(arr,'Quebras Padaria','padaria',x);});
   bossLista(dados,'producaoPadaria').forEach(function(x){bossRxAdd_(arr,'Produção Padaria','padaria',x);});
@@ -8169,6 +8534,7 @@ function bossRxSetorLabel_(s){
   s=String(s||'').toLowerCase();
   if(s.indexOf('hort')>=0)return 'Horti';
   if(s.indexOf('pad')>=0)return 'Padaria';
+  if(s.indexOf('acou')>=0||s.indexOf('açou')>=0)return 'Açougue';
   return 'Loja';
 }
 function bossRxPopularUnidades_(){
@@ -8746,6 +9112,42 @@ function bossRenderCharts_(dados){
     });
   }
 
+
+  var ga=(dados&&dados.grupos&&dados.grupos.gerencialAcougue)||null;
+  var comprasAcougue=ga&&ga.nfIncluidaNoCalculo?(Number(ga.totalCompra)||0):0;
+  var vendasAcougue=ga&&ga.vendasIncluidaNoCalculo?(Number(ga.totalVendas)||0):0;
+  var elAcougue=document.getElementById('bossChartAcougue');
+  if(elAcougue){
+    if(_bossCharts.acougue){_bossCharts.acougue.destroy();}
+    elAcougue.classList.add('boss-chart-clicavel');
+    _bossCharts.acougue=new Chart(elAcougue.getContext('2d'),{
+      type:'bar',
+      data:{labels:['Compras','Vendas'],datasets:[{
+        data:[comprasAcougue,vendasAcougue],
+        backgroundColor:['#378ADD','#1D9E75'],
+        borderRadius:6,borderWidth:0,maxBarThickness:64
+      }]},
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        animation:{duration:1100,easing:'easeInOutQuart'},
+        onHover:function(evt,els){evt.native.target.style.cursor=els.length?'pointer':'default';},
+        onClick:function(evt,els){
+          if(!els.length)return;
+          if(els[0].index===0)bossToggleGrupo('bossGrupoComprasAcougue','bossKpiComprasAcougueCard','bossComprasAcougueChevron');
+          else bossToggleGrupo('bossGrupoVendasAcougue','bossKpiVendasAcougueCard','bossVendasAcougueChevron');
+        },
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:function(ctx){return bossFmtBRL(ctx.parsed.y||0)+' · clique para detalhar';}}}
+        },
+        scales:{
+          y:{beginAtZero:true,ticks:{font:{size:10},callback:function(v){return bossFmtBRL(v);}}},
+          x:{ticks:{font:{size:11}}}
+        }
+      }
+    });
+  }
+
   var elSetor=document.getElementById('bossChartSetor');
   if(elSetor){
     if(_bossCharts.setor){_bossCharts.setor.destroy();}
@@ -8795,8 +9197,11 @@ function bossRender(dados){
   bossRenderEntradaCeasa_(dados);
   bossRenderVendasHorti_(dados);
   var vendasPadaria=bossRenderVendasPadaria_(dados);
+  var comprasAcougue=bossRenderComprasAcougue_(dados);
+  var vendasAcougue=bossRenderVendasAcougue_(dados);
   bossRenderGerencialHorti_(dados);
   var gerPadaria=bossRenderGerencialPadaria_(dados);
+  var gerAcougue=bossRenderGerencialAcougue_(dados);
   var q=bossTotal(horti)+bossTotal(padaria),p=bossTotal(vencidos),ci=bossTotal(uso);
   var qHorti=bossTotal(horti),qPadaria=bossTotal(padaria);
   var aH=document.getElementById('bossKpiQuebrasHorti');if(aH)aH.textContent=bossFmtBRL(qHorti);
@@ -8905,7 +9310,7 @@ function bossDataApiSelecionada_(){
   if(bossPeriodoAtual==='dia'){
     return /^\d{4}-\d{2}-\d{2}$/.test(v)?v:bossHoje();
   }
-  var ym=/^\d{4}-\d{2}$/.test(v)?v:(/^\d{4}-\d{2}-\d{2}$/.test(v)?v.slice(0,7):bossMesAtualValor_());
+  var ym=/^\d{4}-\d{2}$/.test(v)?v:(/^\d{4}-\d{2}-\d{2}$/.test(v)?v.slice(0,7):bossUltimoMesFechadoValor_());
   // O backend trabalha com AAAA-MM-DD, mas no modo mensal usa apenas o mês.
   return ym+'-01';
 }
@@ -8925,7 +9330,7 @@ function bossConfigurarCampoPeriodo_(p,valorPreferido){
     var pref=String(valorPreferido||'');
     if(/^\d{4}-\d{2}$/.test(pref))mes=pref;
     else if(/^\d{4}-\d{2}-\d{2}$/.test(pref))mes=pref.slice(0,7);
-    if(!mes)mes=bossMesAtualValor_();
+    if(!mes)mes=bossUltimoMesFechadoValor_();
     inp.type='month';
     inp.value=mes;
     if(atalhos)atalhos.style.display='flex';
@@ -8945,9 +9350,9 @@ function bossSetPeriodo(p){
     b.classList.toggle('active',b.getAttribute('data-periodo')===p);
   });
 
-  // Ao entrar no modo mensal, abre SEMPRE o mês atual.
+  // Ao entrar no modo mensal, usa o último mês fechado como ponto seguro.
   // Ao entrar no modo diário, abre hoje.
-  bossConfigurarCampoPeriodo_(p,p==='dia'?bossHoje():bossMesAtualValor_());
+  bossConfigurarCampoPeriodo_(p,p==='dia'?bossHoje():bossUltimoMesFechadoValor_());
   bossCarregar(true);
 }
 
@@ -8991,7 +9396,7 @@ function bossFetch(url,data,periodo){
 }
 function bossCarregar(force){
   var inp=document.getElementById('bossData');if(!inp)return;
-  if(!inp.value)bossConfigurarCampoPeriodo_(bossPeriodoAtual,bossPeriodoAtual==='dia'?bossHoje():bossMesAtualValor_());
+  if(!inp.value)bossConfigurarCampoPeriodo_(bossPeriodoAtual,bossPeriodoAtual==='dia'?bossHoje():bossUltimoMesFechadoValor_());
   var data=bossDataApiSelecionada_();
   var periodo=bossPeriodoAtual;
   var compPrev=String(data||'').slice(0,7);
@@ -9048,29 +9453,25 @@ function bossCarregar(force){
 function bossInit(){
   var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
 
-  // Regra gerencial v8:
+  // Regra gerencial:
   // - abre sempre no modo MÊS;
-  // - mês padrão = MÊS ATUAL;
-  // - a leitura mensal do backend é da competência completa selecionada.
-  //   Ex.: em setembro abre 2026-09 e consulta a pasta BANCO DE DADOS/2026-09.
+  // - mês padrão = último mês fechado;
+  // - mês atual fica disponível por atalho quando os relatórios já existirem.
   bossPeriodoAtual='mes';
-  var mesPadrao=bossMesAtualValor_();
+  var mesPadrao=bossUltimoMesFechadoValor_();
   bossConfigurarCampoPeriodo_('mes',mesPadrao);
 
   document.querySelectorAll('.boss-periodo-opt').forEach(function(b){
     b.classList.toggle('active',b.getAttribute('data-periodo')==='mes');
   });
 
-  var compEl=document.getElementById('bossCompetenciaDrive');
-  if(compEl)compEl.textContent='Competência '+mesPadrao+' · BANCO DE DADOS/'+mesPadrao;
-
-  // Só usa snapshot quando ele pertence ao mês ATUAL.
-  // Assim um cache antigo de agosto nunca volta a aparecer ao abrir setembro.
+  // Não exibe snapshot de outro mês. Isso evita abrir setembro mostrando
+  // silenciosamente dados salvos de agosto ou vice-versa.
   if(cache&&cache.dados&&cache.periodo==='mes'){
     var cacheMes=String(cache.valorFiltro||cache.data||'').slice(0,7);
     if(cacheMes===mesPadrao){
       bossRender(cache.dados);
-      bossSetStatus('warn','Snapshot de '+bossMesLabelValor_(mesPadrao)+' exibido; atualizando o mês atual ao abrir o Boss Vision.');
+      bossSetStatus('warn','Snapshot de '+bossMesLabelValor_(mesPadrao)+' exibido; abra o Boss Vision para atualizar os relatórios.');
     }
   }
 }
