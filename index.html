@@ -2014,14 +2014,14 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .colab-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .colab-title{font-size:18px;font-weight:850;color:var(--tx);display:flex;align-items:center;gap:8px}
 .colab-sub{font-size:11px;color:var(--tx2);margin-top:4px;line-height:1.45;max-width:860px}
-.colab-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:14px}
+.colab-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:14px}
 .colab-kpi{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:12px}
 .colab-kpi span{display:block;font-size:8.5px;font-weight:800;text-transform:uppercase;color:var(--tx2);letter-spacing:.05em}
 .colab-kpi b{display:block;font-size:20px;margin-top:4px;color:var(--tx)}
 .colab-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
 .colab-toolbar input{flex:1;min-width:220px;background:var(--bg);color:var(--tx);border:1px solid var(--bds);border-radius:8px;padding:8px 10px;font-size:12px}
 .colab-list{display:flex;flex-direction:column;gap:7px}
-.colab-row{display:grid;grid-template-columns:minmax(210px,1.4fr) minmax(240px,1.5fr) 105px 90px 170px;gap:8px;align-items:center;background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:9px 10px}
+.colab-row{display:grid;grid-template-columns:minmax(190px,1.35fr) minmax(220px,1.45fr) 115px 92px 90px 165px;gap:8px;align-items:center;background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:9px 10px}
 .colab-name{font-size:11px;font-weight:800;color:var(--tx)}
 .colab-id{font-size:8px;color:var(--tx2);margin-top:2px;font-family:monospace}
 .colab-email{font-size:10px;color:var(--tx2);word-break:break-all}
@@ -2030,6 +2030,24 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .colab-status.on{background:rgba(16,185,129,.13);color:#34d399}.colab-status.off{background:rgba(107,114,128,.15);color:#9ca3af}
 .colab-actions{display:flex;gap:5px;justify-content:flex-end}
 .colab-empty{text-align:center;padding:32px 12px;color:var(--tx2);border:1px dashed var(--bds);border-radius:10px}
+.colab-list-head{display:grid;grid-template-columns:minmax(190px,1.35fr) minmax(220px,1.45fr) 115px 92px 90px 165px;gap:8px;padding:0 10px 2px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.055em;color:var(--tx2)}
+.colab-aniv{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--tx)}
+.colab-aniv i{color:var(--amber);font-size:14px}.colab-aniv b{font-size:11px}
+.colab-coletas{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05}.colab-coletas b{font-size:17px;color:var(--blue)}.colab-coletas span{font-size:8px;color:var(--tx2);text-transform:uppercase;font-weight:800;margin-top:2px}
+@media(max-width:900px){.colab-list-head{display:none}}
+
+/* Lembrete gerencial de aniversários */
+.bday-gestor{background:var(--bg);border:1px solid var(--bd);border-left:4px solid var(--amber);border-radius:var(--rl);padding:14px 16px;margin-bottom:18px}
+.bday-gestor-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.bday-gestor-title{font-size:14px;font-weight:800;color:var(--tx);display:flex;align-items:center;gap:7px}.bday-gestor-title i{color:var(--amber);font-size:18px}
+.bday-gestor-sub{font-size:10px;color:var(--tx2);margin-top:3px}
+.bday-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:7px}
+.bday-item{display:flex;align-items:center;gap:9px;background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:9px 10px;min-width:0}
+.bday-date{width:45px;height:39px;border-radius:8px;background:rgba(186,117,23,.12);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0}
+.bday-person{flex:1;min-width:0}.bday-person b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bday-person span{display:block;font-size:9px;color:var(--tx2);margin-top:2px}
+.bday-days{font-size:9px;font-weight:900;padding:4px 7px;border-radius:999px;background:rgba(55,138,221,.11);color:var(--blue);white-space:nowrap}.bday-days.today{background:rgba(29,158,117,.14);color:var(--green)}
+@media(max-width:560px){.bday-list{grid-template-columns:1fr}.bday-gestor{padding:11px 12px}}
+
 .colab-modal-back{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:14px}
 .colab-modal{width:520px;max-width:96vw;background:var(--bg2);border:1px solid var(--bds);border-radius:12px;padding:16px;box-shadow:0 18px 60px rgba(0,0,0,.45)}
 .colab-modal h3{margin:0 0 12px;font-size:15px;color:var(--tx)}
@@ -2545,6 +2563,9 @@ function toggleTheme() {
   </div>
 
   <div id="sec-dashboard" class="sec active">
+
+    <!-- Lembrete gerencial de aniversários -->
+    <div id="dashAniversariosGestor" class="bday-gestor" style="display:none"></div>
 
     <!-- KPI Tiles -->
     <div class="dash-divider-label">Status dos produtos</div>
@@ -3903,7 +3924,7 @@ function toggleTheme() {
     <div class="colab-head">
       <div>
         <div class="colab-title"><i class="ti ti-users"></i> Colaboradores</div>
-        <div class="colab-sub">Cadastro universal da atmosfera AURA. A fonte oficial é a aba <b>Colaboradores</b> do Google Sheets. A lista alimenta também as atribuições de tarefas e a identificação dos responsáveis nas telas do sistema.</div>
+        <div class="colab-sub">Cadastro universal da atmosfera AURA. A fonte oficial é a aba <b>Colaboradores</b> do Google Sheets. Aqui o gestor acompanha aniversário, situação e o total de coletas de cada usuário; a mesma identidade alimenta tarefas e responsáveis nas demais telas.</div>
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn" onclick="colabAdminCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
@@ -3916,6 +3937,7 @@ function toggleTheme() {
       <div class="colab-kpi"><span>Ativos</span><b id="colabKpiAtivos">0</b></div>
       <div class="colab-kpi"><span>Inativos / arquivados</span><b id="colabKpiInativos">0</b></div>
       <div class="colab-kpi"><span>Total universal</span><b id="colabKpiTotal">0</b></div>
+      <div class="colab-kpi"><span>Coletas registradas</span><b id="colabKpiColetas">0</b></div>
     </div>
     <div class="colab-toolbar">
       <input id="colabBusca" placeholder="Buscar por nome, e-mail ou e-mail anterior..." oninput="colabAdminRender()">
@@ -5355,6 +5377,7 @@ function fmtBRL(n){
 }
 
 function renderDashboard(){
+  try{renderLembreteAniversariosGestor_();}catch(e){}
   if(!products||!products.length){
     document.getElementById('dashTiles').innerHTML='';
     document.getElementById('dashMini').innerHTML='';
@@ -6722,7 +6745,7 @@ var _bossDados=null;
 var BOSS_VISION_BUILD='v8.24-acougue-compras-vendas-sem-quebra';
 var AURA_COBERTURA_BUILD='v7-custo-fallback-buscarEANCompleto';
 console.info('[AURA] Cobertura Fornecedor',AURA_COBERTURA_BUILD);
-var AURA_COLABORADORES_BUILD='v1-universal-admin-compat-id-linha';
+var AURA_COLABORADORES_BUILD='v3-aniversarios-coletas-schema-canonico';
 console.info('[AURA] Colaboradores',AURA_COLABORADORES_BUILD);
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
@@ -12817,6 +12840,7 @@ function carregarColaboradoresUniversal_(forcar){
       try{if(typeof _ucFiltrar==='function')_ucFiltrar();}catch(e){}
       try{if(typeof renderTarefas==='function')renderTarefas();}catch(e2){}
       colabAdminAtualizarKpis_();
+      try{renderLembreteAniversariosGestor_();}catch(e3){}
 
       var badge=document.getElementById('colabNavBadge');
       if(badge){
@@ -12890,16 +12914,16 @@ _ucSalvarUser=async function(email){
 function colabAdminAtualizarKpis_(){
   var todos=COLABORADORES_TODOS||[];
   var ativos=todos.filter(function(c){return c.ativo!==false;}).length;
+  var coletas=todos.reduce(function(s,c){return s+(Number(c.coletas)||0);},0);
   var a=document.getElementById('colabKpiAtivos');if(a)a.textContent=ativos;
   var i=document.getElementById('colabKpiInativos');if(i)i.textContent=todos.length-ativos;
   var t=document.getElementById('colabKpiTotal');if(t)t.textContent=todos.length;
+  var c=document.getElementById('colabKpiColetas');if(c)c.textContent=coletas.toLocaleString('pt-BR');
 }
 
 async function colabAdminCarregar(forcar){
   var el=document.getElementById('colabLista');
-  if(el&&(!COLABORADORES_TODOS.length||forcar)){
-    el.innerHTML='<div class="colab-empty"><i class="ti ti-loader-2 spin"></i><div style="margin-top:5px">Carregando fonte universal...</div></div>';
-  }
+  if(el&&(!COLABORADORES_TODOS.length||forcar))el.innerHTML='<div class="colab-empty"><i class="ti ti-loader-2"></i><div style="margin-top:5px">Carregando colaboradores e contagem de coletas...</div></div>';
   await carregarColaboradoresUniversal_(!!forcar);
   colabAdminRender();
 }
@@ -12909,24 +12933,22 @@ function colabAdminRender(){
   var q=String((document.getElementById('colabBusca')||{}).value||'').trim().toLowerCase();
   var lista=(COLABORADORES_TODOS||[]).slice().filter(function(c){
     if(!q)return true;
-    return [c.nome,c.email,(c.aliases||[]).join(' ')].join(' ').toLowerCase().indexOf(q)>=0;
+    return [c.nome,c.email,(c.aliases||[]).join(' '),c.aniv,String(c.coletas||0)].join(' ').toLowerCase().indexOf(q)>=0;
   });
   lista.sort(function(a,b){
     if((a.ativo!==false)!==(b.ativo!==false))return a.ativo===false?1:-1;
     return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');
   });
-  if(!lista.length){
-    el.innerHTML='<div class="colab-empty">Nenhum colaborador encontrado.</div>';
-    colabAdminAtualizarKpis_();return;
-  }
-  el.innerHTML=lista.map(function(c){
-    var aliases=_colabAliases_(c);
-    var chave=_colabChave_(c);
-    var ref=c.id?('ID '+c.id):(c.linha?('Linha '+c.linha):'Cadastro Sheets');
+  if(!lista.length){el.innerHTML='<div class="colab-empty">Nenhum colaborador encontrado.</div>';colabAdminAtualizarKpis_();return;}
+  var cab='<div class="colab-list-head"><div>Colaborador</div><div>E-mail / anteriores</div><div>Aniversário</div><div>Coletas</div><div>Situação</div><div style="text-align:right">Ações</div></div>';
+  el.innerHTML=cab+lista.map(function(c){
+    var aliases=c.aliases||[],ref=c.id||c.linha||c.email||'',chave=c.id||c.linha||c.email||'';
+    var coletas=Number(c.coletas)||0;
     return '<div class="colab-row">'
       +'<div><div class="colab-name">'+escHtml(c.nome||'Sem nome')+(_colabNormEmail_(c.email)===COLAB_EMAIL_TESTE?'<span style="margin-left:6px;font-size:8px;padding:2px 6px;border-radius:99px;background:rgba(186,117,23,.14);color:var(--amber)">LOGIN DE TESTE</span>':'')+'</div><div class="colab-id">'+escHtml(ref)+'</div></div>'
       +'<div><div class="colab-email">'+escHtml(c.email||'Sem e-mail')+'</div>'+(aliases.length?'<div class="colab-alias">Anterior: '+escHtml(aliases.join(' · '))+'</div>':'')+'</div>'
-      +'<div style="font-size:10px;color:var(--tx2)">'+escHtml(c.aniv||'—')+'</div>'
+      +'<div class="colab-aniv" title="Aniversário"><i class="ti ti-cake"></i><b>'+escHtml(c.aniv||'—')+'</b></div>'
+      +'<div class="colab-coletas" title="Total de coletas associadas ao e-mail atual e aos e-mails anteriores"><b>'+coletas.toLocaleString('pt-BR')+'</b><span>coletas</span></div>'
       +'<div><span class="colab-status '+(c.ativo===false?'off':'on')+'">'+(c.ativo===false?'Inativo':'Ativo')+'</span></div>'
       +'<div class="colab-actions">'
         +'<button class="btn btn-sm" onclick="colabAdminAbrirModal('+JSON.stringify(chave).replace(/"/g,'&quot;')+')"><i class="ti ti-pencil"></i> Editar</button>'
@@ -12934,6 +12956,47 @@ function colabAdminRender(){
       +'</div></div>';
   }).join('');
   colabAdminAtualizarKpis_();
+}
+
+// ── Lembrete de aniversários para o Dashboard ──────────────────
+var _colabMesesPt_=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+function _colabParseAnivFront_(v){
+  var m=String(v||'').trim().match(/^(\d{1,2})\/(\d{1,2})/);if(!m)return null;
+  var d=Number(m[1]),mo=Number(m[2]);if(d<1||d>31||mo<1||mo>12)return null;return {d:d,m:mo};
+}
+function _colabDiasAteAniv_(aniv,hoje){
+  var p=_colabParseAnivFront_(aniv);if(!p)return null;
+  var y=hoje.getFullYear(),h=Date.UTC(y,hoje.getMonth(),hoje.getDate()),a=Date.UTC(y,p.m-1,p.d);
+  var dias=Math.round((a-h)/86400000);if(dias<0){a=Date.UTC(y+1,p.m-1,p.d);dias=Math.round((a-h)/86400000);}return dias;
+}
+function renderLembreteAniversariosGestor_(){
+  var el=document.getElementById('dashAniversariosGestor');if(!el)return;
+  if(!_colabUniversalCarregado){
+    el.style.display='';el.innerHTML='<div class="bday-gestor-title"><i class="ti ti-cake"></i> Aniversários da equipe</div><div class="bday-gestor-sub">Carregando calendário dos colaboradores...</div>';
+    carregarColaboradoresUniversal_(false).then(function(){renderLembreteAniversariosGestor_();});return;
+  }
+  var hoje=new Date(),mesAtual=hoje.getMonth()+1;
+  var ativos=(COLABORADORES_TODOS||[]).filter(function(c){return c.ativo!==false&&c.nome&&_colabParseAnivFront_(c.aniv);});
+  var mes=ativos.map(function(c){var p=_colabParseAnivFront_(c.aniv);return {c:c,p:p,dias:_colabDiasAteAniv_(c.aniv,hoje)};})
+    .filter(function(x){return x.p.m===mesAtual&&x.dias!==null&&x.dias<=31;})
+    .sort(function(a,b){return a.p.d-b.p.d;});
+  // No mês atual, mostra de hoje em diante. Se não houver, mostra os 4 próximos do calendário.
+  var futurosMes=mes.filter(function(x){return x.p.d>=hoje.getDate();});
+  var lista=futurosMes;
+  var modoProximos=false;
+  if(!lista.length){
+    modoProximos=true;
+    lista=ativos.map(function(c){return {c:c,p:_colabParseAnivFront_(c.aniv),dias:_colabDiasAteAniv_(c.aniv,hoje)};}).filter(function(x){return x.dias!==null;}).sort(function(a,b){return a.dias-b.dias;}).slice(0,4);
+  }
+  var nomeMes=_colabMesesPt_[hoje.getMonth()];
+  var sub=lista.length?(modoProximos?'Nenhum aniversário restante em '+nomeMes+'. Veja os próximos da equipe.':lista.length+' aniversário'+(lista.length===1?'':'s')+' restante'+(lista.length===1?'':'s')+' em '+nomeMes+'.'):'Nenhum aniversário cadastrado para colaboradores ativos.';
+  var itens=lista.map(function(x){
+    var dias=x.dias,txt=dias===0?'Hoje!':(dias===1?'Amanhã':'Faltam '+dias+' dias');
+    var dt=(x.p.d<10?'0':'')+x.p.d+'/'+(x.p.m<10?'0':'')+x.p.m;
+    return '<div class="bday-item"><div class="bday-date">'+dt+'</div><div class="bday-person"><b>'+escHtml(x.c.nome)+'</b><span>'+escHtml(x.c.email||'')+'</span></div><div class="bday-days '+(dias===0?'today':'')+'">'+txt+'</div></div>';
+  }).join('');
+  el.style.display='';
+  el.innerHTML='<div class="bday-gestor-hd"><div><div class="bday-gestor-title"><i class="ti ti-cake"></i> Aniversários da equipe — '+nomeMes.charAt(0).toUpperCase()+nomeMes.slice(1)+'</div><div class="bday-gestor-sub">'+sub+'</div></div><div style="font-size:9px;color:var(--tx2)">Somente colaboradores ativos</div></div>'+(itens?'<div class="bday-list">'+itens+'</div>':'');
 }
 
 function colabAdminAbrirModal(chave){
