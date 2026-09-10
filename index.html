@@ -2009,37 +2009,6 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .cf-flow{grid-template-columns:1fr}.cf-step-arrow{display:none}
 }
 
-
-/* COLABORADORES UNIVERSAIS */
-.colab-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-.colab-title{font-size:18px;font-weight:850;color:var(--tx);display:flex;align-items:center;gap:8px}
-.colab-sub{font-size:11px;color:var(--tx2);margin-top:4px;line-height:1.45;max-width:860px}
-.colab-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:14px}
-.colab-kpi{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:12px}
-.colab-kpi span{display:block;font-size:8.5px;font-weight:800;text-transform:uppercase;color:var(--tx2);letter-spacing:.05em}
-.colab-kpi b{display:block;font-size:20px;margin-top:4px;color:var(--tx)}
-.colab-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-.colab-toolbar input{flex:1;min-width:220px;background:var(--bg);color:var(--tx);border:1px solid var(--bds);border-radius:8px;padding:8px 10px;font-size:12px}
-.colab-list{display:flex;flex-direction:column;gap:7px}
-.colab-row{display:grid;grid-template-columns:minmax(210px,1.4fr) minmax(240px,1.5fr) 105px 90px 170px;gap:8px;align-items:center;background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:9px 10px}
-.colab-name{font-size:11px;font-weight:800;color:var(--tx)}
-.colab-id{font-size:8px;color:var(--tx2);margin-top:2px;font-family:monospace}
-.colab-email{font-size:10px;color:var(--tx2);word-break:break-all}
-.colab-alias{font-size:8.5px;color:var(--amber);margin-top:2px;word-break:break-all}
-.colab-status{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:3px 7px;font-size:8px;font-weight:900;text-transform:uppercase}
-.colab-status.on{background:rgba(16,185,129,.13);color:#34d399}.colab-status.off{background:rgba(107,114,128,.15);color:#9ca3af}
-.colab-actions{display:flex;gap:5px;justify-content:flex-end}
-.colab-empty{text-align:center;padding:32px 12px;color:var(--tx2);border:1px dashed var(--bds);border-radius:10px}
-.colab-modal-back{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:14px}
-.colab-modal{width:520px;max-width:96vw;background:var(--bg2);border:1px solid var(--bds);border-radius:12px;padding:16px;box-shadow:0 18px 60px rgba(0,0,0,.45)}
-.colab-modal h3{margin:0 0 12px;font-size:15px;color:var(--tx)}
-.colab-form{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.colab-field.full{grid-column:1/-1}.colab-field label{display:block;font-size:8px;font-weight:800;text-transform:uppercase;color:var(--tx2);letter-spacing:.05em;margin-bottom:4px}
-.colab-field input{width:100%;box-sizing:border-box;background:var(--bg);color:var(--tx);border:1px solid var(--bds);border-radius:7px;padding:8px 9px;font-size:12px}
-.colab-modal-foot{display:flex;justify-content:flex-end;gap:7px;margin-top:13px}
-@media(max-width:900px){.colab-row{grid-template-columns:1fr 1fr}.colab-actions{justify-content:flex-start}}
-@media(max-width:560px){.colab-row,.colab-form,.colab-kpis{grid-template-columns:1fr}}
-
 </style>
 </head>
 <body>
@@ -2408,11 +2377,6 @@ function tentarLogin() {
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       <span>Tarefas</span>
       <span class="sb-nav-badge" id="asBadgeTarefas" style="display:none">0</span>
-    </button>
-    <button onclick="auraNav(this,'colaboradores')">
-      <i class="ti ti-users" style="font-size:17px"></i>
-      <span>Colaboradores</span>
-      <span class="sb-nav-badge" id="colabNavBadge" style="display:none">0</span>
     </button>
     <button id="navAjuda" onclick="auraNav(this,'ajuda')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -2947,7 +2911,7 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre o <strong>último mês fechado</strong>. Você pode escolher qualquer mês, abrir o <strong>mês atual</strong> ou consultar um <strong>dia específico</strong>. O mês atual só terá análise completa quando os relatórios desse mês já tiverem sido gerados.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: BANCO DE DADOS/AAAA-MM · Entradas Horti, Entradas Padaria, Entradas Fiambreria, ABC Horti, ABC Padaria, ABC Fiambreria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
+          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre sempre o <strong>mês atual completo</strong>. Você pode escolher qualquer outro mês, abrir o <strong>último mês fechado</strong> ou consultar um <strong>dia específico</strong>. A visão mensal usa a competência inteira selecionada; os números refletem os relatórios já disponíveis para aquele mês.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: BANCO DE DADOS/AAAA-MM · Entradas Horti, Entradas Padaria, Entradas Fiambreria, ABC Horti, ABC Padaria, ABC Fiambreria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div class="boss-fontes-bar">
             <button type="button" class="btn btn-sm" onclick="bossToggleFontes_()"><i class="ti ti-folder-check"></i> Verificar fontes</button>
@@ -3733,31 +3697,6 @@ function toggleTheme() {
       </div>
     </div>
   </div>
-  <div id="sec-colaboradores" class="sec">
-    <div class="colab-head">
-      <div>
-        <div class="colab-title"><i class="ti ti-users"></i> Colaboradores</div>
-        <div class="colab-sub">Cadastro universal da atmosfera AURA. A fonte oficial é a aba <b>Colaboradores</b> do Google Sheets. Ao trocar o e-mail de uma pessoa, o e-mail anterior fica preservado como alias para que lançamentos históricos continuem ligados ao mesmo colaborador.</div>
-      </div>
-      <div style="display:flex;gap:7px;flex-wrap:wrap">
-        <button class="btn" onclick="colabAdminCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
-        <button class="btn btn-green" onclick="colabAdminAbrirModal()"><i class="ti ti-user-plus"></i> Novo colaborador</button>
-      </div>
-    </div>
-    <div class="colab-kpis">
-      <div class="colab-kpi"><span>Ativos</span><b id="colabKpiAtivos">0</b></div>
-      <div class="colab-kpi"><span>Inativos / arquivados</span><b id="colabKpiInativos">0</b></div>
-      <div class="colab-kpi"><span>Total universal</span><b id="colabKpiTotal">0</b></div>
-    </div>
-    <div class="colab-toolbar">
-      <input id="colabBusca" placeholder="Buscar por nome, e-mail ou e-mail anterior..." oninput="colabAdminRender()">
-      <span style="font-size:9px;color:var(--tx2)">Fonte única · Google Sheets</span>
-    </div>
-    <div class="colab-list" id="colabLista">
-      <div class="colab-empty"><i class="ti ti-loader-2"></i><div style="margin-top:5px">Carregando colaboradores...</div></div>
-    </div>
-  </div>
-
   <div id="sec-ajuda" class="sec">
     <div class="help-box">
       <h4><i class="ti ti-brand-google" style="color:#4285F4"></i> Como conectar ao Google Sheets</h4>
@@ -5385,10 +5324,31 @@ function _construirUcIndex() {
 var _ucFiltrados = []; // após filtros
 
 // ── Dicionário de usuários (e-mail → nome) ──────────────────────
-// Lista local antiga removida. A fonte oficial é a API universal.
-// Estas funções são sobrescritas pelo módulo universal mais abaixo.
-function _ucGetUsers(){ return {}; }
-function _ucSaveUser(email,nome){ return null; }
+var UC_USERS_KEY = 'aura_uc_users';
+var _ucUsersDefault = {
+  'angelamaria.ao727@gmail.com':       'Angela Maria Duarte de Oliveira',
+  'cleitonbarbosaalencastro@gmail.com':'Cleiton Barbosa Alencastro',
+  'comercialvitoriacarnes@gmail.com':  'Celular ADM Televendas',
+  'gamagulartn@gmail.com':             'Natanieli Gama Gulart',
+  'janacosta1989@hotmail.com':         'Janaina da Silva Costa',
+  'katulula28251723@gmail.com':        'Karen Machado Fortuna',
+  'leila.darocha.5@gmail.com':         'Leila Schonhofen da Rocha',
+  'lima23stefani@gmail.com':           'Stefani Lima',
+  'stefanilima000@gmail.com':          'Stefani Lima',
+  'marineumann@gmail.com':             'Mari Estela da Silveira Neumann',
+  'pinheiroduarteweslyn@gmail.com':    'Weslyn Pinheiro Duarte',
+  'pontodigital1960@gmail.com':        '1960-NF',
+  'prevencaoboascompras@gmail.com':    'Leonardo',
+  'sinuelo6@gmail.com':                'Rafael da Costa Pereira',
+  'viniciusaraujomotorola@gmail.com':  'Vinicius Araujo'
+};
+function _ucGetUsers(){
+  try{var s=JSON.parse(localStorage.getItem(UC_USERS_KEY)||'{}');return Object.assign({},_ucUsersDefault,s);}
+  catch(e){return Object.assign({},_ucUsersDefault);}
+}
+function _ucSaveUser(email,nome){
+  try{var s=JSON.parse(localStorage.getItem(UC_USERS_KEY)||'{}');s[email.toLowerCase().trim()]=nome.trim();localStorage.setItem(UC_USERS_KEY,JSON.stringify(s));}catch(e){}
+}
 // v-fix: o modal de "Cadastrar colaborador" chamava _ucSalvarUser (com
 // esse nome), mas só existia _ucSaveUser definida — a função nunca
 // disparava, então salvar o nome do colaborador não fazia nada. Esta é
@@ -5423,7 +5383,7 @@ function _ucAbrirCadastroUser(email){
     +'<label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted,#a0a0a0);display:block;margin-bottom:5px">Nome completo</label>'
     +'<input id="ucUserNomeInput" placeholder="Ex: Maria da Silva" value="'+escHtml(existente)+'" '
     +'style="width:100%;box-sizing:border-box;background:var(--bg,#1a1a1a);border:1px solid var(--bds,rgba(255,255,255,.2));color:var(--fg,#f5f5f5);border-radius:7px;padding:9px 12px;font-size:14px;margin-bottom:6px;outline:none">'
-    +'<div style="font-size:11px;color:var(--muted,#a0a0a0);margin-bottom:16px">Trocas de e-mail são feitas na aba Colaboradores e preservam o histórico automaticamente.</div>'
+    +'<div style="font-size:11px;color:var(--muted,#a0a0a0);margin-bottom:16px">Se a mesma pessoa tiver dois e-mails, cadastre o nome nos dois separadamente.</div>'
     +'<div style="display:flex;gap:8px;justify-content:flex-end">'
     +'<button id="ucUserBtnCancelar" style="background:transparent;border:1px solid var(--bds,rgba(255,255,255,.2));color:var(--muted,#a0a0a0);border-radius:6px;padding:8px 16px;cursor:pointer;font-size:13px">Cancelar</button>'
     +'<button id="ucUserBtnSalvar" style="background:#D4001A;border:none;color:white;border-radius:6px;padding:8px 18px;cursor:pointer;font-size:13px;font-weight:600">Salvar</button>'
@@ -6530,11 +6490,10 @@ function addManual(){
 // ═══════════════════════════════════════════════════════════════
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
-var BOSS_VISION_BUILD='v8.23-pastas-mensais-seguras';
-var AURA_COBERTURA_BUILD='v7-custo-fallback-buscarEANCompleto';
+var BOSS_VISION_BUILD='v8.24-mes-atual-padrao';
+var BOSS_DEFAULT_PERIODO='mes_atual_completo';
+var AURA_COBERTURA_BUILD='v8-boss-mes-atual-padrao';
 console.info('[AURA] Cobertura Fornecedor',AURA_COBERTURA_BUILD);
-var AURA_COLABORADORES_BUILD='v1-universal-id-alias-admin';
-console.info('[AURA] Colaboradores',AURA_COLABORADORES_BUILD);
 console.info('[Boss Vision] build',BOSS_VISION_BUILD,'— fotos oficiais compartilhadas Arsenal/AURA/Coleta');
 
 function bossFmtBRL(v){
@@ -8946,7 +8905,7 @@ function bossDataApiSelecionada_(){
   if(bossPeriodoAtual==='dia'){
     return /^\d{4}-\d{2}-\d{2}$/.test(v)?v:bossHoje();
   }
-  var ym=/^\d{4}-\d{2}$/.test(v)?v:(/^\d{4}-\d{2}-\d{2}$/.test(v)?v.slice(0,7):bossUltimoMesFechadoValor_());
+  var ym=/^\d{4}-\d{2}$/.test(v)?v:(/^\d{4}-\d{2}-\d{2}$/.test(v)?v.slice(0,7):bossMesAtualValor_());
   // O backend trabalha com AAAA-MM-DD, mas no modo mensal usa apenas o mês.
   return ym+'-01';
 }
@@ -8966,7 +8925,7 @@ function bossConfigurarCampoPeriodo_(p,valorPreferido){
     var pref=String(valorPreferido||'');
     if(/^\d{4}-\d{2}$/.test(pref))mes=pref;
     else if(/^\d{4}-\d{2}-\d{2}$/.test(pref))mes=pref.slice(0,7);
-    if(!mes)mes=bossUltimoMesFechadoValor_();
+    if(!mes)mes=bossMesAtualValor_();
     inp.type='month';
     inp.value=mes;
     if(atalhos)atalhos.style.display='flex';
@@ -8986,9 +8945,9 @@ function bossSetPeriodo(p){
     b.classList.toggle('active',b.getAttribute('data-periodo')===p);
   });
 
-  // Ao entrar no modo mensal, usa o último mês fechado como ponto seguro.
+  // Ao entrar no modo mensal, abre SEMPRE o mês atual.
   // Ao entrar no modo diário, abre hoje.
-  bossConfigurarCampoPeriodo_(p,p==='dia'?bossHoje():bossUltimoMesFechadoValor_());
+  bossConfigurarCampoPeriodo_(p,p==='dia'?bossHoje():bossMesAtualValor_());
   bossCarregar(true);
 }
 
@@ -9032,7 +8991,7 @@ function bossFetch(url,data,periodo){
 }
 function bossCarregar(force){
   var inp=document.getElementById('bossData');if(!inp)return;
-  if(!inp.value)bossConfigurarCampoPeriodo_(bossPeriodoAtual,bossPeriodoAtual==='dia'?bossHoje():bossUltimoMesFechadoValor_());
+  if(!inp.value)bossConfigurarCampoPeriodo_(bossPeriodoAtual,bossPeriodoAtual==='dia'?bossHoje():bossMesAtualValor_());
   var data=bossDataApiSelecionada_();
   var periodo=bossPeriodoAtual;
   var compPrev=String(data||'').slice(0,7);
@@ -9089,25 +9048,29 @@ function bossCarregar(force){
 function bossInit(){
   var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
 
-  // Regra gerencial:
+  // Regra gerencial v8:
   // - abre sempre no modo MÊS;
-  // - mês padrão = último mês fechado;
-  // - mês atual fica disponível por atalho quando os relatórios já existirem.
+  // - mês padrão = MÊS ATUAL;
+  // - a leitura mensal do backend é da competência completa selecionada.
+  //   Ex.: em setembro abre 2026-09 e consulta a pasta BANCO DE DADOS/2026-09.
   bossPeriodoAtual='mes';
-  var mesPadrao=bossUltimoMesFechadoValor_();
+  var mesPadrao=bossMesAtualValor_();
   bossConfigurarCampoPeriodo_('mes',mesPadrao);
 
   document.querySelectorAll('.boss-periodo-opt').forEach(function(b){
     b.classList.toggle('active',b.getAttribute('data-periodo')==='mes');
   });
 
-  // Não exibe snapshot de outro mês. Isso evita abrir setembro mostrando
-  // silenciosamente dados salvos de agosto ou vice-versa.
+  var compEl=document.getElementById('bossCompetenciaDrive');
+  if(compEl)compEl.textContent='Competência '+mesPadrao+' · BANCO DE DADOS/'+mesPadrao;
+
+  // Só usa snapshot quando ele pertence ao mês ATUAL.
+  // Assim um cache antigo de agosto nunca volta a aparecer ao abrir setembro.
   if(cache&&cache.dados&&cache.periodo==='mes'){
     var cacheMes=String(cache.valorFiltro||cache.data||'').slice(0,7);
     if(cacheMes===mesPadrao){
       bossRender(cache.dados);
-      bossSetStatus('warn','Snapshot de '+bossMesLabelValor_(mesPadrao)+' exibido; abra o Boss Vision para atualizar os relatórios.');
+      bossSetStatus('warn','Snapshot de '+bossMesLabelValor_(mesPadrao)+' exibido; atualizando o mês atual ao abrir o Boss Vision.');
     }
   }
 }
@@ -10028,7 +9991,6 @@ function goTab(name){
   if(name==='dashboard')renderDashboard();
   if(name==='estoque')renderEstoque();
   if(name==='tarefas'){renderTarefas();sincronizarTarefasCompleto();}
-  if(name==='colaboradores'){colabAdminCarregar(false);}
 }
 function refresh(){renderMetrics();renderTable();atualizarNegBadge();renderDashboard();if(typeof bossAtualizarVencidosAura==='function')bossAtualizarVencidosAura();}
 
@@ -11564,7 +11526,6 @@ _popularRetiradaDiaSel();
 function _iniciarDadosSecundariosAposCarga_(){
   if(window._auraDadosSecundariosIniciados)return;
   window._auraDadosSecundariosIniciados=true;
-  carregarColaboradoresUniversal_(false);
   sincronizarTarefasCompleto();
   cloudLoad();
 }
@@ -12313,234 +12274,39 @@ function abrirRelatorioRetirada() {
 }
 
 // ═══ SISTEMA DE TAREFAS ═══
-var COLABORADORES_TODOS = [];
-var COLABORADORES = [];
-var AURA_COLABORADORES_API = 'https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk2OOaOOG_oOhpGdKETgZgIkTrZOBY36_UzS35Ns8s/exec';
+var COLABORADORES = [
+
+  {nome: '1960-NF',                         email: 'pontodigital1960@gmail.com'},
+  {nome: 'Televendas',                      email: 'comercialvitoriacarnes@gmail.com'},
+  {nome: 'Angela Maria Duarte de Oliveira', email: 'angelamaria.ao727@gmail.com'},
+  {nome: 'Cesar Augusto Porto Pacheco',     email: 'cesarporto0319@gmail.com'},
+  {nome: 'Claudionir Oliveira Silveira',    email: 'claudiosilveira0221@gmail.com'},
+  {nome: 'Cleiton Barbosa Alencastro',      email: 'cleitonbarbosaalencastro@gmail.com'},
+  {nome: 'Janaina da Silva Costa',          email: 'janacosta1989@hotmail.com'},
+  {nome: 'Karen Machado Fortuna',           email: 'katulula28251723@gmail.com'},
+  {nome: 'Leila Schonhofen da Rocha',       email: 'leila.darocha.5@gmail.com'},
+  {nome: 'Leonardo',                        email: 'prevencaoboascompras@gmail.com'},
+  {nome: 'Mari Estela da Silveira Neumann', email: 'marineumann@gmail.com'},
+  {nome: 'Natanieli Gama Gulart',           email: 'gamagulartn@gmail.com'},
+  {nome: 'Rafael da Costa Pereira',         email: 'sinuelo6@gmail.com'},
+  {nome: 'Stefani Lima',                    email: 'lima23stefani@gmail.com'},
+  {nome: 'Stefani Lima',                    email: 'stefanilima000@gmail.com'},
+  {nome: 'Taiti Gabriela Witter Loch',      email: 'taitigabriel@hotmail.com'},
+  {nome: 'Vinicius',                        email: 'viniciusaraujomotorola@gmail.com'},
+  {nome: 'Wagner',                          email: 'limawagner8213@gmail.com'},
+  {nome: 'Weslyn Pinheiro Duarte',          email: 'pinheiroduarteweslyn@gmail.com'},
+  {nome: 'Carlos Henrique Gonçalves',       email: ''},
+  {nome: 'Cristiano da Rosa Ramos',         email: ''},
+  {nome: 'Eduardo',                         email: ''},
+  {nome: 'Jose Kael da Conceição',          email: ''},
+  {nome: 'Juliana',                         email: ''},
+  {nome: 'Katia Brasil Vieira',             email: ''},
+  {nome: 'Leticia',                         email: ''},
+  {nome: 'Michael de Matos Leal',           email: ''},
+  {nome: 'Pedro',                           email: ''},
+];
 var TAREFAS_KEY = 'boascompras_tarefas';
 var TAREFAS_FILA_KEY = 'boascompras_tarefas_fila';
-
-// ═══════════════════════════════════════════════════════════════
-// COLABORADORES UNIVERSAIS — sem lista fixa no HTML
-// ═══════════════════════════════════════════════════════════════
-var _colabUniversalCarregado=false;
-var _colabUniversalPromise=null;
-
-function _colabNormEmail_(v){return String(v||'').trim().toLowerCase();}
-function _colabAliases_(c){
-  return c&&Array.isArray(c.aliases)?c.aliases.map(_colabNormEmail_).filter(Boolean):[];
-}
-function _colabPorEmail_(email){
-  var e=_colabNormEmail_(email),i,c;
-  if(!e)return null;
-  for(i=0;i<COLABORADORES_TODOS.length;i++){
-    c=COLABORADORES_TODOS[i];
-    if(_colabNormEmail_(c.email)===e)return c;
-  }
-  for(i=0;i<COLABORADORES_TODOS.length;i++){
-    c=COLABORADORES_TODOS[i];
-    if(_colabAliases_(c).indexOf(e)>=0)return c;
-  }
-  return null;
-}
-function _colabNomePorEmail_(email){var c=_colabPorEmail_(email);return c?c.nome:null;}
-
-function carregarColaboradoresUniversal_(forcar){
-  if(_colabUniversalPromise&&!forcar)return _colabUniversalPromise;
-  if(_colabUniversalCarregado&&!forcar)return Promise.resolve(COLABORADORES_TODOS);
-
-  var cfg=typeof loadCfg==='function'?loadCfg():{};
-  var base=(cfg&&cfg.url)||AURA_COLABORADORES_API;
-  _colabUniversalPromise=fetch(base+'?action=getUsuarios&_='+Date.now(),{cache:'no-store'})
-    .then(function(r){return r.json();})
-    .then(function(j){
-      if(!j||!j.ok||!Array.isArray(j.usuarios))throw new Error((j&&j.erro)||'Resposta inválida de getUsuarios');
-      COLABORADORES_TODOS=j.usuarios.slice();
-      COLABORADORES=COLABORADORES_TODOS.filter(function(c){return c.ativo!==false&&_colabNormEmail_(c.email);});
-      _colabUniversalCarregado=true;
-      _colabUniversalPromise=null;
-
-      // Atualiza nomes de registros históricos já carregados; aliases fazem
-      // teste@gmail.com resolver para o cadastro atual do Valdeci.
-      if(typeof _ucDados!=='undefined'&&Array.isArray(_ucDados)){
-        _ucDados.forEach(function(d){if(d&&d.email)d.nomeColeta=_colabNomePorEmail_(d.email);});
-      }
-      try{if(typeof _ucFiltrar==='function')_ucFiltrar();}catch(e){}
-      try{if(typeof renderTarefas==='function')renderTarefas();}catch(e2){}
-      colabAdminAtualizarKpis_();
-
-      var badge=document.getElementById('colabNavBadge');
-      if(badge){
-        badge.textContent=COLABORADORES.length;
-        badge.style.display=COLABORADORES.length?'inline-flex':'none';
-      }
-      return COLABORADORES_TODOS;
-    })
-    .catch(function(err){
-      _colabUniversalPromise=null;
-      console.error('[Colaboradores] Falha ao carregar fonte universal:',err);
-      return COLABORADORES_TODOS;
-    });
-  return _colabUniversalPromise;
-}
-
-async function _colabPost_(body){
-  var cfg=typeof loadCfg==='function'?loadCfg():{};
-  var base=(cfg&&cfg.url)||AURA_COLABORADORES_API;
-  var r=await fetch(base,{
-    method:'POST',
-    headers:{'Content-Type':'text/plain;charset=UTF-8'},
-    body:JSON.stringify(body)
-  });
-  var txt=await r.text();
-  try{return JSON.parse(txt);}catch(e){return {ok:false,erro:'Resposta inválida do servidor.'};}
-}
-
-// Sobrescreve o dicionário/localStorage legado: nomes agora vêm da lista universal.
-_ucGetUsers=function(){
-  var mapa={};
-  COLABORADORES_TODOS.forEach(function(c){
-    if(!c||!c.nome)return;
-    if(c.email)mapa[_colabNormEmail_(c.email)]=c.nome;
-    _colabAliases_(c).forEach(function(a){mapa[a]=c.nome;});
-  });
-  return mapa;
-};
-_ucResolveNome=function(email){return _colabNomePorEmail_(email);};
-_ucSaveUser=function(email,nome){
-  return _colabPost_({action:'salvarUsuario',usuario:{email:_colabNormEmail_(email),nome:String(nome||'').trim(),ativo:true}})
-    .then(function(r){return carregarColaboradoresUniversal_(true).then(function(){return r;});});
-};
-_ucSalvarUser=async function(email){
-  var inp=document.getElementById('ucUserNomeInput');
-  var nome=inp?inp.value.trim():'';
-  if(!nome){if(inp){inp.style.borderColor='#ef4444';inp.focus();}return;}
-  var existente=_colabPorEmail_(email);
-  var res=await _colabPost_({
-    action:'salvarUsuario',
-    usuario:{
-      id:existente&&existente.id||'',
-      linha:existente&&existente.linha||'',
-      email:existente&&existente.email||_colabNormEmail_(email),
-      nome:nome,
-      aniv:existente&&existente.aniv||'',
-      ativo:existente?existente.ativo!==false:true,
-      aliases:existente&&existente.aliases||[]
-    }
-  });
-  if(!res||!res.ok){mostrarToast('Erro ao salvar colaborador: '+((res&&res.erro)||'falha'),'err');return;}
-  await carregarColaboradoresUniversal_(true);
-  var modal=document.getElementById('ucUserModal');if(modal)modal.remove();
-  if(typeof renderUltimasColetas==='function')renderUltimasColetas(false);
-  mostrarToast('Colaborador salvo na fonte universal.','ok');
-};
-
-function colabAdminAtualizarKpis_(){
-  var todos=COLABORADORES_TODOS||[];
-  var ativos=todos.filter(function(c){return c.ativo!==false;}).length;
-  var a=document.getElementById('colabKpiAtivos');if(a)a.textContent=ativos;
-  var i=document.getElementById('colabKpiInativos');if(i)i.textContent=todos.length-ativos;
-  var t=document.getElementById('colabKpiTotal');if(t)t.textContent=todos.length;
-}
-
-async function colabAdminCarregar(forcar){
-  var el=document.getElementById('colabLista');
-  if(el&&(!COLABORADORES_TODOS.length||forcar)){
-    el.innerHTML='<div class="colab-empty"><i class="ti ti-loader-2"></i><div style="margin-top:5px">Carregando fonte universal...</div></div>';
-  }
-  await carregarColaboradoresUniversal_(!!forcar);
-  colabAdminRender();
-}
-
-function colabAdminRender(){
-  var el=document.getElementById('colabLista');if(!el)return;
-  var q=String((document.getElementById('colabBusca')||{}).value||'').trim().toLowerCase();
-  var lista=(COLABORADORES_TODOS||[]).slice().filter(function(c){
-    if(!q)return true;
-    return [c.nome,c.email,(c.aliases||[]).join(' ')].join(' ').toLowerCase().indexOf(q)>=0;
-  });
-  lista.sort(function(a,b){
-    if((a.ativo!==false)!==(b.ativo!==false))return a.ativo===false?1:-1;
-    return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');
-  });
-  if(!lista.length){
-    el.innerHTML='<div class="colab-empty">Nenhum colaborador encontrado.</div>';
-    colabAdminAtualizarKpis_();return;
-  }
-  el.innerHTML=lista.map(function(c){
-    var aliases=c.aliases||[];
-    return '<div class="colab-row">'
-      +'<div><div class="colab-name">'+escHtml(c.nome||'Sem nome')+'</div><div class="colab-id">'+escHtml(c.id||'sem ID')+'</div></div>'
-      +'<div><div class="colab-email">'+escHtml(c.email||'Sem e-mail')+'</div>'+(aliases.length?'<div class="colab-alias">Anterior: '+escHtml(aliases.join(' · '))+'</div>':'')+'</div>'
-      +'<div style="font-size:10px;color:var(--tx2)">'+escHtml(c.aniv||'—')+'</div>'
-      +'<div><span class="colab-status '+(c.ativo===false?'off':'on')+'">'+(c.ativo===false?'Inativo':'Ativo')+'</span></div>'
-      +'<div class="colab-actions">'
-        +'<button class="btn btn-sm" onclick="colabAdminAbrirModal(\''+escHtml(c.id||'')+'\')"><i class="ti ti-pencil"></i> Editar</button>'
-        +'<button class="btn btn-sm" onclick="colabAdminAlternar(\''+escHtml(c.id||'')+'\','+(c.ativo===false?'true':'false')+')" title="'+(c.ativo===false?'Reativar':'Inativar')+'"><i class="ti '+(c.ativo===false?'ti-user-check':'ti-user-off')+'"></i></button>'
-      +'</div></div>';
-  }).join('');
-  colabAdminAtualizarKpis_();
-}
-
-function colabAdminAbrirModal(id){
-  var c=id?(COLABORADORES_TODOS||[]).find(function(x){return String(x.id||'')===String(id);}):null;
-  var aliases=c&&Array.isArray(c.aliases)?c.aliases:[];
-  var modal=document.createElement('div');
-  modal.className='colab-modal-back';modal.id='colabAdminModal';
-  modal.innerHTML='<div class="colab-modal">'
-    +'<h3><i class="ti ti-user-edit"></i> '+(c?'Editar colaborador':'Novo colaborador')+'</h3>'
-    +'<div class="colab-form">'
-      +'<div class="colab-field full"><label>Nome completo</label><input id="colabFormNome" value="'+escHtml(c&&c.nome||'')+'" placeholder="Nome completo"></div>'
-      +'<div class="colab-field full"><label>E-mail atual</label><input id="colabFormEmail" type="email" value="'+escHtml(c&&c.email||'')+'" placeholder="email@dominio.com"></div>'
-      +'<div class="colab-field"><label>Aniversário (DD/MM)</label><input id="colabFormAniv" value="'+escHtml(c&&c.aniv||'')+'" placeholder="29/04"></div>'
-      +'<div class="colab-field"><label>Situação</label><div style="height:34px;display:flex;align-items:center;gap:7px"><input id="colabFormAtivo" type="checkbox" style="width:auto" '+(!c||c.ativo!==false?'checked':'')+'><span style="font-size:11px;color:var(--tx2)">Ativo</span></div></div>'
-      +(c?'<div class="colab-field full"><label>ID estável</label><input value="'+escHtml(c.id||'')+'" disabled></div>':'')
-      +(aliases.length?'<div class="colab-field full"><label>E-mails anteriores preservados</label><input value="'+escHtml(aliases.join('; '))+'" disabled></div>':'')
-    +'</div>'
-    +'<div style="font-size:9px;color:var(--tx2);margin-top:9px;line-height:1.4">Ao alterar o e-mail, o anterior vira alias automaticamente. O histórico continua ligado ao mesmo ID.</div>'
-    +'<div class="colab-modal-foot">'
-      +'<button class="btn" onclick="document.getElementById(\'colabAdminModal\').remove()">Cancelar</button>'
-      +'<button class="btn btn-green" id="colabFormSalvar" onclick="colabAdminSalvar(\''+(c?escHtml(c.id||''):'')+'\')"><i class="ti ti-device-floppy"></i> Salvar</button>'
-    +'</div></div>';
-  document.body.appendChild(modal);
-  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
-  setTimeout(function(){var n=document.getElementById('colabFormNome');if(n)n.focus();},40);
-}
-
-async function colabAdminSalvar(id){
-  var c=id?(COLABORADORES_TODOS||[]).find(function(x){return String(x.id||'')===String(id);}):null;
-  var nome=String((document.getElementById('colabFormNome')||{}).value||'').trim();
-  var email=_colabNormEmail_((document.getElementById('colabFormEmail')||{}).value||'');
-  var aniv=String((document.getElementById('colabFormAniv')||{}).value||'').trim();
-  var ativo=!!((document.getElementById('colabFormAtivo')||{}).checked);
-  if(!nome){mostrarToast('Informe o nome completo.','warn');return;}
-
-  var btn=document.getElementById('colabFormSalvar');
-  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Salvando...';}
-  var res=await _colabPost_({
-    action:'salvarUsuario',
-    usuario:{
-      id:c&&c.id||'',linha:c&&c.linha||'',email:email,nome:nome,aniv:aniv,ativo:ativo,
-      aliases:c&&c.aliases||[]
-    }
-  });
-  if(!res||!res.ok){
-    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> Salvar';}
-    mostrarToast('Erro ao salvar colaborador: '+((res&&res.erro)||'falha'),'err');return;
-  }
-  var modal=document.getElementById('colabAdminModal');if(modal)modal.remove();
-  await carregarColaboradoresUniversal_(true);
-  colabAdminRender();
-  mostrarToast('Colaborador salvo na fonte universal.','ok');
-}
-
-async function colabAdminAlternar(id,ativo){
-  var res=await _colabPost_({action:'ativarDesativarUsuario',id:id,ativo:!!ativo});
-  if(!res||!res.ok){mostrarToast('Erro ao alterar colaborador: '+((res&&res.erro)||'falha'),'err');return;}
-  await carregarColaboradoresUniversal_(true);
-  colabAdminRender();
-  mostrarToast(ativo?'Colaborador reativado.':'Colaborador inativado sem apagar o histórico.','ok');
-}
-
 
 function getTarefas(){try{return JSON.parse(localStorage.getItem(TAREFAS_KEY)||'[]');}catch(e){return[];}}
 function saveTarefas(arr){try{localStorage.setItem(TAREFAS_KEY,JSON.stringify(arr));}catch(e){console.warn('localStorage cheio, pulando cache de tarefas:',e);}}
