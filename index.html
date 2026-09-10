@@ -3907,6 +3907,8 @@ function toggleTheme() {
       </div>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn" onclick="colabAdminCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
+        <button class="btn" style="border-color:var(--amber);color:var(--amber)" onclick="colabEfetivarTesteAbrir()"><i class="ti ti-user-check"></i> Efetivar usuário de teste</button>
+        <button class="btn" style="border-color:var(--blue);color:var(--blue)" onclick="colabUnificarAbrir()"><i class="ti ti-arrows-join"></i> Unificar cadastros</button>
         <button class="btn btn-green" onclick="colabAdminAbrirModal()"><i class="ti ti-user-plus"></i> Novo colaborador</button>
       </div>
     </div>
@@ -12746,6 +12748,7 @@ var AURA_COLABORADORES_API = (typeof GAS_URL!=='undefined' && String(GAS_URL||''
   : 'https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk2OOaOOG_oOhpGdKETgZgIkTrZOBY36_UzS35Ns8s/exec';
 var TAREFAS_KEY = 'boascompras_tarefas';
 var TAREFAS_FILA_KEY = 'boascompras_tarefas_fila';
+var COLAB_EMAIL_TESTE = 'teste@gmail.com';
 
 // ═══════════════════════════════════════════════════════════════
 // COLABORADORES — fonte universal no Sheets
@@ -12921,7 +12924,7 @@ function colabAdminRender(){
     var chave=_colabChave_(c);
     var ref=c.id?('ID '+c.id):(c.linha?('Linha '+c.linha):'Cadastro Sheets');
     return '<div class="colab-row">'
-      +'<div><div class="colab-name">'+escHtml(c.nome||'Sem nome')+'</div><div class="colab-id">'+escHtml(ref)+'</div></div>'
+      +'<div><div class="colab-name">'+escHtml(c.nome||'Sem nome')+(_colabNormEmail_(c.email)===COLAB_EMAIL_TESTE?'<span style="margin-left:6px;font-size:8px;padding:2px 6px;border-radius:99px;background:rgba(186,117,23,.14);color:var(--amber)">LOGIN DE TESTE</span>':'')+'</div><div class="colab-id">'+escHtml(ref)+'</div></div>'
       +'<div><div class="colab-email">'+escHtml(c.email||'Sem e-mail')+'</div>'+(aliases.length?'<div class="colab-alias">Anterior: '+escHtml(aliases.join(' · '))+'</div>':'')+'</div>'
       +'<div style="font-size:10px;color:var(--tx2)">'+escHtml(c.aniv||'—')+'</div>'
       +'<div><span class="colab-status '+(c.ativo===false?'off':'on')+'">'+(c.ativo===false?'Inativo':'Ativo')+'</span></div>'
@@ -12948,7 +12951,7 @@ function colabAdminAbrirModal(chave){
       +(c?'<div class="colab-field full"><label>Referência do cadastro</label><input value="'+escHtml(c.id||('Linha '+(c.linha||'—')))+'" disabled></div>':'')
       +(aliases.length?'<div class="colab-field full"><label>E-mails anteriores preservados</label><input value="'+escHtml(aliases.join('; '))+'" disabled></div>':'')
     +'</div>'
-    +(aliases.length?'<div style="font-size:9px;color:var(--tx2);margin-top:9px;line-height:1.4">Este backend preserva e-mails anteriores como aliases, mantendo o histórico ligado ao mesmo colaborador.</div>':'')
+    +(_colabNormEmail_(c&&c.email)===COLAB_EMAIL_TESTE?'<div style="font-size:9px;color:var(--amber);margin-top:9px;line-height:1.4"><b>Login reservado:</b> não troque este e-mail por aqui. Para efetivar a pessoa e levar o histórico, use o botão “Efetivar usuário de teste”.</div>':(aliases.length?'<div style="font-size:9px;color:var(--tx2);margin-top:9px;line-height:1.4">E-mails pessoais anteriores podem ficar como aliases. O endereço teste@gmail.com nunca vira alias porque é reutilizável.</div>':''))
     +'<div class="colab-modal-foot">'
       +'<button class="btn" onclick="document.getElementById(\'colabAdminModal\').remove()">Cancelar</button>'
       +'<button class="btn btn-green" id="colabFormSalvar" onclick="colabAdminSalvar('+JSON.stringify(chave||'').replace(/"/g,'&quot;')+')"><i class="ti ti-device-floppy"></i> Salvar</button>'
@@ -13003,6 +13006,89 @@ async function colabAdminAlternar(chave,ativo){
   await carregarColaboradoresUniversal_(true);
   colabAdminRender();
   mostrarToast(ativo?'Colaborador reativado.':'Colaborador inativado sem apagar o histórico.','ok');
+}
+
+
+function _colabResumoMigracao_(res){
+  return (Number(res&&res.coletasMigradas)||0)+' coleta(s) e '+(Number(res&&res.tarefasMigradas)||0)+' tarefa(s) migradas';
+}
+
+function colabEfetivarTesteAbrir(){
+  var teste=_colabPorEmail_(COLAB_EMAIL_TESTE);
+  var nomeInicial=(teste&&String(teste.nome||'').toUpperCase()!=='COLABORADOR EM TESTE')?String(teste.nome||''):'';
+  var emailInicial=/valdeci/i.test(nomeInicial)?'valdecijuniorgoncalves@gmail.com':'';
+  var modal=document.createElement('div');
+  modal.className='colab-modal-back';modal.id='colabEfetivarModal';
+  modal.innerHTML='<div class="colab-modal" style="max-width:560px">'
+    +'<h3><i class="ti ti-user-check" style="color:var(--amber)"></i> Efetivar usuário de teste</h3>'
+    +'<div style="font-size:10px;color:var(--tx2);line-height:1.55;margin-bottom:12px">Todo o histórico atualmente gravado como <b>'+escHtml(COLAB_EMAIL_TESTE)+'</b> será transferido para o cadastro pessoal abaixo. Depois, o login de teste volta automaticamente para <b>COLABORADOR EM TESTE</b> e fica livre para a próxima pessoa.</div>'
+    +'<div class="colab-form">'
+      +'<div class="colab-field full"><label>Nome completo</label><input id="colabEfetivarNome" value="'+escHtml(nomeInicial)+'"></div>'
+      +'<div class="colab-field full"><label>E-mail pessoal definitivo</label><input id="colabEfetivarEmail" type="email" value="'+escHtml(emailInicial)+'" placeholder="email pessoal definitivo"></div>'
+      +'<div class="colab-field"><label>Aniversário (DD/MM) — opcional</label><input id="colabEfetivarAniv" placeholder="dd/mm"></div>'
+      +'<div class="colab-field"><label>Login liberado após concluir</label><input value="'+escHtml(COLAB_EMAIL_TESTE)+'" disabled></div>'
+    +'</div>'
+    +'<div style="font-size:9px;color:var(--amber);margin-top:10px"><b>Importante:</b> esta ação altera fisicamente os e-mails do histórico de coletas e tarefas. Uma cópia de auditoria é registrada na aba “Histórico Migrações Colaboradores”.</div>'
+    +'<div class="colab-modal-foot"><button class="btn" onclick="document.getElementById(\'colabEfetivarModal\').remove()">Cancelar</button>'
+      +'<button class="btn btn-green" id="colabEfetivarBtn" onclick="colabEfetivarTesteConfirmar()"><i class="ti ti-transfer"></i> Transferir e efetivar</button></div>'
+    +'</div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+}
+
+async function colabEfetivarTesteConfirmar(){
+  var nome=String((document.getElementById('colabEfetivarNome')||{}).value||'').trim();
+  var email=_colabNormEmail_((document.getElementById('colabEfetivarEmail')||{}).value||'');
+  var aniv=String((document.getElementById('colabEfetivarAniv')||{}).value||'').trim();
+  if(!nome||!email){mostrarToast('Informe nome e e-mail pessoal definitivo.','warn');return;}
+  if(email===COLAB_EMAIL_TESTE){mostrarToast('O e-mail definitivo precisa ser diferente do login de teste.','warn');return;}
+  if(!confirm('Transferir TODO o histórico atual de '+COLAB_EMAIL_TESTE+' para '+email+' e liberar o login de teste?'))return;
+  var btn=document.getElementById('colabEfetivarBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Migrando...';}
+  var res=await _colabPost_({action:'efetivarUsuarioTeste',emailDestino:email,nomeDestino:nome,anivDestino:aniv});
+  if(!res||!res.ok){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-transfer"></i> Transferir e efetivar';}mostrarToast('Erro na efetivação: '+((res&&res.erro)||'falha'),'err');return;}
+  var modal=document.getElementById('colabEfetivarModal');if(modal)modal.remove();
+  await carregarColaboradoresUniversal_(true);colabAdminRender();
+  if(typeof renderUltimasColetas==='function'){try{_ucDados=[];_ucIndex=null;await renderUltimasColetas(true);}catch(e){}}
+  if(typeof sincronizarTarefasCompleto==='function'){try{sincronizarTarefasCompleto();}catch(e2){}}
+  mostrarToast('Efetivação concluída: '+_colabResumoMigracao_(res)+'. '+COLAB_EMAIL_TESTE+' está livre.','ok');
+}
+
+function colabUnificarAbrir(){
+  var lista=(COLABORADORES_TODOS||[]).filter(function(c){return _colabNormEmail_(c.email)!==COLAB_EMAIL_TESTE;});
+  if(lista.length<2){mostrarToast('São necessários ao menos dois cadastros para unificar.','warn');return;}
+  lista.sort(function(a,b){return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');});
+  var opts=lista.map(function(c){var ch=_colabChave_(c);return '<option value="'+escHtml(ch)+'">'+escHtml((c.nome||'Sem nome')+' — '+(c.email||'sem e-mail'))+'</option>';}).join('');
+  var modal=document.createElement('div');modal.className='colab-modal-back';modal.id='colabUnificarModal';
+  modal.innerHTML='<div class="colab-modal" style="max-width:620px">'
+    +'<h3><i class="ti ti-arrows-join" style="color:var(--blue)"></i> Unificar cadastros</h3>'
+    +'<div style="font-size:10px;color:var(--tx2);line-height:1.55;margin-bottom:12px">Use quando a mesma pessoa ficou cadastrada com dois e-mails. O cadastro de <b>destino</b> será mantido; o cadastro de <b>origem</b> será removido após a transferência. O e-mail antigo ficará como alias do cadastro oficial.</div>'
+    +'<div class="colab-form">'
+      +'<div class="colab-field full"><label>Cadastro duplicado / origem</label><select id="colabUnificarOrigem" style="width:100%;height:34px;background:var(--bg);color:var(--tx);border:1px solid var(--bds);border-radius:6px">'+opts+'</select></div>'
+      +'<div class="colab-field full"><label>Cadastro oficial que será mantido / destino</label><select id="colabUnificarDestino" style="width:100%;height:34px;background:var(--bg);color:var(--tx);border:1px solid var(--bds);border-radius:6px">'+opts+'</select></div>'
+    +'</div>'
+    +'<div style="font-size:9px;color:var(--tx2);margin-top:10px">A operação migra coletas e tarefas e registra auditoria. O login '+escHtml(COLAB_EMAIL_TESTE)+' não aparece aqui porque possui fluxo próprio.</div>'
+    +'<div class="colab-modal-foot"><button class="btn" onclick="document.getElementById(\'colabUnificarModal\').remove()">Cancelar</button>'
+      +'<button class="btn btn-green" id="colabUnificarBtn" onclick="colabUnificarConfirmar()"><i class="ti ti-arrows-join"></i> Unificar</button></div>'
+    +'</div>';
+  document.body.appendChild(modal);
+  var so=document.getElementById('colabUnificarOrigem'),sd=document.getElementById('colabUnificarDestino');
+  if(sd&&sd.options.length>1)sd.selectedIndex=1;
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+}
+
+async function colabUnificarConfirmar(){
+  var ko=String((document.getElementById('colabUnificarOrigem')||{}).value||''), kd=String((document.getElementById('colabUnificarDestino')||{}).value||'');
+  if(!ko||!kd||ko===kd){mostrarToast('Escolha dois cadastros diferentes.','warn');return;}
+  var o=_colabPorChave_(ko),d=_colabPorChave_(kd);if(!o||!d){mostrarToast('Cadastro não encontrado.','err');return;}
+  if(!confirm('Unificar '+(o.nome||o.email)+' ('+o.email+') em '+(d.nome||d.email)+' ('+d.email+')? O cadastro de origem será removido.'))return;
+  var btn=document.getElementById('colabUnificarBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Unificando...';}
+  var res=await _colabPost_({action:'unificarUsuarios',origemId:o.id||'',origemLinha:o.linha||'',emailOrigem:o.email||'',destinoId:d.id||'',destinoLinha:d.linha||'',emailDestino:d.email||''});
+  if(!res||!res.ok){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-arrows-join"></i> Unificar';}mostrarToast('Erro ao unificar: '+((res&&res.erro)||'falha'),'err');return;}
+  var modal=document.getElementById('colabUnificarModal');if(modal)modal.remove();
+  await carregarColaboradoresUniversal_(true);colabAdminRender();
+  if(typeof renderUltimasColetas==='function'){try{_ucDados=[];_ucIndex=null;await renderUltimasColetas(true);}catch(e){}}
+  if(typeof sincronizarTarefasCompleto==='function'){try{sincronizarTarefasCompleto();}catch(e2){}}
+  mostrarToast('Cadastros unificados: '+_colabResumoMigracao_(res)+'.','ok');
 }
 
 function getTarefas(){try{return JSON.parse(localStorage.getItem(TAREFAS_KEY)||'[]');}catch(e){return[];}}
