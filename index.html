@@ -2612,7 +2612,7 @@ function toggleTheme() {
   <div class="metrics" id="metrics" style="display:none"></div>
   <div class="tabs">
     <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
-    <div class="tab" onclick="goTab('nfe')"><i class="ti ti-file-invoice"></i> Receber NF-e</div>
+    <div class="tab" onclick="goTab('nfe')"><i class="ti ti-file-invoice"></i> Conferência NF-e</div>
     <div class="tab" onclick="goTab('bossvision')"><i class="ti ti-eye"></i> Boss Vision</div>
     <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório <span id="negBadge" style="display:none;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
     <div class="tab" onclick="goTab('modalidades')"><i class="ti ti-truck-delivery"></i> Modalidades</div>
@@ -3043,8 +3043,8 @@ function toggleTheme() {
       <div class="nfe-hero">
         <div class="nfe-hero-top">
           <div>
-            <div class="nfe-title"><i class="ti ti-file-barcode"></i> Recebimento por NF-e</div>
-            <div class="nfe-sub">Bipe a chave de acesso de 44 dígitos do DANFE. A AURA lê o XML da nota, confronta GTIN/EAN e códigos do fornecedor com o Banco de Dados e monta todos os produtos de uma vez para você informar as validades. Itens não reconhecidos ficam destacados para vínculo manual.</div>
+            <div class="nfe-title"><i class="ti ti-file-barcode"></i> Conferência de recebimento por NF-e</div>
+            <div class="nfe-sub">Bipe ou digite a chave de acesso de 44 dígitos do DANFE. A AURA localiza o XML, confronta os GTIN/EAN com o Banco de Dados e apresenta todos os produtos e quantidades da nota para conferência e lançamento das validades. Itens sem correspondência ficam destacados para vínculo manual.</div>
           </div>
           <span class="nfe-badge ok"><i class="ti ti-scan"></i> scanner de chave</span>
         </div>
@@ -9654,7 +9654,7 @@ function bossDataApiSelecionada_(){
   if(bossPeriodoAtual==='dia'){
     return /^\d{4}-\d{2}-\d{2}$/.test(v)?v:bossHoje();
   }
-  var ym=/^\d{4}-\d{2}$/.test(v)?v:(/^\d{4}-\d{2}-\d{2}$/.test(v)?v.slice(0,7):bossUltimoMesFechadoValor_());
+  var ym=/^\d{4}-\d{2}$/.test(v)?v:(/^\d{4}-\d{2}-\d{2}$/.test(v)?v.slice(0,7):bossMesAtualValor_());
   // O backend trabalha com AAAA-MM-DD, mas no modo mensal usa apenas o mês.
   return ym+'-01';
 }
@@ -9674,7 +9674,7 @@ function bossConfigurarCampoPeriodo_(p,valorPreferido){
     var pref=String(valorPreferido||'');
     if(/^\d{4}-\d{2}$/.test(pref))mes=pref;
     else if(/^\d{4}-\d{2}-\d{2}$/.test(pref))mes=pref.slice(0,7);
-    if(!mes)mes=bossUltimoMesFechadoValor_();
+    if(!mes)mes=bossMesAtualValor_();
     inp.type='month';
     inp.value=mes;
     if(atalhos)atalhos.style.display='flex';
@@ -9694,9 +9694,9 @@ function bossSetPeriodo(p){
     b.classList.toggle('active',b.getAttribute('data-periodo')===p);
   });
 
-  // Ao entrar no modo mensal, usa o último mês fechado como ponto seguro.
+  // Ao entrar no modo mensal, abre sempre o mês atual.
   // Ao entrar no modo diário, abre hoje.
-  bossConfigurarCampoPeriodo_(p,p==='dia'?bossHoje():bossUltimoMesFechadoValor_());
+  bossConfigurarCampoPeriodo_(p,p==='dia'?bossHoje():bossMesAtualValor_());
   bossCarregar(true);
 }
 
@@ -9740,7 +9740,7 @@ function bossFetch(url,data,periodo){
 }
 function bossCarregar(force){
   var inp=document.getElementById('bossData');if(!inp)return;
-  if(!inp.value)bossConfigurarCampoPeriodo_(bossPeriodoAtual,bossPeriodoAtual==='dia'?bossHoje():bossUltimoMesFechadoValor_());
+  if(!inp.value)bossConfigurarCampoPeriodo_(bossPeriodoAtual,bossPeriodoAtual==='dia'?bossHoje():bossMesAtualValor_());
   var data=bossDataApiSelecionada_();
   var periodo=bossPeriodoAtual;
   var compPrev=String(data||'').slice(0,7);
@@ -9799,18 +9799,18 @@ function bossInit(){
 
   // Regra gerencial:
   // - abre sempre no modo MÊS;
-  // - mês padrão = último mês fechado;
-  // - mês atual fica disponível por atalho quando os relatórios já existirem.
+  // - mês padrão = mês atual do dispositivo;
+  // - o último mês fechado continua disponível apenas como atalho manual.
   bossPeriodoAtual='mes';
-  var mesPadrao=bossUltimoMesFechadoValor_();
+  var mesPadrao=bossMesAtualValor_();
   bossConfigurarCampoPeriodo_('mes',mesPadrao);
 
   document.querySelectorAll('.boss-periodo-opt').forEach(function(b){
     b.classList.toggle('active',b.getAttribute('data-periodo')==='mes');
   });
 
-  // Não exibe snapshot de outro mês. Isso evita abrir setembro mostrando
-  // silenciosamente dados salvos de agosto ou vice-versa.
+  // Não exibe snapshot de outro mês. Assim, ao virar o mês, o Boss Vision
+  // abre a competência atual sem reutilizar silenciosamente o mês anterior.
   if(cache&&cache.dados&&cache.periodo==='mes'){
     var cacheMes=String(cache.valorFiltro||cache.data||'').slice(0,7);
     if(cacheMes===mesPadrao){
@@ -10748,6 +10748,7 @@ function nfeSalvar_(){var c=nfeColetarPayload_(),er=document.getElementById('nfe
 function nfeLimpar_(){_nfeNota=null;var box=document.getElementById('nfeNotaBox');if(box){box.style.display='none';box.innerHTML='';}var i=document.getElementById('nfeChave');if(i){i.value='';i.focus();}nfeStatus_('','Aguardando uma chave. Se o XML ainda não estiver no Drive, use “Importar XML”.');}
 
 
+var AURA_CONTROLE_VALIDADE_BUILD='v6.40-conferencia-nfe-mes-atual';
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
