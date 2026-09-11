@@ -1769,6 +1769,56 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .boss-rx-table th{position:static;background:var(--bg2);padding:7px 8px;font-size:8.5px}
 .boss-rx-table td{padding:7px 8px;border-top:1px solid var(--bd);white-space:nowrap}
 .boss-rx-notes{font-size:9.5px;color:var(--tx2);line-height:1.5;margin-top:9px}
+
+/* ── Raio-X focado: ao selecionar um item, some o painel setorial ── */
+.boss-wrap.boss-rx-focus>.boss-clean-dashboard,
+.boss-wrap.boss-rx-focus>.boss-group{display:none!important}
+.boss-rx.focus-mode{border-color:rgba(55,138,221,.42);box-shadow:0 12px 34px rgba(55,138,221,.10)}
+.boss-rx.focus-mode .boss-rx-results{display:none!important}
+.boss-rx-focusbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:rgba(55,138,221,.08);border:1px solid rgba(55,138,221,.20);border-radius:10px;padding:9px 11px;margin:0 0 12px}
+.boss-rx-focusbar-main{display:flex;align-items:center;gap:8px;min-width:0}
+.boss-rx-focusbar-main i{font-size:18px;color:var(--blue)}
+.boss-rx-focusbar-title{font-size:11px;font-weight:850;color:var(--tx)}
+.boss-rx-focusbar-sub{font-size:9px;color:var(--tx2);margin-top:2px;line-height:1.35}
+.boss-rx-performance{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:10px 0 12px}
+.boss-rx-perf-card{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px 11px;min-width:0}
+.boss-rx-perf-card span{display:block;font-size:8.3px;font-weight:850;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2)}
+.boss-rx-perf-card strong{display:block;font-size:14px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boss-rx-perf-card small{display:block;font-size:8.8px;color:var(--tx2);margin-top:3px;line-height:1.25}
+.boss-rx-charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 12px}
+.boss-rx-chart-card{border:1px solid var(--bd);border-radius:11px;background:var(--bg);padding:11px 12px;min-width:0}
+.boss-rx-chart-title{font-size:10.5px;font-weight:850;display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.boss-rx-chart-sub{font-size:8.8px;color:var(--tx2);line-height:1.35;margin-bottom:8px}
+.boss-rx-chart-box{height:235px;position:relative}
+.boss-rx-decision-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:10px;margin:10px 0 12px}
+.boss-rx-buy-card,.boss-rx-actions-card,.boss-rx-errors-card{border:1px solid var(--bd);border-radius:11px;background:var(--bg);padding:12px}
+.boss-rx-buy-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px}
+.boss-rx-buy-title{font-size:11px;font-weight:900;display:flex;align-items:center;gap:6px}
+.boss-rx-buy-title i{color:var(--green);font-size:16px}
+.boss-rx-buy-head select{height:30px;border:1px solid var(--bds);border-radius:7px;background:var(--bg);color:var(--tx);font-size:10px;padding:0 8px}
+.boss-rx-buy-main{display:grid;grid-template-columns:minmax(135px,.7fr) 1fr;gap:12px;align-items:center}
+.boss-rx-buy-number{font-size:26px;font-weight:900;line-height:1;color:var(--green)}
+.boss-rx-buy-number.warn{color:var(--amber)}
+.boss-rx-buy-number.off{color:var(--tx2)}
+.boss-rx-buy-label{font-size:8.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);margin-bottom:4px;font-weight:800}
+.boss-rx-buy-desc{font-size:9.5px;color:var(--tx2);line-height:1.5}
+.boss-rx-buy-desc strong{color:var(--tx)}
+.boss-rx-errors{display:flex;flex-direction:column;gap:7px}
+.boss-rx-signal{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--bd);border-left:4px solid var(--blue);border-radius:8px;padding:8px 9px;background:var(--bg2)}
+.boss-rx-signal.critico{border-left-color:var(--red);background:rgba(226,75,74,.06)}
+.boss-rx-signal.atencao{border-left-color:var(--amber);background:rgba(186,117,23,.07)}
+.boss-rx-signal.bom{border-left-color:var(--green);background:rgba(29,158,117,.06)}
+.boss-rx-signal i{font-size:15px;margin-top:1px}
+.boss-rx-signal.critico i{color:var(--red)}.boss-rx-signal.atencao i{color:var(--amber)}.boss-rx-signal.bom i{color:var(--green)}
+.boss-rx-signal strong{display:block;font-size:9.8px;margin-bottom:2px}
+.boss-rx-signal p{font-size:9px;line-height:1.4;color:var(--tx2);margin:0}
+.boss-rx-actions{display:flex;flex-direction:column;gap:7px}
+.boss-rx-action{display:grid;grid-template-columns:24px 1fr;gap:8px;align-items:flex-start;padding:8px 9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg2)}
+.boss-rx-action-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--blue);color:#fff;font-size:9px;font-weight:900}
+.boss-rx-action strong{display:block;font-size:9.8px;margin-bottom:2px}.boss-rx-action p{font-size:9px;line-height:1.4;color:var(--tx2);margin:0}
+.boss-rx-method{font-size:8.7px;line-height:1.45;color:var(--tx2);margin-top:8px;padding-top:8px;border-top:1px dashed var(--bd)}
+@media(max-width:1050px){.boss-rx-performance{grid-template-columns:repeat(3,minmax(0,1fr))}.boss-rx-decision-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.boss-rx-charts{grid-template-columns:1fr}.boss-rx-performance{grid-template-columns:repeat(2,minmax(0,1fr))}.boss-rx-buy-main{grid-template-columns:1fr}.boss-rx-chart-box{height:210px}}
 @media(max-width:980px){
   .boss-rx-filters{grid-template-columns:1fr 1fr}
   .boss-rx-filters .boss-rx-field:first-child{grid-column:1/-1}
@@ -3021,7 +3071,7 @@ function toggleTheme() {
           <div class="boss-rx-head-icon"><i class="ti ti-search"></i></div>
           <div class="boss-rx-head-main">
             <div class="boss-rx-title">Raio-X gerencial do item</div>
-            <div class="boss-rx-sub">Pesquise por nome, palavra-chave, código, unidade, fornecedor, setor ou origem. Clique no produto para cruzar compras, vendas, quebra, produção, uso/consumo e dados do banco.</div>
+            <div class="boss-rx-sub">Pesquise e selecione um produto. Ao abrir o Raio-X, o painel entra em modo exclusivo do item: desempenho, gráficos, diagnóstico, ações e sugestão de compra sem misturar dados gerais dos setores.</div>
           </div>
         </div>
 
@@ -8450,6 +8500,9 @@ var _bossRxRelacionados=[];
 var _bossRxRelMapa={};
 var _bossRxRelTimer=null;
 var _bossRxBancoNomeIdx=null;
+var _bossRxCharts={};
+var _bossRxHorizonteCompra=7;
+var BOSS_RX_META_MARGEM=30;
 
 function bossRxNorm_(v){
   return String(v==null?'':v)
@@ -8733,6 +8786,7 @@ function bossRxPesquisar_(forcar){
       var s=bossRxNorm_(p.setores);
       if(setorFiltro==='horti'&&s.indexOf('HORTI')<0)return false;
       if(setorFiltro==='padaria'&&s.indexOf('PADARIA')<0)return false;
+      if(setorFiltro==='acougue'&&s.indexOf('AÇOUGUE')<0&&s.indexOf('ACOUGUE')<0)return false;
       if(setorFiltro==='loja'&&s.indexOf('LOJA')<0)return false;
     }
     if(fonteFiltro){
@@ -8897,6 +8951,177 @@ function bossRxRelacionadosHtml_(r){
     +'</div><div class="boss-rx-rel-results" id="bossRxRelResultados"></div></div>';
 }
 
+
+function bossRxSetFocus_(ativo){
+  var wrap=document.querySelector('#sec-bossvision .boss-wrap');
+  var rx=document.getElementById('bossRaioX');
+  if(wrap)wrap.classList.toggle('boss-rx-focus',!!ativo);
+  if(rx)rx.classList.toggle('focus-mode',!!ativo);
+}
+function bossRxDestroyCharts_(){
+  Object.keys(_bossRxCharts||{}).forEach(function(k){
+    try{if(_bossRxCharts[k]&&typeof _bossRxCharts[k].destroy==='function')_bossRxCharts[k].destroy();}catch(e){}
+  });
+  _bossRxCharts={};
+}
+function bossRxPeriodoDias_(){
+  if(bossPeriodoAtual==='dia')return 1;
+  var inp=document.getElementById('bossData');
+  var v=String(inp&&inp.value||'');
+  var m=v.match(/^(\d{4})-(\d{2})$/);
+  if(!m)return 30;
+  var y=Number(m[1]),mes=Number(m[2]);
+  var total=new Date(y,mes,0).getDate();
+  var hoje=new Date();
+  if(y===hoje.getFullYear()&&mes===hoje.getMonth()+1)return Math.max(1,Math.min(total,hoje.getDate()));
+  return total;
+}
+function bossRxMetricasPeriodo_(r){
+  var dias=bossRxPeriodoDias_();
+  var qVenda=r.vendas.qtdCompativel?bossRxNum_(r.vendas.qtd):null;
+  var qCompra=r.compras.qtdCompativel?bossRxNum_(r.compras.qtd):null;
+  var qQuebra=r.quebras.qtdCompativel?bossRxNum_(r.quebras.qtd):null;
+  var estoqueConhecido=!!(r.validades&&r.validades.lista&&r.validades.lista.length&&r.validades.qtdCompativel);
+  var estoque=estoqueConhecido?bossRxNum_(r.validades.qtd):null;
+  var vendaQtdDia=qVenda!==null?qVenda/dias:null;
+  var vendaValorDia=bossRxNum_(r.vendas.valor)/dias;
+  var compraValorDia=bossRxNum_(r.compras.valor)/dias;
+  var quebraValorDia=bossRxNum_(r.quebras.valor)/dias;
+  var cobertura=(estoque!==null&&vendaQtdDia&&vendaQtdDia>0)?estoque/vendaQtdDia:null;
+  var giroCompras=(qCompra!==null&&qCompra>0&&qVenda!==null)?qVenda/qCompra*100:null;
+  var saldoPeriodo=(qCompra!==null&&qVenda!==null)?qCompra-qVenda-(qQuebra!==null?qQuebra:0):null;
+  var necessidade=vendaQtdDia!==null?vendaQtdDia*_bossRxHorizonteCompra:null;
+  var sugestao=null;
+  if(necessidade!==null){sugestao=estoque!==null?Math.max(0,necessidade-estoque):Math.max(0,necessidade);}
+  return {dias:dias,qVenda:qVenda,qCompra:qCompra,qQuebra:qQuebra,estoque:estoque,estoqueConhecido:estoqueConhecido,
+    vendaQtdDia:vendaQtdDia,vendaValorDia:vendaValorDia,compraValorDia:compraValorDia,quebraValorDia:quebraValorDia,
+    cobertura:cobertura,giroCompras:giroCompras,saldoPeriodo:saldoPeriodo,necessidade:necessidade,sugestao:sugestao};
+}
+function bossRxDiagnostico_(r,m){
+  var sinais=[],acoes=[];
+  function sinal(nivel,titulo,texto){sinais.push({nivel:nivel,titulo:titulo,texto:texto});}
+  function acao(titulo,texto){acoes.push({titulo:titulo,texto:texto});}
+
+  if(!(r.vendas.valor>0)){
+    sinal('atencao','Sem venda registrada','O item não apresenta venda no período selecionado. Antes de comprar, confirme exposição, cadastro, preço e estoque físico.');
+    acao('Validar o giro real','Confira se o produto estava disponível para venda e se o código usado no ABC é o mesmo código analisado no Raio-X.');
+  }
+
+  if(r.quebraVenda!==null&&isFinite(Number(r.quebraVenda))){
+    if(r.quebraVenda>5){
+      sinal('critico','Quebra muito alta','A quebra equivale a '+bossRxFmtPct_(r.quebraVenda)+' da venda do próprio item.');
+      acao('Atacar a causa da quebra','Reduza lote/produção, confira validade, armazenamento, exposição e frequência de reposição.');
+    }else if(r.quebraVenda>2){
+      sinal('atencao','Quebra pede atenção','A quebra equivale a '+bossRxFmtPct_(r.quebraVenda)+' da venda do item.');
+      acao('Reduzir perda do item','Acompanhe o lote seguinte com compra/produção menor e compare a quebra no próximo período.');
+    }
+  }
+
+  if(r.margem!==null&&r.margem!==undefined&&isFinite(Number(r.margem))){
+    if(Number(r.margem)<BOSS_RX_META_MARGEM){
+      sinal(Number(r.margem)<20?'critico':'atencao','Margem abaixo da meta','Margem estimada de '+bossRxFmtPct_(r.margem)+' contra meta gerencial de '+bossRxFmtPct_(BOSS_RX_META_MARGEM)+'.');
+      acao('Revisar custo e preço','Confira o último custo, fornecedor, preço praticado e possibilidade de recuperar margem sem perder competitividade.');
+    }
+  }
+
+  if(m.cobertura!==null&&isFinite(Number(m.cobertura))){
+    if(m.cobertura>15){
+      sinal('atencao','Cobertura de estoque alta','O estoque cadastrado na AURA representa aproximadamente '+m.cobertura.toLocaleString('pt-BR',{maximumFractionDigits:1})+' dias no ritmo atual.');
+      acao('Segurar a próxima compra','Antes de nova entrada, reduza a cobertura e valide se todo o saldo cadastrado ainda está fisicamente disponível.');
+    }else if(m.cobertura<3&&r.vendas.valor>0){
+      sinal('atencao','Risco de ruptura','A cobertura cadastrada é de apenas '+m.cobertura.toLocaleString('pt-BR',{maximumFractionDigits:1})+' dias no ritmo atual.');
+      acao('Antecipar reposição','Confirme o estoque físico e programe reposição para evitar ruptura.');
+    }
+  }
+
+  if(m.giroCompras!==null&&isFinite(Number(m.giroCompras))){
+    if(m.giroCompras<60&&r.compras.valor>0&&r.vendas.valor>0){
+      sinal('atencao','Entrada acima do giro observado','A quantidade vendida equivale a '+bossRxFmtPct_(m.giroCompras)+' da quantidade comprada no período. Isso é sinal de possível excesso de entrada, mas deve ser confrontado com estoque inicial/final.');
+      acao('Ajustar lote de compra','Compare saldo inicial, saldo atual e vendas antes de repetir o mesmo volume de compra.');
+    }
+  }
+
+  var mov=(r.ghMov||[]).filter(function(x){return x&&x.variacaoPct!==null&&x.variacaoPct!==undefined&&isFinite(Number(x.variacaoPct));});
+  if(mov.length){
+    var ult=mov[mov.length-1];
+    if(Number(ult.variacaoPct)>5){
+      sinal('atencao','Custo subiu','A última variação de custo disponível foi de '+bossRxFmtPct_(ult.variacaoPct)+'.');
+      acao('Negociar custo / fornecedor','Compare a última compra com alternativas e confirme se o preço de venda acompanhou o aumento.');
+    }
+  }
+
+  if(m.sugestao!==null&&m.vendaQtdDia!==null&&m.vendaQtdDia>0){
+    if(m.estoqueConhecido){
+      if(m.sugestao>0)acao('Sugestão de compra','Para '+_bossRxHorizonteCompra+' dias no ritmo observado, a reposição aproximada é '+bossFmtQtd(m.sugestao)+' '+(r.banco.unidade||'qtd')+', descontando o estoque cadastrado na AURA.');
+      else acao('Não comprar agora','O estoque cadastrado cobre a necessidade projetada para '+_bossRxHorizonteCompra+' dias no ritmo observado.');
+    }else{
+      acao('Contar estoque antes de comprar','A demanda bruta para '+_bossRxHorizonteCompra+' dias é cerca de '+bossFmtQtd(m.sugestao)+' '+(r.banco.unidade||'qtd')+', mas não há saldo confiável no AURA para descontar.');
+    }
+  }
+
+  if(!sinais.length)sinal('bom','Sem desvio forte detectado','Com os dados disponíveis deste item, o painel não encontrou um sinal crítico de margem, quebra, cobertura ou giro. Continue acompanhando.');
+  if(!acoes.length)acao('Manter acompanhamento','Compare este Raio-X com o próximo período para validar tendência de venda, custo e quebra.');
+  return {sinais:sinais,acoes:acoes};
+}
+function bossRxPerformanceHtml_(r,m){
+  function val(v,fmt){return (v===null||v===undefined||!isFinite(Number(v)))?'—':fmt(Number(v));}
+  var cobertura=val(m.cobertura,function(x){return x.toLocaleString('pt-BR',{maximumFractionDigits:1})+' dias';});
+  var giro=val(m.giroCompras,function(x){return bossRxFmtPct_(x);});
+  var margem=(r.margem!==null&&r.margem!==undefined&&isFinite(Number(r.margem)))?bossRxFmtPct_(r.margem):'—';
+  return '<div class="boss-rx-section-title">Desempenho do item em '+m.dias+' '+(m.dias===1?'dia':'dias')+'</div><div class="boss-rx-performance">'
+    +'<div class="boss-rx-perf-card"><span>Período analisado</span><strong>'+m.dias+' '+(m.dias===1?'dia':'dias')+'</strong><small>Base do filtro atual do Boss Vision</small></div>'
+    +'<div class="boss-rx-perf-card"><span>Venda média / dia</span><strong>'+bossFmtBRL(m.vendaValorDia||0)+'</strong><small>'+(m.vendaQtdDia!==null?bossFmtQtd(m.vendaQtdDia)+' '+bossEscapeHtml(r.banco.unidade||'qtd')+'/dia':'Quantidade incompatível')+'</small></div>'
+    +'<div class="boss-rx-perf-card"><span>Compra média / dia</span><strong>'+bossFmtBRL(m.compraValorDia||0)+'</strong><small>Valor de entradas ÷ dias analisados</small></div>'
+    +'<div class="boss-rx-perf-card"><span>Quebra média / dia</span><strong>'+bossFmtBRL(m.quebraValorDia||0)+'</strong><small>'+((r.quebraVenda!==null)?bossRxFmtPct_(r.quebraVenda)+' da venda':'Sem base de venda')+'</small></div>'
+    +'<div class="boss-rx-perf-card"><span>Cobertura AURA</span><strong>'+cobertura+'</strong><small>'+(m.estoqueConhecido?'Estoque cadastrado ÷ giro diário':'Sem estoque cadastrado suficiente')+'</small></div>'
+    +'<div class="boss-rx-perf-card"><span>Margem estimada</span><strong>'+margem+'</strong><small>Meta gerencial '+bossRxFmtPct_(BOSS_RX_META_MARGEM)+'</small></div>'
+    +'</div>';
+}
+function bossRxCompraHtml_(r,m){
+  var opts=[3,7,15,30].map(function(n){return '<option value="'+n+'" '+(n===_bossRxHorizonteCompra?'selected':'')+'>'+n+' dias</option>';}).join('');
+  var numero='—',cls='off',desc='';
+  if(m.vendaQtdDia===null){desc='As unidades das vendas não são compatíveis entre si; não é seguro sugerir quantidade.';}
+  else if(!(m.vendaQtdDia>0)){desc='Sem giro de venda suficiente no período. Não há base segura para sugerir compra.';}
+  else if(m.estoqueConhecido){
+    numero=bossFmtQtd(m.sugestao||0)+' '+bossEscapeHtml(r.banco.unidade||'qtd');
+    cls=(m.sugestao||0)>0?'':'off';
+    desc=(m.sugestao||0)>0
+      ?'Necessidade projetada para <strong>'+_bossRxHorizonteCompra+' dias</strong> menos <strong>'+bossFmtQtd(m.estoque||0)+' '+bossEscapeHtml(r.banco.unidade||'qtd')+'</strong> cadastrados na AURA.'
+      :'O saldo cadastrado já cobre a projeção de '+_bossRxHorizonteCompra+' dias. Confirme o estoque físico antes de zerar a compra.';
+  }else{
+    numero=bossFmtQtd(m.sugestao||0)+' '+bossEscapeHtml(r.banco.unidade||'qtd');cls='warn';
+    desc='Demanda bruta projetada para <strong>'+_bossRxHorizonteCompra+' dias</strong>. Como não há estoque confiável cadastrado, este número <strong>não deve virar pedido sem contagem física</strong>.';
+  }
+  return '<div class="boss-rx-buy-card"><div class="boss-rx-buy-head"><div class="boss-rx-buy-title"><i class="ti ti-shopping-cart-plus"></i> Sugestão de compra</div><select onchange="bossRxAtualizarHorizonte_(this.value)">'+opts+'</select></div>'
+    +'<div class="boss-rx-buy-main"><div><div class="boss-rx-buy-label">Reposição aproximada</div><div class="boss-rx-buy-number '+cls+'">'+numero+'</div></div><div class="boss-rx-buy-desc">'+desc+'</div></div>'
+    +'<div class="boss-rx-method">Cálculo gerencial: média diária de quantidade vendida × horizonte escolhido − estoque cadastrado na AURA. Não considera estoque inicial do período, pedidos em trânsito, sazonalidade ou estoque não bipado.</div></div>';
+}
+function bossRxSinaisHtml_(diag){
+  return '<div class="boss-rx-errors-card"><div class="boss-rx-buy-title" style="margin-bottom:9px"><i class="ti ti-alert-triangle" style="color:var(--amber)"></i> Onde erramos / pontos de atenção</div><div class="boss-rx-errors">'
+    +diag.sinais.map(function(s){var ic=s.nivel==='critico'?'ti-alert-octagon':(s.nivel==='bom'?'ti-circle-check':'ti-alert-triangle');return '<div class="boss-rx-signal '+s.nivel+'"><i class="ti '+ic+'"></i><div><strong>'+bossEscapeHtml(s.titulo)+'</strong><p>'+bossEscapeHtml(s.texto)+'</p></div></div>';}).join('')+'</div></div>';
+}
+function bossRxAcoesHtml_(diag){
+  return '<div class="boss-rx-actions-card"><div class="boss-rx-buy-title" style="margin-bottom:9px"><i class="ti ti-bulb" style="color:var(--blue)"></i> O que fazer agora</div><div class="boss-rx-actions">'
+    +diag.acoes.map(function(a,i){return '<div class="boss-rx-action"><div class="boss-rx-action-num">'+(i+1)+'</div><div><strong>'+bossEscapeHtml(a.titulo)+'</strong><p>'+bossEscapeHtml(a.texto)+'</p></div></div>';}).join('')+'</div></div>';
+}
+function bossRxAtualizarHorizonte_(v){
+  var n=Number(v);if([3,7,15,30].indexOf(n)<0)n=7;_bossRxHorizonteCompra=n;
+  if(_bossRxSelecionado)bossRxRenderDetalhe_(_bossRxSelecionado);
+}
+function bossRxRenderGraficosProduto_(r,m){
+  bossRxDestroyCharts_();
+  if(typeof Chart==='undefined')return;
+  var ev=document.getElementById('bossRxChartValores');
+  if(ev){
+    _bossRxCharts.valores=new Chart(ev.getContext('2d'),{type:'bar',data:{labels:['Compras','Vendas','Quebra','Produção','Uso/consumo'],datasets:[{data:[r.compras.valor||0,r.vendas.valor||0,r.quebras.valor||0,r.producao.valor||0,r.consumo.valor||0],backgroundColor:['#378ADD','#1D9E75','#E24B4A','#BA7517','#7C6FC1'],borderRadius:6,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return bossFmtBRL(ctx.parsed.y||0);}}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:function(v){return bossFmtBRL(v);}}},x:{ticks:{font:{size:9}}}}}});
+  }
+  var eq=document.getElementById('bossRxChartQtd');
+  if(eq){
+    var qCompra=m.qCompra===null?0:m.qCompra,qVenda=m.qVenda===null?0:m.qVenda,qQuebra=m.qQuebra===null?0:m.qQuebra,qEst=m.estoque===null?0:m.estoque;
+    _bossRxCharts.qtd=new Chart(eq.getContext('2d'),{type:'bar',data:{labels:['Comprado','Vendido','Quebra','Estoque AURA'],datasets:[{data:[qCompra,qVenda,qQuebra,qEst],backgroundColor:['#378ADD','#1D9E75','#E24B4A','#7C6FC1'],borderRadius:6,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return bossFmtQtd(ctx.parsed.y||0)+' '+(r.banco.unidade||'qtd');}}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9}}},x:{ticks:{font:{size:9}}}}}});
+  }
+}
+
 function bossRxResumo_(sel){
   var grupo=bossRxGrupoAtivo_(sel);
   var ats=bossRxAtividades_().filter(function(a){return bossRxMatchGrupo_(a,grupo);});
@@ -8933,9 +9158,12 @@ function bossRxResumo_(sel){
   var ghMov=(Array.isArray(gg.movimentosCusto)?gg.movimentosCusto:[]).filter(function(x){return bossRxMatchGrupo_(x,grupo);});
   var gpDet=(Array.isArray(gp.detalheProdutos)?gp.detalheProdutos:[]).find(function(x){return bossRxMatch_(x,sel);})||null;
 
-  var setor='Loja';
-  if(ats.some(function(x){return x.setor==='horti';}))setor='Horti';
-  if(ats.some(function(x){return x.setor==='padaria';}))setor=(setor==='Horti'?'Horti + Padaria':'Padaria');
+  var setoresEncontrados=[];
+  if(ats.some(function(x){return x.setor==='horti';}))setoresEncontrados.push('Horti');
+  if(ats.some(function(x){return x.setor==='padaria';}))setoresEncontrados.push('Padaria');
+  if(ats.some(function(x){return x.setor==='acougue';}))setoresEncontrados.push('Açougue');
+  if(ats.some(function(x){return x.setor==='loja';}))setoresEncontrados.push('Loja');
+  var setor=setoresEncontrados.length?setoresEncontrados.join(' + '):'Cadastro';
 
   var vendaMed=(vendas.qtdCompativel&&vendas.qtd>0)?vendas.valor/vendas.qtd:0;
   var compraMed=(compras.qtdCompativel&&compras.qtd>0)?compras.valor/compras.qtd:0;
@@ -8982,10 +9210,12 @@ function bossRxKpiHtml_(label,valor,sub){
 }
 function bossRxRenderDetalhe_(sel){
   var box=document.getElementById('bossRxDetalhe');if(!box)return;
-  var r=bossRxResumo_(sel),cod=bossRxCod_(r.banco.cod);
+  bossRxSetFocus_(true);
+  bossRxDestroyCharts_();
+  var r=bossRxResumo_(sel),m=bossRxMetricasPeriodo_(r),diag=bossRxDiagnostico_(r,m),cod=bossRxCod_(r.banco.cod);
   var photo=cod?'<div class="boss-rx-detail-photo"><img data-boss-cod="'+bossEscapeHtml(cod)+'" data-boss-nome="'+bossEscapeHtml(r.banco.nome||'')+'" alt=""></div>':'<div class="boss-rx-detail-photo"><i class="ti ti-photo-off" style="font-size:28px;color:var(--tx2)"></i></div>';
   var relHtml=bossRxRelacionadosHtml_(r);
-  var consolNote=r.consolidado?('<div class="boss-rx-consolidated-note"><strong>Análise consolidada:</strong> '+r.grupo.length+' códigos marcados. Venda e quebra abaixo representam a soma desses códigos.</div>'):'';
+  var consolNote=r.consolidado?('<div class="boss-rx-consolidated-note"><strong>Análise consolidada:</strong> '+r.grupo.length+' códigos marcados. Todos os números abaixo são somente destes códigos relacionados.</div>'):'';
 
   var kpis='';
   kpis+=bossRxKpiHtml_(r.consolidado?'Compras consolidadas':'Compras',r.compras.valor?bossFmtBRL(r.compras.valor):'—',r.compras.qtd?(r.compras.qtdCompativel?bossFmtQtd(r.compras.qtd)+' '+(r.banco.unidade||'qtd'):'Qtd não somada: unidades diferentes'):'Sem compra no período');
@@ -8993,72 +9223,65 @@ function bossRxRenderDetalhe_(sel){
   kpis+=bossRxKpiHtml_(r.consolidado?'Vendas consolidadas':'Vendas',r.vendas.valor?bossFmtBRL(r.vendas.valor):'—',r.vendas.qtd?(r.vendas.qtdCompativel?bossFmtQtd(r.vendas.qtd)+' qtd vendida':'Qtd não somada: unidades diferentes'):'Sem venda no período');
   kpis+=bossRxKpiHtml_('Preço médio realizado',r.vendaMed?bossFmtBRL(r.vendaMed):'—','Venda total ÷ quantidade');
   kpis+=bossRxKpiHtml_(r.consolidado?'Quebra consolidada':'Quebra',r.quebras.valor?bossFmtBRL(r.quebras.valor):'R$ 0,00',r.quebras.qtd?(r.quebras.qtdCompativel?bossFmtQtd(r.quebras.qtd)+' qtd':'Qtd não somada: unidades diferentes'):'Sem quebra registrada');
-  kpis+=bossRxKpiHtml_('Quebra / venda',r.quebraVenda!==null?bossRxFmtPct_(r.quebraVenda):'—','Peso da quebra no faturamento do item');
-  kpis+=bossRxKpiHtml_('Produção Padaria',r.producao.valor?bossFmtBRL(r.producao.valor):'—',r.producao.qtd?bossFmtQtd(r.producao.qtd)+' qtd/insumo':'Não consta em produção');
-  kpis+=bossRxKpiHtml_('Uso e consumo loja',r.consumo.valor?bossFmtBRL(r.consumo.valor):'—',r.consumo.qtd?bossFmtQtd(r.consumo.qtd)+' qtd':'Não consta em uso interno');
+  kpis+=bossRxKpiHtml_('Quebra / venda',r.quebraVenda!==null?bossRxFmtPct_(r.quebraVenda):'—','Peso da quebra no faturamento deste item');
+  kpis+=bossRxKpiHtml_('Estoque cadastrado',m.estoqueConhecido?bossFmtQtd(m.estoque)+' '+(r.banco.unidade||'qtd'):'—',m.estoqueConhecido?'Somatório dos lotes/validades do item':'Sem saldo confiável na AURA');
+  kpis+=bossRxKpiHtml_('Margem estimada',r.margem!==null&&r.margem!==undefined?bossRxFmtPct_(r.margem):'—',r.margemLabel||'Sem base individual segura');
 
-  var analise1='<h4><i class="ti ti-chart-line"></i> Análise gerencial</h4><p>';
-  if(r.margem!==null&&r.margem!==undefined&&isFinite(Number(r.margem))){
-    analise1+='<strong>'+bossEscapeHtml(r.margemLabel||'Margem')+': '+bossRxFmtPct_(r.margem)+'</strong>. ';
-  }else analise1+='Margem individual ainda não disponível com segurança. ';
-  if(r.quebraVenda!==null)analise1+='A quebra representa '+bossRxFmtPct_(r.quebraVenda)+' da venda do item. ';
+  var analise1='<h4><i class="ti ti-chart-line"></i> Diagnóstico do item</h4><p>';
+  if(r.margem!==null&&r.margem!==undefined&&isFinite(Number(r.margem)))analise1+='<strong>'+bossEscapeHtml(r.margemLabel||'Margem')+': '+bossRxFmtPct_(r.margem)+'</strong> (meta '+bossRxFmtPct_(BOSS_RX_META_MARGEM)+'). ';
+  else analise1+='Margem individual ainda não disponível com segurança. ';
+  if(r.quebraVenda!==null)analise1+='A quebra representa '+bossRxFmtPct_(r.quebraVenda)+' da venda deste item. ';
+  if(m.cobertura!==null)analise1+='Cobertura cadastrada: '+m.cobertura.toLocaleString('pt-BR',{maximumFractionDigits:1})+' dias. ';
   if(r.statusCusto)analise1+=bossEscapeHtml(r.statusCusto)+'.';
   analise1+='</p>';
 
-  var analise2='<h4><i class="ti ti-database"></i> Cadastro / contexto</h4><p>'
-    +'Setor encontrado: <strong>'+bossEscapeHtml(r.setor)+'</strong>. '
+  var analise2='<h4><i class="ti ti-database"></i> Cadastro do produto</h4><p>'
     +'Unidade: <strong>'+bossEscapeHtml(r.banco.unidade||'—')+'</strong>. '
-    +'Fornecedor cadastrado: <strong>'+bossEscapeHtml(r.banco.fornecedor||'—')+'</strong>. '
-    +'Custo atual no banco: <strong>'+(r.banco.custo?bossFmtBRL(r.banco.custo):'—')+'</strong>.'
-    +'</p>';
-
-  if(r.gpDet){
-    analise2+='<p style="margin-top:5px">Padaria: <strong>'+bossEscapeHtml(r.gpDet.statusCusto==='direto_aprox'?'vínculo de custo direto aproximado':'aguardando receita')+'</strong>'
-      +(r.gpDet.entradaNome?' · entrada vinculada: '+bossEscapeHtml(r.gpDet.entradaNome):'')
-      +(r.gpDet.custoEstimadoUsado!=null?' · custo estimado usado '+bossFmtBRL(r.gpDet.custoEstimadoUsado):'')+'.</p>';
-  }
+    +'Fornecedor: <strong>'+bossEscapeHtml(r.banco.fornecedor||'—')+'</strong>. '
+    +'Custo atual: <strong>'+(r.banco.custo?bossFmtBRL(r.banco.custo):'—')+'</strong>. '
+    +'Fontes encontradas: <strong>'+bossEscapeHtml(Array.from(new Set(r.atividades.map(function(a){return a.src;}))).join(' · ')||'somente cadastro')+'</strong>.</p>';
 
   var comparacaoRows=(r.comparacaoItens||[]).map(function(it){
     return '<tr><td>'+bossEscapeHtml(it.cod||'—')+'</td><td>'+bossEscapeHtml(it.nome||'Produto')+'</td><td>'+bossEscapeHtml(it.unidade||'—')+'</td><td>'+bossFmtQtd(it.compras.qtd||0)+'</td><td>'+(it.compras.valor?bossFmtBRL(it.compras.valor):'—')+'</td><td>'+bossFmtQtd(it.vendas.qtd||0)+'</td><td>'+(it.vendas.valor?bossFmtBRL(it.vendas.valor):'—')+'</td><td>'+(it.quebras.valor?bossFmtBRL(it.quebras.valor):'R$ 0,00')+'</td><td>'+bossRxFmtPct_(it.participacaoVenda)+'</td></tr>';
   }).join('');
-
   var rows=r.atividades.slice().sort(function(a,b){return String(a.src).localeCompare(String(b.src),'pt-BR');}).map(function(a){
     var cu=a.custo||((a.qtd>0&&a.valor>0)?a.valor/a.qtd:0);
-    return '<tr><td>'+bossEscapeHtml(a.src)+'</td><td>'+bossEscapeHtml(bossRxSetorLabel_(a.setor))+'</td><td>'+bossEscapeHtml(a.data||a.nf||'—')+'</td><td>'+bossEscapeHtml(a.fornecedor||'—')+'</td><td>'+bossFmtQtd(a.qtd||0)+'</td><td>'+bossEscapeHtml(a.unidade||r.banco.unidade||'')+'</td><td>'+(cu?bossFmtBRL(cu):'—')+'</td><td>'+(a.valor?bossFmtBRL(a.valor):'—')+'</td></tr>';
+    return '<tr><td>'+bossEscapeHtml(a.src)+'</td><td>'+bossEscapeHtml(a.data||a.nf||'—')+'</td><td>'+bossEscapeHtml(a.fornecedor||'—')+'</td><td>'+bossFmtQtd(a.qtd||0)+'</td><td>'+bossEscapeHtml(a.unidade||r.banco.unidade||'')+'</td><td>'+(cu?bossFmtBRL(cu):'—')+'</td><td>'+(a.valor?bossFmtBRL(a.valor):'—')+'</td></tr>';
   }).join('');
+  var validadeRows=r.validades.lista.map(function(a){return '<tr><td>'+bossEscapeHtml(a.data||'—')+'</td><td>'+bossFmtQtd(a.qtd||0)+'</td><td>'+bossEscapeHtml(a.unidade||r.banco.unidade||'')+'</td><td>'+(a.custo?bossFmtBRL(a.custo):'—')+'</td></tr>';}).join('');
+  var movimentos=r.ghMov.map(function(mm){return '<tr><td>'+bossEscapeHtml(mm.data||'—')+'</td><td>'+bossEscapeHtml(mm.origem||'')+'</td><td>'+(mm.custoAnterior!=null?bossFmtBRL(mm.custoAnterior):'—')+'</td><td>'+(mm.custoAtual!=null?bossFmtBRL(mm.custoAtual):'—')+'</td><td>'+bossRxFmtPct_(mm.variacaoPct)+'</td></tr>';}).join('');
 
-  var validadeRows=r.validades.lista.map(function(a){
-    return '<tr><td>'+bossEscapeHtml(a.data||'—')+'</td><td>'+bossFmtQtd(a.qtd||0)+'</td><td>'+bossEscapeHtml(a.unidade||r.banco.unidade||'')+'</td><td>'+(a.custo?bossFmtBRL(a.custo):'—')+'</td></tr>';
-  }).join('');
+  var st=document.getElementById('bossRxStatus');if(st)st.textContent='Modo Raio-X ativo · '+(r.banco.nome||sel.nome||'Produto')+' · '+m.dias+' '+(m.dias===1?'dia analisado':'dias analisados')+' · somente dados deste item';
 
-  var movimentos=r.ghMov.map(function(m){
-    return '<tr><td>'+bossEscapeHtml(m.data||'—')+'</td><td>'+bossEscapeHtml(m.origem||'')+'</td><td>'+(m.custoAnterior!=null?bossFmtBRL(m.custoAnterior):'—')+'</td><td>'+(m.custoAtual!=null?bossFmtBRL(m.custoAtual):'—')+'</td><td>'+bossRxFmtPct_(m.variacaoPct)+'</td></tr>';
-  }).join('');
-
-  box.innerHTML='<div class="boss-rx-detail-head">'
-    +photo
-    +'<div class="boss-rx-detail-main"><div class="boss-rx-detail-name">'+bossEscapeHtml(r.banco.nome||sel.nome||'Produto')+'</div>'
-    +'<div class="boss-rx-detail-code">'+(cod?'Código '+bossEscapeHtml(cod):'Sem código')+' · '+bossEscapeHtml(r.setor)+(r.banco.unidade?' · '+bossEscapeHtml(r.banco.unidade):'')+'</div>'
-    +'<div class="boss-rx-tags" style="margin-top:6px">'+Array.from(new Set(r.atividades.map(function(a){return a.src;}))).slice(0,8).map(function(x){return '<span class="boss-rx-tag">'+bossEscapeHtml(x)+'</span>';}).join('')+'</div></div>'
-    +'<div class="boss-rx-detail-actions"><button class="btn" onclick="bossRxImprimirA4_()"><i class="ti ti-printer"></i> Imprimir relatório A4</button><button class="btn" onclick="bossRxFecharDetalhe_()"><i class="ti ti-x"></i> Fechar</button></div>'
-    +'</div>'
+  box.innerHTML='<div class="boss-rx-focusbar"><div class="boss-rx-focusbar-main"><i class="ti ti-focus-2"></i><div><div class="boss-rx-focusbar-title">Modo Raio-X do produto</div><div class="boss-rx-focusbar-sub">Enquanto este item estiver selecionado, o Boss Vision oculta os dados gerais por setor e mostra somente informações deste produto.</div></div></div><button class="btn btn-sm" onclick="bossRxLimpar_()"><i class="ti ti-layout-dashboard"></i> Voltar ao painel geral</button></div>'
+    +'<div class="boss-rx-detail-head">'+photo
+    +'<div class="boss-rx-detail-main"><div class="boss-rx-detail-name">'+bossEscapeHtml(r.banco.nome||sel.nome||'Produto')+'</div><div class="boss-rx-detail-code">'+(cod?'Código '+bossEscapeHtml(cod):'Sem código')+(r.banco.unidade?' · '+bossEscapeHtml(r.banco.unidade):'')+'</div><div class="boss-rx-tags" style="margin-top:6px">'+Array.from(new Set(r.atividades.map(function(a){return a.src;}))).slice(0,8).map(function(x){return '<span class="boss-rx-tag">'+bossEscapeHtml(x)+'</span>';}).join('')+'</div></div>'
+    +'<div class="boss-rx-detail-actions"><button class="btn" onclick="bossRxImprimirA4_()"><i class="ti ti-printer"></i> Imprimir relatório A4</button><button class="btn" onclick="bossRxFecharDetalhe_()"><i class="ti ti-switch-horizontal"></i> Trocar produto</button></div></div>'
     +relHtml+consolNote
     +'<div class="boss-rx-summary">'+kpis+'</div>'
+    +bossRxPerformanceHtml_(r,m)
+    +'<div class="boss-rx-charts"><div class="boss-rx-chart-card"><div class="boss-rx-chart-title"><i class="ti ti-chart-bar"></i> Resultado financeiro do item</div><div class="boss-rx-chart-sub">Somente compras, vendas, quebra, produção e uso/consumo vinculados a este produto no período.</div><div class="boss-rx-chart-box"><canvas id="bossRxChartValores"></canvas></div></div><div class="boss-rx-chart-card"><div class="boss-rx-chart-title"><i class="ti ti-packages"></i> Quantidade e estoque do item</div><div class="boss-rx-chart-sub">Comparação em quantidade quando as unidades são compatíveis. Estoque = lotes/validades cadastrados na AURA.</div><div class="boss-rx-chart-box"><canvas id="bossRxChartQtd"></canvas></div></div></div>'
     +'<div class="boss-rx-analysis"><div class="boss-rx-analysis-card">'+analise1+'</div><div class="boss-rx-analysis-card">'+analise2+'</div></div>'
-    +(r.consolidado?('<div class="boss-rx-section-title">Comparação dos códigos marcados</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Código</th><th>Produto</th><th>Un.</th><th>Compra qtd</th><th>Compra R$</th><th>Venda qtd</th><th>Venda R$</th><th>Quebra R$</th><th>% vendas</th></tr></thead><tbody>'+comparacaoRows+'</tbody></table></div>'):'')
-    +'<div class="boss-rx-section-title">Movimentação encontrada no período</div>'
-    +'<div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Origem</th><th>Setor</th><th>Data/NF</th><th>Fornecedor</th><th>Qtd</th><th>Un.</th><th>Custo unit.</th><th>Valor</th></tr></thead><tbody>'+(rows||'<tr><td colspan="8">Nenhuma movimentação encontrada.</td></tr>')+'</tbody></table></div>'
-    +(movimentos?'<div class="boss-rx-section-title">Histórico / variação de custo disponível</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Data</th><th>Origem</th><th>Custo anterior</th><th>Custo atual</th><th>Variação</th></tr></thead><tbody>'+movimentos+'</tbody></table></div>':'')
-    +(validadeRows?'<div class="boss-rx-section-title">Validades / estoque cadastrado na AURA</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Validade</th><th>Qtd</th><th>Un.</th><th>Custo</th></tr></thead><tbody>'+validadeRows+'</tbody></table></div>':'')
-    +'<div class="boss-rx-notes"><strong>Leitura gerencial:</strong> o relatório cruza somente as fontes disponíveis no período selecionado. Na Padaria, custos de produtos transformados podem ser provisórios enquanto a receita não estiver cadastrada. No Horti, margem por item é uma estimativa baseada no custo médio das compras cruzado com as vendas. Não substitui apuração contábil ou inventário físico.</div>';
+    +'<div class="boss-rx-decision-grid">'+bossRxCompraHtml_(r,m)+bossRxSinaisHtml_(diag)+'</div>'
+    +bossRxAcoesHtml_(diag)
+    +(r.consolidado?('<div class="boss-rx-section-title">Comparação dos códigos que formam este produto</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Código</th><th>Produto</th><th>Un.</th><th>Compra qtd</th><th>Compra R$</th><th>Venda qtd</th><th>Venda R$</th><th>Quebra R$</th><th>% vendas</th></tr></thead><tbody>'+comparacaoRows+'</tbody></table></div>'):'')
+    +'<div class="boss-rx-section-title">Movimentações deste produto no período</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Origem</th><th>Data/NF</th><th>Fornecedor</th><th>Qtd</th><th>Un.</th><th>Custo unit.</th><th>Valor</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">Nenhuma movimentação encontrada para este produto.</td></tr>')+'</tbody></table></div>'
+    +(movimentos?'<div class="boss-rx-section-title">Histórico / variação de custo deste produto</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Data</th><th>Origem</th><th>Custo anterior</th><th>Custo atual</th><th>Variação</th></tr></thead><tbody>'+movimentos+'</tbody></table></div>':'')
+    +(validadeRows?'<div class="boss-rx-section-title">Validades / estoque cadastrado deste produto</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Validade</th><th>Qtd</th><th>Un.</th><th>Custo</th></tr></thead><tbody>'+validadeRows+'</tbody></table></div>':'')
+    +'<div class="boss-rx-notes"><strong>Leitura gerencial do produto:</strong> todos os blocos acima foram filtrados para o item selecionado. A sugestão de compra é projeção simples do ritmo de venda e do estoque cadastrado; confirme estoque físico, pedidos em trânsito e sazonalidade antes de comprar. Margens são estimativas gerenciais e não substituem contabilidade ou inventário físico.</div>';
 
   box.classList.add('show');
   bossResolverFotos(box);
-  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+  bossRxRenderGraficosProduto_(r,m);
+  box.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function bossRxFecharDetalhe_(){
+  bossRxDestroyCharts_();
   var box=document.getElementById('bossRxDetalhe');if(box){box.classList.remove('show');box.innerHTML='';}
+  bossRxSetFocus_(false);
   _bossRxSelecionado=null;_bossRxRelacionados=[];_bossRxRelMapa={};
+  var b=document.getElementById('bossRxBusca');
+  if(b&&String(b.value||'').trim().length>=2){bossRxPesquisar_(true);var st=document.getElementById('bossRxStatus');if(st)st.textContent='Selecione outro produto para abrir o Raio-X exclusivo do item.';}
 }
 function bossRxLimpar_(){
   var b=document.getElementById('bossRxBusca');if(b)b.value='';
@@ -9369,7 +9592,11 @@ function bossRender(dados){
   bossRenderInsights_(dados);
   bossRxPopularUnidades_();
   var rxBusca=document.getElementById('bossRxBusca');
-  if(rxBusca&&String(rxBusca.value||'').trim().length>=2)bossRxPesquisar_(true);
+  if(_bossRxSelecionado){
+    bossRxRenderDetalhe_(_bossRxSelecionado);
+  }else if(rxBusca&&String(rxBusca.value||'').trim().length>=2){
+    bossRxPesquisar_(true);
+  }
 }
 var bossPeriodoAtual='mes';
 
