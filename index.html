@@ -5641,6 +5641,7 @@ function renderDashboard(){
 //  Cruza EAN com banco{} para obter nome do produto
 // ═══════════════════════════════════════════════════════════════
 var _ucDados = [];   // cache das coletas brutas
+var _ucUltimoRefresh=0,_ucAutoRefreshTimer=null;
 // v6.20: índice EAN -> lista de coletas (já ordenada, mais recente primeiro).
 // buscarBipagem() era chamada 1x por card renderizado em Validades/Estoque e
 // fazia um .filter() na coleção INTEIRA de coletas históricas a cada
@@ -5765,7 +5766,7 @@ function fmtBipagemHtml(bip) {
   var quando = bip.ts
     ? bip.ts.toLocaleDateString('pt-BR') + ' às ' + bip.ts.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})
     : '';
-  return '<div class="urg-card-bip" title="' + escHtml(bip.email || '') + '"><i class="ti ti-scan"></i> Bipado por <b>' + escHtml(quem) + '</b>' + (quando ? ' · ' + quando : '') + '</div>';
+  return '<div class="urg-card-bip" title="' + escHtml(bip.email || '') + '"><i class="ti '+(bip.viaNFe?'ti-file-invoice':'ti-scan')+'"></i> '+(bip.viaNFe?'NF-e lançada por ':'Bipado por ')+'<b>' + escHtml(quem) + '</b>' + (quando ? ' · ' + quando : '') + '</div>';
 }
 // Garante que _ucDados esteja carregado (necessário para exibir quem bipou
 // nos cards de Estoque/Validade). Dispara o carregamento uma única vez e,
@@ -5781,6 +5782,8 @@ function garantirDadosBipagem() {
 }
 
 async function renderUltimasColetas(forceRefresh) {
+  var silent = forceRefresh === 'silent';
+  var force = forceRefresh === true || silent;
   var el = document.getElementById('ucGrid');
   if (!el) return;
 
@@ -5791,8 +5794,8 @@ async function renderUltimasColetas(forceRefresh) {
   }
 
   // Só busca se ainda não tem dados ou se forçou refresh
-  if (!_ucDados.length || forceRefresh) {
-    el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;vertical-align:middle;margin-right:6px"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Buscando coletas...</div>';
+  if (!_ucDados.length || force) {
+    if(!silent) el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--muted)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;vertical-align:middle;margin-right:6px"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>Buscando coletas...</div>';
     try {
       var abaResp = cfg.abaResp || 'Respostas ao formulario 1';
       var table = await fetchSheet(cfg.id, abaResp);
@@ -5801,7 +5804,7 @@ async function renderUltimasColetas(forceRefresh) {
       _ucIndex = null; // força reconstrução do índice na próxima buscarBipagem()
 
       // Detectar colunas pelo cabeçalho (linha 0 ou table.cols)
-      var ciTs=-1, ciSetor=-1, ciEan=-1, ciVal=-1, ciQtde=-1, ciEmail=-1;
+      var ciTs=-1, ciSetor=-1, ciEan=-1, ciVal=-1, ciQtde=-1, ciEmail=-1, ciOrigem=-1;
       function detectCols(headers) {
         headers.forEach(function(h, i) {
           var u = h.toUpperCase();
@@ -5811,6 +5814,7 @@ async function renderUltimasColetas(forceRefresh) {
           else if (/VALIDADE/.test(u)) ciVal = i;
           else if (/QUANTIDADE|QTD|QTY/.test(u)) ciQtde = i;
           else if (/E.?MAIL|EMAIL/.test(u)) ciEmail = i;
+          else if (/ORIGEM/.test(u)) ciOrigem = i;
         });
       }
 
@@ -5828,6 +5832,7 @@ async function renderUltimasColetas(forceRefresh) {
       if (ciVal < 0) ciVal = 3;
       if (ciQtde < 0) ciQtde = 4;
       if (ciEmail < 0) ciEmail = 5;
+      if (ciOrigem < 0) ciOrigem = 6;
 
       var hoje = new Date(); hoje.setHours(0,0,0,0);
 
@@ -5862,13 +5867,18 @@ async function renderUltimasColetas(forceRefresh) {
         }
 
         var email = String((c[ciEmail]&&c[ciEmail].f)||(c[ciEmail]&&c[ciEmail].v)||'').trim().toLowerCase();
+        var origem = String((c[ciOrigem]&&c[ciOrigem].f)||(c[ciOrigem]&&c[ciOrigem].v)||'').trim();
+        var viaNFe = /^NFE:/i.test(origem);
+        var nfeChave = viaNFe ? String(origem.split(':')[1]||'') : '';
         var nomeColeta = _ucResolveNome(email);
-        _ucDados.push({ ean: ean, nome: nome, setor: setor, qtde: qtde, dias: dias, valStr: valStr, ts: tsDate, email: email, nomeColeta: nomeColeta });
+        _ucDados.push({ ean: ean, nome: nome, setor: setor, qtde: qtde, dias: dias, valStr: valStr, ts: tsDate, email: email, nomeColeta: nomeColeta, origem:origem, viaNFe:viaNFe, nfeChave:nfeChave });
         } catch(errLinha) {
           // Uma linha com dado inesperado não pode derrubar a lista inteira.
           console.warn('Coleta ignorada (dado inválido na linha):', errLinha);
         }
       });
+
+      _ucUltimoRefresh=Date.now();
 
       // Preencher select de setores
       var setoresUnicos = [...new Set(_ucDados.map(function(d){ return d.setor; }).filter(Boolean))].sort();
@@ -5880,6 +5890,7 @@ async function renderUltimasColetas(forceRefresh) {
         selSetor.value = opcAtual;
       }
     } catch(e) {
+      if(silent){console.warn('Atualização automática de coletas falhou:',e);return;}
       el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#f87171">Erro ao carregar coletas: ' + escHtml(e.message) + '</div>';
       return;
     }
@@ -5994,6 +6005,7 @@ function _ucFiltrar() {
       +'<div class="uc-card-tags">'
         +'<span class="uc-card-tag mono">'+escHtml(d.ean)+'</span>'
         +(d.setor?'<span class="uc-card-tag">'+escHtml(d.setor)+'</span>':'')
+        +(d.viaNFe?'<span class="uc-card-tag" title="Lançado pela Conferência NF-e" style="background:rgba(29,158,117,.12);border-color:rgba(29,158,117,.35);color:#1D9E75;font-weight:800"><i class="ti ti-file-invoice" style="margin-right:3px"></i>NF-e</span>':'')
       +'</div>'
       // Validade + dias
       +'<div class="uc-card-val">'
@@ -6013,6 +6025,19 @@ function _ucFiltrar() {
     el.innerHTML += '<div style="grid-column:1/-1;text-align:center;padding:12px;color:var(--muted);font-size:12px">Exibindo '+MAX+' de '+dados.length+' registros. Use os filtros para refinar.</div>';
   }
 }
+
+
+function _ucIniciarAutoRefresh(){
+  if(_ucAutoRefreshTimer)return;
+  _ucAutoRefreshTimer=setInterval(function(){
+    if(document.visibilityState==='visible')renderUltimasColetas('silent');
+  },60000);
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible'&&Date.now()-_ucUltimoRefresh>15000)renderUltimasColetas('silent');
+  });
+  window.addEventListener('focus',function(){if(Date.now()-_ucUltimoRefresh>15000)renderUltimasColetas('silent');});
+}
+setTimeout(_ucIniciarAutoRefresh,1500);
 
 function filtrarSetor(setor){
   // alterna: clicar de novo no mesmo setor remove o filtro
@@ -10721,7 +10746,25 @@ var _nfeNota=null,_nfeAutoTimer=null;
 var NFE_SETORES=['Açougue','Bazar','Bebidas','Congelados','Frios','Horti','Laticínios','Limpeza','Outros','Padaria','Perfumaria','Pet','Pilhas/Baterias','Seca','Seca doce'];
 function nfeEsc_(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function nfeDigitos_(v){return String(v==null?'':v).replace(/\D/g,'');}
-function nfePost_(body){var cfg=loadCfg();if(!cfg.url)return Promise.resolve({ok:false,erro:'URL do Code.gs não configurada.'});return fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(body)}).then(function(r){return r.text();}).then(function(t){try{return JSON.parse(t);}catch(e){return {ok:false,erro:'Resposta inválida do servidor.'};}}).catch(function(e){return {ok:false,erro:e.message||'Falha de conexão.'};});}
+function nfePost_(body){
+  var cfg=loadCfg();if(!cfg.url)return Promise.resolve({ok:false,erro:'URL do Code.gs não configurada.'});
+  var action=String((body&&body.action)||''),timeout=action==='nfeRegistrarValidades'?180000:(action==='nfeBuscarChave'?90000:60000);
+  var controller=(typeof AbortController!=='undefined')?new AbortController():null;
+  var timer=controller?setTimeout(function(){controller.abort();},timeout):null;
+  var opts={method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(body)};if(controller)opts.signal=controller.signal;
+  return fetch(cfg.url,opts).then(function(r){return r.text();}).then(function(t){try{return JSON.parse(t);}catch(e){return {ok:false,erro:'Resposta inválida do servidor.'};}}).catch(function(e){return {ok:false,erro:e&&e.message?e.message:'Falha de conexão.',falhaTransporte:true};}).finally(function(){if(timer)clearTimeout(timer);});
+}
+function nfeConsultarStatus_(chave){
+  var cfg=loadCfg(),ch=nfeDigitos_(chave);if(!cfg.url||ch.length!==44)return Promise.resolve(null);
+  var sep=cfg.url.indexOf('?')>=0?'&':'?',url=cfg.url+sep+'action=nfeStatusRecebimento&chave='+encodeURIComponent(ch)+'&_='+Date.now();
+  var controller=(typeof AbortController!=='undefined')?new AbortController():null,timer=controller?setTimeout(function(){controller.abort();},30000):null,opts={cache:'no-store'};if(controller)opts.signal=controller.signal;
+  return fetch(url,opts).then(function(r){return r.json();}).then(function(j){return j&&j.ok?j:null;}).catch(function(){return null;}).finally(function(){if(timer)clearTimeout(timer);});
+}
+function nfeAtualizarColetasAposGravacao_(){
+  try{_ucDados=[];_ucIndex=null;}catch(e){}
+  setTimeout(function(){try{renderUltimasColetas('silent');}catch(e){}},900);
+  setTimeout(function(){try{renderUltimasColetas('silent');}catch(e){}},4500);
+}
 function nfeStatus_(tipo,msg){var el=document.getElementById('nfeStatus');if(!el)return;el.className='nfe-status '+(tipo||'');el.innerHTML='<i class="ti '+(tipo==='ok'?'ti-circle-check':tipo==='err'?'ti-alert-circle':tipo==='warn'?'ti-alert-triangle':'ti-info-circle')+'"></i> '+nfeEsc_(msg||'');}
 function nfeInit_(){try{if(typeof carregarColaboradoresUniversal_==='function')carregarColaboradoresUniversal_(false).then(nfeRenderOperadores_);}catch(e){}setTimeout(function(){var i=document.getElementById('nfeChave');if(i)i.focus();},80);}
 function nfeChaveInput_(){var i=document.getElementById('nfeChave');if(!i)return;var d=nfeDigitos_(i.value||'');if(d.length<=44)i.value=d;if(_nfeAutoTimer)clearTimeout(_nfeAutoTimer);if(d.length===44)_nfeAutoTimer=setTimeout(nfeBuscarChave_,250);}
@@ -10757,11 +10800,36 @@ function nfeRemoverLote_(idx,li){var it=_nfeNota.itens[idx];if(!it)return;if(it.
 function nfeValidarEan_(idx){var it=_nfeNota.itens[idx],ean=nfeDigitos_((document.getElementById('nfeEan_'+idx)||{}).value||it.eanAura||'');if(!ean){mostrarToast('Informe o EAN AURA','warn');return;}nfeStatus_('','Validando EAN '+ean+' no Banco AURA...');_gasGetJsonp('buscarEANCompleto','&ean='+encodeURIComponent(ean),30000).then(function(r){if(!r||!r.ok){nfeStatus_('warn','EAN '+ean+' não existe no Banco AURA.');return;}it.eanAura=nfeDigitos_(r.ean||ean);it.nomeAura=r.descricao||'';it.unidadeAura=r.unidade||it.uCom||'';it.status='encontrado';it.origemVinculo='manual';if(r.setor&&r.setor!=='Outros'){it.setor=r.setor;it.setorSugerido=r.setor;it.setorOrigem=r.setorOrigem||'banco_dados';}it.fotoDataUrl='';it.fotoCarregando=false;nfeStatus_('ok','Produto vinculado. Este código do fornecedor será lembrado nas próximas notas.');nfeRenderNota_();});}
 function nfeRenderOperadores_(){var sel=document.getElementById('nfeOperador');if(!sel)return;var atual=localStorage.getItem('aura_nfe_operador')||sel.value||'';var lista=(typeof COLABORADORES!=='undefined'?COLABORADORES:[])||[];sel.innerHTML='<option value="">Não informado</option>'+lista.map(function(c){return '<option value="'+nfeEsc_(c.email||'')+'">'+nfeEsc_(c.nome||c.email||'')+'</option>';}).join('');sel.value=atual;sel.onchange=function(){try{localStorage.setItem('aura_nfe_operador',sel.value||'');}catch(e){}};}
 function nfeColetarPayload_(){var n=_nfeNota,errs=[],itens=(n.itens||[]).map(function(it,idx){var control=document.getElementById('nfeControlar_'+idx),controlar=!!(control&&control.checked),ean=it.eanAura||nfeDigitos_((document.getElementById('nfeEan_'+idx)||{}).value||''),qtd=Number(it.qtdEstoque||it.qCom||0)||0,setor=String((document.getElementById('nfeSetor_'+idx)||{}).value||it.setor||'Outros'),lotes=[];if(controlar){if(!ean)errs.push((it.nomeAura||it.nome||'Item')+': sem vínculo com EAN AURA.');var rows=document.querySelectorAll('#nfeLotesRows_'+idx+' .nfe-lote'),soma=0;rows.forEach(function(r){var v=(r.querySelector('.nfe-lot-val')||{}).value||'',q=Number((r.querySelector('.nfe-lot-qtd')||{}).value)||0,l=(r.querySelector('.nfe-lote-id')||{}).value||'';if(!v||!(q>0))errs.push((it.nomeAura||it.nome||ean)+': preencha validade e quantidade.');soma+=q;lotes.push({validade:v,quantidade:q,lote:l});});if(Math.abs(soma-qtd)>0.001)errs.push((it.nomeAura||it.nome||ean)+': lotes somam '+nfeFmtQtd_(soma)+' e a NF-e tem '+nfeFmtQtd_(qtd)+'.');}return {nItem:it.nItem,cProd:it.cProd,nome:it.nome,qCom:it.qCom,ean:ean,qtdEstoque:qtd,fatorConversao:it.fatorConversao||1,unidadeNFe:it.uCom||'',unidadeAura:it.unidadeAura||it.uCom||'',setor:setor,controlar:controlar,lotes:lotes,origemVinculo:it.origemVinculo||''};});return {erros:errs,payload:{action:'nfeRegistrarValidades',chave:n.chave,fornecedor:n.fornecedor,cnpjFornecedor:n.cnpjFornecedor,numero:n.numero,serie:n.serie,emissao:n.emissao,fonte:n.fonte,operador:String((document.getElementById('nfeOperador')||{}).value||''),itens:itens}};}
-function nfeSalvar_(){var c=nfeColetarPayload_(),er=document.getElementById('nfeErros');if(c.erros.length){if(er)er.innerHTML=c.erros.slice(0,10).map(function(x){return '• '+nfeEsc_(x);}).join('<br>');return;}if(er)er.innerHTML='';var b=document.getElementById('nfeBtnSalvar');if(b){b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Gravando...';}nfePost_(c.payload).then(function(r){if(b){b.disabled=false;b.innerHTML='<i class="ti ti-device-floppy"></i> Gravar validades da NF-e';}if(!r||!r.ok){var es=(r&&r.erros)||[];if(er)er.innerHTML=nfeEsc_((r&&r.erro)||'Falha ao gravar.')+(es.length?'<br>'+es.map(function(x){return '• '+nfeEsc_(x);}).join('<br>'):'');nfeStatus_('err',(r&&r.erro)||'Falha ao gravar validades.');return;}nfeStatus_('ok','NF-e concluída: '+Number(r.gravados||0)+' lote(s) gravado(s)'+(r.ignorados?' · '+r.ignorados+' já existentes':'')+'.');_nfeNota.jaProcessada=true;nfeRenderNota_();if(typeof syncAll==='function')setTimeout(syncAll,300);});}
+function nfeFinalizarGravacaoAura_(r,confirmado){
+  r=r||{};var lotes=Number(r.gravados!=null?r.gravados:r.lotes)||0;
+  nfeStatus_('ok',confirmado?'NF-e confirmada no servidor e concluída.':'NF-e concluída: '+lotes+' lote(s) gravado(s)'+(r.ignorados?' · '+r.ignorados+' já existentes':'')+'.');
+  if(_nfeNota){_nfeNota.jaProcessada=true;_nfeNota.processadaEm=r.processadaEm||_nfeNota.processadaEm||'';}
+  nfeRenderNota_();
+  nfeAtualizarColetasAposGravacao_();
+  if(typeof syncAll==='function')setTimeout(syncAll,300);
+}
+function nfeSalvar_(){
+  var c=nfeColetarPayload_(),er=document.getElementById('nfeErros');if(c.erros.length){if(er)er.innerHTML=c.erros.slice(0,10).map(function(x){return '• '+nfeEsc_(x);}).join('<br>');return;}if(er)er.innerHTML='';
+  var b=document.getElementById('nfeBtnSalvar');if(b){b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Gravando...';}
+  nfePost_(c.payload).then(function(r){
+    function restaurar(){if(b){b.disabled=false;b.innerHTML='<i class="ti ti-device-floppy"></i> Gravar validades da NF-e';}}
+    if(r&&r.ok){restaurar();nfeFinalizarGravacaoAura_(r,false);return;}
+    var msg=(r&&r.erro)||'Falha ao gravar validades.',es=(r&&r.erros)||[];
+    var ambiguo=!!(r&&r.falhaTransporte)||/abort|timeout|fetch|network|failed to fetch|load failed|conex[aã]o|demor|j[aá] foi conclu[ií]da/i.test(msg);
+    if(!ambiguo){restaurar();if(er)er.innerHTML=nfeEsc_(msg)+(es.length?'<br>'+es.map(function(x){return '• '+nfeEsc_(x);}).join('<br>'):'');nfeStatus_('err',msg);return;}
+    nfeStatus_('warn','A resposta demorou. Confirmando o status da NF-e no servidor...');
+    nfeConsultarStatus_(c.payload.chave).then(function(st){
+      restaurar();
+      if(st&&st.completa){nfeFinalizarGravacaoAura_(st,true);return;}
+      if(st&&st.parcial){msg='A NF-e foi processada parcialmente. Revise os itens antes de tentar novamente.';}
+      if(er)er.innerHTML=nfeEsc_(msg);nfeStatus_('err',msg);
+    });
+  });
+}
 function nfeLimpar_(){_nfeNota=null;var box=document.getElementById('nfeNotaBox');if(box){box.style.display='none';box.innerHTML='';}var i=document.getElementById('nfeChave');if(i){i.value='';i.focus();}nfeStatus_('','Aguardando uma chave. Se o XML ainda não estiver no Drive, use “Importar XML”.');}
 
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.41-nfe-menu-visivel-mes-atual';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.47-nfe-confirmacao-coletas-auto';
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
