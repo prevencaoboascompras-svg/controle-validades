@@ -2147,6 +2147,11 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 @media(max-width:650px){.nfe-conv-choices{grid-template-columns:1fr}}
 
 </style>
+
+<style>
+.nfe-camera-btn{background:#1D9E75!important;color:#fff!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;white-space:nowrap!important;min-width:108px!important}
+.nfe-camera-btn i{font-size:15px}
+</style>
 </head>
 <body>
 
@@ -10842,7 +10847,7 @@ function nfeItemHtml_(it,idx){
     +'<div class="nfe-product-wrap">'+nfeThumbHtml_(it,idx)+'<div class="nfe-item-main"><div class="nfe-item-name">'+nfeEsc_(nomeExibir)+'</div>'
     +(nomeAURA?'<div class="nfe-bank-tag"><i class="ti ti-database"></i> Banco AURA / Telecon</div>':(aguardando?'<div class="nfe-bank-tag" style="color:#B76E00"><i class="ti ti-hourglass"></i> Produto novo · será gravado agora e vinculado depois</div>':''))
     +'<div class="nfe-info-list">'+infoNF+'<div class="nfe-info-line"><span class="lbl">Código do fornecedor</span>'+nfeEsc_(it.cProd||'—')+'</div><div class="nfe-info-line"><span class="lbl">Recebido na NF</span><b>'+nfeFmtQtd_(it.qCom)+' '+nfeEsc_(it.uCom||'')+'</b></div><div class="nfe-info-line"><span class="lbl">Quantidade que será gravada</span><b>'+nfeFmtQtd_(qtd)+' '+nfeEsc_(it.unidadeAura||unDestino||'')+'</b></div><div class="nfe-info-line"><span class="lbl">EAN</span>'+(it.eanAura?'<b>'+nfeEsc_(it.eanAura)+'</b>':'Informe o código de barras')+'</div></div></div></div></div>'
-    +'<div class="nfe-item-body">'+convHtml+'<div class="nfe-grid2"><div class="nfe-field"><label>EAN / código de barras</label><div class="nfe-ean-row"><input id="nfeEan_'+idx+'" inputmode="numeric" value="'+nfeEsc_(it.eanAura||'')+'" placeholder="Pode ser produto novo ainda sem Telecon" onchange="nfeSetEan_('+idx+',this.value)"><button class="nfe-mini-btn" onclick="nfeValidarEan_('+idx+')">Validar</button></div></div><div class="nfe-field"><label>Setor</label><select id="nfeSetor_'+idx+'" onchange="nfeSetSetor_('+idx+',this.value)">'+nfeSetorOptions_(it.setor||it.setorSugerido||'Outros')+'</select>'+nfeSetorNotaHtml_(it)+'</div></div><div class="nfe-lotes-title"><span>Validades / lotes · total a gravar '+nfeFmtQtd_(qtd)+'</span><button class="nfe-add-lote" onclick="nfeAdicionarLote_('+idx+')"><i class="ti ti-plus"></i> Outra validade</button></div><div id="nfeLotesRows_'+idx+'">'+lotes+'</div></div></div>';
+    +'<div class="nfe-item-body">'+convHtml+'<div class="nfe-grid2"><div class="nfe-field"><label>EAN / código de barras</label><div class="nfe-ean-row"><input id="nfeEan_'+idx+'" inputmode="numeric" readonly value="'+nfeEsc_(it.eanAura||'')+'" placeholder="Use a câmera para ler o código" onchange="nfeSetEan_('+idx+',this.value)"><button class="nfe-mini-btn nfe-camera-btn" onclick="nfeEscanearEanAura_('+idx+')"><i class="ti ti-camera"></i> Ler código</button></div></div><div class="nfe-field"><label>Setor</label><select id="nfeSetor_'+idx+'" onchange="nfeSetSetor_('+idx+',this.value)">'+nfeSetorOptions_(it.setor||it.setorSugerido||'Outros')+'</select>'+nfeSetorNotaHtml_(it)+'</div></div><div class="nfe-lotes-title"><span>Validades / lotes · total a gravar '+nfeFmtQtd_(qtd)+'</span><button class="nfe-add-lote" onclick="nfeAdicionarLote_('+idx+')"><i class="ti ti-plus"></i> Outra validade</button></div><div id="nfeLotesRows_'+idx+'">'+lotes+'</div></div></div>';
 }
 function nfeRenderNota_(){var box=document.getElementById('nfeNotaBox'),n=_nfeNota;if(!box||!n)return;box.style.display='block';var itens=(n.itens||[]).map(function(it,idx){return nfeItemHtml_(it,idx);}).join('');box.innerHTML='<div class="nfe-note">'+(n.jaProcessada?'<div class="nfe-processed"><i class="ti ti-alert-triangle"></i> Esta NF-e já consta como concluída'+(n.processadaEm?' em '+nfeEsc_(n.processadaEm):'')+'. Uma nova gravação é bloqueada por segurança.</div>':'')+'<div class="nfe-note-head"><div><div class="nfe-note-name">'+nfeEsc_(n.fornecedor||'Fornecedor')+'</div><div class="nfe-note-meta">CNPJ '+nfeEsc_(n.cnpjFornecedor||'—')+' · NF '+nfeEsc_(n.numero||'—')+' série '+nfeEsc_(n.serie||'—')+' · emissão '+nfeEsc_(n.emissao||'—')+'<br>Chave '+nfeEsc_(n.chave||'')+' · fonte '+nfeEsc_(n.fonte||'XML')+'</div></div><div class="nfe-note-total">'+nfeFmtBRL_(n.valorTotal)+'</div></div><div class="nfe-kpis"><div class="nfe-kpi"><span>Itens da NF-e</span><b>'+Number(n.totalItens||0)+'</b></div><div class="nfe-kpi ok"><span>Reconhecidos</span><b>'+Number(n.totalEncontrados||0)+'</b></div><div class="nfe-kpi warn"><span>Para vincular</span><b>'+Number(n.totalNaoEncontrados||0)+'</b></div><div class="nfe-kpi"><span>Valor da nota</span><b>'+nfeFmtBRL_(n.valorTotal)+'</b></div></div><div class="nfe-toolbar"><div class="nfe-field"><label>Aplicar setor a todos</label><select id="nfeSetorTodos" onchange="nfeAplicarSetorTodos_()"><option value="">Selecione...</option>'+nfeSetorOptions_('')+'</select></div><div class="nfe-field"><label>Recebido por</label><select id="nfeOperador"><option value="">Não informado</option></select></div><div class="nfe-toolbar-help">Produtos reconhecidos já mostram o nome do Banco AURA e a foto do item. Confira a quantidade e distribua integralmente as validades/lotes.</div></div><div class="nfe-items">'+itens+'</div><div class="nfe-foot"><div id="nfeErros" class="nfe-errors"></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn" onclick="nfeLimpar_()">Cancelar</button><button class="btn btn-green" id="nfeBtnSalvar" '+(n.jaProcessada?'disabled':'')+' onclick="nfeSalvar_()"><i class="ti ti-device-floppy"></i> Gravar validades da NF-e</button></div></div></div>';nfeRenderOperadores_();setTimeout(nfeCarregarFotosPendentes_,0);}
 function nfeAtualizarThumb_(idx){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];var el=document.getElementById('nfeThumb_'+idx);if(!it||!el)return;if(it.fotoDataUrl){el.innerHTML='<img src="'+nfeEsc_(it.fotoDataUrl)+'" alt="Produto">';el.className='nfe-thumb';return;}if(it.fotoCarregando){el.innerHTML='<i class="ti ti-loader-2 spin"></i>';el.className='nfe-thumb loading';return;}el.innerHTML='<i class="ti ti-photo"></i>';el.className='nfe-thumb';}
@@ -10851,6 +10856,12 @@ function nfeCarregarFotosPendentes_(){var n=_nfeNota;if(!n||!Array.isArray(n.ite
 function nfeToggleItem_(idx,v){var it=_nfeNota.itens[idx];if(!it)return;it.controlar=!!v;var el=document.getElementById('nfeItem_'+idx);if(el)el.classList.toggle('off',!v);}
 function nfeAplicarSetorTodos_(){var s=document.getElementById('nfeSetorTodos');if(!s||!s.value)return;(_nfeNota.itens||[]).forEach(function(it,idx){it.setor=s.value;it.setorOrigem='manual';var el=document.getElementById('nfeSetor_'+idx);if(el)el.value=s.value;});nfeRenderNota_();}
 function nfeSetSetor_(idx,v){var it=_nfeNota.itens[idx];if(it){it.setor=v;it.setorOrigem='manual';}nfeRenderNota_();}
+function nfeEscanearEanAura_(idx){
+  var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];if(!it)return;
+  _auraScanPreserveGTIN=true;
+  _auraScanAfterFill=function(){setTimeout(function(){nfeValidarEan_(idx);},60);};
+  abrirScannerAura('nfeEan_'+idx);
+}
 function nfeSetEan_(idx,v){var it=_nfeNota.itens[idx];if(it){it.eanAura=nfeDigitos_(v);it.status='nao_encontrado';it.origemVinculo='manual';it.nomeAura='';it.unidadeAura=it.unidadeAura||it.uCom||'';it.fotoDataUrl='';it.fotoCarregando=false;}}
 function nfeAjustarConversao_(idx,v){
   var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];if(!it)return;
@@ -10941,7 +10952,7 @@ function nfeSalvar_(){
 function nfeLimpar_(){_nfeNota=null;var box=document.getElementById('nfeNotaBox');if(box){box.style.display='none';box.innerHTML='';}var i=document.getElementById('nfeChave');if(i){i.value='';i.focus();}nfeStatus_('','Aguardando uma chave. Se o XML ainda não estiver no Drive, use “Importar XML”.');}
 
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.55-produto-novo-conversao-decidida';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.56-camera-vinculo-nfe';
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
@@ -15123,6 +15134,8 @@ var _auraScanZxingReader = null;
 var _auraScanZxingControls = null; // .stop() encerra o decode contínuo de verdade
 var _auraScanSessionId = 0;        // invalida callbacks atrasados de sessões antigas
 var _auraScanTargetInput = null;
+var _auraScanAfterFill = null;
+var _auraScanPreserveGTIN = false;
 
 function _auraIsIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
@@ -15163,6 +15176,8 @@ function abrirScannerAura(inputId) {
 function fecharScannerAura() {
   pararScannerAura();
   document.getElementById('scanModalOv').classList.remove('open');
+  _auraScanAfterFill = null;
+  _auraScanPreserveGTIN = false;
 }
 
 async function iniciarScannerAura() {
@@ -15358,7 +15373,15 @@ function _auraMostrarErro(msg) {
 function _auraOnScanSuccess(code) {
   if (!code) return;
   code = String(code).trim();
-  if (code.length === 13 && code.charAt(0) === '0') code = code.substring(1);
+  var preservar = !!_auraScanPreserveGTIN;
+  if (!preservar && code.length === 13 && code.charAt(0) === '0') code = code.substring(1);
+  if (preservar) {
+    code = code.replace(/\D/g,'');
+    if ([8,12,13,14].indexOf(code.length) < 0) {
+      mostrarToast('Leia o código de barras EAN/GTIN da embalagem.','warn');
+      return;
+    }
+  }
   if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
   var input = _auraScanTargetInput ? document.getElementById(_auraScanTargetInput) : null;
   if (input) {
@@ -15366,7 +15389,9 @@ function _auraOnScanSuccess(code) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
   }
+  var depois = _auraScanAfterFill;
   fecharScannerAura();
+  if (typeof depois === 'function') setTimeout(depois, 30);
 }
 </script>
 
