@@ -2257,6 +2257,25 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .nfe-auto-empty{padding:11px;color:var(--tx2);font-size:11px;text-align:center}
 
 </style>
+
+<style id="nfeHistoricoGlobalCss">
+.nfe-hist-global{margin-top:16px;border:1px solid var(--bd);background:var(--bg);border-radius:14px;overflow:hidden}
+.nfe-hist-hd{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 16px;border-bottom:1px solid var(--bd);background:linear-gradient(135deg,rgba(29,158,117,.07),rgba(29,158,117,.015))}
+.nfe-hist-title{font-size:14px;font-weight:850;color:var(--tx);display:flex;align-items:center;gap:7px}.nfe-hist-title i{color:#1D9E75;font-size:18px}
+.nfe-hist-sub{font-size:10px;color:var(--tx2);margin-top:3px;line-height:1.45}
+.nfe-hist-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:12px 14px 6px}
+.nfe-hist-kpi{border:1px solid var(--bd);background:var(--bg2);border-radius:10px;padding:10px 11px}.nfe-hist-kpi span{display:block;color:var(--tx2);font-size:8px;text-transform:uppercase;font-weight:800;letter-spacing:.04em}.nfe-hist-kpi b{display:block;font-size:18px;margin-top:3px;color:var(--tx)}
+.nfe-hist-filters{display:grid;grid-template-columns:minmax(220px,1fr) 220px 180px;gap:8px;padding:8px 14px 12px}.nfe-hist-filters input,.nfe-hist-filters select{width:100%;height:38px;border:1px solid var(--bd);border-radius:9px;background:var(--bg2);color:var(--tx);padding:0 10px;font-size:11px;outline:none}.nfe-hist-filters input:focus,.nfe-hist-filters select:focus{border-color:#1D9E75;box-shadow:0 0 0 2px rgba(29,158,117,.10)}
+.nfe-hist-table-wrap{overflow:auto;border-top:1px solid var(--bd);max-height:540px}.nfe-hist-table{width:100%;border-collapse:collapse;min-width:1050px}.nfe-hist-table th{position:sticky;top:0;z-index:2;background:var(--bg2);color:var(--tx2);font-size:8px;text-transform:uppercase;letter-spacing:.03em;padding:8px 9px;text-align:left;border-bottom:1px solid var(--bd)}.nfe-hist-table td{padding:9px;border-bottom:1px solid var(--bd);font-size:10px;color:var(--tx);vertical-align:middle}.nfe-hist-table tr:hover td{background:rgba(29,158,117,.04)}
+.nfe-hist-nf{font-size:12px;font-weight:850}.nfe-hist-forn{font-weight:750;max-width:250px}.nfe-hist-op{font-weight:700}.nfe-hist-email{font-size:8px;color:var(--tx2);margin-top:1px}.nfe-hist-key{font-family:monospace;font-size:8px;color:var(--tx2);max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nfe-hist-status{display:inline-flex;align-items:center;border:1px solid var(--bd);border-radius:999px;padding:3px 7px;font-size:8px;font-weight:850;text-transform:uppercase;white-space:nowrap}.nfe-hist-status.ok{color:#1D9E75;border-color:rgba(29,158,117,.35);background:rgba(29,158,117,.09)}.nfe-hist-status.warn{color:#B7791F;border-color:rgba(183,121,31,.35);background:rgba(183,121,31,.08)}.nfe-hist-status.err{color:#C93C3C;border-color:rgba(201,60,60,.35);background:rgba(201,60,60,.08)}
+.nfe-hist-empty{padding:28px;text-align:center;color:var(--tx2);font-size:11px}.nfe-hist-count{font-size:9px;color:var(--tx2);padding:8px 14px;border-top:1px solid var(--bd)}
+.nfe-hist-modal-back{position:fixed;inset:0;z-index:120500;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;padding:18px}.nfe-hist-modal{width:min(1120px,96vw);max-height:92vh;overflow:auto;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.42)}.nfe-hist-modal-hd{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 18px;background:var(--bg);border-bottom:1px solid var(--bd)}.nfe-hist-modal-title{font-size:17px;font-weight:900}.nfe-hist-modal-sub{font-size:10px;color:var(--tx2);margin-top:4px;line-height:1.45}.nfe-hist-modal-body{padding:16px 18px 20px}.nfe-hist-meta-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:13px}.nfe-hist-meta{border:1px solid var(--bd);border-radius:10px;background:var(--bg2);padding:9px}.nfe-hist-meta span{font-size:7.5px;text-transform:uppercase;color:var(--tx2);font-weight:800;display:block}.nfe-hist-meta b{font-size:11px;display:block;margin-top:3px;word-break:break-word}
+.nfe-hist-readonly{padding:9px 11px;border-radius:9px;background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.28);font-size:9px;color:var(--tx2);margin-bottom:12px}.nfe-hist-readonly b{color:#1D9E75}
+.nfe-hist-items{display:flex;flex-direction:column;gap:8px}.nfe-hist-item{border:1px solid var(--bd);border-radius:10px;overflow:hidden}.nfe-hist-item-hd{display:grid;grid-template-columns:minmax(240px,1.5fr) 160px 150px 120px;gap:8px;align-items:center;padding:9px 10px;background:var(--bg2)}.nfe-hist-item-name{font-size:11px;font-weight:850}.nfe-hist-item-nf{font-size:8px;color:var(--tx2);margin-top:2px}.nfe-hist-item-cell span{font-size:7px;color:var(--tx2);text-transform:uppercase;font-weight:800;display:block}.nfe-hist-item-cell b{font-size:9px;margin-top:2px;display:block}.nfe-hist-lotes{padding:7px 10px}.nfe-hist-lote{display:grid;grid-template-columns:130px 110px 1fr;gap:8px;padding:5px 0;border-bottom:1px dashed var(--bd);font-size:9px}.nfe-hist-lote:last-child{border-bottom:0}.nfe-hist-lote strong{font-weight:800}.nfe-hist-no-lote{font-size:9px;color:var(--tx2);padding:5px 0}
+@media(max-width:900px){.nfe-hist-kpis{grid-template-columns:repeat(2,1fr)}.nfe-hist-filters{grid-template-columns:1fr}.nfe-hist-meta-grid{grid-template-columns:repeat(2,1fr)}.nfe-hist-item-hd{grid-template-columns:1fr 1fr}.nfe-hist-modal-back{padding:8px}.nfe-hist-modal{width:100%;max-height:96vh}}
+</style>
+
 </head>
 <body>
 
@@ -3337,6 +3356,34 @@ function toggleTheme() {
         <div id="nfeStatus" class="nfe-status"><i class="ti ti-info-circle"></i> Aguardando uma chave. Se o XML ainda não estiver no Drive, use “Importar XML”.</div>
       </div>
       <div id="nfeNotaBox" style="display:none"></div>
+
+      <div class="nfe-hist-global" id="nfeHistoricoGlobalBox">
+        <div class="nfe-hist-hd">
+          <div>
+            <div class="nfe-hist-title"><i class="ti ti-history"></i> Histórico geral de Conferência NF-e</div>
+            <div class="nfe-hist-sub">Visão administrativa da AURA com todas as NF-e lançadas por todos os usuários. Abra uma nota para consultar produtos, vínculos, setores, validades e quantidades registradas.</div>
+          </div>
+          <button class="btn" id="nfeHistAtualizarBtn" onclick="nfeHistoricoGeralCarregar_(true)"><i class="ti ti-refresh"></i> Atualizar histórico</button>
+        </div>
+        <div class="nfe-hist-kpis">
+          <div class="nfe-hist-kpi"><span>NF-e no histórico</span><b id="nfeHistKpiNotas">0</b></div>
+          <div class="nfe-hist-kpi"><span>Usuários envolvidos</span><b id="nfeHistKpiUsuarios">0</b></div>
+          <div class="nfe-hist-kpi"><span>Itens lançados</span><b id="nfeHistKpiItens">0</b></div>
+          <div class="nfe-hist-kpi"><span>Lotes / validades</span><b id="nfeHistKpiLotes">0</b></div>
+        </div>
+        <div class="nfe-hist-filters">
+          <input id="nfeHistBusca" placeholder="Buscar NF, fornecedor, chave, CNPJ ou usuário" oninput="nfeHistoricoGeralRender_()">
+          <select id="nfeHistOperadorFiltro" onchange="nfeHistoricoGeralRender_()"><option value="">Todos os usuários</option></select>
+          <select id="nfeHistStatusFiltro" onchange="nfeHistoricoGeralRender_()"><option value="">Todos os status</option></select>
+        </div>
+        <div class="nfe-hist-table-wrap">
+          <table class="nfe-hist-table">
+            <thead><tr><th>NF</th><th>Fornecedor</th><th>Emissão</th><th>Conferida em</th><th>Recebido por</th><th>Status</th><th>Itens</th><th>Lotes</th><th>Fonte</th><th>Chave</th><th></th></tr></thead>
+            <tbody id="nfeHistBody"><tr><td colspan="11"><div class="nfe-hist-empty">Carregando histórico...</div></td></tr></tbody>
+          </table>
+        </div>
+        <div class="nfe-hist-count" id="nfeHistCount">Aguardando consulta.</div>
+      </div>
     </div>
   </div>
 
@@ -11054,7 +11101,7 @@ function nfeAtualizarColetasAposGravacao_(){
   setTimeout(function(){try{renderUltimasColetas('silent');}catch(e){}},4500);
 }
 function nfeStatus_(tipo,msg){var el=document.getElementById('nfeStatus');if(!el)return;el.className='nfe-status '+(tipo||'');el.innerHTML='<i class="ti '+(tipo==='ok'?'ti-circle-check':tipo==='err'?'ti-alert-circle':tipo==='warn'?'ti-alert-triangle':'ti-info-circle')+'"></i> '+nfeEsc_(msg||'');}
-function nfeInit_(){try{if(typeof carregarColaboradoresUniversal_==='function')carregarColaboradoresUniversal_(false).then(nfeRenderOperadores_);}catch(e){}if(!_nfeNota){var d=nfeLerRascunho_();if(d&&d.nota&&!d.nota.jaProcessada){nfeRestaurarRascunho_(true);nfeStatus_('ok','Rascunho salvo automaticamente restaurado. Continue de onde parou.');}}setTimeout(function(){var i=document.getElementById('nfeChave');if(i&&!_nfeNota)i.focus();},80);}
+function nfeInit_(){try{if(typeof carregarColaboradoresUniversal_==='function')carregarColaboradoresUniversal_(false).then(function(){nfeRenderOperadores_();if(_nfeHistGeralCarregado_)nfeHistoricoGeralPopularFiltros_(),nfeHistoricoGeralRender_();});}catch(e){}if(!_nfeNota){var d=nfeLerRascunho_();if(d&&d.nota&&!d.nota.jaProcessada){nfeRestaurarRascunho_(true);nfeStatus_('ok','Rascunho salvo automaticamente restaurado. Continue de onde parou.');}}nfeHistoricoGeralCarregar_(false);setTimeout(function(){var i=document.getElementById('nfeChave');if(i&&!_nfeNota)i.focus();},80);}
 function nfeChaveInput_(){var i=document.getElementById('nfeChave');if(!i)return;var d=nfeDigitos_(i.value||'');if(d.length<=44)i.value=d;if(_nfeAutoTimer)clearTimeout(_nfeAutoTimer);if(d.length===44)_nfeAutoTimer=setTimeout(nfeBuscarChave_,250);}
 function nfeEhEmbalagemFront_(u){
   u=String(u||'').trim().toUpperCase().replace(/\./g,'');
@@ -11247,7 +11294,7 @@ function nfeFinalizarGravacaoAura_(r,confirmado){
   if(_nfeNota){_nfeNota.jaProcessada=true;_nfeNota.processadaEm=r.processadaEm||_nfeNota.processadaEm||'';}
   nfeRenderNota_();
   nfeLimparRascunho_();nfeAtualizarColetasAposGravacao_();
-  if(typeof syncAll==='function')setTimeout(syncAll,300);
+  if(typeof syncAll==='function')setTimeout(syncAll,300);setTimeout(function(){try{nfeHistoricoGeralCarregar_(true);}catch(e){}},700);
 }
 function nfeSalvar_(){
   var c=nfeColetarPayload_(),er=document.getElementById('nfeErros');if(c.erros.length){if(er)er.innerHTML=c.erros.slice(0,10).map(function(x){return '• '+nfeEsc_(x);}).join('<br>');return;}if(er)er.innerHTML='';
@@ -11271,6 +11318,98 @@ function nfeLimpar_(){nfeAutosaveAgora_();_nfeNota=null;var box=document.getElem
 
 
 
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// v6.72 — HISTÓRICO GERAL DE CONFERÊNCIA NF-e (AURA ADMIN)
+// Lista todas as NF-e de todos os usuários. Consulta de detalhe é somente leitura.
+// ═══════════════════════════════════════════════════════════════
+var _nfeHistGeralDados_=[],_nfeHistGeralCarregado_=false,_nfeHistGeralCarregando_=false;
+function nfeHistNorm_(v){return String(v==null?'':v).trim().toLowerCase();}
+function nfeHistNomeOperador_(email){
+  var e=nfeHistNorm_(email),lista=(typeof COLABORADORES!=='undefined'&&Array.isArray(COLABORADORES))?COLABORADORES:[];
+  for(var i=0;i<lista.length;i++){
+    var c=lista[i]||{},ce=nfeHistNorm_(c.email||'');if(ce&&ce===e)return String(c.nome||c.email||email||'Não informado');
+    var aliases=Array.isArray(c.aliases)?c.aliases:[];for(var j=0;j<aliases.length;j++)if(nfeHistNorm_(aliases[j])===e)return String(c.nome||c.email||email||'Não informado');
+  }
+  return String(email||'Não informado');
+}
+function nfeHistStatusInfo_(s){
+  s=String(s||'').toUpperCase();
+  if(['REGISTRADA','PROCESSANDO','COMPLETA'].indexOf(s)>=0)return {c:'ok',t:s==='COMPLETA'?'Completa':(s==='PROCESSANDO'?'Processando':'Registrada')};
+  if(s==='AGUARDANDO_CADASTRO')return {c:'warn',t:'Aguardando cadastro'};
+  if(['PARCIAL','PENDENTE_ITENS'].indexOf(s)>=0)return {c:'warn',t:s==='PARCIAL'?'Parcial':'Pendente itens'};
+  if(['ERRO','FALHA'].indexOf(s)>=0)return {c:'err',t:s||'Erro'};
+  return {c:'',t:s||'—'};
+}
+function nfeHistDataExibir_(v){
+  var s=String(v||'').trim();if(!s)return '—';
+  var m=s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/);if(m)return m[3]+'/'+m[2]+'/'+m[1]+(m[4]?' '+m[4]+':'+m[5]:'');
+  return s;
+}
+function nfeHistoricoGeralCarregar_(forcar){
+  if(_nfeHistGeralCarregando_)return;if(_nfeHistGeralCarregado_&&!forcar){nfeHistoricoGeralRender_();return;}
+  var body=document.getElementById('nfeHistBody'),btn=document.getElementById('nfeHistAtualizarBtn');
+  if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty"><i class="ti ti-loader-2 spin"></i> Carregando todas as NF-e...</div></td></tr>';
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Atualizando...';}
+  _nfeHistGeralCarregando_=true;
+  _gasGetJsonp('nfeHistoricoTodos','&limite=500',60000).then(function(r){
+    _nfeHistGeralCarregando_=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
+    if(!r||!r.ok){if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Não foi possível carregar o histórico: '+nfeEsc_((r&&r.erro)||'falha')+'</div></td></tr>';return;}
+    _nfeHistGeralDados_=Array.isArray(r.notas)?r.notas:[];_nfeHistGeralCarregado_=true;
+    nfeHistoricoGeralPopularFiltros_();nfeHistoricoGeralRender_();
+  }).catch(function(e){
+    _nfeHistGeralCarregando_=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
+    if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Falha ao consultar o histórico.</div></td></tr>';
+  });
+}
+function nfeHistoricoGeralPopularFiltros_(){
+  var ops={},sts={};_nfeHistGeralDados_.forEach(function(n){var e=nfeHistNorm_(n.operador);if(e)ops[e]=nfeHistNomeOperador_(e);var s=String(n.status||'').toUpperCase();if(s)sts[s]=nfeHistStatusInfo_(s).t;});
+  var so=document.getElementById('nfeHistOperadorFiltro'),ss=document.getElementById('nfeHistStatusFiltro');
+  if(so){var atual=so.value||'';so.innerHTML='<option value="">Todos os usuários</option>'+Object.keys(ops).sort(function(a,b){return String(ops[a]).localeCompare(String(ops[b]),'pt-BR');}).map(function(e){return '<option value="'+nfeEsc_(e)+'">'+nfeEsc_(ops[e])+'</option>';}).join('');so.value=atual;}
+  if(ss){var at=ss.value||'';ss.innerHTML='<option value="">Todos os status</option>'+Object.keys(sts).sort().map(function(s){return '<option value="'+nfeEsc_(s)+'">'+nfeEsc_(sts[s])+'</option>';}).join('');ss.value=at;}
+}
+function nfeHistoricoGeralRender_(){
+  var body=document.getElementById('nfeHistBody');if(!body)return;
+  var q=nfeHistNorm_((document.getElementById('nfeHistBusca')||{}).value||''),op=nfeHistNorm_((document.getElementById('nfeHistOperadorFiltro')||{}).value||''),st=String((document.getElementById('nfeHistStatusFiltro')||{}).value||'').toUpperCase();
+  var dados=_nfeHistGeralDados_.filter(function(n){
+    if(op&&nfeHistNorm_(n.operador)!==op)return false;if(st&&String(n.status||'').toUpperCase()!==st)return false;if(!q)return true;
+    var nomeOp=nfeHistNomeOperador_(n.operador),hay=[n.numero,n.serie,n.fornecedor,n.cnpj,n.chave,n.operador,nomeOp,n.status,n.fonte].join(' ').toLowerCase();return hay.indexOf(q)>=0;
+  });
+  var ops={};_nfeHistGeralDados_.forEach(function(n){var e=nfeHistNorm_(n.operador);if(e)ops[e]=1;});
+  var itens=_nfeHistGeralDados_.reduce(function(s,n){return s+(Number(n.itens)||0);},0),lotes=_nfeHistGeralDados_.reduce(function(s,n){return s+(Number(n.lotes)||0);},0);
+  var el=document.getElementById('nfeHistKpiNotas');if(el)el.textContent=_nfeHistGeralDados_.length;el=document.getElementById('nfeHistKpiUsuarios');if(el)el.textContent=Object.keys(ops).length;el=document.getElementById('nfeHistKpiItens');if(el)el.textContent=itens;el=document.getElementById('nfeHistKpiLotes');if(el)el.textContent=lotes;
+  var count=document.getElementById('nfeHistCount');if(count)count.textContent='Exibindo '+dados.length+' de '+_nfeHistGeralDados_.length+' NF-e carregadas'+(_nfeHistGeralDados_.length>=500?' · limite atual de 500 registros':'')+'.';
+  if(!dados.length){body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Nenhuma NF-e encontrada para os filtros selecionados.</div></td></tr>';return;}
+  body.innerHTML=dados.map(function(n){var si=nfeHistStatusInfo_(n.status),nome=nfeHistNomeOperador_(n.operador),email=String(n.operador||'');return '<tr>'
+    +'<td><div class="nfe-hist-nf">NF '+nfeEsc_(n.numero||'—')+'</div><div class="nfe-hist-email">Série '+nfeEsc_(n.serie||'—')+'</div></td>'
+    +'<td><div class="nfe-hist-forn">'+nfeEsc_(n.fornecedor||'Fornecedor não informado')+'</div><div class="nfe-hist-email">'+nfeEsc_(n.cnpj||'')+'</div></td>'
+    +'<td>'+nfeEsc_(nfeHistDataExibir_(n.emissao))+'</td><td>'+nfeEsc_(nfeHistDataExibir_(n.processadaEm))+'</td>'
+    +'<td><div class="nfe-hist-op">'+nfeEsc_(nome)+'</div>'+(email&&nfeHistNorm_(nome)!==nfeHistNorm_(email)?'<div class="nfe-hist-email">'+nfeEsc_(email)+'</div>':'')+'</td>'
+    +'<td><span class="nfe-hist-status '+si.c+'">'+nfeEsc_(si.t)+'</span></td><td>'+Number(n.itens||0)+'</td><td>'+Number(n.lotes||0)+'</td><td>'+nfeEsc_(n.fonte||'—')+'</td>'
+    +'<td><div class="nfe-hist-key" title="'+nfeEsc_(n.chave||'')+'">'+nfeEsc_(n.chave||'—')+'</div></td>'
+    +'<td><button class="btn btn-sm" onclick="nfeHistoricoGeralAbrir_(\''+nfeEsc_(n.chave||'')+'\')"><i class="ti ti-eye"></i> Abrir</button></td></tr>';}).join('');
+}
+function nfeHistoricoGeralAbrir_(chave){
+  chave=nfeDigitos_(chave);if(chave.length!==44)return;var modal=document.createElement('div');modal.className='nfe-hist-modal-back';modal.id='nfeHistModalGlobal';modal.innerHTML='<div class="nfe-hist-modal"><div class="nfe-hist-modal-hd"><div><div class="nfe-hist-modal-title"><i class="ti ti-file-invoice"></i> Carregando NF-e...</div><div class="nfe-hist-modal-sub">Consultando produtos e validades gravados.</div></div><button class="btn" onclick="document.getElementById(\'nfeHistModalGlobal\').remove()"><i class="ti ti-x"></i> Fechar</button></div><div class="nfe-hist-modal-body"><div class="nfe-hist-empty"><i class="ti ti-loader-2 spin"></i> Aguarde...</div></div></div>';
+  var old=document.getElementById('nfeHistModalGlobal');if(old)old.remove();document.body.appendChild(modal);modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+  _gasGetJsonp('nfeHistoricoDetalheAura','&chave='+encodeURIComponent(chave),60000).then(function(r){if(!document.getElementById('nfeHistModalGlobal'))return;if(!r||!r.ok){nfeHistoricoGeralDetalheErro_((r&&r.erro)||'Não foi possível abrir esta NF-e.');return;}nfeHistoricoGeralRenderDetalhe_(r);}).catch(function(){nfeHistoricoGeralDetalheErro_('Falha ao consultar os detalhes desta NF-e.');});
+}
+function nfeHistoricoGeralDetalheErro_(msg){var m=document.getElementById('nfeHistModalGlobal');if(!m)return;var b=m.querySelector('.nfe-hist-modal-body');if(b)b.innerHTML='<div class="nfe-hist-empty">'+nfeEsc_(msg)+'</div>';}
+function nfeHistoricoGeralRenderDetalhe_(r){
+  var modal=document.getElementById('nfeHistModalGlobal');if(!modal)return;var n=r.nota||{},itens=Array.isArray(r.itens)?r.itens:[],si=nfeHistStatusInfo_(n.status),nomeOp=nfeHistNomeOperador_(n.operador);
+  var title=modal.querySelector('.nfe-hist-modal-title'),sub=modal.querySelector('.nfe-hist-modal-sub');if(title)title.innerHTML='<i class="ti ti-file-invoice"></i> NF '+nfeEsc_(n.numero||'—')+' · '+nfeEsc_(n.fornecedor||'Fornecedor');if(sub)sub.innerHTML='Chave '+nfeEsc_(n.chave||'')+' · <span class="nfe-hist-status '+si.c+'">'+nfeEsc_(si.t)+'</span>';
+  var body=modal.querySelector('.nfe-hist-modal-body');if(!body)return;
+  var rows=itens.map(function(it){var nome=it.nomeBanco||it.nomeNFe||'Item da NF-e',lotes=Array.isArray(it.lotes)?it.lotes:[];var lotHtml=lotes.length?lotes.map(function(l){return '<div class="nfe-hist-lote"><div><strong>Validade</strong> '+nfeEsc_(nfeHistDataExibir_(l.validade))+'</div><div><strong>Qtd.</strong> '+nfeFmtQtd_(l.quantidade)+'</div><div></div></div>';}).join(''):'<div class="nfe-hist-no-lote">Sem lotes/validades localizados no histórico consolidado.</div>';return '<div class="nfe-hist-item"><div class="nfe-hist-item-hd"><div><div class="nfe-hist-item-name">'+nfeEsc_(nome)+'</div><div class="nfe-hist-item-nf">'+(it.nomeBanco&&it.nomeNFe&&it.nomeBanco!==it.nomeNFe?'NF-e: '+nfeEsc_(it.nomeNFe):'Item '+nfeEsc_(it.nItem||it.itemId||'—'))+'</div></div><div class="nfe-hist-item-cell"><span>EAN / Código</span><b>'+nfeEsc_(it.eanCanonico||it.ean||'—')+'</b></div><div class="nfe-hist-item-cell"><span>Setor</span><b>'+nfeEsc_(it.setor||'Outros')+'</b></div><div class="nfe-hist-item-cell"><span>Situação</span><b>'+nfeEsc_(it.gravado?(it.cadastrado?'Gravado':'Gravado · aguarda cadastro'):'Não gravado')+'</b></div></div><div class="nfe-hist-lotes">'+lotHtml+'</div></div>';}).join('');
+  body.innerHTML='<div class="nfe-hist-meta-grid">'
+    +'<div class="nfe-hist-meta"><span>Fornecedor</span><b>'+nfeEsc_(n.fornecedor||'—')+'</b></div><div class="nfe-hist-meta"><span>CNPJ</span><b>'+nfeEsc_(n.cnpj||'—')+'</b></div>'
+    +'<div class="nfe-hist-meta"><span>Emissão</span><b>'+nfeEsc_(nfeHistDataExibir_(n.emissao))+'</b></div><div class="nfe-hist-meta"><span>Conferida em</span><b>'+nfeEsc_(nfeHistDataExibir_(n.processadaEm))+'</b></div>'
+    +'<div class="nfe-hist-meta"><span>Recebido por</span><b>'+nfeEsc_(nomeOp)+'</b></div><div class="nfe-hist-meta"><span>E-mail registrado</span><b>'+nfeEsc_(n.operador||'—')+'</b></div>'
+    +'<div class="nfe-hist-meta"><span>Itens</span><b>'+Number(n.itens||itens.length||0)+'</b></div><div class="nfe-hist-meta"><span>Lotes</span><b>'+Number(n.lotes||0)+'</b></div></div>'
+    +'<div class="nfe-hist-readonly"><b>Histórico administrativo da AURA.</b> Esta visão reúne notas lançadas por todos os usuários e é somente para consulta; a autoria original da conferência permanece preservada.</div>'
+    +'<div class="nfe-hist-items">'+(rows||'<div class="nfe-hist-empty">Nenhum item encontrado para esta NF-e.</div>')+'</div>';
+}
 
 // ═══════════════════════════════════════════════════════════════
 // AÇÕES FORNECEDORES — produtos vencidos / evidências / notificação
