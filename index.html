@@ -11374,12 +11374,12 @@ function afPreviewDocumentoEnsure_(){
   ov.id='afDocPreviewOverlay';
   ov.style.cssText='display:none;position:fixed;inset:0;z-index:250000;background:rgba(0,0,0,.82);flex-direction:column';
   ov.innerHTML='<div style="height:58px;flex:0 0 58px;background:#171717;border-bottom:1px solid #3a3a3a;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 14px;color:#fff">'
-    +'<div style="min-width:0"><div id="afDocPreviewTitle" style="font-size:14px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Pré-visualização da notificação</div><div style="font-size:11px;color:#aaa">Revise o documento antes de imprimir ou salvar em PDF.</div></div>'
+    +'<div style="min-width:0"><div id="afDocPreviewTitle" style="font-size:14px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Pré-visualização da notificação</div><div style="font-size:11px;color:#aaa">Visualização A4 (210 × 297 mm). Revise antes de imprimir ou salvar em PDF.</div></div>'
     +'<div style="display:flex;gap:8px;flex-wrap:nowrap">'
     +'<button type="button" onclick="afImprimirPreviewDocumento_()" style="border:0;background:#d71920;color:#fff;border-radius:8px;padding:10px 14px;font-weight:900;cursor:pointer"><i class="ti ti-printer"></i> Imprimir / Salvar PDF</button>'
     +'<button type="button" onclick="afFecharPreviewDocumento_()" style="border:1px solid #555;background:#282828;color:#fff;border-radius:8px;padding:10px 14px;font-weight:800;cursor:pointer"><i class="ti ti-x"></i> Fechar</button>'
     +'</div></div>'
-    +'<div style="flex:1;min-height:0;padding:10px;background:#2a2a2a"><iframe id="afDocPreviewFrame" title="Pré-visualização do documento" style="width:100%;height:100%;border:0;background:#fff;border-radius:8px;box-shadow:0 8px 35px rgba(0,0,0,.35)"></iframe></div>';
+    +'<div style="flex:1;min-height:0;padding:10px;background:#2a2a2a"><iframe id="afDocPreviewFrame" title="Pré-visualização do documento" style="width:100%;height:100%;border:0;background:#303030;border-radius:8px;box-shadow:0 8px 35px rgba(0,0,0,.35)"></iframe></div>';
   document.body.appendChild(ov);
   return ov;
 }
@@ -11503,7 +11503,7 @@ async function afGerarDocumento_(a){
     if(rt.extracaoCompleta&&itens.length){
       anexoI='<div class="sec">Anexo I — Relação de produtos</div>'+fonte+afDocTabelaTelecon_(itens,total);
     }else if(telePaginas.length){
-      anexoI='<div class="annex-start"><div class="sec">Anexo I — Relação de produtos</div>'+fonte+'<p class="muted">Reprodução do relatório original utilizado como base desta notificação.</p>'
+      anexoI='<div class="annex-block"><div class="sec">Anexo I — Relação de produtos</div>'+fonte+'<p class="muted">Reprodução do relatório original utilizado como base desta notificação.</p>'
         +telePaginas.map(function(src,idx){return '<div class="tele-page"><div class="tele-page-label">Relatório Telecon · página '+(idx+1)+'</div><img src="'+src+'" alt="Relatório Telecon página '+(idx+1)+'"></div>';}).join('')+'</div>';
     }else if(itens.length){
       anexoI='<div class="sec">Anexo I — Relação de produtos</div>'+fonte+afDocTabelaTelecon_(itens,total)+'<p class="muted">O relatório original Telecon integra o dossiê desta notificação.</p>';
@@ -11532,7 +11532,7 @@ async function afGerarDocumento_(a){
     +'</div>';
 
   var html='<!doctype html><html><head><meta charset="utf-8"><title>'+afEsc_(a.numero||'Notificação')+'</title><style>'
-    +'@page{size:A4 portrait;margin:9mm}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;color:#202020;font-size:9.6px;line-height:1.34;margin:0;background:#fff}p{margin:4px 0}'
+    +'@page{size:A4 portrait;margin:0}*{box-sizing:border-box}html{background:#303030}body{font-family:Arial,Helvetica,sans-serif;color:#202020;font-size:9.6px;line-height:1.34;margin:0;background:#303030}p{margin:4px 0}.a4-stack{padding:10mm 0}.a4-page{width:210mm;min-height:297mm;margin:0 auto 10mm;background:#fff;padding:9mm;box-shadow:0 3mm 12mm rgba(0,0,0,.32);position:relative}.a4-page:last-child{margin-bottom:0}'
     +'.brand{border-bottom:3px solid #d71920;padding:2px 0 6px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:end}.brand .super{font-size:12.5px;font-weight:900;color:#d71920;letter-spacing:.01em}.brand .tag{font-size:7.2px;color:#666;margin-top:1px}'
     +'.title{text-align:center;margin:6px 0 7px}.title h1{font-size:15.2px;line-height:1.12;margin:0;font-weight:900}.title h2{font-size:8.8px;margin:3px 0 0;color:#555;font-weight:600}'
     +'.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:5px 0 6px}.cell{border:1px solid #cfcfcf;padding:5px 6px;min-height:38px}.cell b{display:block;font-size:6.6px;text-transform:uppercase;color:#666;margin-bottom:2px;letter-spacing:.02em}'
@@ -11541,10 +11541,8 @@ async function afGerarDocumento_(a){
     +'.object{font-size:9.7px;line-height:1.38}.prov{margin:3px 0 5px 18px;padding:0}.prov li{margin:2px 0;padding-left:1px}.prov li::marker{color:#d71920}.deadline{border:1px solid #d8d8d8;border-left:4px solid #d71920;background:#fafafa;border-radius:4px;padding:7px 8px;margin:6px 0;line-height:1.38}.deadline .deadline-title{display:block;font-weight:900;font-size:8.4px;text-transform:uppercase;margin-bottom:2px}.risk{margin-top:6px;padding:5px 7px;background:#f7f7f7;border-radius:4px}'
     +'table{width:100%;border-collapse:collapse;font-size:7.3px;line-height:1.16;page-break-inside:auto}thead{display:table-header-group}tfoot{display:table-row-group}tr{page-break-inside:avoid;page-break-after:auto}th{background:#ececec;border:1px solid #bbb;padding:2.7px;text-align:left}td{border:1px solid #ccc;padding:2.7px;vertical-align:top}.n{text-align:right;white-space:nowrap}.total{font-weight:900}'
     +'.source{border:1px solid #bbb;background:#fafafa;border-radius:5px;padding:5px;line-height:1.3}.source-clean{border-left:3px solid #d71920;padding:4px 7px;background:#fafafa;font-size:7.8px;margin:0 0 4px}.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-items:stretch}.photo{border:1px solid #cfcfcf;border-radius:3px;padding:4px;page-break-inside:avoid;display:flex;flex-direction:column;min-height:148px}.photo img{height:124px;width:auto;max-width:100%;object-fit:contain;background:#fafafa;display:block;margin:0 auto}.ph{height:124px;display:flex;align-items:center;justify-content:center;background:#eee;color:#777}.cap{font-size:7.1px;line-height:1.18;margin-top:4px}.muted{color:#6f6f6f}.annex-start{break-before:page;page-break-before:always}.tele-page{page-break-before:auto;page-break-inside:avoid;margin:4px 0 6px}.tele-page img{width:100%;height:auto;max-height:132mm;object-fit:contain;display:block;border:1px solid #bbb}.tele-page-label{font-size:6.6px;color:#777;margin-bottom:2px;text-align:right}.sign-wrap{page-break-inside:avoid;margin-top:7px}.sign{margin-top:14px;width:55%;border-top:1px solid #333;padding-top:4px;line-height:1.3}.foot{margin-top:8px;border-top:1px solid #ccc;padding-top:4px;color:#777;font-size:6.5px}'
-    +'.no-print{margin:0 0 12px;text-align:right}.no-print button{background:#d71920;color:#fff;border:0;border-radius:6px;padding:9px 14px;font-weight:bold;cursor:pointer}'
-    +'@media print{.no-print{display:none}.photo,.tele-page,.sign-wrap{break-inside:avoid}.annex-start{break-before:page;page-break-before:always}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
-    +'</style></head><body>'
-    +'<div class="no-print"><button onclick="window.print()">Imprimir / Salvar PDF</button></div>'
+    +'@media print{html,body{background:#fff!important}.a4-stack{padding:0}.a4-page{width:210mm;min-height:297mm;margin:0;padding:9mm;box-shadow:none;page-break-after:always;break-after:page}.a4-page:last-child{page-break-after:auto;break-after:auto}.photo,.tele-page,.sign-wrap{break-inside:avoid}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
+    +'</style></head><body><div class="a4-stack"><section class="a4-page a4-page-notice">'
     +'<div class="brand"><div><div class="super">SUPERMERCADO BOAS COMPRAS</div><div class="tag">o super para toda a família</div></div><div class="tag">AURA Vencimentos · Dossiê do Fornecedor</div></div>'
     +'<div class="title"><h1>NOTIFICAÇÃO FORMAL — PRODUTOS VENCIDOS EM ESTOQUE</h1><h2>Solicitação de Troca, Recolhimento e Crédito/Devolução de Valores</h2></div>'
     +'<div class="meta"><div class="cell"><b>Nº do documento</b>'+afEsc_(a.numero||'—')+'</div><div class="cell"><b>Data de emissão</b>'+afFmtData_(a.dataEmissao)+'</div><div class="cell"><b>Loja / Unidade</b>'+afEsc_(a.loja||'Supermercado Boas Compras')+'</div></div>'
@@ -11555,11 +11553,12 @@ async function afGerarDocumento_(a){
     +'<div class="deadline"><span class="deadline-title">Prazo para resposta: '+afFmtData_(a.prazoResposta)+'</span>Não havendo previsão legal específica que fixe prazo para o recolhimento de mercadorias vencidas entre fornecedor e estabelecimento comercial (relação diversa da tutelada pelo Código de Defesa do Consumidor em relação ao consumidor final), esta loja adota, por analogia ao prazo de sanação de vícios previsto no art. 18, §1º da Lei nº 8.078/90 (Código de Defesa do Consumidor), o prazo comercial de <b>'+afEsc_(a.prazoDiasUteis||10)+' dias úteis</b>, contados do recebimento desta notificação, para resposta e regularização das providências solicitadas.</div>'
     +'<p class="risk">Ressaltamos que a manutenção de produtos vencidos em depósito representa risco à saúde pública e infração sanitária passível de autuação por órgãos de vigilância, razão pela qual solicitamos atenção e retorno dentro do prazo estipulado.</p>'
     +(a.observacoes?'<p><b>Observações:</b> '+afEsc_(a.observacoes)+'</p>':'')
+    +'</section><section class="a4-page a4-page-annex">'
     +anexoI
     +'<div class="sec">Anexo II — Evidências fotográficas</div><p class="muted">Registros fotográficos que acompanham esta notificação.</p><div class="photos">'+imgHtml+'</div>'
     +'<div class="sign-wrap"><div class="sec">Assinatura</div><div class="sign">'+afEsc_(assinatura.nome)+'<br>'+afEsc_(assinatura.cargo)+'<br>Supermercado Boas Compras</div></div>'
     +'<div class="foot">Documento gerado pelo sistema AURA Vencimentos — Supermercado Boas Compras · '+new Date().toLocaleString('pt-BR')+'</div>'
-    +'</body></html>';
+    +'</section></div></body></html>';
   afMostrarPreviewDocumento_(html,a.numero||'Notificação');
   }catch(e){
     console.error('[AURA] Falha ao montar notificação:',e);
@@ -11571,7 +11570,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.68-dossie-relatorio-profissional';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.69-dossie-a4-real';
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
