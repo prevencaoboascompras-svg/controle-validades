@@ -11571,7 +11571,7 @@ async function afGerarDocumento_(a){
     +'<div class="sec">Destinatário</div><div class="dest">'+dest+'</div>'
     +'<div class="sec">Objeto da notificação</div><p class="object">'+afEsc_(afDocTextoSituacao_(a))+'</p>'
     +'<div class="sec">Providências solicitadas</div><p>Solicitamos a adoção das seguintes providências em relação aos itens '+afEsc_(fonteTexto)+':</p><ul class="prov">'+prov.map(function(x){return '<li>'+afEsc_(x)+'</li>';}).join('')+'</ul>'
-    +'<div class="deadline"><span class="deadline-title">Prazo para resposta: '+afFmtData_(a.prazoResposta)+'</span>Não havendo previsão legal específica que fixe prazo para o recolhimento de mercadorias vencidas entre fornecedor e estabelecimento comercial (relação diversa da tutelada pelo Código de Defesa do Consumidor em relação ao consumidor final), esta loja adota, por analogia ao prazo de sanação de vícios previsto no art. 18, §1º da Lei nº 8.078/90 (Código de Defesa do Consumidor), o prazo comercial de <b>'+afEsc_(a.prazoDiasUteis||10)+' dias úteis</b>, contados do recebimento desta notificação, para resposta e regularização das providências solicitadas.</div>'
+    +'<div class="deadline"><span class="deadline-title">Prazo para resposta: '+afFmtData_(a.prazoResposta)+'</span>Tratando-se de relação empresarial B2B, esta notificação é formulada no âmbito da relação contratual privada entre as partes, observando-se a liberdade contratual, a alocação de riscos pactuada e os deveres de probidade e boa-fé previstos nos arts. 421, 421-A e 422 da Lei nº 10.406/2002 (Código Civil), sem prejuízo das condições comerciais e contratuais vigentes entre as partes. Para fins operacionais desta notificação, solicita-se manifestação e regularização no prazo comercial de <b>'+afEsc_(a.prazoDiasUteis||10)+' dias úteis</b>, contados do recebimento deste documento.</div>'
     +'<p class="risk">Ressaltamos que a manutenção de produtos vencidos em depósito representa risco à saúde pública e infração sanitária passível de autuação por órgãos de vigilância, razão pela qual solicitamos atenção e retorno dentro do prazo estipulado.</p>'
     +(a.observacoes?'<p><b>Observações:</b> '+afEsc_(a.observacoes)+'</p>':'')
     +'<div class="doc-index"><b>Documentos que integram esta notificação</b><br>Anexo I — '+(tele?'Relatório de Trocas Telecon'+(resumoRegistros?' ('+afEsc_(resumoRegistros)+' registros)':''):'Relação de produtos vencidos')+' · Anexo II — '+afEsc_(evs.length)+' evidência(s) fotográfica(s).</div>'
@@ -11592,7 +11592,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.70-dossie-a4-nome-compactacao';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.71-dossie-a4-nome-compactacao';
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
