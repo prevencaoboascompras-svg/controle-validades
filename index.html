@@ -11271,7 +11271,7 @@ function nfeColetarPayload_(){
     var control=document.getElementById('nfeControlar_'+idx),controlar=!!(control&&control.checked);
     var ean=it.eanAura||nfeDigitos_((document.getElementById('nfeEan_'+idx)||{}).value||'');
     var decFinal=String(it.conversaoDecisao||'').toLowerCase();
-    var qComFinal=Number(it.qCom)||0,fatorFinal=Number(it.fatorConversaoSugerido||it.fatorConversao||1)||1;
+    var qComFinal=Number(it.qCom)||0,fatorAplicado=Number(it.fatorConversao)||0,fatorSugerido=Number(it.fatorConversaoSugerido)||0,fatorFinal=(decFinal==='converter'?(Math.abs(fatorAplicado-1)>0.000001&&fatorAplicado>0?fatorAplicado:(Math.abs(fatorSugerido-1)>0.000001&&fatorSugerido>0?fatorSugerido:(fatorSugerido>0?fatorSugerido:(fatorAplicado>0?fatorAplicado:1)))):(fatorSugerido>0?fatorSugerido:(fatorAplicado>0?fatorAplicado:1)));
     var qtd=Number(it.qtdEstoque||it.qCom||0)||0;
     if(decFinal==='converter'&&qComFinal>0&&fatorFinal>0)qtd=qComFinal*fatorFinal;
     else if(decFinal==='nao_converter'&&qComFinal>0)qtd=qComFinal;
@@ -11362,12 +11362,12 @@ function nfeHistoricoGeralCarregar_(forcar){
   _nfeHistGeralCarregando_=true;
   nfeHistoricoGeralApi_('nfeHistoricoTodos','&limite=1000',{limite:1000},90000).then(function(r){
     _nfeHistGeralCarregando_=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
-    if(!r||!r.ok){if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Não foi possível carregar o histórico: '+nfeEsc_((r&&r.erro)||'verifique se o Code.gs v6.73 foi implantado')+'</div></td></tr>';return;}
+    if(!r||!r.ok){if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Não foi possível carregar o histórico: '+nfeEsc_((r&&r.erro)||'verifique se o Code.gs v6.74 foi implantado')+'</div></td></tr>';return;}
     _nfeHistGeralDados_=Array.isArray(r.notas)?r.notas:[];_nfeHistGeralFontes_=r.fontes||null;_nfeHistGeralCarregado_=true;
     nfeHistoricoGeralPopularFiltros_();nfeHistoricoGeralRender_();
   }).catch(function(){
     _nfeHistGeralCarregando_=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
-    if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Falha ao consultar o histórico. Confirme a implantação do Code.gs v6.73.</div></td></tr>';
+    if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Falha ao consultar o histórico. Confirme a implantação do Code.gs v6.74.</div></td></tr>';
   });
 }
 
@@ -11408,14 +11408,28 @@ function nfeHistoricoGeralRenderDetalhe_(r){
   var modal=document.getElementById('nfeHistModalGlobal');if(!modal)return;var n=r.nota||{},itens=Array.isArray(r.itens)?r.itens:[],si=nfeHistStatusInfo_(n.status),nomeOp=nfeHistNomeOperador_(n.operador);
   var title=modal.querySelector('.nfe-hist-modal-title'),sub=modal.querySelector('.nfe-hist-modal-sub');if(title)title.innerHTML='<i class="ti ti-file-invoice"></i> NF '+nfeEsc_(n.numero||'—')+' · '+nfeEsc_(n.fornecedor||'Fornecedor');if(sub)sub.innerHTML='Chave '+nfeEsc_(n.chave||'')+' · <span class="nfe-hist-status '+si.c+'">'+nfeEsc_(si.t)+'</span>';
   var body=modal.querySelector('.nfe-hist-modal-body');if(!body)return;
-  var rows=itens.map(function(it){var nome=it.nomeBanco||it.nomeNFe||'Item da NF-e',lotes=Array.isArray(it.lotes)?it.lotes:[];var lotHtml=lotes.length?lotes.map(function(l){return '<div class="nfe-hist-lote"><div><strong>Validade</strong> '+nfeEsc_(nfeHistDataExibir_(l.validade))+'</div><div><strong>Qtd.</strong> '+nfeFmtQtd_(l.quantidade)+'</div><div></div></div>';}).join(''):'<div class="nfe-hist-no-lote">Sem lotes/validades localizados no histórico consolidado.</div>';return '<div class="nfe-hist-item"><div class="nfe-hist-item-hd"><div><div class="nfe-hist-item-name">'+nfeEsc_(nome)+'</div><div class="nfe-hist-item-nf">'+(it.nomeBanco&&it.nomeNFe&&it.nomeBanco!==it.nomeNFe?'NF-e: '+nfeEsc_(it.nomeNFe):'Item '+nfeEsc_(it.nItem||it.itemId||'—'))+'</div></div><div class="nfe-hist-item-cell"><span>EAN / Código</span><b>'+nfeEsc_(it.eanCanonico||it.ean||'—')+'</b></div><div class="nfe-hist-item-cell"><span>Setor</span><b>'+nfeEsc_(it.setor||'Outros')+'</b></div><div class="nfe-hist-item-cell"><span>Situação</span><b>'+nfeEsc_(it.gravado?(it.cadastrado?'Gravado':'Gravado · aguarda cadastro'):'Não gravado')+'</b></div></div><div class="nfe-hist-lotes">'+lotHtml+'</div></div>';}).join('');
-  body.innerHTML='<div class="nfe-hist-meta-grid">'
+  var rows=itens.map(function(it){var nome=it.nomeBanco||it.nomeNFe||'Item da NF-e',lotes=Array.isArray(it.lotes)?it.lotes:[];var lotHtml=lotes.length?lotes.map(function(l){return '<div class="nfe-hist-lote"><div><strong>Validade</strong> '+nfeEsc_(nfeHistDataExibir_(l.validade))+'</div><div><strong>Qtd.</strong> '+nfeFmtQtd_(l.quantidade)+'</div><div></div></div>';}).join(''):'<div class="nfe-hist-no-lote">Sem lotes/validades localizados no histórico consolidado.</div>';var conv=String(it.conversaoDecisao||'').toLowerCase()==='converter'?('<div class="nfe-hist-item-nf" style="color:#1D9E75;font-weight:800;margin-top:3px">Conversão registrada: '+nfeEsc_(it.unidadeNFe||'emb.')+' × '+nfeFmtQtd_(it.fatorConversao||1)+' → '+nfeEsc_(it.unidadeAura||it.unidadeBanco||'UN')+'</div>'):'';return '<div class="nfe-hist-item"><div class="nfe-hist-item-hd"><div><div class="nfe-hist-item-name">'+nfeEsc_(nome)+'</div><div class="nfe-hist-item-nf">'+(it.nomeBanco&&it.nomeNFe&&it.nomeBanco!==it.nomeNFe?'NF-e: '+nfeEsc_(it.nomeNFe):'Item '+nfeEsc_(it.nItem||it.itemId||'—'))+'</div>'+conv+'</div><div class="nfe-hist-item-cell"><span>EAN / Código</span><b>'+nfeEsc_(it.eanCanonico||it.ean||'—')+'</b></div><div class="nfe-hist-item-cell"><span>Setor</span><b>'+nfeEsc_(it.setor||'Outros')+'</b></div><div class="nfe-hist-item-cell"><span>Situação</span><b style="color:'+(it.gravado?'#1D9E75':'#E24B4A')+'">'+nfeEsc_(it.gravado?(it.cadastrado?'Gravado':'Gravado · aguarda cadastro'):'Pendente · não gravado')+'</b></div></div><div class="nfe-hist-lotes">'+lotHtml+'</div></div>';}).join('');
+  var podeRetomar=['PENDENTE_ITENS','PARCIAL'].indexOf(String(n.status||'').toUpperCase())>=0;
+  body.innerHTML=(podeRetomar?'<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btn-green" onclick="nfeHistoricoRetomarPendente_(\''+nfeEsc_(n.chave||'')+'\')"><i class="ti ti-player-play"></i> Retomar conferência pendente</button></div>':'')+'<div class="nfe-hist-meta-grid">'
     +'<div class="nfe-hist-meta"><span>Fornecedor</span><b>'+nfeEsc_(n.fornecedor||'—')+'</b></div><div class="nfe-hist-meta"><span>CNPJ</span><b>'+nfeEsc_(n.cnpj||'—')+'</b></div>'
     +'<div class="nfe-hist-meta"><span>Emissão</span><b>'+nfeEsc_(nfeHistDataExibir_(n.emissao))+'</b></div><div class="nfe-hist-meta"><span>Conferida em</span><b>'+nfeEsc_(nfeHistDataExibir_(n.processadaEm))+'</b></div>'
     +'<div class="nfe-hist-meta"><span>Recebido por</span><b>'+nfeEsc_(nomeOp)+'</b></div><div class="nfe-hist-meta"><span>E-mail registrado</span><b>'+nfeEsc_(n.operador||'—')+'</b></div>'
     +'<div class="nfe-hist-meta"><span>Itens</span><b>'+Number(n.itens||itens.length||0)+'</b></div><div class="nfe-hist-meta"><span>Lotes</span><b>'+Number(n.lotes||0)+'</b></div></div>'
     +'<div class="nfe-hist-readonly"><b>Histórico administrativo da AURA.</b> Esta visão reúne notas lançadas por todos os usuários e é somente para consulta; a autoria original da conferência permanece preservada.</div>'
     +'<div class="nfe-hist-items">'+(rows||'<div class="nfe-hist-empty">Nenhum item encontrado para esta NF-e.</div>')+'</div>';
+}
+
+
+function nfeHistoricoRetomarPendente_(chave){
+  chave=nfeDigitos_(chave);if(chave.length!==44)return;
+  var btn=document.querySelector('#nfeHistModalGlobal .btn-green');if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Restaurando...';}
+  nfeHistoricoGeralApi_('nfeRetomarPendente','&chave='+encodeURIComponent(chave),{chave:chave},90000).then(function(r){
+    if(!r||!r.ok||!r.nota){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-player-play"></i> Retomar conferência pendente';}mostrarToast((r&&r.erro)||'Não foi possível restaurar a conferência.','err');return;}
+    var m=document.getElementById('nfeHistModalGlobal');if(m)m.remove();_nfeNota=r.nota;nfePrepararItens_(_nfeNota);nfeSalvarRascunho_();nfeRenderNota_();nfeRenderOperadores_();
+    var chaveEl=document.getElementById('nfeChave');if(chaveEl)chaveEl.value=_nfeNota.chave||'';
+    nfeStatus_('ok','Conferência pendente restaurada do servidor. Revise os itens marcados, confirme as conversões e grave novamente.');
+    var box=document.getElementById('nfeNotaBox');if(box)box.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(nfeCarregarFotosPendentes_,0);
+  }).catch(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-player-play"></i> Retomar conferência pendente';}mostrarToast('Falha de conexão ao restaurar a NF-e.','err');});
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -11738,7 +11752,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.73-historico-nfe-global-robusto';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.74-historico-nfe-global-robusto';
 var currentTabName='dashboard';
 function goTab(name){
   currentTabName=name;
