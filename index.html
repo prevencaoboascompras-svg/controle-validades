@@ -149,6 +149,16 @@ html,body{overflow-x:hidden;max-width:100%}
 .ecard-add{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:1px dashed var(--bds);border-radius:var(--rl);width:100%;background:none;color:var(--tx2);font-size:13px;cursor:pointer;transition:all .15s}
 .ecard-add:hover{background:var(--bg2);color:var(--tx);border-color:var(--green)}
 .sec{display:none}.sec.active{display:block}
+/* v6.77 — Estoque + Validades unificados */
+.estoque-unificado-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px;padding:14px 16px;border:1px solid var(--bd);border-radius:var(--rl);background:var(--surface)}
+.estoque-unificado-title{font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.estoque-unificado-sub{font-size:11px;color:var(--tx2);margin-top:3px;line-height:1.45}
+.estoque-modo-toggle{display:inline-flex;gap:4px;padding:4px;background:var(--bg2);border:1px solid var(--bd);border-radius:10px}
+.estoque-modo-toggle button{border:0;background:transparent;color:var(--tx2);font-size:12px;font-weight:700;padding:8px 12px;border-radius:7px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.estoque-modo-toggle button.active{background:var(--green);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.16)}
+#estoquePainelProdutos,#estoquePainelValidades{min-width:0}
+@media(max-width:700px){.estoque-unificado-head{align-items:stretch}.estoque-modo-toggle{width:100%;display:grid;grid-template-columns:1fr 1fr}.estoque-modo-toggle button{justify-content:center;padding:9px 7px;font-size:11px}}
+
 .filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .filters select,.filters input[type=text]{font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none}
 .filters input[type=text]{min-width:220px}
@@ -2610,15 +2620,11 @@ function tentarLogin() {
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span>Dashboard</span>
     </button>
-    <button onclick="auraNav(this,'validades')">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span>Validades</span>
-    </button>
     <button onclick="auraNav(this,'nfe')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
       <span>Conferência NF-e</span>
     </button>
-    <button onclick="auraNav(this,'estoque')">
+    <button id="navEstoque" onclick="auraNav(this,'estoque')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       <span>Estoque</span>
     </button>
@@ -2764,7 +2770,7 @@ function toggleTheme() {
 
   <div class="metrics" id="metrics" style="display:none"></div>
   <div class="tabs">
-    <div class="tab active" onclick="goTab('validades')"><i class="ti ti-calendar-event"></i> Validades</div>
+    <div class="tab active" onclick="goTab('estoque')"><i class="ti ti-package"></i> Estoque</div>
     <div class="tab" onclick="goTab('nfe')"><i class="ti ti-file-invoice"></i> Conferência NF-e</div>
     <div class="tab" onclick="goTab('bossvision')"><i class="ti ti-eye"></i> Boss Vision</div>
     <div class="tab" onclick="goTab('relatorio')"><i class="ti ti-chart-bar"></i> Relatório <span id="negBadge" style="display:none;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px">0</span></div>
@@ -2838,45 +2844,6 @@ function toggleTheme() {
 
   </div>
 
-  <div id="sec-validades" class="sec">
-    <div class="filters">
-      <select id="fSetor" onchange="setorAtivo=this.value;_multiStatusFilter=null;renderTable();atualizarSetorGridDestaque()" style="display:none">
-        <option value="">Todos os setores</option>
-        <option value="">Todos os setores</option>
-<option>Açougue</option>
-<option>Bazar</option>
-<option>Bebidas</option>
-<option>Congelados</option>
-<option>Frios</option>
-<option>Horti</option>
-<option>Laticínios</option>
-<option>Limpeza</option>
-<option>Outros</option>
-<option>Padaria</option>
-<option>Perfumaria</option>
-<option>Pet</option>
-<option>Pilhas/Baterias</option>
-<option>Seca</option>
-<option>Seca doce</option>
-      </select>
-      <select id="fStatus" onchange="_multiStatusFilter=null;renderTable()" style="display:none">
-        <option value="">Todos os status</option>
-        <option value="vencido">Vencido</option>
-        <option value="critico">Critico (3d)</option>
-        <option value="urgente">Urgente (7d)</option>
-        <option value="atencao">Atencao (15d)</option>
-        <option value="ok">OK</option>
-        <option value="aguardando">Aguardando</option>
-      </select>
-      <input type="text" id="fBusca" placeholder="Buscar produto ou código..." oninput="renderTable()">
-      <button type="button" class="btn-scan" onclick="abrirScannerAura('fBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);cursor:pointer;white-space:nowrap">
-        <input type="checkbox" id="chkMostrarResolvidos" onchange="renderTable()" style="accent-color:var(--green)" checked>
-        Mostrar resolvidos
-      </label>
-    </div>
-    <div class="val-grid" id="valGrid"></div>
-  </div>
   <div id="sec-promocoes" class="sec">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px">
       <div>
@@ -3461,7 +3428,7 @@ function toggleTheme() {
               <option value="quebras">Quebras</option>
               <option value="producao">Produção Padaria</option>
               <option value="consumo">Uso e consumo</option>
-              <option value="validades">Validades / estoque cadastrado</option>
+              <option value="validades">Estoque / validades cadastradas</option>
             </select>
           </div>
 
@@ -4254,6 +4221,17 @@ function toggleTheme() {
     </div>
   </div>
   <div id="sec-estoque" class="sec">
+    <div class="estoque-unificado-head">
+      <div>
+        <div class="estoque-unificado-title"><i class="ti ti-package" style="color:var(--blue)"></i> Estoque e Validades</div>
+        <div class="estoque-unificado-sub">Uma única área para consultar estoque, lotes e vencimentos. Alterne a visão sem sair da aba.</div>
+      </div>
+      <div class="estoque-modo-toggle">
+        <button type="button" id="estoqueModoProdutoBtn" class="active" onclick="setEstoqueModo('produto')"><i class="ti ti-packages"></i> Por produto</button>
+        <button type="button" id="estoqueModoValidadeBtn" onclick="setEstoqueModo('validades')"><i class="ti ti-calendar-due"></i> Por validade / lote</button>
+      </div>
+    </div>
+    <div id="estoquePainelProdutos">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
       <div>
         <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-package" style="color:var(--blue)"></i> Estoque por produto</div>
@@ -4284,6 +4262,52 @@ function toggleTheme() {
       </div>
     </div>
     <div id="estoqueGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
+    </div>
+    <div id="estoquePainelValidades" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin:2px 0 12px">
+        <div>
+          <div style="font-size:14px;font-weight:700">Validades por lote</div>
+          <div style="font-size:11px;color:var(--tx2);margin-top:2px">Visão individual de cada lote, com vencimento, quantidade, responsável pela coleta, promoção, encarte e resolução.</div>
+        </div>
+      </div>
+    <div class="filters">
+      <select id="fSetor" onchange="setorAtivo=this.value;_multiStatusFilter=null;renderTable();atualizarSetorGridDestaque()" style="display:none">
+        <option value="">Todos os setores</option>
+        <option value="">Todos os setores</option>
+<option>Açougue</option>
+<option>Bazar</option>
+<option>Bebidas</option>
+<option>Congelados</option>
+<option>Frios</option>
+<option>Horti</option>
+<option>Laticínios</option>
+<option>Limpeza</option>
+<option>Outros</option>
+<option>Padaria</option>
+<option>Perfumaria</option>
+<option>Pet</option>
+<option>Pilhas/Baterias</option>
+<option>Seca</option>
+<option>Seca doce</option>
+      </select>
+      <select id="fStatus" onchange="_multiStatusFilter=null;renderTable()" style="display:none">
+        <option value="">Todos os status</option>
+        <option value="vencido">Vencido</option>
+        <option value="critico">Critico (3d)</option>
+        <option value="urgente">Urgente (7d)</option>
+        <option value="atencao">Atencao (15d)</option>
+        <option value="ok">OK</option>
+        <option value="aguardando">Aguardando</option>
+      </select>
+      <input type="text" id="fBusca" placeholder="Buscar produto ou código..." oninput="renderTable()">
+      <button type="button" class="btn-scan" onclick="abrirScannerAura('fBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);cursor:pointer;white-space:nowrap">
+        <input type="checkbox" id="chkMostrarResolvidos" onchange="renderTable()" style="accent-color:var(--green)" checked>
+        Mostrar resolvidos
+      </label>
+    </div>
+    <div class="val-grid" id="valGrid"></div>
+    </div>
   </div>
   <div id="sec-tarefas" class="sec">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
@@ -6463,7 +6487,7 @@ function filtrarSetor(setor){
   // re-renderiza a aba em que o usuário está agora, sem trocar de aba
   switch(currentTabName){
     case 'validades': renderTable(); break;
-    case 'estoque': renderEstoque(); break;
+    case 'estoque': renderEstoque(); renderTable(); break;
     case 'promocoes': renderPromos(); break;
     case 'encartes':
       renderEncartesAtivos();
@@ -6478,8 +6502,10 @@ function filtrarSetor(setor){
       if(setorAtivo)mostrarToast('Modalidades não filtra por setor ainda.','warn');
       break;
     default:
-      // dashboard e ajuda não têm listagem filtrável: manda para Validades
-      auraNav(document.querySelector('#auraNav button:nth-child(2)'),'validades');
+      // Dashboard/ajuda: abre a área unificada de Estoque.
+      setEstoqueModo('produto');
+      auraNav(document.getElementById('navEstoque'),'estoque');
+      renderEstoque();
       renderTable();
   }
   atualizarSetorGridDestaque();
@@ -6593,7 +6619,7 @@ function filtrarMetrica(filt){
   document.getElementById('fSetor').value='';
   sel.value=filt;
   renderTable();
-  var sec=document.getElementById('sec-validades');
+  var sec=document.getElementById('estoquePainelValidades');
   if(sec)setTimeout(function(){var tbl=sec.querySelector('.val-grid');if(tbl)tbl.scrollIntoView({behavior:'smooth',block:'start'});},150);
 }
 
@@ -9127,7 +9153,7 @@ function bossRxAtividades_(){
   if(typeof products!=='undefined'&&Array.isArray(products)){
     products.forEach(function(p){
       var cod=bossRxCod_(p.cod);
-      bossRxAdd_(arr,'Validades / estoque cadastrado',String(p.setor||'loja').toLowerCase(),{
+      bossRxAdd_(arr,'Estoque / validades cadastradas',String(p.setor||'loja').toLowerCase(),{
         cod:cod,nome:p.nome,qtde:(typeof qtdeEfetiva==='function'?qtdeEfetiva(p.qtde):p.qtde),
         custo:(p.custo||(cod&&typeof bancoCusto!=='undefined'?bancoCusto[cod]:0)),
         unidade:p.unidade||'',data:p.validade||''
@@ -9743,7 +9769,7 @@ function bossRxRenderDetalhe_(sel){
     +(r.consolidado?('<div class="boss-rx-section-title">Comparação dos códigos que formam este produto</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Código</th><th>Produto</th><th>Un.</th><th>Compra qtd</th><th>Compra R$</th><th>Venda qtd</th><th>Venda R$</th><th>Quebra R$</th><th>% vendas</th></tr></thead><tbody>'+comparacaoRows+'</tbody></table></div>'):'')
     +'<div class="boss-rx-section-title">Movimentações deste produto no período</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Origem</th><th>Data/NF</th><th>Fornecedor</th><th>Qtd</th><th>Un.</th><th>Custo unit.</th><th>Valor</th></tr></thead><tbody>'+(rows||'<tr><td colspan="7">Nenhuma movimentação encontrada para este produto.</td></tr>')+'</tbody></table></div>'
     +(movimentos?'<div class="boss-rx-section-title">Histórico / variação de custo deste produto</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Data</th><th>Origem</th><th>Custo anterior</th><th>Custo atual</th><th>Variação</th></tr></thead><tbody>'+movimentos+'</tbody></table></div>':'')
-    +(validadeRows?'<div class="boss-rx-section-title">Validades / estoque cadastrado deste produto</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Validade</th><th>Qtd</th><th>Un.</th><th>Custo</th></tr></thead><tbody>'+validadeRows+'</tbody></table></div>':'')
+    +(validadeRows?'<div class="boss-rx-section-title">Estoque / validades cadastradas deste produto</div><div class="boss-rx-table-wrap"><table class="boss-rx-table"><thead><tr><th>Validade</th><th>Qtd</th><th>Un.</th><th>Custo</th></tr></thead><tbody>'+validadeRows+'</tbody></table></div>':'')
     +'<div class="boss-rx-notes"><strong>Leitura gerencial do produto:</strong> todos os blocos acima foram filtrados para o item selecionado. A sugestão de compra é projeção simples do ritmo de venda e do estoque cadastrado; confirme estoque físico, pedidos em trânsito e sazonalidade antes de comprar. Margens são estimativas gerenciais e não substituem contabilidade ou inventário físico.</div>';
 
   box.classList.add('show');
@@ -11846,9 +11872,31 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.74-historico-nfe-global-robusto';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.77-estoque-validades-unificados';
 var currentTabName='dashboard';
+var estoqueModoAtual='produto';
+function setEstoqueModo(modo,semRender){
+  modo=modo==='validades'?'validades':'produto';
+  estoqueModoAtual=modo;
+  var pp=document.getElementById('estoquePainelProdutos'),pv=document.getElementById('estoquePainelValidades');
+  if(pp)pp.style.display=modo==='produto'?'':'none';
+  if(pv)pv.style.display=modo==='validades'?'':'none';
+  var bp=document.getElementById('estoqueModoProdutoBtn'),bv=document.getElementById('estoqueModoValidadeBtn');
+  if(bp)bp.classList.toggle('active',modo==='produto');
+  if(bv)bv.classList.toggle('active',modo==='validades');
+  var fs=document.getElementById('fSetor'),es=document.getElementById('estoqueSetor');
+  if(fs)fs.value=setorAtivo||'';
+  if(es)es.value=setorAtivo||'';
+  if(!semRender){if(modo==='validades')renderTable();else renderEstoque();}
+}
 function goTab(name){
+  var solicitado=name;
+  if(name==='validades'){
+    name='estoque';
+    setEstoqueModo('validades',true);
+    var navE=document.getElementById('navEstoque');
+    if(navE){document.querySelectorAll('#auraNav button').forEach(function(x){x.classList.remove('active');});navE.classList.add('active');}
+  }
   currentTabName=name;
   document.querySelectorAll('.tab').forEach(function(t){
     var oc=t.getAttribute('onclick')||'';
@@ -11878,11 +11926,12 @@ function goTab(name){
   if(name==='cobertura')cfCarregar(false);
   if(name==='acoesfornecedores')afCarregar(false);
   if(name==='dashboard')renderDashboard();
-  if(name==='estoque')renderEstoque();
+  if(name==='estoque'){if(estoqueModoAtual==='validades')renderTable();else renderEstoque();}
   if(name==='tarefas'){renderTarefas();sincronizarTarefasCompleto();}
   if(name==='colaboradores'){colabAdminCarregar(false);}
 }
-function refresh(){renderMetrics();renderTable();atualizarNegBadge();renderDashboard();if(typeof bossAtualizarVencidosAura==='function')bossAtualizarVencidosAura();if(typeof afRenderVencidos_==='function')afRenderVencidos_();}
+setTimeout(function(){try{setEstoqueModo(estoqueModoAtual,true);}catch(e){}},0);
+function refresh(){renderMetrics();renderTable();renderEstoque();atualizarNegBadge();renderDashboard();if(typeof bossAtualizarVencidosAura==='function')bossAtualizarVencidosAura();if(typeof afRenderVencidos_==='function')afRenderVencidos_();}
 
 // ── Encartes Ativos ──────────────────────────────────────────────────────────
 var ENC_KEY='boascompras_encartes_ativos';
