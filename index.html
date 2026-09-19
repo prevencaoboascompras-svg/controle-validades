@@ -4874,8 +4874,43 @@ function toggleTheme() {
       </div>
       <div id="tarefaValidadeWrap" style="display:none">
         <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Lote (validade)</label>
-        <select id="tarefaValidade" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none"></select>
+        <select id="tarefaValidade" onchange="tarefaAtualizarComercial_()" style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none"></select>
       </div>
+
+      <div id="tarefaComercialWrap" style="display:none;border:1px solid color-mix(in srgb,var(--green) 45%,var(--bds));border-radius:var(--rl);padding:12px;background:color-mix(in srgb,var(--green) 5%,var(--bg2))">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+          <div><div style="font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.05em"><i class="ti ti-cash"></i> Preço da ação</div><div style="font-size:10.5px;color:var(--tx2);margin-top:2px">Mesmo cálculo usado no gerador de encarte: custo, preço normal, desconto e margem.</div></div>
+          <div id="tarefaQtdRefBadge" style="padding:5px 9px;border:1px solid var(--bds);border-radius:8px;font-size:11px;font-weight:800;color:var(--tx)">0 un.</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px">
+          <div class="rel-card-sm" style="padding:8px"><div style="font-size:9px;color:var(--tx2);text-transform:uppercase">Custo gerencial</div><div id="tarefaCustoInfo" style="font-size:15px;font-weight:800;margin-top:2px">—</div></div>
+          <div class="rel-card-sm" style="padding:8px"><div style="font-size:9px;color:var(--tx2);text-transform:uppercase">Venda normal</div><div id="tarefaVendaInfo" style="font-size:15px;font-weight:800;margin-top:2px">—</div></div>
+          <div class="rel-card-sm" style="padding:8px"><div style="font-size:9px;color:var(--tx2);text-transform:uppercase">Sugestão AURA</div><div id="tarefaSugestaoInfo" style="font-size:15px;font-weight:800;color:var(--green);margin-top:2px">—</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);gap:8px;align-items:end">
+          <div>
+            <label style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;display:block;margin-bottom:4px">Preço que será praticado</label>
+            <div style="display:flex;gap:6px"><input id="tarefaPrecoAcao" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" oninput="tarefaAtualizarComercial_(true)" style="flex:1;font-size:15px;font-weight:800;padding:8px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none"><button type="button" class="btn btn-sm" onclick="tarefaUsarPrecoSugerido_()" title="Usar a mesma sugestão inicial do gerador de encarte">Usar sugerido</button></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
+            <div class="rel-card-sm" style="padding:7px;text-align:center"><div style="font-size:8.5px;color:var(--tx2);text-transform:uppercase">Margem</div><div id="tarefaMargemInfo" style="font-size:13px;font-weight:800">—</div></div>
+            <div class="rel-card-sm" style="padding:7px;text-align:center"><div style="font-size:8.5px;color:var(--tx2);text-transform:uppercase">Desconto</div><div id="tarefaDescontoInfo" style="font-size:13px;font-weight:800">—</div></div>
+          </div>
+        </div>
+        <div id="tarefaPrecoAlerta" style="display:none;margin-top:7px;padding:7px 9px;border-radius:7px;font-size:10.5px;font-weight:650"></div>
+
+        <div style="margin-top:12px;padding-top:11px;border-top:1px solid var(--bds)">
+          <div style="font-size:10px;font-weight:800;color:var(--tx2);text-transform:uppercase;margin-bottom:6px">Como sinalizar este produto?</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+            <button type="button" id="tarefaMatDecidir" class="btn btn-sm" onclick="tarefaSelecionarMaterial_('DECIDIR')"><i class="ti ti-help"></i> Decidir depois</button>
+            <button type="button" id="tarefaMatEtiqueta" class="btn btn-sm" onclick="tarefaSelecionarMaterial_('ETIQUETA')"><i class="ti ti-tag"></i> Etiqueta</button>
+            <button type="button" id="tarefaMatPlaca" class="btn btn-sm" onclick="tarefaSelecionarMaterial_('PLACA')"><i class="ti ti-photo"></i> Placa / Encarte</button>
+          </div>
+          <div style="font-size:10px;color:var(--tx2);margin-top:6px">A quantidade acima fica visível para você decidir: poucas unidades podem receber etiqueta; para volume maior, use placa/encarte. A decisão continua manual.</div>
+          <label id="tarefaGerarEncarteWrap" style="display:none;align-items:center;gap:7px;margin-top:8px;font-size:11px;font-weight:650;color:var(--green);cursor:pointer"><input id="tarefaGerarEncarte" type="checkbox" checked style="accent-color:var(--green)"> Abrir o gerador de encarte assim que a tarefa for atribuída</label>
+        </div>
+      </div>
+
       <div>
         <label style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:5px">Descrição (opcional)</label>
         <textarea id="tarefaDescricao" placeholder="Ex: Conferir se ainda tem no corredor 3..." style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;min-height:50px;resize:vertical;font-family:inherit"></textarea>
@@ -5525,7 +5560,7 @@ function renderTable(){
         +fmtBipagemHtml(buscarBipagem(p.cod,p.validade))
       +'</div>'
       +'<div class="urg-card-foot">'
-        +(needsPromo?'<button class="abtn" style="border-color:var(--amber);color:var(--amber)" onclick="openTarefaModal('+idx+')" title="Sinalizar promoção ativa e atribuir tarefa"><i class="ti ti-tag"></i> Promoção</button><button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido
+        +(needsPromo?'<button class="abtn" style="border-color:var(--amber);color:var(--amber)" onclick="openTarefaModal('+idx+',\'venda_rapida\')" title="Sinalizar promoção ativa e atribuir tarefa"><i class="ti ti-tag"></i> Promoção</button><button class="abtn encarte" onclick="openEncarteModal('+idx+')"><i class="ti ti-photo"></i> Encarte</button>':'')+btnResolvido
       +'</div>'
     +'</div>';
   }
@@ -14640,7 +14675,10 @@ function sincronizarTarefasCompleto(){
           quantidadeConfirmada:c[8]?(cellStr(c[8])?parseInt(cellStr(c[8])):null):null,
           criadoEm:cellStr(c[9]),confirmadoEm:cellStr(c[10])||null,
           criadoPor:cellStr(c[11])||'gestor',
-          carrinhoStatus:cellStr(c[12])||null
+          carrinhoStatus:cellStr(c[12])||null,
+          precoAcao:cellNum(c[14])||null,custoGerencial:cellNum(c[15])||null,precoNormal:cellNum(c[16])||null,
+          margemAcaoPct:c[17]&&cellStr(c[17])!==''?cellNum(c[17]):null,descontoPct:c[18]&&cellStr(c[18])!==''?cellNum(c[18]):null,
+          materialAcao:cellStr(c[19])||'',qtdReferencia:c[20]&&cellStr(c[20])!==''?cellNum(c[20]):null,tipoTarefa:cellStr(c[21])||''
         });
       }
       // Sheets tem prioridade — mescla com local
@@ -14921,143 +14959,114 @@ function _fecharTarefaMenuFora(ev){
 
 // Chamado pelas opções do menu "Tarefa" do modal de produto.
 // v-fix: abrirTarefaProduto também não existia — completa o fluxo junto com toggleTarefaMenu.
+var _tarefaTipoAtual='venda_rapida';
+var _tarefaMaterialAtual='DECIDIR';
+var _tarefaProdutoIdxAtual=null;
+var _tarefaPrecoSugeridoAtual=null;
+
+function tarefaProdutoPorFormulario_(){
+  var cod=String((document.getElementById('tarefaCod')||{}).value||'').trim();
+  var val=String((document.getElementById('tarefaValidade')||{}).value||'').trim();
+  if(!cod)return null;
+  var lista=(typeof products!=='undefined'?products:[]).filter(function(p){return String(p.cod||'').trim()===cod;});
+  if(!lista.length)return null;
+  if(val){var ex=lista.find(function(p){return String(p.validade||'')===val;});if(ex)return ex;}
+  return lista[0];
+}
+function tarefaQtdReferencia_(){
+  var cod=String((document.getElementById('tarefaCod')||{}).value||'').trim();
+  if(!cod)return 0;
+  var lista=(typeof products!=='undefined'?products:[]).filter(function(p){return String(p.cod||'').trim()===cod;});
+  if(_tarefaTipoAtual==='inventario')return lista.reduce(function(a,p){return a+(typeof qtdeEfetiva==='function'?qtdeEfetiva(p.qtde):(Number(p.qtde)||0));},0);
+  var p=tarefaProdutoPorFormulario_();return p?(typeof qtdeEfetiva==='function'?qtdeEfetiva(p.qtde):(Number(p.qtde)||0)):0;
+}
+function tarefaPrecoSugeridoProduto_(p){
+  if(!p)return null;
+  var promo=Number(p.precoPromo)||0;if(promo>0)return promo;
+  var custo=Number(p.custo)||0;
+  if(custo>0){var base=custo*1.10,sug=Math.ceil(base)-0.01;if(sug<base)sug+=1;return Math.round(sug*100)/100;}
+  return null;
+}
+function tarefaSelecionarMaterial_(tipo){
+  _tarefaMaterialAtual=['ETIQUETA','PLACA'].indexOf(tipo)>=0?tipo:'DECIDIR';
+  [['tarefaMatDecidir','DECIDIR'],['tarefaMatEtiqueta','ETIQUETA'],['tarefaMatPlaca','PLACA']].forEach(function(x){var b=document.getElementById(x[0]);if(!b)return;var on=_tarefaMaterialAtual===x[1];b.style.borderColor=on?'var(--green)':'';b.style.color=on?'var(--green)':'';b.style.background=on?'color-mix(in srgb,var(--green) 12%,transparent)':'';});
+  var ge=document.getElementById('tarefaGerarEncarteWrap');if(ge)ge.style.display=_tarefaMaterialAtual==='PLACA'?'flex':'none';
+}
+function tarefaAtualizarComercial_(preservarPreco){
+  var wrap=document.getElementById('tarefaComercialWrap');if(!wrap)return;
+  var p=tarefaProdutoPorFormulario_();
+  var ativo=!!p&&_tarefaTipoAtual!=='inventario';wrap.style.display=ativo?'block':'none';if(!ativo)return;
+  var custo=Number(p.custo)||0,normal=Number(p.precoNormal)||0,sug=tarefaPrecoSugeridoProduto_(p);_tarefaPrecoSugeridoAtual=sug;
+  var qtd=tarefaQtdReferencia_(),qEl=document.getElementById('tarefaQtdRefBadge');if(qEl)qEl.textContent=qtd.toLocaleString('pt-BR',{maximumFractionDigits:3})+' un.';
+  var fmtm=function(n){return n>0?n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'—';};
+  document.getElementById('tarefaCustoInfo').textContent=fmtm(custo);document.getElementById('tarefaVendaInfo').textContent=fmtm(normal);document.getElementById('tarefaSugestaoInfo').textContent=fmtm(sug||0);
+  var pe=document.getElementById('tarefaPrecoAcao');if(pe&&!preservarPreco){pe.value=sug?Number(sug).toFixed(2):'';}
+  var preco=Number(String(pe&&pe.value||'').replace(',','.'))||0;
+  var margem=preco>0&&custo>0?((preco-custo)/preco*100):null,desc=preco>0&&normal>0?((normal-preco)/normal*100):null;
+  var mEl=document.getElementById('tarefaMargemInfo'),dEl=document.getElementById('tarefaDescontoInfo');
+  mEl.textContent=margem===null?'—':margem.toFixed(1)+'%';dEl.textContent=desc===null?'—':Math.max(0,desc).toFixed(1)+'%';mEl.style.color=margem===null?'':(preco<custo?'var(--red)':(margem<10?'var(--amber)':'var(--green)'));
+  var al=document.getElementById('tarefaPrecoAlerta');al.style.display='none';
+  if(preco>0&&custo>0&&preco<custo){al.style.display='block';al.style.background='rgba(226,75,74,.12)';al.style.color='var(--red)';al.innerHTML='<i class="ti ti-alert-triangle"></i> Preço abaixo do custo: perda de '+fmtm(custo-preco)+' por unidade.';}
+  else if(margem!==null&&margem<10){al.style.display='block';al.style.background='rgba(186,117,23,.12)';al.style.color='var(--amber)';al.innerHTML='<i class="ti ti-alert-circle"></i> Margem baixa. O preço cobre o custo, mas com pouca folga.';}
+}
+function tarefaUsarPrecoSugerido_(){var e=document.getElementById('tarefaPrecoAcao');if(e&&_tarefaPrecoSugeridoAtual){e.value=Number(_tarefaPrecoSugeridoAtual).toFixed(2);tarefaAtualizarComercial_(true);}}
+
+// Chamado pelas opções do menu "Tarefa" do modal de produto.
 function abrirTarefaProduto(cod,tipo){
-  cod=(cod||'').trim();
-  if(!cod)return;
-  var m=document.getElementById('pmTarefaMenu');
-  if(m)m.style.display='none';
-  var lotes=products.filter(function(p){return(p.cod||'').trim()===cod;});
-  if(!lotes.length){mostrarToast('Produto não encontrado.','warn');return;}
-  var lotesOrdenados=lotes.slice().sort(function(a,b){
-    var da=daysDiff(a.validade);da=da===null?99999:da;
-    var db=daysDiff(b.validade);db=db===null?99999:db;
-    return da-db;
-  });
-  var idx=products.indexOf(lotesOrdenados[0]);
-  if(idx<0){mostrarToast('Produto não encontrado.','warn');return;}
-  closeModal('produtoModal');
-  openTarefaModal(idx);
-  document.getElementById('tarefaDescricao').value=(tipo==='inventario')
-    ?'Conferência de inventário total do produto.'
-    :'Venda rápida deste lote.';
+  cod=(cod||'').trim();if(!cod)return;var m=document.getElementById('pmTarefaMenu');if(m)m.style.display='none';
+  var lotes=products.filter(function(p){return(p.cod||'').trim()===cod;});if(!lotes.length){mostrarToast('Produto não encontrado.','warn');return;}
+  var lotesOrdenados=lotes.slice().sort(function(a,b){var da=daysDiff(a.validade);da=da===null?99999:da;var db=daysDiff(b.validade);db=db===null?99999:db;return da-db;});
+  var idx=products.indexOf(lotesOrdenados[0]);if(idx<0){mostrarToast('Produto não encontrado.','warn');return;}
+  closeModal('produtoModal');openTarefaModal(idx,tipo||'venda_rapida');
 }
 
-function openTarefaModal(prodIdx) {
-  var modal = document.getElementById('tarefaModal');
-  var p = prodIdx !== undefined ? products[prodIdx] : null;
-  document.getElementById('tarefaProduto').value = p ? cleanNome(p.nome || '') : '';
-  document.getElementById('tarefaCod').value = p ? (p.cod || '') : '';
-  document.getElementById('tarefaDescricao').value = '';
-  
-  preencherLotesValidade(p ? p.cod : '');
-  
-  var codInput = document.getElementById('tarefaCod');
-  codInput.oninput = function() { preencherLotesValidade(this.value.trim()); };
-  
-  var sel = document.getElementById('tarefaColaborador');
-  sel.innerHTML = '<option value="">Selecione o colaborador...</option>';
-  COLABORADORES.forEach(function(c) {
-    sel.innerHTML += '<option value="' + c.email + '">' + c.nome + ' (' + c.email + ')</option>';
-  });
-  
-  modal.classList.add('open');
+function openTarefaModal(prodIdx,tipo) {
+  var modal=document.getElementById('tarefaModal'),p=prodIdx!==undefined&&prodIdx!==null?products[prodIdx]:null;
+  _tarefaProdutoIdxAtual=p?prodIdx:null;_tarefaTipoAtual=tipo||(p?'venda_rapida':'manual');_tarefaMaterialAtual='DECIDIR';
+  document.getElementById('tarefaProduto').value=p?cleanNome(p.nome||''):'';document.getElementById('tarefaCod').value=p?(p.cod||''):'';
+  document.getElementById('tarefaDescricao').value=_tarefaTipoAtual==='inventario'?'Conferência de inventário total do produto.':(_tarefaTipoAtual==='venda_rapida'?'Venda rápida deste lote.':'');
+  preencherLotesValidade(p?p.cod:'');
+  var codInput=document.getElementById('tarefaCod');codInput.oninput=function(){preencherLotesValidade(this.value.trim());tarefaAtualizarComercial_();};
+  var sel=document.getElementById('tarefaColaborador');sel.innerHTML='<option value="">Selecione o colaborador...</option>';COLABORADORES.forEach(function(c){sel.innerHTML+='<option value="'+c.email+'">'+c.nome+' ('+c.email+')</option>';});
+  tarefaSelecionarMaterial_('DECIDIR');tarefaAtualizarComercial_();modal.classList.add('open');
 }
 
 function preencherLotesValidade(cod) {
-  var wrap = document.getElementById('tarefaValidadeWrap');
-  var sel = document.getElementById('tarefaValidade');
-  sel.innerHTML = '';
-  if (!cod) { wrap.style.display = 'none'; return; }
-  
-  var lotes = (typeof products !== 'undefined' ? products : []).filter(function(prod) {
-    return prod.cod && String(prod.cod).trim() === String(cod).trim() && prod.validade;
-  });
-  
-  // remove duplicados de mesma validade
-  var vistos = {};
-  lotes = lotes.filter(function(prod) {
-    var key = String(prod.validade);
-    if (vistos[key]) return false;
-    vistos[key] = true;
-    return true;
-  }).sort(function(a, b) { return (daysDiff(a.validade) || 9999) - (daysDiff(b.validade) || 9999); });
-  
-  if (!lotes.length) { wrap.style.display = 'none'; return; }
-  
-  lotes.forEach(function(prod) {
-    var opt = document.createElement('option');
-    opt.value = prod.validade;
-    var qLote=typeof qtdeEfetiva==='function'?qtdeEfetiva(prod.qtde):(isNaN(Number(prod.qtde))?1:Number(prod.qtde));
-    opt.textContent = fmtDataExtenso(prod.validade) + ' — ' + qLote + ' un.';
-    sel.appendChild(opt);
-  });
-  wrap.style.display = lotes.length ? 'block' : 'none';
+  var wrap=document.getElementById('tarefaValidadeWrap'),sel=document.getElementById('tarefaValidade');sel.innerHTML='';
+  if(!cod){wrap.style.display='none';tarefaAtualizarComercial_();return;}
+  var lotes=(typeof products!=='undefined'?products:[]).filter(function(prod){return prod.cod&&String(prod.cod).trim()===String(cod).trim()&&prod.validade;});
+  var vistos={};lotes=lotes.filter(function(prod){var key=String(prod.validade);if(vistos[key])return false;vistos[key]=true;return true;}).sort(function(a,b){return(daysDiff(a.validade)||9999)-(daysDiff(b.validade)||9999);});
+  if(!lotes.length){wrap.style.display='none';tarefaAtualizarComercial_();return;}
+  lotes.forEach(function(prod){var opt=document.createElement('option');opt.value=prod.validade;var qLote=typeof qtdeEfetiva==='function'?qtdeEfetiva(prod.qtde):(isNaN(Number(prod.qtde))?1:Number(prod.qtde));opt.textContent=fmtDataExtenso(prod.validade)+' — '+qLote+' un.';sel.appendChild(opt);});
+  wrap.style.display='block';setTimeout(function(){tarefaAtualizarComercial_();},0);
 }
 
+function tarefaAbrirEncartePlanejado_(tarefa){
+  if(!tarefa||!tarefa.cod)return;var lista=products.filter(function(p){return String(p.cod||'').trim()===String(tarefa.cod||'').trim();});if(!lista.length)return;
+  var p=(tarefa.validade&&lista.find(function(x){return String(x.validade||'')===String(tarefa.validade||'');}))||lista[0],idx=products.indexOf(p);if(idx<0)return;
+  openEncarteModal(idx);setTimeout(function(){var por=document.getElementById('ePor'),de=document.getElementById('eDe'),val=document.getElementById('eValidade');if(tarefa.precoAcao>0&&por)por.value='R$ '+Number(tarefa.precoAcao).toFixed(2).replace('.',',');if(tarefa.precoNormal>0&&de)de.value='R$ '+Number(tarefa.precoNormal).toFixed(2).replace('.',',');if(tarefa.validade&&val)val.value=fmt(tarefa.validade);onPorChange();drawEncarte();},180);
+}
+function abrirEncarteDaTarefa_(id){var t=getTarefas().find(function(x){return String(x.id)===String(id);});if(t)tarefaAbrirEncartePlanejado_(t);}
+
 function criarTarefa() {
-  var produto = document.getElementById('tarefaProduto').value.trim();
-  var cod = document.getElementById('tarefaCod').value.trim();
-  var descricao = document.getElementById('tarefaDescricao').value.trim();
-  var email = document.getElementById('tarefaColaborador').value;
-  
-  if (!produto) { mostrarToast('Informe o produto', 'err'); return; }
-  if (!email) { mostrarToast('Selecione o colaborador', 'err'); return; }
-  
-  var colab = COLABORADORES.find(function(c) { return c.email === email; });
-  
-  var validadeWrap = document.getElementById('tarefaValidadeWrap');
-  var validadeSelecionada = (validadeWrap.style.display !== 'none' && document.getElementById('tarefaValidade').value) || null;
-  
-  var tarefa = {
-    id: 'T' + Date.now(),
-    produto: produto,
-    cod: cod,
-    descricao: descricao,
-    email: email,
-    nomeColaborador: colab ? colab.nome : email,
-    status: 'pendente',
-    quantidadeConfirmada: null,
-    validade: validadeSelecionada,
-    criadoEm: new Date().toISOString(),
-    confirmadoEm: null,
-    criadoPor: 'gestor'
-  };
-  
-  var tarefas = getTarefas();
-  tarefas.push(tarefa);
-  saveTarefas(tarefas);
-  enviarTarefaParaSheets(tarefa);
-  
-  closeModal('tarefaModal');
-  mostrarToast('Tarefa atribuída para ' + (colab ? colab.nome : email), 'ok');
-  
-  if (cod) {
-    var promoAtivas = getPromoAtivas();
-    if (!promoAtivas.includes(cod)) {
-      promoAtivas.push(cod);
-      savePromoAtivas(promoAtivas);
-    }
-    renderTable();
-    renderPromos();
-  }
-  
-  renderTarefas();
+  var produto=document.getElementById('tarefaProduto').value.trim(),cod=document.getElementById('tarefaCod').value.trim(),descricao=document.getElementById('tarefaDescricao').value.trim(),email=document.getElementById('tarefaColaborador').value;
+  if(!produto){mostrarToast('Informe o produto','err');return;}if(!email){mostrarToast('Selecione o colaborador','err');return;}
+  var colab=COLABORADORES.find(function(c){return c.email===email;});var validadeWrap=document.getElementById('tarefaValidadeWrap'),validadeSelecionada=(validadeWrap.style.display!=='none'&&document.getElementById('tarefaValidade').value)||null;
+  var p=tarefaProdutoPorFormulario_(),precoAcao=Number(String((document.getElementById('tarefaPrecoAcao')||{}).value||'').replace(',','.'))||0,custo=p?(Number(p.custo)||0):0,precoNormal=p?(Number(p.precoNormal)||0):0;
+  var margem=precoAcao>0&&custo>0?((precoAcao-custo)/precoAcao*100):null,desconto=precoAcao>0&&precoNormal>0?((precoNormal-precoAcao)/precoNormal*100):null,qtdRef=tarefaQtdReferencia_();
+  if(_tarefaTipoAtual!=='inventario'&&p&&!precoAcao){mostrarToast('Informe o preço da ação ou use o preço sugerido.','warn');return;}
+  var mat=_tarefaTipoAtual==='inventario'?'NAO_APLICA':_tarefaMaterialAtual;
+  var instr=[];if(_tarefaTipoAtual!=='inventario'&&precoAcao>0){instr.push('Preço ação: R$ '+precoAcao.toFixed(2).replace('.',','));instr.push('Material: '+(mat==='PLACA'?'PLACA/ENCARTE':(mat==='ETIQUETA'?'ETIQUETA':'DECIDIR APÓS CONFERÊNCIA')));instr.push('Qtd. referência: '+qtdRef+' un.');}
+  var descFinal=descricao;if(instr.length)descFinal+=(descFinal?' | ':'')+instr.join(' · ');
+  var tarefa={id:'T'+Date.now(),produto:produto,cod:cod,descricao:descFinal,email:email,nomeColaborador:colab?colab.nome:email,status:'pendente',quantidadeConfirmada:null,validade:validadeSelecionada,criadoEm:new Date().toISOString(),confirmadoEm:null,criadoPor:'gestor',tipoTarefa:_tarefaTipoAtual,precoAcao:precoAcao||null,custoGerencial:custo||null,precoNormal:precoNormal||null,margemAcaoPct:margem,descontoPct:desconto,materialAcao:mat,qtdReferencia:qtdRef};
+  var gerarAgora=mat==='PLACA'&&!!((document.getElementById('tarefaGerarEncarte')||{}).checked);
+  var tarefas=getTarefas();tarefas.push(tarefa);saveTarefas(tarefas);enviarTarefaParaSheets(tarefa);closeModal('tarefaModal');mostrarToast('Tarefa atribuída para '+(colab?colab.nome:email),'ok');
+  if(cod){var promoAtivas=getPromoAtivas();if(!promoAtivas.includes(cod)){promoAtivas.push(cod);savePromoAtivas(promoAtivas);}renderTable();renderPromos();}
+  renderTarefas();if(gerarAgora)setTimeout(function(){tarefaAbrirEncartePlanejado_(tarefa);},120);
 }
 
 function enviarTarefaParaSheets(tarefa) {
-  var cfg = loadCfg();
-  if (!cfg.url) return;
-  fetch(cfg.url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-    body: JSON.stringify({ action: 'criarTarefa', tarefa: tarefa })
-  }).catch(function() {
-    // Sem conexão — guarda na fila para reenviar depois
-    var fila = getFilaTarefas();
-    fila.push(tarefa);
-    saveFilaTarefas(fila);
-    mostrarToast('Sem conexão — tarefa salva para sincronizar depois', 'warn');
-  });
+  var cfg=loadCfg();if(!cfg.url)return;fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action:'criarTarefa',tarefa:tarefa})}).catch(function(){var fila=getFilaTarefas();fila.push(tarefa);saveFilaTarefas(fila);mostrarToast('Sem conexão — tarefa salva para sincronizar depois','warn');});
 }
 
 function renderTarefas() {
@@ -15170,6 +15179,7 @@ function renderTarefas() {
       + validadeInfo
       + _tarefasLotesHtml_(t.cod,t.validade,t.quantidadeConfirmada)
       + (t.descricao ? '<div class="tarefa-card-desc" style="font-size:12px;color:var(--tx2);margin-bottom:6px;line-height:1.4"><i class="ti ti-arrows-exchange" style="font-size:12px;opacity:.7"></i> ' + escHtml(t.descricao) + '</div>' : '')
+      + (t.precoAcao ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px"><span style="font-size:11px;font-weight:800;padding:4px 8px;border-radius:7px;background:rgba(29,158,117,.12);color:var(--green)">Preço ação: '+Number(t.precoAcao).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</span>'+(t.margemAcaoPct!==null&&t.margemAcaoPct!==undefined?'<span style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;background:var(--bg2);border:1px solid var(--bds)">Margem '+Number(t.margemAcaoPct).toFixed(1)+'%</span>':'')+(t.materialAcao?'<span style="font-size:11px;font-weight:800;padding:4px 8px;border-radius:7px;background:rgba(245,158,11,.12);color:var(--amber)">'+(t.materialAcao==='PLACA'?'Placa / Encarte':(t.materialAcao==='ETIQUETA'?'Etiqueta':'Decidir depois'))+'</span>':'')+'</div>' : '')
       + '<div class="tarefa-card-colab" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)">'
       +   '<i class="ti ti-user" style="font-size:14px"></i> '
       +   '<span style="font-weight:600">' + escHtml(t.nomeColaborador) + '</span>'
@@ -15318,7 +15328,7 @@ function renderTarefasProntos() {
     var acoes = ignorado
       ? '<button class="btn btn-sm" style="flex-shrink:0" onclick="restaurarProntoEncarte(\'' + item.cod + '\')"><i class="ti ti-rotate"></i> Restaurar</button>'
       : '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">'
-        + '<button class="btn btn-green btn-sm" onclick="openEncarteModal(' + item.idx + ')"><i class="ti ti-photo"></i> Encarte</button>'
+        + '<button class="btn btn-green btn-sm" onclick="abrirEncarteDaTarefa_(\'' + item.t.id + '\')"><i class="ti ti-photo"></i> '+(item.t.materialAcao==='ETIQUETA'?'Trocar p/ placa':'Encarte')+'</button>'
         + '<button class="btn btn-sm" style="color:var(--amber);border-color:var(--amber)" onclick="ignorarProntoEncarte(\'' + item.cod + '\',\'manual\')" title="Já apliquei desconto com etiqueta manual, sem mexer no preço do sistema"><i class="ti ti-basket"></i> Carrinho</button>'
         + '<button class="btn btn-sm" style="color:var(--tx2)" onclick="ignorarProntoEncarte(\'' + item.cod + '\',\'ignorado\')"><i class="ti ti-x"></i> Ignorar</button>'
       + '</div>';
@@ -15531,7 +15541,7 @@ function filtrarTarefas(filtro) {
 function confirmarEstoquePromo(cod, nome) {
   var p = products.find(function(x) { return x.cod === cod; });
   if (!p) return;
-  openTarefaModal(products.indexOf(p));
+  openTarefaModal(products.indexOf(p),'inventario');
   document.getElementById('tarefaDescricao').value = 'Confirmar se ainda tem em loja e informar quantidade';
 }
 
@@ -15950,7 +15960,7 @@ function renderEstoque() {
       +   fmtBipagemHtml(buscarBipagem(p.cod, p.validade))
       + '</div>'
       + '<div class="urg-card-foot">'
-      +   '<button class="abtn" style="border-color:var(--amber);color:var(--amber)" onclick="event.stopPropagation();openTarefaModal(' + idx + ')"><i class="ti ti-clipboard-check"></i> Conferir</button>'
+      +   '<button class="abtn" style="border-color:var(--amber);color:var(--amber)" onclick="event.stopPropagation();openTarefaModal(' + idx + ',\'inventario\')"><i class="ti ti-clipboard-check"></i> Conferir</button>'
       +   '<button class="abtn encarte" onclick="event.stopPropagation();abrirEncarteDoProduto(\'' + escHtml(grupo.cod || '') + '\')"><i class="ti ti-tag"></i> Gerar Encarte</button>'
       + '</div>'
       + '</div>';
