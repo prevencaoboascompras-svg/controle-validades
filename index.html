@@ -6077,6 +6077,65 @@ function buscarBipagem(cod, validade) {
   }
   return candidatos[0]; // já ordenado — o primeiro já é o mais recente
 }
+
+// v6.75 — auditoria EXATA por lote no modal de Estoque.
+// Diferente de buscarBipagem(), esta função NUNCA cai para outra validade:
+// isso evita atribuir a coleta de um lote ao colaborador/data de outro lote.
+function buscarBipagemLoteExata_(cod, validade) {
+  if (!cod || !_ucDados.length) return null;
+  if (!_ucIndex) _construirUcIndex();
+  var codN = String(cod || '').replace(/[^0-9]/g, '');
+  var chaves = [codN];
+  // Compatibilidade UPC-A <-> EAN-13 com zero inicial.
+  if (codN.length === 13 && codN.charAt(0) === '0') chaves.push(codN.slice(1));
+  else if (codN.length === 12) chaves.push('0' + codN);
+  var candidatos = [];
+  chaves.some(function(k){
+    if (_ucIndex[k] && _ucIndex[k].length) { candidatos = _ucIndex[k]; return true; }
+    return false;
+  });
+  if (!candidatos.length) return null;
+  if (validade) {
+    for (var i=0;i<candidatos.length;i++) if (candidatos[i].valStr === validade) return candidatos[i];
+    return null;
+  }
+  for (var j=0;j<candidatos.length;j++) if (!candidatos[j].valStr) return candidatos[j];
+  return null;
+}
+function pmNomeColetor_(bip){
+  if(!bip)return '';
+  if(bip.nomeColeta)return bip.nomeColeta;
+  try{if(typeof _colabNomePorEmail_==='function'){var n=_colabNomePorEmail_(bip.email||'');if(n)return n;}}catch(e){}
+  try{if(typeof nfeHistNomeOperador_==='function'){var n2=nfeHistNomeOperador_(bip.email||'');if(n2&&n2!==bip.email)return n2;}}catch(e){}
+  return bip.email||'Colaborador';
+}
+function pmAuditoriaLoteHtml_(bip){
+  if(!bip)return '<span style="color:var(--tx2)"><i class="ti ti-info-circle"></i> Coleta desta validade não localizada no histórico</span>';
+  var quem=pmNomeColetor_(bip);
+  var quando=bip.ts?(bip.ts.toLocaleDateString('pt-BR')+' às '+bip.ts.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})):'horário não informado';
+  var rotulo=bip.viaNFe?'NF-e lançada por':'Coletado por';
+  var icone=bip.viaNFe?'ti-file-invoice':'ti-user-check';
+  return '<span title="'+escHtml(bip.email||'')+'"><i class="ti '+icone+'"></i> '+rotulo+' <b style="color:var(--tx)">'+escHtml(quem)+'</b> · <b>'+escHtml(quando)+'</b></span>';
+}
+function pmAtualizarAuditoriaLotes_(cod){
+  var els=document.querySelectorAll('#pmLotes [data-pm-validade]');
+  if(!els.length)return;
+  if(!_ucDados.length){
+    els.forEach(function(el){el.innerHTML='<span style="color:var(--tx2)"><i class="ti ti-loader-2 spin"></i> Carregando responsável pela coleta...</span>';});
+    if(!window._pmAuditLoading){
+      window._pmAuditLoading=true;
+      Promise.resolve(typeof renderUltimasColetas==='function'?renderUltimasColetas('silent'):null).then(function(){
+        window._pmAuditLoading=false;
+        if(window._pmCodAtual===cod && document.getElementById('produtoModal') && document.getElementById('produtoModal').classList.contains('open')) pmAtualizarAuditoriaLotes_(cod);
+      }).catch(function(){window._pmAuditLoading=false;});
+    }
+    return;
+  }
+  els.forEach(function(el){
+    var validade=el.getAttribute('data-pm-validade')||'';
+    el.innerHTML=pmAuditoriaLoteHtml_(buscarBipagemLoteExata_(cod,validade));
+  });
+}
 // Monta o HTML da linha "Bipado por Fulano · 23/07 14:32" exibida nos cards
 // de Estoque e Validade. Retorna string vazia se não há coleta encontrada.
 function fmtBipagemHtml(bip) {
@@ -14752,6 +14811,7 @@ function salvarEstoqueLote(cod,validade,inputEl){
   });
 }
 
+// v6.75 — modal de Estoque com auditoria de coleta por lote (nome + dia + hora)
 // Abre o modal de produto agrupado (clique no card de Estoque), populando custo/venda/estoque/lotes/setor
 function abrirProdutoModal(cod){
   cod=(cod||'').trim();
@@ -14803,18 +14863,22 @@ function abrirProdutoModal(cod){
     var days=daysDiff(p.validade);
     var s=days===null?'sem-data':statusFromDays(days);
     var validadeAttr=escHtml(p.validade||'');
-    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--bds);border-radius:var(--r);padding:6px 10px;font-size:12.5px">'
-      +'<span>'+(p.validade?fmtDataExtenso(p.validade):'Sem data')+'</span>'
-      +badge(s)
-      +'<span style="display:flex;align-items:center;gap:5px">'
-        +'<input type="number" min="0" value="'+(p.qtde||0)+'" data-validade="'+validadeAttr+'" class="lote-estoque-input" style="width:64px;font-size:12.5px;padding:4px 6px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;text-align:right" onkeydown="if(event.key===\'Enter\'){this.nextElementSibling.click();}">'
-        +'<span style="font-size:11px;color:var(--tx2)">un</span>'
-        +'<button class="btn btn-sm" title="Salvar estoque deste lote" onclick="salvarEstoqueLote(window._pmCodAtual,\''+validadeAttr+'\',this.previousElementSibling.previousElementSibling)"><i class="ti ti-device-floppy"></i></button>'
-      +'</span>'
+    return '<div style="border:1px solid var(--bds);border-radius:var(--r);padding:7px 10px;font-size:12.5px;background:color-mix(in srgb,var(--bg2) 35%,transparent)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
+        +'<span style="font-weight:650">'+(p.validade?fmtDataExtenso(p.validade):'Sem data')+'</span>'
+        +badge(s)
+        +'<span style="display:flex;align-items:center;gap:5px">'
+          +'<input type="number" min="0" value="'+(p.qtde||0)+'" data-validade="'+validadeAttr+'" class="lote-estoque-input" style="width:64px;font-size:12.5px;padding:4px 6px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;text-align:right" onkeydown="if(event.key===\'Enter\'){this.nextElementSibling.click();}">'
+          +'<span style="font-size:11px;color:var(--tx2)">un</span>'
+          +'<button class="btn btn-sm" title="Salvar estoque deste lote" onclick="salvarEstoqueLote(window._pmCodAtual,\''+validadeAttr+'\',this.previousElementSibling.previousElementSibling)"><i class="ti ti-device-floppy"></i></button>'
+        +'</span>'
+      +'</div>'
+      +'<div data-pm-validade="'+validadeAttr+'" style="margin-top:6px;padding-top:6px;border-top:1px solid color-mix(in srgb,var(--bds) 70%,transparent);font-size:10.8px;color:var(--tx2);display:flex;align-items:center;gap:5px;line-height:1.35"></div>'
       +'</div>';
   }).join('');
 
   document.getElementById('produtoModal').classList.add('open');
+  pmAtualizarAuditoriaLotes_(cod);
 }
 
 // Chamado pelo botão "Gerar Encarte" dentro do modal de produto.
