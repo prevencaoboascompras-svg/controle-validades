@@ -2564,6 +2564,56 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 }
 @media(max-width:430px){.estoque-unico-grid{grid-template-columns:1fr!important}}
 </style>
+
+<style id="v682-estoque-fontes-maiores">
+/* v6.82 — leitura confortável dos cards unificados */
+.estoque-unico-card .urg-card-nome{font-size:14px!important;line-height:1.22!important}
+.estoque-unico-card .urg-card-cod{font-size:10px!important;line-height:1.2!important}
+.estoque-unico-card .urg-card-header>.badge{font-size:9.5px!important;padding:4px 8px!important}
+.estoque-unico-card .urg-info-lbl{font-size:9.2px!important;line-height:1.15!important}
+.estoque-unico-card .urg-info-val{font-size:12.5px!important;line-height:1.22!important}
+.estoque-unico-card .urg-card-right-extenso{font-size:10px!important;line-height:1.18!important}
+.estoque-unico-card .urg-stat-lbl{font-size:8.2px!important}
+.estoque-unico-card .urg-stat-val{font-size:10.5px!important}
+.estoque-unico-fin span{font-size:8.8px!important;line-height:1.05!important}
+.estoque-unico-fin b{font-size:12px!important;line-height:1.18!important;margin-top:4px!important}
+.estoque-unico-fin>div{min-height:48px!important;padding:8px 9px!important}
+.estoque-unico-lote{min-height:52px!important;padding:8px 9px!important}
+.estoque-unico-lote-data{font-size:11px!important;line-height:1.15!important}
+.estoque-unico-lote-status{font-size:9.5px!important;line-height:1.18!important}
+.estoque-unico-lote-coleta{font-size:9px!important;line-height:1.28!important;margin-top:4px!important}
+.estoque-unico-lote-qtd{font-size:11px!important}
+.estoque-unico-more{font-size:9.2px!important}
+.estoque-unico-meta-line{font-size:9.6px!important;line-height:1.35!important}
+.estoque-unico-actions .abtn{font-size:10.5px!important;min-height:33px!important;padding:7px 6px!important}
+.estoque-unico-filter-note{font-size:10.5px!important}
+
+/* Em monitores comuns, 3 cards por linha dão largura suficiente para as informações respirarem. */
+@media(min-width:1051px) and (max-width:1750px){
+  .estoque-unico-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+}
+@media(min-width:1751px){
+  .estoque-unico-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
+}
+@media(max-width:1050px){
+  .estoque-unico-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:700px){
+  .estoque-unico-card .urg-card-nome{font-size:11px!important}
+  .estoque-unico-card .urg-card-cod{font-size:8px!important}
+  .estoque-unico-card .urg-info-lbl{font-size:7.5px!important}
+  .estoque-unico-card .urg-info-val{font-size:9.5px!important}
+  .estoque-unico-fin span{font-size:7px!important}.estoque-unico-fin b{font-size:9px!important}
+  .estoque-unico-lote-data{font-size:8.8px!important}.estoque-unico-lote-status{font-size:7.6px!important}.estoque-unico-lote-coleta{font-size:7.2px!important}.estoque-unico-lote-qtd{font-size:8.8px!important}
+  .estoque-unico-meta-line{font-size:7.8px!important}.estoque-unico-actions .abtn{font-size:8px!important;min-height:28px!important}
+}
+@media(max-width:430px){.estoque-unico-grid{grid-template-columns:1fr!important}}
+</style>
+
+<style id="v683-zero-resolvido-css">
+.estoque-unico-resolvidos-divider{grid-column:1/-1;display:flex;align-items:center;gap:10px;margin:8px 0 0;padding:10px 12px;border:1px solid rgba(29,158,117,.28);border-radius:10px;background:rgba(29,158,117,.07);color:var(--tx2);font-size:10px;font-weight:700}.estoque-unico-resolvidos-divider i{color:var(--green);font-size:15px}.estoque-unico-card.zero-confirmado{opacity:.78;border-color:rgba(29,158,117,.28)!important}.estoque-unico-card.zero-confirmado .urg-card-header{background:linear-gradient(135deg,rgba(29,158,117,.30),rgba(29,158,117,.14))!important}.zero-confirmado-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 6px;border:1px solid rgba(29,158,117,.35);border-radius:999px;background:rgba(29,158,117,.10);color:var(--green);font-size:7.5px;font-weight:850;white-space:nowrap}
+</style>
+
 </head>
 <body>
 
@@ -5731,7 +5781,7 @@ function renderTable(){
       }
     }
     if(busca&&!matchBusca(p.nome,p.cod,busca))return false;
-    if(!mostrarResolvidos&&resolvidos.includes(produtoChave(p)))return false;
+    if(!mostrarResolvidos&&_auraLoteResolvido_(p,resolvidos,zeroIdx))return false;
     return true;
   });
   var ativos=all.filter(function(p){var d=daysDiff(p.validade);return d===null||d>=0;})
@@ -12102,7 +12152,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.81-estoque-unificado-cards-maiores';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.83-zero-resolvido-retirada';
 var currentTabName='dashboard';
 function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma visão de Estoque */ return 'unificado'; }
 function goTab(name){
@@ -14308,6 +14358,8 @@ function abrirRelatorioRetirada() {
   var dataFmtCurta = dataAlvo.toLocaleDateString('pt-BR');
 
   var totalQtde = doDia.reduce(function(s,p){ return s+qtdeEfetiva(p.qtde); }, 0);
+  var zeroIdxRet=_auraZeroConfirmadoIndex_();
+  var totalZeroConfirmado=doDia.reduce(function(s,p){return s+(_auraZeroInfoLote_(p,zeroIdxRet)?1:0);},0);
 
   var ehPassado = !ehHoje && dataAlvo < hojeReal;
   var msgVazio = ehHoje ? 'Nenhum produto vence hoje' : (ehPassado ? 'Nenhum produto venceu nesse dia' : 'Nenhum produto vence nesse dia');
@@ -14317,22 +14369,26 @@ function abrirRelatorioRetirada() {
         var nomeLimpo = cleanNome(p.nome || '--');
         var valFmt = p.validade ? p.validade.split('-').reverse().join('/') : '--';
         var cod = (p.cod||'').replace(/[^0-9]/g,'');
+        var zeroInfo=_auraZeroInfoLote_(p,zeroIdxRet);
+        var zeroTexto=zeroInfo?_auraFmtZeroConfirmado_(zeroInfo):'';
         var fotoHtml = cod
           ? '<div class="ret-foto" data-cod="'+cod+'" data-nome="'+escHtml(nomeLimpo)+'"><div class="ret-foto-load"></div></div>'
           : '<div class="ret-foto ret-foto-vazia"><i class="ti ti-photo-off"></i></div>';
         return [
           '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.1);margin-bottom:12px">',
             '<div style="background:linear-gradient(135deg,#92190c,#b91c1c);padding:13px 14px 13px 54px;position:relative;min-height:58px;display:flex;flex-direction:column;justify-content:center">',
-              p.qtde ? '<span style="position:absolute;top:50%;left:10px;transform:translateY(-50%);min-width:34px;height:34px;padding:0 8px;border-radius:999px;background:#fff;color:#b91c1c;font-size:16px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);white-space:nowrap">'+p.qtde+'</span>' : '',
+              '<span style="position:absolute;top:50%;left:10px;transform:translateY(-50%);min-width:34px;height:34px;padding:0 8px;border-radius:999px;background:#fff;color:'+(zeroInfo?'#047857':'#b91c1c')+';font-size:16px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);white-space:nowrap">'+(zeroInfo?'0✓':qtdeEfetiva(p.qtde))+'</span>',
               '<div style="font-size:15px;font-weight:800;color:#fff;line-height:1.25;padding-right:8px">'+nomeLimpo+'</div>',
+              zeroInfo?'<div style="font-size:10px;font-weight:800;color:#bbf7d0;margin-top:4px">RESOLVIDO · ESTOQUE 0 CONFIRMADO</div>':'',
             '</div>',
             '<div style="padding:10px 14px 12px;display:flex;gap:10px;align-items:stretch">',
               fotoHtml,
               '<div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 10px;min-width:0">',
                 '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:3px">Setor</div><div style="font-size:13px;font-weight:700;color:#1c1c1e">'+(p.setor||'--')+'</div></div>',
-                '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:3px">Qtde</div><div style="font-size:18px;font-weight:900;color:#b91c1c;line-height:1">'+(p.qtde||'--')+'</div></div>',
+                '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:3px">Qtde</div><div style="font-size:18px;font-weight:900;color:'+(zeroInfo?'#047857':'#b91c1c')+';line-height:1">'+(zeroInfo?'0 confirmado':qtdeEfetiva(p.qtde))+'</div></div>',
                 '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:3px">Validade</div><div style="font-size:13px;font-weight:700;color:#1c1c1e">'+valFmt+'</div></div>',
                 '<div style="grid-column:1/-1"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:3px">Código de Barras</div><div style="font-size:12px;font-weight:600;color:#1c1c1e;font-family:monospace;letter-spacing:.02em">'+(p.cod||'--')+'</div></div>',
+                zeroInfo?'<div style="grid-column:1/-1;background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:8px;padding:7px 8px;font-size:10px;line-height:1.3"><b>'+zeroTexto+'</b><br>Mesmo com estoque 0, conferir corredores, caixas e produtos abandonados e retirar se localizado.</div>':'',
               '</div>',
             '</div>',
           '</div>'
@@ -14378,9 +14434,10 @@ function abrirRelatorioRetirada() {
       '</div>',
     '</div>',
     doDia.length > 0 ? [
-      '<div class="resumo">',
+      '<div class="resumo" style="grid-template-columns:repeat('+(totalZeroConfirmado?3:2)+',1fr)">',
         '<div class="res-card"><div class="res-lbl">Produtos</div><div class="res-val">'+doDia.length+'</div></div>',
-        '<div class="res-card"><div class="res-lbl">Unidades</div><div class="res-val">'+totalQtde+'</div></div>',
+        '<div class="res-card"><div class="res-lbl">Unidades registradas</div><div class="res-val">'+totalQtde+'</div></div>',
+        totalZeroConfirmado?'<div class="res-card"><div class="res-lbl">Estoque 0 confirmado</div><div class="res-val" style="color:#047857">'+totalZeroConfirmado+'</div></div>':'',
       '</div>',
     ].join('') : '',
     '<div class="cards">',cardsHtml,'</div>',
@@ -14971,74 +15028,50 @@ function restaurarProntoEncarte(cod){
 function getTarefasZeroProcessadas(){try{return JSON.parse(localStorage.getItem(TAREFAS_ZERO_KEY)||'[]');}catch(e){return[];}}
 function saveTarefasZeroProcessadas(arr){try{localStorage.setItem(TAREFAS_ZERO_KEY,JSON.stringify(arr));}catch(e){console.warn('localStorage cheio, pulando cache de tarefas zero processadas:',e);}}
 
+
+function _auraZeroConfirmadoIndex_(){
+  var idx={};
+  try{
+    (getTarefas()||[]).forEach(function(t){
+      if(!t||t.status!=='concluida'||t.quantidadeConfirmada===null||t.quantidadeConfirmada===undefined)return;
+      if(parseInt(t.quantidadeConfirmada,10)!==0||!t.cod)return;
+      var cod=String(t.cod||'').trim(), val=String(t.validade||'').trim();
+      var k=cod+'|'+val;
+      var atual=idx[k], dt=String(t.confirmadoEm||t.atualizadoEm||t.criadoEm||'');
+      if(!atual||dt>String(atual.confirmadoEm||atual.atualizadoEm||atual.criadoEm||''))idx[k]=t;
+      if(!val){var kg=cod+'|*',ag=idx[kg];if(!ag||dt>String(ag.confirmadoEm||ag.atualizadoEm||ag.criadoEm||''))idx[kg]=t;}
+    });
+  }catch(e){}
+  return idx;
+}
+function _auraZeroInfoLote_(p,idx){
+  if(!p)return null;idx=idx||_auraZeroConfirmadoIndex_();
+  var cod=String(p.cod||'').trim(),val=String(p.validade||'').trim();
+  return idx[cod+'|'+val]||idx[cod+'|*']||null;
+}
+function _auraLoteResolvido_(p,resolvidos,zeroIdx){return !!((resolvidos||[]).includes(produtoChave(p))||_auraZeroInfoLote_(p,zeroIdx));}
+function _auraFmtZeroConfirmado_(t){
+  if(!t)return '';var quem=t.nomeColaborador||t.colaboradorNome||t.emailColaborador||'colaborador';
+  var bruto=t.confirmadoEm||t.atualizadoEm||t.criadoEm||'',quando='';
+  if(bruto){var d=new Date(bruto);if(!isNaN(d.getTime()))quando=d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+  return '0 confirmado por '+quem+(quando?' · '+quando:'');
+}
+
 function processarTarefasConcluidasZero(){
   var tarefas=getTarefas();
   var jaProcessadas=getTarefasZeroProcessadas();
-  var alvo=tarefas.filter(function(t){
-    return t.status==='concluida'
-      && t.quantidadeConfirmada!==null && t.quantidadeConfirmada!==undefined
-      && parseInt(t.quantidadeConfirmada)===0
-      && t.cod
-      && jaProcessadas.indexOf(t.id)===-1;
-  });
+  var alvo=tarefas.filter(function(t){return t.status==='concluida'&&t.quantidadeConfirmada!==null&&t.quantidadeConfirmada!==undefined&&parseInt(t.quantidadeConfirmada,10)===0&&t.cod&&jaProcessadas.indexOf(t.id)===-1;});
   if(!alvo.length)return;
-
-  var resolvidos=getResolvidos();
-  var promoAtivas=getPromoAtivas();
-  var negs=getNegociacoes();
-  var houveMudanca=false;
-
+  var resolvidos=getResolvidos(),houveMudanca=false;
   alvo.forEach(function(t){
-    // Encontra o(s) lote(s) do produto no banco atual (mesmo código de barras)
-    var lotes=products.filter(function(p){
-      if((p.cod||'')!==t.cod)return false;
-      if(t.validade)return (p.validade||'')===t.validade;
-      return true;
-    });
-    if(!lotes.length){
-      // Produto pode já ter sido removido da base — ainda assim marca a tarefa como processada
-      jaProcessadas.push(t.id);
-      return;
-    }
-
-    lotes.forEach(function(p){
-      // O backend já zerou este lote específico na planilha. Espelha o 0 também
-      // no estado local para a tela do gestor refletir a resposta imediatamente.
-      p.qtde=0;
-      var chave=produtoChave(p);
-      if(!resolvidos.includes(chave)){resolvidos.push(chave);houveMudanca=true;}
-      var qtdeLote=qtdeEfetiva(p.qtde);
-      var custo=p.custo||0;
-      negs.unshift({
-        id:Date.now()+Math.floor(Math.random()*1000),
-        data:new Date().toISOString().substring(0,10),
-        cod:p.cod,nome:p.nome,setor:p.setor,
-        precoNormal:p.precoNormal||0,custo:custo,fornecedor:p.fornecedor||'',
-        obs:'Confirmado sem estoque em loja por '+(t.nomeColaborador||'colaborador')+' (tarefa '+t.id+')',
-        loteId:'lote-'+Date.now(),qtdeTotal:qtdeLote,
-        qtde:qtdeLote,precoPraticado:custo,
-        valorTotal:custo>0?custo*qtdeLote:0,
-        valorDesc:0,tipo:'descarte'
-      });
-      houveMudanca=true;
-    });
-
-    if(!promoAtivas.includes(t.cod)){promoAtivas.push(t.cod);houveMudanca=true;}
+    var lotes=products.filter(function(p){if((p.cod||'')!==t.cod)return false;if(t.validade)return (p.validade||'')===t.validade;return true;});
+    if(!lotes.length){jaProcessadas.push(t.id);return;}
+    lotes.forEach(function(p){p.qtde=0;var chave=produtoChave(p);if(!resolvidos.includes(chave)){resolvidos.push(chave);houveMudanca=true;}});
     jaProcessadas.push(t.id);
   });
-
   saveTarefasZeroProcessadas(jaProcessadas);
   if(alvo.length&&typeof saveProd==='function')saveProd();
-  if(houveMudanca){
-    saveResolvidos(resolvidos);
-    savePromoAtivas(promoAtivas);
-    saveNegociacoes(negs);
-    renderTable();
-    renderPromos();
-    if(typeof renderRelatorio==='function')renderRelatorio();
-    if(typeof atualizarNegBadge==='function')atualizarNegBadge();
-    mostrarToast(alvo.length>1?alvo.length+' produtos baixados do estoque (0 un. confirmado)':'Produto baixado do estoque — 0 un. confirmado','warn');
-  }
+  if(houveMudanca){saveResolvidos(resolvidos);if(typeof renderEstoque==='function')renderEstoque();if(typeof renderTable==='function')renderTable();mostrarToast(alvo.length>1?alvo.length+' produtos confirmados em 0 e movidos para Resolvidos':'Produto confirmado em 0 e movido para Resolvidos','ok');}
 }
 var _promoAtivas=JSON.parse(localStorage.getItem('boascompras_promo_ativas')||'[]');
 function getPromoAtivas(){return Array.isArray(_promoAtivas)?_promoAtivas:[];}
@@ -16134,11 +16167,15 @@ function _estoqueUnificadoBipCompact_(bip){
   var quando=bip.ts?(bip.ts.toLocaleDateString('pt-BR')+' '+bip.ts.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})):'';
   return (bip.viaNFe?'NF-e · ':'')+quem+(quando?' · '+quando:'');
 }
-function _estoqueUnificadoLoteHtml_(lote,resolvidos){
-  var d=daysDiff(lote.validade),st=_estoqueUnificadoLoteStatus_(d),bip=buscarBipagem(lote.cod,lote.validade),res=resolvidos.includes(produtoChave(lote));
-  return '<div class="estoque-unico-lote" title="'+escHtml(_estoqueUnificadoBipCompact_(bip))+'">'
-    +'<span class="estoque-unico-lote-dot" style="background:'+st.cor+'"></span>'
-    +'<div class="estoque-unico-lote-main"><div class="estoque-unico-lote-top"><span class="estoque-unico-lote-data">'+(lote.validade?fmt(lote.validade):'—')+'</span><span class="estoque-unico-lote-status" style="color:'+st.cor+'">'+st.txt+(res?' · resolvido':'')+'</span></div><div class="estoque-unico-lote-coleta"><i class="ti '+(bip&&bip.viaNFe?'ti-file-invoice':'ti-scan')+'"></i> '+escHtml(_estoqueUnificadoBipCompact_(bip))+'</div></div>'
+function _estoqueUnificadoLoteHtml_(lote,resolvidos,zeroIdx){
+  var d=daysDiff(lote.validade),st=_estoqueUnificadoLoteStatus_(d),bip=buscarBipagem(lote.cod,lote.validade);
+  var zeroInfo=_auraZeroInfoLote_(lote,zeroIdx),res=_auraLoteResolvido_(lote,resolvidos,zeroIdx);
+  var statusTxt=zeroInfo?'0 confirmado · resolvido':(st.txt+(res?' · resolvido':''));
+  var statusCor=res?'var(--green)':st.cor;
+  var coletaTxt=zeroInfo?_auraFmtZeroConfirmado_(zeroInfo):_estoqueUnificadoBipCompact_(bip);
+  return '<div class="estoque-unico-lote" title="'+escHtml(coletaTxt)+'">'
+    +'<span class="estoque-unico-lote-dot" style="background:'+statusCor+'"></span>'
+    +'<div class="estoque-unico-lote-main"><div class="estoque-unico-lote-top"><span class="estoque-unico-lote-data">'+(lote.validade?fmt(lote.validade):'—')+'</span><span class="estoque-unico-lote-status" style="color:'+statusCor+'">'+statusTxt+'</span></div><div class="estoque-unico-lote-coleta"><i class="ti '+(zeroInfo?'ti-circle-check':(bip&&bip.viaNFe?'ti-file-invoice':'ti-scan'))+'"></i> '+escHtml(coletaTxt)+'</div></div>'
     +'<span class="estoque-unico-lote-qtd">'+(Number(lote.qtde)||0)+' un</span>'
     +'</div>';
 }
@@ -16150,7 +16187,7 @@ function renderEstoque(){
   var setorSel=document.getElementById('fSetor');if(setorAtivo&&setorSel)setorSel.value=setorAtivo;
   var setor=setorAtivo||String((setorSel||{}).value||'');
   var mostrarResolvidos=!!((document.getElementById('chkMostrarResolvidos')||{}).checked);
-  var resolvidos=getResolvidos(),promoAtivas=getPromoAtivas();
+  var resolvidos=getResolvidos(),promoAtivas=getPromoAtivas(),zeroIdx=_auraZeroConfirmadoIndex_();
 
   var base=products.filter(function(p){
     var nomeNorm=normNome(p.nome||'');if(!nomeNorm)return false;
@@ -16165,6 +16202,8 @@ function renderEstoque(){
   var grupos=ordem.map(function(k){return gruposMap[k];});
 
   function loteCasaFiltro(p){
+    var resolvido=_auraLoteResolvido_(p,resolvidos,zeroIdx);
+    if(resolvido&&(_multiStatusFilter||status))return false;
     var st=statusFromDays(daysDiff(p.validade));
     if(_multiStatusFilter)return _multiStatusFilter.indexOf(st)>=0;
     if(!status)return true;
@@ -16172,7 +16211,9 @@ function renderEstoque(){
     return st===status;
   }
   grupos=grupos.filter(function(g){return g.lotes.some(loteCasaFiltro);});
+  function grupoResolvido_(g){return g.lotes.length>0&&g.lotes.every(function(p){return _auraLoteResolvido_(p,resolvidos,zeroIdx);});}
   grupos.sort(function(a,b){
+    var ra=grupoResolvido_(a),rb=grupoResolvido_(b);if(ra!==rb)return ra?1:-1;
     function minD(g){var ds=g.lotes.map(function(p){var d=daysDiff(p.validade);return d===null?99999:d;});return Math.min.apply(null,ds);}
     return minD(a)-minD(b);
   });
@@ -16184,7 +16225,7 @@ function renderEstoque(){
   }
   if(!grupos.length){container.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:13px"><i class="ti ti-package-off" style="font-size:36px;display:block;margin-bottom:10px;opacity:.4"></i>Nenhum produto encontrado com estes filtros.</div>';return;}
 
-  container.innerHTML=grupos.map(function(grupo){
+  function renderGrupoEstoque_(grupo){
     var lotes=grupo.lotes.slice().sort(function(a,b){var da=daysDiff(a.validade);da=da===null?99999:da;var db=daysDiff(b.validade);db=db===null?99999:db;return da-db;});
     var p=lotes[0],idx=products.indexOf(p),days=daysDiff(p.validade),s=statusFromDays(days),hdrCls='urg-card-header status-'+(days===null?'none':s),badgeSt='status-'+(days===null?'none':s);
     var barras=(grupo.cod||'').replace(/[^0-9]/g,''),forn=p.fornecedor||bancoFornecedor[barras]||bancoFornecedorNome[normNome(p.nome||'')]||'—';
@@ -16194,7 +16235,9 @@ function renderEstoque(){
     var venceExt=days===null?'Sem data':days<0?'Vencido há '+Math.abs(days)+' dias':days===0?'Vence hoje':days===1?'Vence amanhã':'Faltam '+days+' dias';
     var custo=Number(p.custo||bancoCusto[barras]||0)||0,precoNormal=Number(p.precoNormal||0)||0;
     var pp=lotes.find(function(x){return Number(x.precoPromo)>0;})||p,precoPromo=Number(pp.precoPromo||0)||0,pct=Number(pp.pctDesc||0)||0,promoAtiva=promoAtivas.includes(grupo.cod)||precoPromo>0;
-    var jaResolvido=resolvidos.includes(produtoChave(p));
+    var grupoResolvido=grupoResolvido_(grupo);
+    var zeroGrupo=lotes.some(function(x){return !!_auraZeroInfoLote_(x,zeroIdx);});
+    var jaResolvido=grupoResolvido;
     var thumb=barras?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+barras+'"><img data-cod="'+barras+'" data-nome="'+escHtml(cleanNome(p.nome||''))+'" alt="" loading="lazy"></div></div>':'<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
     var needsPromo=lotes.some(function(x){return ['vencido','critico','urgente','atencao'].includes(statusFromDays(daysDiff(x.validade)));});
     return '<div class="urg-card estoque-unico-card'+(jaResolvido?' resolvido':'')+'" onclick="abrirProdutoModal(\''+escHtml(grupo.cod||'')+'\')" style="cursor:pointer">'
@@ -16202,7 +16245,7 @@ function renderEstoque(){
       +'<div class="urg-card-body">'
         +'<div class="urg-card-mid">'+thumb+'<div class="urg-card-info"><div class="urg-info-field"><span class="urg-info-lbl">Lote mais próximo</span><span class="urg-info-val" style="color:'+venceCor+'">'+venceTxt+'</span></div><div class="urg-info-field"><span class="urg-info-lbl">Setor</span><span class="urg-info-val">'+escHtml(p.setor||'—')+'</span></div></div><div class="urg-card-right">'+speedometerSVG(days,s)+'<div class="urg-card-right-extenso" style="color:'+venceCor+'">'+venceExt+'</div><div class="urg-card-right-stats"><div><span class="urg-stat-lbl">Data</span><div class="urg-stat-val" style="color:'+venceCor+'">'+(p.validade?fmtDataExtenso(p.validade):'—')+'</div></div><div><span class="urg-stat-lbl">Total</span><div class="urg-stat-val">'+total+'</div></div></div></div></div>'
         +'<div class="estoque-unico-fin"><div><span>Custo</span><b>'+(custo?fmtR(custo):'—')+'</b></div><div><span>Venda</span><b>'+(precoNormal?fmtR(precoNormal):'—')+'</b></div><div class="promo"><span>Promoção</span><b>'+(precoPromo?fmtR(precoPromo)+(pct?' · '+fmtPct(pct):''):(promoAtiva?'Ativa':'—'))+'</b></div></div>'
-        +'<div class="estoque-unico-lotes">'+lotes.slice(0,3).map(function(x){return _estoqueUnificadoLoteHtml_(x,resolvidos);}).join('')+(lotes.length>3?'<div class="estoque-unico-more">+'+(lotes.length-3)+' lote(s) adicional(is) · clique no card para ver todos</div>':'')+'</div>'
+        +'<div class="estoque-unico-lotes">'+lotes.slice(0,3).map(function(x){return _estoqueUnificadoLoteHtml_(x,resolvidos,zeroIdx);}).join('')+(lotes.length>3?'<div class="estoque-unico-more">+'+(lotes.length-3)+' lote(s) adicional(is) · clique no card para ver todos</div>':'')+'</div>'
         +'<div class="estoque-unico-meta"><div class="estoque-unico-meta-line" title="'+escHtml(forn)+'"><i class="ti ti-truck-delivery"></i> <b>Fornecedor:</b> '+escHtml(forn)+'</div><div class="estoque-unico-meta-line"><i class="ti ti-scan"></i> <b>Última coleta do lote próximo:</b> '+escHtml(_estoqueUnificadoBipCompact_(buscarBipagem(p.cod,p.validade)))+'</div></div>'
       +'</div>'
       +'<div class="estoque-unico-actions">'
@@ -16211,7 +16254,11 @@ function renderEstoque(){
         +'<button class="abtn encarte" onclick="event.stopPropagation();abrirEncarteDoProduto(\''+escHtml(grupo.cod||'')+'\')"><i class="ti ti-photo"></i> Encarte</button>'
         +'<button class="abtn" style="border-color:'+(jaResolvido?'var(--tx2)':'var(--green)')+';color:'+(jaResolvido?'var(--tx2)':'var(--green)')+'" onclick="event.stopPropagation();openResolvidoModal('+idx+')"><i class="ti ti-circle-check"></i> '+(jaResolvido?'OK':'Resolvido')+'</button>'
       +'</div></div>';
-  }).join('');
+  }
+  var ativos=[],resolvidosHtml=[];
+  grupos.forEach(function(g){var h=renderGrupoEstoque_(g);if(grupoResolvido_(g))resolvidosHtml.push(h);else ativos.push(h);});
+  var sep=resolvidosHtml.length?'<div class="estoque-unico-resolvidos-divider"><i class="ti ti-circle-check"></i><span><b>Resolvidos</b> · inclui produtos confirmados com estoque 0 pelos colaboradores. Eles não entram mais nos filtros de urgência, mas continuam na lista de retirada da data de validade.</span></div>':'';
+  container.innerHTML=ativos.join('')+(mostrarResolvidos?sep+resolvidosHtml.join(''):'');
   resolverFotosTarefasArea(container);
 }
 
