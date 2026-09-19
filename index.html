@@ -4906,7 +4906,7 @@ function toggleTheme() {
         <div class="form-row"><label>Código de barras</label><input type="text" id="eCod" placeholder="7896436103414" oninput="drawEncarte()" style="font-family:monospace"></div>
         <div class="form-row-2">
           <div class="form-row"><label>Preco normal (DE)</label><input type="text" id="eDe" placeholder="R$ 18,99" oninput="onDeChange()"></div>
-          <div class="form-row"><label>Preco promocao (POR)</label><input type="text" id="ePor" placeholder="R$ 12,10" oninput="onPorChange()"></div>
+          <div class="form-row"><label>Preco promocao (POR)</label><div style="display:flex;gap:6px;align-items:center"><input type="text" id="ePor" placeholder="R$ 12,10" oninput="onPorChange()" style="flex:1"><button type="button" class="btn btn-sm" onclick="aplicarCharmEncarte_()" title="Aplicar preço psicológico com final ,99"><i class="ti ti-sparkles"></i> ,99</button></div></div>
         </div>
         <div id="custoPainel" style="display:none;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:10px 14px;margin-bottom:13px">
           <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:8px;display:flex;align-items:center;gap:5px">
@@ -5124,7 +5124,7 @@ function toggleTheme() {
 
       <div id="tarefaComercialWrap" style="display:none;border:1px solid color-mix(in srgb,var(--green) 45%,var(--bds));border-radius:var(--rl);padding:12px;background:color-mix(in srgb,var(--green) 5%,var(--bg2))">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-          <div><div style="font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.05em"><i class="ti ti-cash"></i> Preço da ação</div><div style="font-size:10.5px;color:var(--tx2);margin-top:2px">Mesmo cálculo usado no gerador de encarte: custo, preço normal, desconto e margem.</div></div>
+          <div><div style="font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.05em"><i class="ti ti-cash"></i> Preço da ação</div><div style="font-size:10.5px;color:var(--tx2);margin-top:2px">Mesmo cálculo usado no gerador de encarte: custo, preço normal, desconto e margem. A sugestão da AURA aplica preço psicológico com final <b>,99</b> sem ignorar o piso financeiro.</div></div>
           <div id="tarefaQtdRefBadge" style="padding:5px 9px;border:1px solid var(--bds);border-radius:8px;font-size:11px;font-weight:800;color:var(--tx)">0 un.</div>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px">
@@ -5135,7 +5135,7 @@ function toggleTheme() {
         <div style="display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);gap:8px;align-items:end">
           <div>
             <label style="font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;display:block;margin-bottom:4px">Preço que será praticado</label>
-            <div style="display:flex;gap:6px"><input id="tarefaPrecoAcao" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" oninput="tarefaAtualizarComercial_(true)" style="flex:1;font-size:15px;font-weight:800;padding:8px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none"><button type="button" class="btn btn-sm" onclick="tarefaUsarPrecoSugerido_()" title="Usar a mesma sugestão inicial do gerador de encarte">Usar sugerido</button></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap"><input id="tarefaPrecoAcao" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" oninput="tarefaAtualizarComercial_(true)" style="flex:1;min-width:145px;font-size:15px;font-weight:800;padding:8px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none"><button type="button" class="btn btn-sm" onclick="tarefaUsarPrecoSugerido_()" title="Usar a mesma sugestão inicial do gerador de encarte">Usar sugerido</button><button type="button" class="btn btn-sm" onclick="tarefaAplicarCharm_()" title="Ajusta para final ,99 sem romper o piso de margem"><i class="ti ti-sparkles"></i> Charm ,99</button></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px">
             <div class="rel-card-sm" style="padding:7px;text-align:center"><div style="font-size:8.5px;color:var(--tx2);text-transform:uppercase">Margem</div><div id="tarefaMargemInfo" style="font-size:13px;font-weight:800">—</div></div>
@@ -6863,6 +6863,43 @@ function fmtPreco(n){
   return n.toFixed(2).replace('.',',');
 }
 
+// v6.80 — preço psicológico / charm pricing.
+// Regra: o cálculo financeiro continua mandando. O final ,99 é aplicado somente
+// como acabamento comercial do preço sugerido. Nunca baixa o preço abaixo do
+// piso informado e nunca altera silenciosamente um preço promocional já gravado.
+function auraPrecoCharm_(valor, opcoes){
+  opcoes=opcoes||{};
+  valor=Number(valor)||0;if(!(valor>0))return 0;
+  var piso=Math.max(0,Number(opcoes.piso)||0);
+  var custo=Math.max(0,Number(opcoes.custo)||0);
+  var margemMin=Number(opcoes.margemMinPct);
+  if(custo>0&&isFinite(margemMin)&&margemMin>0&&margemMin<100){
+    piso=Math.max(piso,custo/(1-margemMin/100));
+  }
+  var modo=String(opcoes.modo||'seguro');
+  var cent=Math.round(valor*100)/100;
+  // Se já termina em ,99, mantém.
+  if(Math.abs((cent-Math.floor(cent))-0.99)<0.0001 && cent+0.0001>=piso)return cent;
+  var inteiro=Math.floor(cent);
+  var abaixo=Math.max(0,inteiro-0.01);   // ex.: 15,20 -> 14,99
+  var acima=inteiro+0.99;                // ex.: 15,20 -> 15,99
+  var escolhido=0;
+  if(modo==='promocional'){
+    // Em promoções, privilegia o ,99 abaixo do alvo quando a margem permitir.
+    if(abaixo>0&&abaixo+0.0001>=piso)escolhido=abaixo;
+    else escolhido=acima;
+  }else{
+    // Em preço sugerido de segurança, escolhe o ,99 mais próximo que respeite o piso.
+    var cand=[];if(abaixo>0&&abaixo+0.0001>=piso)cand.push(abaixo);if(acima+0.0001>=piso)cand.push(acima);
+    if(!cand.length){var base=Math.max(valor,piso),i=Math.floor(base);escolhido=i+0.99;if(escolhido<base)escolhido+=1;}
+    else{cand.sort(function(a,b){return Math.abs(a-valor)-Math.abs(b-valor);});escolhido=cand[0];}
+  }
+  // Se o escolhido ainda ficou abaixo do piso, sobe ao próximo ,99.
+  if(escolhido+0.0001<piso){var bi=Math.floor(piso);escolhido=bi+0.99;if(escolhido<piso)escolhido+=1;}
+  return Math.round(escolhido*100)/100;
+}
+function auraCharmFmt_(valor,opcoes){var n=auraPrecoCharm_(valor,opcoes);return n>0?'R$ '+fmtPreco(n):'';}
+
 // Evita loop de recalculo
 var _recalcLock=false;
 var _custoProduto=null;
@@ -6934,6 +6971,7 @@ function onDeChange(){
     pctEl.value=calc.toFixed(0)+'%';
   } else if(de&&!isNaN(pct)&&pct>0){
     var novoPor=de*(1-pct/100);
+    novoPor=auraPrecoCharm_(novoPor,{modo:'promocional',custo:_custoProduto||0,margemMinPct:10});
     document.getElementById('ePor').value='R$ '+fmtPreco(novoPor);
   }
   _recalcLock=false;
@@ -6964,12 +7002,17 @@ function onPctChange(){
   var pct=parseFloat((pctEl.value||'').replace('%','').replace(',','.'));
   if(de&&!isNaN(pct)&&pct>=0&&pct<=100){
     var novoPor=de*(1-pct/100);
+    novoPor=auraPrecoCharm_(novoPor,{modo:'promocional',custo:_custoProduto||0,margemMinPct:10});
     document.getElementById('ePor').value='R$ '+fmtPreco(novoPor);
   }
   _recalcLock=false;
   drawEncarte();
 }
 
+function aplicarCharmEncarte_(){
+  var el=document.getElementById('ePor');if(!el)return;var atual=parsePreco(el.value);if(!(atual>0)){mostrarToast('Informe o preço promocional primeiro.','warn');return;}
+  var novo=auraPrecoCharm_(atual,{modo:'promocional',custo:_custoProduto||0,margemMinPct:10});el.value='R$ '+fmtPreco(novo);onPorChange();mostrarToast('Preço psicológico aplicado: R$ '+fmtPreco(novo),'ok');
+}
 function setCor(c){document.getElementById('eCorTexto').value=c;drawEncarte();}
 function setCorValor(c){document.getElementById('eCorValor').value=c;drawEncarte();}
 function setCorUnidade(c){document.getElementById('eCorUnidade').value=c;drawEncarte();}
@@ -7377,10 +7420,9 @@ function openEncarteModal(idx){
     if(p.precoPromo){
       porSugerido=fmtR(p.precoPromo);
     } else if(_custoProduto&&_custoProduto>0){
-      // Custo + 10% markup, arredondado para terminar em ,99
+      // Mantém a regra financeira existente e aplica o acabamento psicológico ,99.
       var _base=_custoProduto*1.10;
-      var _sugerido=Math.ceil(_base)-0.01;
-      if(_sugerido<_base) _sugerido+=1;
+      var _sugerido=auraPrecoCharm_(_base,{modo:'seguro',custo:_custoProduto,margemMinPct:10});
       porSugerido='R$ '+_sugerido.toFixed(2).replace('.',',');
     }
     document.getElementById('ePor').value=porSugerido;
@@ -15189,9 +15231,10 @@ function tarefaQtdReferencia_(){
 }
 function tarefaPrecoSugeridoProduto_(p){
   if(!p)return null;
+  // Promoção já cadastrada é respeitada exatamente como veio do banco.
   var promo=Number(p.precoPromo)||0;if(promo>0)return promo;
   var custo=Number(p.custo)||0;
-  if(custo>0){var base=custo*1.10,sug=Math.ceil(base)-0.01;if(sug<base)sug+=1;return Math.round(sug*100)/100;}
+  if(custo>0){var base=custo*1.10;return auraPrecoCharm_(base,{modo:'seguro',custo:custo,margemMinPct:10});}
   return null;
 }
 function tarefaSelecionarMaterial_(tipo){
@@ -15217,6 +15260,12 @@ function tarefaAtualizarComercial_(preservarPreco){
   else if(margem!==null&&margem<10){al.style.display='block';al.style.background='rgba(186,117,23,.12)';al.style.color='var(--amber)';al.innerHTML='<i class="ti ti-alert-circle"></i> Margem baixa. O preço cobre o custo, mas com pouca folga.';}
 }
 function tarefaUsarPrecoSugerido_(){var e=document.getElementById('tarefaPrecoAcao');if(e&&_tarefaPrecoSugeridoAtual){e.value=Number(_tarefaPrecoSugeridoAtual).toFixed(2);tarefaAtualizarComercial_(true);}}
+function tarefaAplicarCharm_(){
+  var e=document.getElementById('tarefaPrecoAcao'),p=tarefaProdutoPorFormulario_();if(!e||!p)return;
+  var atual=Number(String(e.value||'').replace(',','.'))||0;if(!(atual>0)){mostrarToast('Informe um preço para aplicar o preço psicológico.','warn');return;}
+  var custo=Number(p.custo)||0,novo=auraPrecoCharm_(atual,{modo:'promocional',custo:custo,margemMinPct:10});
+  e.value=novo.toFixed(2);tarefaAtualizarComercial_(true);mostrarToast('Preço psicológico aplicado: '+novo.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}),'ok');
+}
 
 // Chamado pelas opções do menu "Tarefa" do modal de produto.
 function abrirTarefaProduto(cod,tipo){
