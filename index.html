@@ -2339,6 +2339,231 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 @media(max-width:900px){.nfe-hist-kpis{grid-template-columns:repeat(2,1fr)}.nfe-hist-filters{grid-template-columns:1fr}.nfe-hist-meta-grid{grid-template-columns:repeat(2,1fr)}.nfe-hist-item-hd{grid-template-columns:1fr 1fr}.nfe-hist-modal-back{padding:8px}.nfe-hist-modal{width:100%;max-height:96vh}}
 </style>
 
+<style id="v679-estoque-legibilidade">
+/* ═══ v6.79 — ESTOQUE UNIFICADO: mesma densidade, leitura muito melhor ═══ */
+.estoque-unico-grid{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:10px;
+  align-items:stretch;
+}
+.estoque-unico-card{
+  min-width:0;
+  height:100%;
+  border-color:rgba(255,255,255,.14);
+  box-shadow:0 2px 8px rgba(0,0,0,.14);
+  transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease;
+}
+.estoque-unico-card:hover{
+  transform:translateY(-1px);
+  border-color:rgba(255,255,255,.28);
+  box-shadow:0 7px 20px rgba(0,0,0,.22);
+}
+.estoque-unico-card .urg-card-header{
+  min-height:46px;
+  padding-top:8px;
+  padding-bottom:8px;
+  padding-right:9px;
+  align-items:center;
+}
+.estoque-unico-card .urg-card-nome{
+  font-size:11.5px;
+  line-height:1.18;
+  font-weight:850;
+  -webkit-line-clamp:2;
+}
+.estoque-unico-card .urg-card-cod{
+  font-size:8.2px;
+  line-height:1.15;
+  margin-top:3px;
+  color:rgba(255,255,255,.78);
+}
+.estoque-unico-card .urg-card-header>.badge{
+  font-size:8px!important;
+  padding:3px 6px!important;
+  flex-shrink:0;
+}
+.estoque-unico-card .urg-card-body{
+  padding:9px 9px 8px;
+  gap:8px;
+}
+.estoque-unico-card .urg-card-mid{
+  display:grid;
+  grid-template-columns:62px minmax(0,1fr) 62px;
+  gap:8px;
+  align-items:center;
+}
+.estoque-unico-card .urg-photobox,
+.estoque-unico-card .urg-photobox-imgwrap,
+.estoque-unico-card .urg-photobox-empty{
+  width:62px;
+  min-width:62px;
+  height:62px;
+  border-radius:9px;
+}
+.estoque-unico-card .urg-photobox img{max-width:62px;max-height:62px}
+.estoque-unico-card .urg-card-info{gap:7px;min-width:0}
+.estoque-unico-card .urg-info-field{min-width:0}
+.estoque-unico-card .urg-info-lbl{
+  display:block;
+  font-size:7.7px;
+  line-height:1.1;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  color:var(--tx2);
+  margin-bottom:2px;
+}
+.estoque-unico-card .urg-info-val{
+  display:block;
+  font-size:10.5px;
+  line-height:1.18;
+  font-weight:800;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+.estoque-unico-card .urg-card-right{
+  width:62px;
+  gap:2px;
+}
+.estoque-unico-card .urg-card-right svg{width:58px;height:44px}
+.estoque-unico-card .urg-card-right-extenso{
+  font-size:8.2px;
+  line-height:1.12;
+  margin-top:-4px;
+  font-weight:800;
+}
+.estoque-unico-card .urg-card-right-stats{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:3px;
+  margin-top:2px;
+}
+.estoque-unico-card .urg-stat-lbl{
+  display:block;
+  font-size:6.8px;
+  line-height:1;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+  color:var(--tx2);
+}
+.estoque-unico-card .urg-stat-val{
+  display:block;
+  font-size:8.6px;
+  line-height:1.15;
+  font-weight:850;
+}
+.estoque-unico-fin{gap:5px}
+.estoque-unico-fin>div{
+  padding:6px 7px;
+  border-radius:7px;
+  min-height:39px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.estoque-unico-fin span{
+  font-size:7.2px;
+  line-height:1;
+  letter-spacing:.045em;
+}
+.estoque-unico-fin b{
+  font-size:10px;
+  line-height:1.15;
+  margin-top:3px;
+  font-weight:850;
+}
+.estoque-unico-lotes{gap:5px}
+.estoque-unico-lote{
+  grid-template-columns:7px minmax(0,1fr) auto;
+  gap:7px;
+  padding:6px 7px;
+  border-radius:7px;
+  min-height:43px;
+}
+.estoque-unico-lote-dot{width:7px;height:7px}
+.estoque-unico-lote-top{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:5px;
+  align-items:baseline;
+}
+.estoque-unico-lote-data{
+  font-size:9.2px;
+  line-height:1.12;
+  font-weight:900;
+}
+.estoque-unico-lote-status{
+  font-size:8px;
+  line-height:1.12;
+  font-weight:750;
+  overflow:visible;
+  text-overflow:clip;
+  white-space:normal;
+}
+.estoque-unico-lote-coleta{
+  font-size:7.8px;
+  line-height:1.2;
+  margin-top:3px;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  color:var(--tx2);
+}
+.estoque-unico-lote-qtd{
+  font-size:9.2px;
+  line-height:1.1;
+  font-weight:900;
+  align-self:center;
+}
+.estoque-unico-more{
+  font-size:8px;
+  line-height:1.25;
+  padding:2px 4px;
+}
+.estoque-unico-meta{
+  gap:4px;
+  padding-top:6px;
+}
+.estoque-unico-meta-line{
+  font-size:8.2px;
+  line-height:1.25;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+}
+.estoque-unico-actions{
+  gap:5px;
+  padding:7px 8px 8px;
+}
+.estoque-unico-actions .abtn{
+  min-height:28px;
+  font-size:8.8px!important;
+  line-height:1.1;
+  padding:5px 4px!important;
+  font-weight:800;
+}
+.estoque-unico-actions .abtn i{font-size:10px}
+.estoque-unico-filter-note{font-size:9.5px}
+
+/* Mantém 5 por linha em desktop de uso normal; reduz só quando realmente necessário. */
+@media(max-width:1180px){.estoque-unico-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:930px){.estoque-unico-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){
+  .estoque-unico-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important}
+  .estoque-unico-card .urg-card-header{min-height:42px!important;padding:6px 6px 6px 28px!important}
+  .estoque-unico-card .urg-card-nome{font-size:9px!important;line-height:1.15!important}
+  .estoque-unico-card .urg-card-cod{font-size:7px!important}
+  .estoque-unico-card .urg-card-body{padding:7px!important;gap:6px!important}
+  .estoque-unico-card .urg-card-mid{grid-template-columns:48px minmax(0,1fr) 48px!important;gap:6px!important}
+  .estoque-unico-card .urg-photobox,.estoque-unico-card .urg-photobox-imgwrap,.estoque-unico-card .urg-photobox-empty{width:48px!important;height:48px!important;min-width:48px!important}
+  .estoque-unico-card .urg-card-right{width:48px!important}
+  .estoque-unico-card .urg-card-right svg{width:46px!important;height:34px!important}
+  .estoque-unico-card .urg-info-lbl{font-size:6.8px!important}.estoque-unico-card .urg-info-val{font-size:8.8px!important}
+  .estoque-unico-fin span{font-size:6.4px!important}.estoque-unico-fin b{font-size:8.4px!important}
+  .estoque-unico-lote-data{font-size:8px!important}.estoque-unico-lote-status{font-size:7px!important}.estoque-unico-lote-coleta{font-size:6.8px!important}.estoque-unico-lote-qtd{font-size:8px!important}
+  .estoque-unico-meta-line{font-size:7.2px!important}.estoque-unico-actions .abtn{font-size:7.5px!important;min-height:26px!important}
+}
+@media(max-width:430px){.estoque-unico-grid{grid-template-columns:1fr!important}}
+</style>
 </head>
 <body>
 
@@ -11835,7 +12060,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.78-estoque-card-unico-sem-redundancia';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.79-estoque-unificado-legivel';
 var currentTabName='dashboard';
 function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma visão de Estoque */ return 'unificado'; }
 function goTab(name){
