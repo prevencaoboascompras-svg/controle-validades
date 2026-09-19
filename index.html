@@ -2246,6 +2246,59 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 @media(max-width:650px){#sec-acoesfornecedores .af-title{font-size:20px}#sec-acoesfornecedores .af-sub{font-size:12px}#sec-acoesfornecedores .af-grid{grid-template-columns:1fr}#sec-acoesfornecedores .af-span2,#sec-acoesfornecedores .af-span4{grid-column:span 1}#sec-acoesfornecedores .af-kpis{grid-template-columns:1fr 1fr}#sec-acoesfornecedores .af-kpi b{font-size:22px}}
 
 
+
+/* ═══ v6.78 — ESTOQUE REALMENTE UNIFICADO: 1 TELA / 1 CARD POR PRODUTO ═══ */
+.estoque-unico-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.estoque-unico-title{font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
+.estoque-unico-sub{font-size:11px;color:var(--tx2);margin-top:3px;line-height:1.45}
+.estoque-unico-filtros{display:grid;grid-template-columns:minmax(220px,1fr) 170px auto auto;gap:8px;align-items:center;width:100%;margin-bottom:14px}
+.estoque-unico-filtros input[type="text"],.estoque-unico-filtros select{width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;min-width:0}
+.estoque-unico-filtros .busca-wrap{display:flex;gap:6px;min-width:0}
+.estoque-unico-filtros .resolver-wrap{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--tx2);white-space:nowrap}
+.estoque-unico-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:stretch}
+.estoque-unico-card{min-width:0;height:100%}
+.estoque-unico-card .urg-card-body{padding:9px 10px;gap:7px}
+.estoque-unico-card .urg-card-header{padding-top:8px;padding-bottom:8px;padding-right:9px}
+.estoque-unico-card .urg-card-nome{font-size:11px;line-height:1.2}
+.estoque-unico-card .urg-card-cod{font-size:8px}
+.estoque-unico-card .urg-card-mid{gap:7px}
+.estoque-unico-card .urg-photobox{width:58px;min-width:58px;height:58px}
+.estoque-unico-card .urg-photobox-imgwrap,.estoque-unico-card .urg-photobox-empty{width:58px;height:58px}
+.estoque-unico-card .urg-photobox img{max-width:58px;max-height:58px}
+.estoque-unico-card .urg-card-info{gap:5px}
+.estoque-unico-card .urg-info-lbl{font-size:7.5px}
+.estoque-unico-card .urg-info-val{font-size:10px}
+.estoque-unico-card .urg-card-right{width:66px;gap:2px}
+.estoque-unico-card .urg-card-right svg{width:66px;height:54px}
+.estoque-unico-card .urg-card-right-extenso{font-size:8px;margin-top:-6px}
+.estoque-unico-card .urg-stat-lbl{font-size:7px}
+.estoque-unico-card .urg-stat-val{font-size:9px}
+.estoque-unico-fin{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.estoque-unico-fin>div{background:var(--bg2);border:1px solid var(--bd);border-radius:7px;padding:5px 6px;min-width:0}
+.estoque-unico-fin span{display:block;font-size:6.8px;text-transform:uppercase;letter-spacing:.03em;color:var(--tx2)}
+.estoque-unico-fin b{display:block;font-size:9.5px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.estoque-unico-fin .promo b{color:var(--green)}
+.estoque-unico-lotes{display:flex;flex-direction:column;gap:4px}
+.estoque-unico-lote{display:grid;grid-template-columns:6px minmax(0,1fr) auto;gap:6px;align-items:center;padding:5px 6px;border-radius:7px;background:var(--bg2);border:1px solid var(--bd);min-width:0}
+.estoque-unico-lote-dot{width:6px;height:6px;border-radius:50%}
+.estoque-unico-lote-main{min-width:0}
+.estoque-unico-lote-top{display:flex;gap:5px;align-items:baseline;min-width:0}
+.estoque-unico-lote-data{font-size:8.5px;font-weight:800;white-space:nowrap}
+.estoque-unico-lote-status{font-size:7.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.estoque-unico-lote-coleta{font-size:6.8px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.estoque-unico-lote-qtd{font-size:8.5px;font-weight:800;white-space:nowrap}
+.estoque-unico-more{font-size:7.5px;color:var(--tx2);text-align:center;padding:2px 0}
+.estoque-unico-meta{display:flex;flex-direction:column;gap:3px;padding-top:5px;border-top:1px solid var(--bd);min-width:0}
+.estoque-unico-meta-line{font-size:8px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.estoque-unico-meta-line b{color:var(--tx);font-weight:700}
+.estoque-unico-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:7px 9px;border-top:1px solid var(--bd);background:var(--bg2)}
+.estoque-unico-actions .abtn{width:100%;justify-content:center;font-size:8.5px;padding:5px 4px;min-width:0}
+.estoque-unico-filter-note{grid-column:1/-1;font-size:9px;color:var(--tx2);margin:-3px 0 2px;display:none}
+.estoque-unico-filter-note.show{display:block}
+@media(max-width:1450px){.estoque-unico-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:1120px){.estoque-unico-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.estoque-unico-filtros{grid-template-columns:minmax(180px,1fr) 150px auto}}
+@media(max-width:820px){.estoque-unico-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.estoque-unico-filtros{grid-template-columns:1fr 135px}.estoque-unico-filtros .resolver-wrap{grid-column:1/2}.estoque-unico-filtros .limpar-btn{grid-column:2/3}}
+@media(max-width:520px){.estoque-unico-grid{grid-template-columns:1fr 1fr;gap:7px}.estoque-unico-filtros{grid-template-columns:1fr}.estoque-unico-filtros>*{grid-column:auto!important}.estoque-unico-card .urg-card-nome{font-size:8.5px}.estoque-unico-card .urg-card-cod{font-size:6.5px}.estoque-unico-card .urg-photobox,.estoque-unico-card .urg-photobox-imgwrap,.estoque-unico-card .urg-photobox-empty{width:45px;height:45px;min-width:45px}.estoque-unico-card .urg-card-right{width:48px}.estoque-unico-card .urg-card-right svg{width:48px;height:42px}.estoque-unico-fin b{font-size:7.5px}.estoque-unico-lote-data{font-size:7px}.estoque-unico-lote-status,.estoque-unico-lote-coleta{font-size:6px}.estoque-unico-actions .abtn{font-size:7px}.estoque-unico-meta-line{font-size:6.5px}}
 </style>
 
 <style>
@@ -4221,93 +4274,36 @@ function toggleTheme() {
     </div>
   </div>
   <div id="sec-estoque" class="sec">
-    <div class="estoque-unificado-head">
+    <div class="estoque-unico-head">
       <div>
-        <div class="estoque-unificado-title"><i class="ti ti-package" style="color:var(--blue)"></i> Estoque e Validades</div>
-        <div class="estoque-unificado-sub">Uma única área para consultar estoque, lotes e vencimentos. Alterne a visão sem sair da aba.</div>
-      </div>
-      <div class="estoque-modo-toggle">
-        <button type="button" id="estoqueModoProdutoBtn" class="active" onclick="setEstoqueModo('produto')"><i class="ti ti-packages"></i> Por produto</button>
-        <button type="button" id="estoqueModoValidadeBtn" onclick="setEstoqueModo('validades')"><i class="ti ti-calendar-due"></i> Por validade / lote</button>
+        <div class="estoque-unico-title"><i class="ti ti-packages" style="color:var(--blue)"></i> Estoque</div>
+        <div class="estoque-unico-sub">Visão única por produto: estoque total, todos os lotes/validades, urgência, promoção, fornecedor, responsável pela coleta e ações. Clique em qualquer card para abrir o detalhe completo.</div>
       </div>
     </div>
-    <div id="estoquePainelProdutos">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
-      <div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-package" style="color:var(--blue)"></i> Estoque por produto</div>
-        <p style="font-size:12px;color:var(--tx2)">Visão agrupada por produto — cada lote com sua validade e quantidade</p>
+    <div class="estoque-unico-filtros">
+      <div class="busca-wrap">
+        <input type="text" id="fBusca" placeholder="Buscar produto ou código..." oninput="renderEstoque()">
+        <button type="button" class="btn-scan" onclick="abrirScannerAura('fBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;width:100%">
-        <input type="text" id="estoqueBusca" placeholder="Buscar produto..." oninput="renderEstoque()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:0">
-        <button type="button" class="btn-scan" onclick="abrirScannerAura('estoqueBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
-        <select id="estoqueSetor" onchange="setorAtivo=this.value;atualizarSetorGridDestaque();renderEstoque()" style="display:none;font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none">
-          <option value="">Todos os setores</option>
-          <option value="">Todos os setores</option>
-<option>Açougue</option>
-<option>Bazar</option>
-<option>Bebidas</option>
-<option>Congelados</option>
-<option>Frios</option>
-<option>Horti</option>
-<option>Laticínios</option>
-<option>Limpeza</option>
-<option>Outros</option>
-<option>Padaria</option>
-<option>Perfumaria</option>
-<option>Pet</option>
-<option>Pilhas/Baterias</option>
-<option>Seca</option>
-<option>Seca doce</option>
-        </select>
-      </div>
-    </div>
-    <div id="estoqueGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px"></div>
-    </div>
-    <div id="estoquePainelValidades" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin:2px 0 12px">
-        <div>
-          <div style="font-size:14px;font-weight:700">Validades por lote</div>
-          <div style="font-size:11px;color:var(--tx2);margin-top:2px">Visão individual de cada lote, com vencimento, quantidade, responsável pela coleta, promoção, encarte e resolução.</div>
-        </div>
-      </div>
-    <div class="filters">
-      <select id="fSetor" onchange="setorAtivo=this.value;_multiStatusFilter=null;renderTable();atualizarSetorGridDestaque()" style="display:none">
-        <option value="">Todos os setores</option>
-        <option value="">Todos os setores</option>
-<option>Açougue</option>
-<option>Bazar</option>
-<option>Bebidas</option>
-<option>Congelados</option>
-<option>Frios</option>
-<option>Horti</option>
-<option>Laticínios</option>
-<option>Limpeza</option>
-<option>Outros</option>
-<option>Padaria</option>
-<option>Perfumaria</option>
-<option>Pet</option>
-<option>Pilhas/Baterias</option>
-<option>Seca</option>
-<option>Seca doce</option>
-      </select>
-      <select id="fStatus" onchange="_multiStatusFilter=null;renderTable()" style="display:none">
+      <select id="fStatus" onchange="_multiStatusFilter=null;renderEstoque()">
         <option value="">Todos os status</option>
         <option value="vencido">Vencido</option>
-        <option value="critico">Critico (3d)</option>
+        <option value="critico">Crítico (3d)</option>
         <option value="urgente">Urgente (7d)</option>
-        <option value="atencao">Atencao (15d)</option>
+        <option value="atencao">Atenção (15d)</option>
         <option value="ok">OK</option>
         <option value="aguardando">Aguardando</option>
       </select>
-      <input type="text" id="fBusca" placeholder="Buscar produto ou código..." oninput="renderTable()">
-      <button type="button" class="btn-scan" onclick="abrirScannerAura('fBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2);cursor:pointer;white-space:nowrap">
-        <input type="checkbox" id="chkMostrarResolvidos" onchange="renderTable()" style="accent-color:var(--green)" checked>
-        Mostrar resolvidos
-      </label>
+      <label class="resolver-wrap"><input type="checkbox" id="chkMostrarResolvidos" onchange="renderEstoque()" style="accent-color:var(--green)" checked> Mostrar resolvidos</label>
+      <button type="button" class="btn btn-sm limpar-btn" onclick="limparFiltrosEstoqueUnificado_()"><i class="ti ti-filter-x"></i> Limpar filtros</button>
+      <select id="fSetor" onchange="setorAtivo=this.value;_multiStatusFilter=null;renderEstoque();atualizarSetorGridDestaque()" style="display:none">
+        <option value="">Todos os setores</option><option>Açougue</option><option>Bazar</option><option>Bebidas</option><option>Congelados</option><option>Frios</option><option>Horti</option><option>Laticínios</option><option>Limpeza</option><option>Outros</option><option>Padaria</option><option>Perfumaria</option><option>Pet</option><option>Pilhas/Baterias</option><option>Seca</option><option>Seca doce</option>
+      </select>
+      <div id="estoqueFiltroNota" class="estoque-unico-filter-note"></div>
     </div>
-    <div class="val-grid" id="valGrid"></div>
-    </div>
+    <div id="estoqueGrid" class="estoque-unico-grid"></div>
+    <!-- Compatibilidade interna: antigas rotinas que ainda chamam renderTable não criam uma segunda tela visível. -->
+    <div id="valGrid" style="display:none!important"></div>
   </div>
   <div id="sec-tarefas" class="sec">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
@@ -5488,6 +5484,7 @@ function fmtR(v){if(!v)return'--';return'R$ '+v.toFixed(2).replace('.',',');}
 function fmtPct(v){if(!v)return'--';var p=v<1?v*100:v;return p.toFixed(2).replace('.',',')+'%';}
 
 function renderTable(){
+  if(document.getElementById('estoqueGrid')){renderEstoque();return;}
   garantirDadosBipagem();
   var setor=document.getElementById('fSetor').value;
   var status=document.getElementById('fStatus').value;
@@ -6477,37 +6474,10 @@ function _ucIniciarAutoRefresh(){
 setTimeout(_ucIniciarAutoRefresh,1500);
 
 function filtrarSetor(setor){
-  // alterna: clicar de novo no mesmo setor remove o filtro
   setorAtivo=(setorAtivo===setor)?'':setor;
-
-  // sincroniza com o select da aba Validades (mesmo que não seja a aba atual)
-  var s=document.getElementById('fSetor');
-  if(s)s.value=setorAtivo;
-
-  // re-renderiza a aba em que o usuário está agora, sem trocar de aba
-  switch(currentTabName){
-    case 'validades': renderTable(); break;
-    case 'estoque': renderEstoque(); renderTable(); break;
-    case 'promocoes': renderPromos(); break;
-    case 'encartes':
-      renderEncartesAtivos();
-      if(setorAtivo)mostrarToast('Encartes não filtram por setor ainda.','warn');
-      break;
-    case 'relatorio':
-      renderRelatorio();
-      if(setorAtivo)mostrarToast('Relatório não filtra por setor ainda.','warn');
-      break;
-    case 'modalidades':
-      renderModalidades();
-      if(setorAtivo)mostrarToast('Modalidades não filtra por setor ainda.','warn');
-      break;
-    default:
-      // Dashboard/ajuda: abre a área unificada de Estoque.
-      setEstoqueModo('produto');
-      auraNav(document.getElementById('navEstoque'),'estoque');
-      renderEstoque();
-      renderTable();
-  }
+  var s=document.getElementById('fSetor');if(s)s.value=setorAtivo;
+  if(currentTabName!=='estoque')auraNav(document.getElementById('navEstoque'),'estoque');
+  else renderEstoque();
   atualizarSetorGridDestaque();
 }
 
@@ -6585,42 +6555,35 @@ function renderMetrics(){
 // filtro multi-status (usado pelos hero cards)
 var _multiStatusFilter=null;
 
+function _abrirEstoqueFiltrado_(){
+  if(currentTabName!=='estoque')auraNav(document.getElementById('navEstoque'),'estoque');
+  else renderEstoque();
+  setTimeout(function(){var g=document.getElementById('estoqueGrid');if(g)g.scrollIntoView({behavior:'smooth',block:'start'});},120);
+}
 function filtrarTudo(){
-  _multiStatusFilter=null;
-  goTab('validades');
-  document.getElementById('fBusca').value='';
-  document.getElementById('fSetor').value='';
-  document.getElementById('fStatus').value='';
-  renderTable();
+  _multiStatusFilter=null;setorAtivo='';
+  var q=document.getElementById('fBusca'),s=document.getElementById('fSetor'),st=document.getElementById('fStatus');
+  if(q)q.value='';if(s)s.value='';if(st)st.value='';
+  atualizarSetorGridDestaque();_abrirEstoqueFiltrado_();
 }
 function filtrarAtencaoGeral(){
   _multiStatusFilter=['vencido','critico','urgente','atencao'];
-  goTab('validades');
-  document.getElementById('fBusca').value='';
-  document.getElementById('fSetor').value='';
-  document.getElementById('fStatus').value='';
-  renderTable();
+  var q=document.getElementById('fBusca'),s=document.getElementById('fSetor'),st=document.getElementById('fStatus');
+  if(q)q.value='';if(s)s.value='';if(st)st.value='';
+  _abrirEstoqueFiltrado_();
 }
 function filtrarRisco(){
   _multiStatusFilter=['vencido','critico','urgente'];
-  goTab('validades');
-  document.getElementById('fBusca').value='';
-  document.getElementById('fSetor').value='';
-  document.getElementById('fStatus').value='';
-  renderTable();
+  var q=document.getElementById('fBusca'),s=document.getElementById('fSetor'),st=document.getElementById('fStatus');
+  if(q)q.value='';if(s)s.value='';if(st)st.value='';
+  _abrirEstoqueFiltrado_();
 }
 function filtrarMetrica(filt){
   _multiStatusFilter=null;
   if(filt==='todos'){filtrarTudo();return;}
-  goTab('validades');
-  var sel=document.getElementById('fStatus');
-  if(!sel)return;
-  document.getElementById('fBusca').value='';
-  document.getElementById('fSetor').value='';
-  sel.value=filt;
-  renderTable();
-  var sec=document.getElementById('estoquePainelValidades');
-  if(sec)setTimeout(function(){var tbl=sec.querySelector('.val-grid');if(tbl)tbl.scrollIntoView({behavior:'smooth',block:'start'});},150);
+  var q=document.getElementById('fBusca'),s=document.getElementById('fSetor'),st=document.getElementById('fStatus');
+  if(q)q.value='';if(s)s.value='';if(st)st.value=filt;
+  _abrirEstoqueFiltrado_();
 }
 
 var charts={};
@@ -11872,66 +11835,36 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.77-estoque-validades-unificados';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.78-estoque-card-unico-sem-redundancia';
 var currentTabName='dashboard';
-var estoqueModoAtual='produto';
-function setEstoqueModo(modo,semRender){
-  modo=modo==='validades'?'validades':'produto';
-  estoqueModoAtual=modo;
-  var pp=document.getElementById('estoquePainelProdutos'),pv=document.getElementById('estoquePainelValidades');
-  if(pp)pp.style.display=modo==='produto'?'':'none';
-  if(pv)pv.style.display=modo==='validades'?'':'none';
-  var bp=document.getElementById('estoqueModoProdutoBtn'),bv=document.getElementById('estoqueModoValidadeBtn');
-  if(bp)bp.classList.toggle('active',modo==='produto');
-  if(bv)bv.classList.toggle('active',modo==='validades');
-  var fs=document.getElementById('fSetor'),es=document.getElementById('estoqueSetor');
-  if(fs)fs.value=setorAtivo||'';
-  if(es)es.value=setorAtivo||'';
-  if(!semRender){if(modo==='validades')renderTable();else renderEstoque();}
-}
+function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma visão de Estoque */ return 'unificado'; }
 function goTab(name){
-  var solicitado=name;
-  if(name==='validades'){
-    name='estoque';
-    setEstoqueModo('validades',true);
-    var navE=document.getElementById('navEstoque');
-    if(navE){document.querySelectorAll('#auraNav button').forEach(function(x){x.classList.remove('active');});navE.classList.add('active');}
-  }
+  if(name==='validades')name='estoque'; // compatibilidade com atalhos antigos
   currentTabName=name;
   document.querySelectorAll('.tab').forEach(function(t){
     var oc=t.getAttribute('onclick')||'';
     t.classList.toggle('active', oc.indexOf("goTab('"+name+"')")!==-1);
   });
   document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
-  document.getElementById('sec-'+name).classList.add('active');
-  // Na aba Dashboard, o próprio dashboard já mostra os totais (dash-tiles).
-  // Esconde a barra de métricas global pra não duplicar.
+  var sec=document.getElementById('sec-'+name);if(sec)sec.classList.add('active');
   var metricsEl=document.getElementById('metrics');
-  if(metricsEl) metricsEl.style.display = (name==='dashboard'||name==='bossvision'||name==='nfe'||name==='acoesfornecedores') ? 'none' : '';
-  // A barra fixa "Por setor" é sobre estoque/vencimento — não faz sentido
-  // dentro do Boss Vision, que já tem sua própria seção "Setores" com
-  // dados financeiros (compra/venda/quebra). Escondida só ali.
+  if(metricsEl)metricsEl.style.display=(name==='dashboard'||name==='bossvision'||name==='nfe'||name==='acoesfornecedores')?'none':'';
   var setorWrapEl=document.getElementById('setorStickyWrap');
-  if(setorWrapEl) setorWrapEl.style.display = (name==='bossvision'||name==='nfe'||name==='acoesfornecedores') ? 'none' : '';
+  if(setorWrapEl)setorWrapEl.style.display=(name==='bossvision'||name==='nfe'||name==='acoesfornecedores')?'none':'';
   if(name==='bossvision'){if(_bossDados)bossReanimarGraficosBoss_();bossCarregar(false);}
   if(name==='nfe'){nfeInit_();}
-  if(name==='relatorio'){
-    var selFiltro=document.getElementById('filtroNegTipo');
-    if(selFiltro)selFiltro.value='sobras';
-    setTimeout(renderRelatorio,120);
-  }
+  if(name==='relatorio'){var selFiltro=document.getElementById('filtroNegTipo');if(selFiltro)selFiltro.value='sobras';setTimeout(renderRelatorio,120);}
   if(name==='promocoes')renderPromos();
   if(name==='modalidades')renderModalidades();
   if(name==='antecipacao')renderAntecipacao();
   if(name==='cobertura')cfCarregar(false);
   if(name==='acoesfornecedores')afCarregar(false);
   if(name==='dashboard')renderDashboard();
-  if(name==='estoque'){if(estoqueModoAtual==='validades')renderTable();else renderEstoque();}
+  if(name==='estoque')renderEstoque();
   if(name==='tarefas'){renderTarefas();sincronizarTarefasCompleto();}
   if(name==='colaboradores'){colabAdminCarregar(false);}
 }
-setTimeout(function(){try{setEstoqueModo(estoqueModoAtual,true);}catch(e){}},0);
-function refresh(){renderMetrics();renderTable();renderEstoque();atualizarNegBadge();renderDashboard();if(typeof bossAtualizarVencidosAura==='function')bossAtualizarVencidosAura();if(typeof afRenderVencidos_==='function')afRenderVencidos_();}
+function refresh(){renderMetrics();renderEstoque();atualizarNegBadge();renderDashboard();if(typeof bossAtualizarVencidosAura==='function')bossAtualizarVencidosAura();if(typeof afRenderVencidos_==='function')afRenderVencidos_();}
 
 // ── Encartes Ativos ──────────────────────────────────────────────────────────
 var ENC_KEY='boascompras_encartes_ativos';
@@ -15907,118 +15840,107 @@ function _auraEstoqueThumbShowEmpty(imgEl) {
   }
 }
 
-// ═══ ESTOQUE AGRUPADO ═══
-function renderEstoque() {
+// ═══ ESTOQUE UNIFICADO — 1 card por produto, sem tela paralela de Validades ═══
+function limparFiltrosEstoqueUnificado_(){
+  _multiStatusFilter=null;setorAtivo='';
+  var q=document.getElementById('fBusca'),s=document.getElementById('fSetor'),st=document.getElementById('fStatus'),mr=document.getElementById('chkMostrarResolvidos');
+  if(q)q.value='';if(s)s.value='';if(st)st.value='';if(mr)mr.checked=true;
+  atualizarSetorGridDestaque();renderEstoque();
+}
+function _estoqueUnificadoLoteStatus_(d){
+  if(d===null)return{txt:'Sem data',cor:'#94a3b8'};
+  if(d<0)return{txt:'Vencido há '+Math.abs(d)+'d',cor:'#ef4444'};
+  if(d===0)return{txt:'Vence hoje',cor:'#ef4444'};
+  if(d===1)return{txt:'Amanhã',cor:'#f97316'};
+  return{txt:'Faltam '+d+'d',cor:d<=3?'#f97316':d<=7?'#fbbf24':d<=15?'#f59e0b':'#34d399'};
+}
+function _estoqueUnificadoBipCompact_(bip){
+  if(!bip)return 'Coleta não localizada';
+  var quem=bip.nomeColeta||bip.email||'Colaborador';
+  var quando=bip.ts?(bip.ts.toLocaleDateString('pt-BR')+' '+bip.ts.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})):'';
+  return (bip.viaNFe?'NF-e · ':'')+quem+(quando?' · '+quando:'');
+}
+function _estoqueUnificadoLoteHtml_(lote,resolvidos){
+  var d=daysDiff(lote.validade),st=_estoqueUnificadoLoteStatus_(d),bip=buscarBipagem(lote.cod,lote.validade),res=resolvidos.includes(produtoChave(lote));
+  return '<div class="estoque-unico-lote" title="'+escHtml(_estoqueUnificadoBipCompact_(bip))+'">'
+    +'<span class="estoque-unico-lote-dot" style="background:'+st.cor+'"></span>'
+    +'<div class="estoque-unico-lote-main"><div class="estoque-unico-lote-top"><span class="estoque-unico-lote-data">'+(lote.validade?fmt(lote.validade):'—')+'</span><span class="estoque-unico-lote-status" style="color:'+st.cor+'">'+st.txt+(res?' · resolvido':'')+'</span></div><div class="estoque-unico-lote-coleta"><i class="ti '+(bip&&bip.viaNFe?'ti-file-invoice':'ti-scan')+'"></i> '+escHtml(_estoqueUnificadoBipCompact_(bip))+'</div></div>'
+    +'<span class="estoque-unico-lote-qtd">'+(Number(lote.qtde)||0)+' un</span>'
+    +'</div>';
+}
+function renderEstoque(){
   garantirDadosBipagem();
-  var container = document.getElementById('estoqueGrid');
-  if (!container) return;
+  var container=document.getElementById('estoqueGrid');if(!container)return;
+  var busca=String((document.getElementById('fBusca')||{}).value||'').toLowerCase().trim();
+  var status=String((document.getElementById('fStatus')||{}).value||'');
+  var setorSel=document.getElementById('fSetor');if(setorAtivo&&setorSel)setorSel.value=setorAtivo;
+  var setor=setorAtivo||String((setorSel||{}).value||'');
+  var mostrarResolvidos=!!((document.getElementById('chkMostrarResolvidos')||{}).checked);
+  var resolvidos=getResolvidos(),promoAtivas=getPromoAtivas();
 
-  var busca = (document.getElementById('estoqueBusca').value || '').toLowerCase();
-  var selEstoque = document.getElementById('estoqueSetor');
-  if (setorAtivo && selEstoque) selEstoque.value = setorAtivo;
-  var setor = setorAtivo || (selEstoque ? selEstoque.value : '');
-
-  var listaFiltrada = products.filter(function(p) {
-    var nomeNorm = normNome(p.nome || '');
-    if (!nomeNorm) return false;
-    if (busca && !matchBusca(nomeNorm, p.cod, busca)) return false;
-    if (setor && p.setor !== setor) return false;
+  var base=products.filter(function(p){
+    var nomeNorm=normNome(p.nome||'');if(!nomeNorm)return false;
+    if(busca&&!matchBusca(nomeNorm,p.cod,busca))return false;
+    if(setor&&p.setor!==setor)return false;
+    if(!mostrarResolvidos&&resolvidos.includes(produtoChave(p)))return false;
     return true;
   });
 
-  // Agrupa por código de barras — cada produto vira um único card,
-  // somando as quantidades de todos os lotes/validades.
-  var gruposMap = {};
-  var gruposOrdem = [];
-  listaFiltrada.forEach(function(p, i) {
-    var chave = (p.cod || '').trim() || ('__semcod_' + i);
-    if (!gruposMap[chave]) {
-      gruposMap[chave] = { cod: (p.cod || '').trim(), lotes: [] };
-      gruposOrdem.push(chave);
-    }
-    gruposMap[chave].lotes.push(p);
-  });
+  var gruposMap={},ordem=[];
+  base.forEach(function(p,i){var k=(p.cod||'').trim()||('__semcod_'+i);if(!gruposMap[k]){gruposMap[k]={cod:(p.cod||'').trim(),lotes:[]};ordem.push(k);}gruposMap[k].lotes.push(p);});
+  var grupos=ordem.map(function(k){return gruposMap[k];});
 
-  var lista = gruposOrdem.map(function(chave) { return gruposMap[chave]; }).sort(function(a, b) {
-    var da = Math.min.apply(null, a.lotes.map(function(p) { var d = daysDiff(p.validade); return d === null ? 99999 : d; }));
-    var db = Math.min.apply(null, b.lotes.map(function(p) { var d = daysDiff(p.validade); return d === null ? 99999 : d; }));
-    return da - db;
-  });
-
-  if (!lista.length) {
-    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:13px"><i class="ti ti-package-off" style="font-size:36px;display:block;margin-bottom:10px;opacity:.4"></i>Nenhum produto encontrado</div>';
-    return;
+  function loteCasaFiltro(p){
+    var st=statusFromDays(daysDiff(p.validade));
+    if(_multiStatusFilter)return _multiStatusFilter.indexOf(st)>=0;
+    if(!status)return true;
+    if(status==='aguardando')return String(p.status||'').toLowerCase().indexOf('aguard')>=0;
+    return st===status;
   }
+  grupos=grupos.filter(function(g){return g.lotes.some(loteCasaFiltro);});
+  grupos.sort(function(a,b){
+    function minD(g){var ds=g.lotes.map(function(p){var d=daysDiff(p.validade);return d===null?99999:d;});return Math.min.apply(null,ds);}
+    return minD(a)-minD(b);
+  });
 
-  container.innerHTML = lista.map(function(grupo) {
-    var lotes = grupo.lotes.slice().sort(function(a, b) {
-      var da = daysDiff(a.validade); da = da === null ? 99999 : da;
-      var db = daysDiff(b.validade); db = db === null ? 99999 : db;
-      return da - db;
-    });
-    var p = lotes[0]; // lote mais próximo do vencimento representa o card
-    var idx = products.indexOf(p);
-    var days = daysDiff(p.validade);
-    var s = statusFromDays(days);
-    var hdrCls = 'urg-card-header status-' + (days === null ? 'none' : s);
-    var badgeSt = 'status-' + (days === null ? 'none' : s);
-    var barrasBusca = (p.cod || '').replace(/[^0-9]/g, '');
-    var fornProd = p.fornecedor || bancoFornecedor[barrasBusca] || bancoFornecedorNome[normNome(p.nome || '')] || '—';
-    var venceCor = days === null ? 'var(--tx2)' : days <= 0 ? '#ef4444' : days <= 3 ? '#f97316' : days <= 7 ? '#fbbf24' : 'var(--tx)';
-    var venceTxt = days === null ? 'Sem data' : days <= 0 ? 'Vencido' : days === 1 ? 'Amanhã' : 'Faltam ' + days + 'd';
-    var venceTxtExtenso = days === null ? 'Sem data' : days < 0 ? 'Vencido há ' + Math.abs(days) + ' dias' : days === 0 ? 'Vence hoje' : days === 1 ? 'Vence amanhã' : 'Faltam ' + days + ' dias';
-    var totalQtde = lotes.reduce(function(s, p) { return s + (Number(p.qtde) || 0); }, 0);
-    var multiLote = lotes.length > 1;
-    var qb = qtdeBadge(totalQtde, badgeSt, totalQtde + ' unidades');
+  var nota=document.getElementById('estoqueFiltroNota');
+  if(nota){
+    var partes=[];if(setor)partes.push('Setor: <b>'+escHtml(setor)+'</b>');if(status)partes.push('Status: <b>'+escHtml(status)+'</b>');if(_multiStatusFilter)partes.push('Risco: <b>'+_multiStatusFilter.join(', ')+'</b>');if(busca)partes.push('Busca: <b>'+escHtml(busca)+'</b>');
+    nota.classList.toggle('show',!!partes.length);nota.innerHTML=partes.length?('<i class="ti ti-filter"></i> '+partes.join(' · ')+' · '+grupos.length+' produto(s)'):'';
+  }
+  if(!grupos.length){container.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:13px"><i class="ti ti-package-off" style="font-size:36px;display:block;margin-bottom:10px;opacity:.4"></i>Nenhum produto encontrado com estes filtros.</div>';return;}
 
-    var thumbCod = (grupo.cod || '').replace(/[^0-9]/g, '');
-    var photoBoxHtml = thumbCod
-      ? '<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_' + thumbCod + '"><img data-cod="' + thumbCod + '" data-nome="' + escHtml(cleanNome(p.nome || '')) + '" alt="" loading="lazy"></div></div>'
-      : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
-
-    return '<div class="urg-card" onclick="abrirProdutoModal(\'' + escHtml(grupo.cod || '') + '\')" style="cursor:pointer">'
-      + '<div class="' + hdrCls + '" style="padding-left:' + qb.headerPadLeft + 'px">'
-      +   qb.html
-      +   '<div style="min-width:0;flex:1">'
-      +     '<div class="urg-card-nome">' + escHtml(cleanNome(p.nome || '—')) + '</div>'
-      +     '<div class="urg-card-cod">' + (p.cod || '') + (multiLote ? ' · ' + lotes.length + ' lotes' : '') + '</div>'
-      +   '</div>'
-      +   badge(days === null ? 'sem-data' : s)
-      + '</div>'
-      + '<div class="urg-card-body">'
-      +   '<div class="urg-card-mid">'
-      +     photoBoxHtml
-      +     '<div class="urg-card-info">'
-      +       '<div class="urg-info-field"><span class="urg-info-lbl">' + (multiLote ? 'Lote mais próximo' : 'Vence em') + '</span><span class="urg-info-val" style="font-size:15px;color:' + venceCor + '">' + venceTxt + '</span></div>'
-      +       '<div class="urg-info-field"><span class="urg-info-lbl">Setor</span><span class="urg-info-val" style="font-size:14px">' + escHtml(p.setor || '—') + '</span></div>'
-      +     '</div>'
-      +     '<div class="urg-card-right">'
-      +       speedometerSVG(days, s)
-      +       '<div class="urg-card-right-extenso" style="color:' + venceCor + '">' + venceTxtExtenso + '</div>'
-      +       '<div class="urg-card-right-stats">'
-      +         '<div><span class="urg-stat-lbl">Data</span><div class="urg-stat-val" style="font-weight:700;color:' + venceCor + '">' + (p.validade ? fmtDataExtenso(p.validade) : '—') + '</div></div>'
-      +         '<div><span class="urg-stat-lbl">Qtde total</span><div class="urg-stat-val">' + escHtml(totalQtde || '—') + '</div></div>'
-      +       '</div>'
-      +     '</div>'
-      +   '</div>'
-      +   (multiLote ? '<div class="urg-lotes-mini">'
-      +     lotes.slice(0,3).map(_loteMiniRowHtml).join('')
-      +     (lotes.length>3 ? '<div class="urg-lote-more">+'+(lotes.length-3)+' lote(s) adicional(is) — ver todos</div>' : '')
-      +   '</div>' : '')
-      +   '<div class="urg-card-forn" title="' + escHtml(fornProd) + '"><i class="ti ti-truck-delivery" style="opacity:.6"></i> ' + escHtml(fornProd) + '</div>'
-      +   fmtBipagemHtml(buscarBipagem(p.cod, p.validade))
-      + '</div>'
-      + '<div class="urg-card-foot">'
-      +   '<button class="abtn" style="border-color:var(--amber);color:var(--amber)" onclick="event.stopPropagation();openTarefaModal(' + idx + ',\'inventario\')"><i class="ti ti-clipboard-check"></i> Conferir</button>'
-      +   '<button class="abtn encarte" onclick="event.stopPropagation();abrirEncarteDoProduto(\'' + escHtml(grupo.cod || '') + '\')"><i class="ti ti-tag"></i> Gerar Encarte</button>'
-      + '</div>'
-      + '</div>';
+  container.innerHTML=grupos.map(function(grupo){
+    var lotes=grupo.lotes.slice().sort(function(a,b){var da=daysDiff(a.validade);da=da===null?99999:da;var db=daysDiff(b.validade);db=db===null?99999:db;return da-db;});
+    var p=lotes[0],idx=products.indexOf(p),days=daysDiff(p.validade),s=statusFromDays(days),hdrCls='urg-card-header status-'+(days===null?'none':s),badgeSt='status-'+(days===null?'none':s);
+    var barras=(grupo.cod||'').replace(/[^0-9]/g,''),forn=p.fornecedor||bancoFornecedor[barras]||bancoFornecedorNome[normNome(p.nome||'')]||'—';
+    var total=lotes.reduce(function(a,x){return a+(Number(x.qtde)||0);},0),qb=qtdeBadge(total,badgeSt,total+' unidades em estoque');
+    var venceCor=days===null?'var(--tx2)':days<=0?'#ef4444':days<=3?'#f97316':days<=7?'#fbbf24':'var(--tx)';
+    var venceTxt=days===null?'Sem data':days<0?'Vencido '+Math.abs(days)+'d':days===0?'Vence hoje':days===1?'Amanhã':'Faltam '+days+'d';
+    var venceExt=days===null?'Sem data':days<0?'Vencido há '+Math.abs(days)+' dias':days===0?'Vence hoje':days===1?'Vence amanhã':'Faltam '+days+' dias';
+    var custo=Number(p.custo||bancoCusto[barras]||0)||0,precoNormal=Number(p.precoNormal||0)||0;
+    var pp=lotes.find(function(x){return Number(x.precoPromo)>0;})||p,precoPromo=Number(pp.precoPromo||0)||0,pct=Number(pp.pctDesc||0)||0,promoAtiva=promoAtivas.includes(grupo.cod)||precoPromo>0;
+    var jaResolvido=resolvidos.includes(produtoChave(p));
+    var thumb=barras?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+barras+'"><img data-cod="'+barras+'" data-nome="'+escHtml(cleanNome(p.nome||''))+'" alt="" loading="lazy"></div></div>':'<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
+    var needsPromo=lotes.some(function(x){return ['vencido','critico','urgente','atencao'].includes(statusFromDays(daysDiff(x.validade)));});
+    return '<div class="urg-card estoque-unico-card'+(jaResolvido?' resolvido':'')+'" onclick="abrirProdutoModal(\''+escHtml(grupo.cod||'')+'\')" style="cursor:pointer">'
+      +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px;--qb-pad-m:'+qb.headerPadLeftMobile+'px">'+qb.html+'<div style="min-width:0;flex:1"><div class="urg-card-nome">'+escHtml(cleanNome(p.nome||'—'))+'</div><div class="urg-card-cod">'+escHtml(p.cod||'—')+' · '+lotes.length+' lote(s)</div></div>'+badge(days===null?'sem-data':s)+'</div>'
+      +'<div class="urg-card-body">'
+        +'<div class="urg-card-mid">'+thumb+'<div class="urg-card-info"><div class="urg-info-field"><span class="urg-info-lbl">Lote mais próximo</span><span class="urg-info-val" style="color:'+venceCor+'">'+venceTxt+'</span></div><div class="urg-info-field"><span class="urg-info-lbl">Setor</span><span class="urg-info-val">'+escHtml(p.setor||'—')+'</span></div></div><div class="urg-card-right">'+speedometerSVG(days,s)+'<div class="urg-card-right-extenso" style="color:'+venceCor+'">'+venceExt+'</div><div class="urg-card-right-stats"><div><span class="urg-stat-lbl">Data</span><div class="urg-stat-val" style="color:'+venceCor+'">'+(p.validade?fmtDataExtenso(p.validade):'—')+'</div></div><div><span class="urg-stat-lbl">Total</span><div class="urg-stat-val">'+total+'</div></div></div></div></div>'
+        +'<div class="estoque-unico-fin"><div><span>Custo</span><b>'+(custo?fmtR(custo):'—')+'</b></div><div><span>Venda</span><b>'+(precoNormal?fmtR(precoNormal):'—')+'</b></div><div class="promo"><span>Promoção</span><b>'+(precoPromo?fmtR(precoPromo)+(pct?' · '+fmtPct(pct):''):(promoAtiva?'Ativa':'—'))+'</b></div></div>'
+        +'<div class="estoque-unico-lotes">'+lotes.slice(0,3).map(function(x){return _estoqueUnificadoLoteHtml_(x,resolvidos);}).join('')+(lotes.length>3?'<div class="estoque-unico-more">+'+(lotes.length-3)+' lote(s) adicional(is) · clique no card para ver todos</div>':'')+'</div>'
+        +'<div class="estoque-unico-meta"><div class="estoque-unico-meta-line" title="'+escHtml(forn)+'"><i class="ti ti-truck-delivery"></i> <b>Fornecedor:</b> '+escHtml(forn)+'</div><div class="estoque-unico-meta-line"><i class="ti ti-scan"></i> <b>Última coleta do lote próximo:</b> '+escHtml(_estoqueUnificadoBipCompact_(buscarBipagem(p.cod,p.validade)))+'</div></div>'
+      +'</div>'
+      +'<div class="estoque-unico-actions">'
+        +'<button class="abtn" style="border-color:var(--blue);color:var(--blue)" onclick="event.stopPropagation();openTarefaModal('+idx+',\'inventario\')"><i class="ti ti-clipboard-check"></i> Conferir</button>'
+        +'<button class="abtn" style="border-color:'+(needsPromo?'var(--amber)':'var(--bds)')+';color:'+(needsPromo?'var(--amber)':'var(--tx2)')+'" onclick="event.stopPropagation();openTarefaModal('+idx+',\'venda_rapida\')"><i class="ti ti-tag"></i> Promoção</button>'
+        +'<button class="abtn encarte" onclick="event.stopPropagation();abrirEncarteDoProduto(\''+escHtml(grupo.cod||'')+'\')"><i class="ti ti-photo"></i> Encarte</button>'
+        +'<button class="abtn" style="border-color:'+(jaResolvido?'var(--tx2)':'var(--green)')+';color:'+(jaResolvido?'var(--tx2)':'var(--green)')+'" onclick="event.stopPropagation();openResolvidoModal('+idx+')"><i class="ti ti-circle-check"></i> '+(jaResolvido?'OK':'Resolvido')+'</button>'
+      +'</div></div>';
   }).join('');
-
-  // As miniaturas do Estoque são criadas com data-cod e src vazio.
-  // Dispara o mesmo resolvedor central usado no modal para preencher as fotos.
   resolverFotosTarefasArea(container);
 }
+
 
 
 </script>
