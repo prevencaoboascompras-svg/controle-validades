@@ -3668,7 +3668,7 @@ function toggleTheme() {
       </div>
 
       <div class="af-box">
-        <div class="af-box-hd"><div><div class="af-box-title">Evidências fotográficas / registro de ausência</div><div class="af-box-sub">Quando houver fotos, elas compõem o Anexo II. Se não houver, a AURA não cria um anexo de “provas” vazio: registra de forma transparente que não existe evidência fotográfica.</div></div><span id="afEvidCount" style="font-size:9px;color:var(--tx2)"></span></div>
+        <div class="af-box-hd"><div><div class="af-box-title">Evidências fotográficas</div><div class="af-box-sub">Quando houver fotos, elas compõem o Anexo II. Quando não houver, o dossiê registra a situação operacional dos produtos conforme a destinação selecionada, sem criar um anexo fotográfico vazio.</div></div><span id="afEvidCount" style="font-size:9px;color:var(--tx2)"></span></div>
         <div class="af-evidence-tools">
           <select id="afEvidItem" style="background:var(--bg);color:var(--tx);border:1px solid var(--bds);border-radius:7px;padding:7px 9px;font-size:10px"><option value="">Evidência geral</option></select>
           <button class="btn btn-green" onclick="document.getElementById('afEvidFile').click()"><i class="ti ti-camera"></i> Adicionar evidência</button>
@@ -12422,18 +12422,47 @@ function afAtualizarSemFotoUI_(){
   if(m.value==='AUTO_PERECIVEL_DESCARTADO'){o.placeholder='Motivo definido automaticamente pela destinação e pelos produtos';o.disabled=true;}
   else{o.disabled=false;if(m.value==='NAO_REALIZADO'&&!o.value.trim())o.placeholder='Ex.: registro fotográfico não realizado no momento da ocorrência';else if(m.value==='NAO_DISPONIVEL'&&!o.value.trim())o.placeholder='Ex.: registro fotográfico indisponível para esta ocorrência';else if(m.value==='OUTRO'&&!o.value.trim())o.placeholder='Descreva objetivamente o motivo informado pelo responsável';else if(!o.value.trim())o.placeholder='Observação opcional sobre a ausência do registro fotográfico';}
 }
+function afRegistroComplementarTitulo_(a){
+  var dest=String((a&&a.destinoProdutos)||'').toUpperCase();
+  if(dest==='DESCARTADOS')return 'Registro complementar — destinação operacional dos produtos';
+  if(dest==='SEGREGADOS')return 'Registro complementar — disponibilidade para conferência e recolhimento';
+  if(dest==='MISTO')return 'Registro complementar — situação e destinação operacional dos produtos';
+  return 'Registro complementar — situação operacional dos produtos';
+}
+function afRegistroComplementarRotulo_(a){
+  var dest=String((a&&a.destinoProdutos)||'').toUpperCase();
+  if(dest==='DESCARTADOS')return 'Destinação operacional';
+  if(dest==='SEGREGADOS')return 'Disponibilidade dos produtos';
+  if(dest==='MISTO')return 'Situação operacional';
+  return 'Registro operacional';
+}
+function afRegistroComplementarTexto_(a){
+  var dest=String((a&&a.destinoProdutos)||'').toUpperCase();
+  var tele=String((a&&a.origemDados)||'').toUpperCase()==='TELECON'&&a&&a.relatorioTelecon;
+  var fonte=tele
+    ?'O detalhamento dos itens, quantidades e valores encontra-se documentado no Relatório de Trocas Telecon, reproduzido integralmente no Anexo I desta notificação.'
+    :'O detalhamento dos itens, quantidades e valores encontra-se relacionado no Anexo I desta notificação.';
+
+  if(dest==='DESCARTADOS'){
+    return 'Os produtos relacionados foram devidamente registrados no controle de vencimentos e, em razão de sua natureza perecível e/ou necessidade de conservação refrigerada, foram posteriormente descartados conforme rotina operacional do estabelecimento. '+fonte;
+  }
+  if(dest==='SEGREGADOS'){
+    return 'Os produtos relacionados permanecem segregados do estoque comercial, devidamente identificados e disponíveis para conferência e recolhimento pelo fornecedor. '+fonte;
+  }
+  if(dest==='MISTO'){
+    return 'Os produtos relacionados receberam tratamento conforme sua natureza e condição operacional. Parte permanece segregada do estoque comercial e disponível para conferência e recolhimento pelo fornecedor, enquanto os produtos perecíveis e/ou sujeitos à conservação refrigerada foram descartados conforme rotina operacional do estabelecimento. '+fonte;
+  }
+  return afSemFotoTexto_(a);
+}
 function afSemFotoTexto_(a){
   var motivo=String((a&&a.semFotoMotivo)||'').toUpperCase(),obs=String((a&&a.semFotoObservacao)||'').trim();
-  if(motivo==='AUTO_PERECIVEL_DESCARTADO'){
-    return 'Não foram anexadas evidências fotográficas a esta notificação. Os produtos relacionados foram identificados como perecíveis e/ou sujeitos à conservação refrigerada e constam como descartados conforme rotina operacional do estabelecimento, razão pela qual não permanecem disponíveis para registro fotográfico posterior. A relação dos itens e valores permanece vinculada à fonte documental e aos controles internos do dossiê.';
-  }
-  var base='Não foram anexadas evidências fotográficas a esta notificação. A situação física e a destinação dos produtos constam em seção específica deste documento; a ausência de fotografia não é apresentada como prova visual da condição física, do lote ou da quantidade.';
+  var base='Não há registro fotográfico anexado a este dossiê.';
   var informado='';
-  if(motivo==='NAO_REALIZADO')informado='Motivo informado pelo responsável: o registro fotográfico não foi realizado no momento da ocorrência.';
-  else if(motivo==='NAO_DISPONIVEL')informado='Motivo informado pelo responsável: não há registro fotográfico disponível para esta ocorrência.';
-  else if(motivo==='DESCARTE')informado='Registro legado: a versão anterior associava a ausência de fotografia ao descarte. A destinação física válida é a informada na seção própria deste documento.';
-  else if(motivo==='OUTRO'&&obs)informado='Motivo informado pelo responsável: '+obs.replace(/[.]+$/,'')+'.';
-  else if(obs)informado='Observação informada pelo responsável: '+obs.replace(/[.]+$/,'')+'.';
+  if(motivo==='AUTO_PERECIVEL_DESCARTADO')informado='Os produtos constam como perecíveis e/ou sujeitos à conservação refrigerada e tiveram destinação conforme rotina operacional do estabelecimento.';
+  else if(motivo==='NAO_REALIZADO')informado='O registro fotográfico não foi realizado no momento da ocorrência.';
+  else if(motivo==='NAO_DISPONIVEL')informado='Não há registro fotográfico disponível para esta ocorrência.';
+  else if(motivo==='OUTRO'&&obs)informado=obs.replace(/[.]+$/,'')+'.';
+  else if(obs)informado=obs.replace(/[.]+$/,'')+'.';
   return base+(informado?' '+informado:'');
 }
 function afAbrirEditor_(){var a=afEdit_;if(!a)return;
@@ -12501,7 +12530,7 @@ function afRenderLista_(){var box=document.getElementById('afLista');if(!box)ret
 function afAbrirAcao_(id){var a=afAcoes_.find(function(x){return String(x.id)===String(id);});if(!a)return;afEdit_=JSON.parse(JSON.stringify(a));afAbrirEditor_();}
 async function afMarcarEnviadaAtual_(){if(!afEdit_)return;afEdit_=afColetarEditor_();if(!afDestinoValido_(afEdit_)){mostrarToast('Informe a situação física / destinação dos produtos antes de marcar a notificação como enviada.','warn');var sel=document.getElementById('afDestinoProdutos');if(sel){sel.focus();sel.scrollIntoView({behavior:'smooth',block:'center'});}return;}afEdit_.status='AGUARDANDO_RETORNO';afEdit_.enviadoEm=new Date().toISOString();document.getElementById('afStatus').value='AGUARDANDO_RETORNO';var r=await afSalvarAcao_(true);if(r)mostrarToast('Ação marcada como enviada. Prazo de resposta em acompanhamento.','ok');}
 async function afMarcarEnviadaId_(id){afAbrirAcao_(id);await afMarcarEnviadaAtual_();}
-function afRenderEvidencias_(){var box=document.getElementById('afEvidGrid'),c=document.getElementById('afEvidCount');if(!box||!afEdit_)return;var es=afEdit_.evidencias||[];if(c)c.textContent=es.length+' evidência(s)';if(!es.length){box.innerHTML='<div class="af-empty" style="grid-column:1/-1"><b>Nenhuma fotografia anexada.</b><br>O PDF não apresentará um “Anexo II — Evidências” vazio. Será exibido apenas um registro de ausência de evidência fotográfica, com o motivo informado acima quando houver.</div>';return;}box.innerHTML=es.map(function(ev){return '<div class="af-evidence"><div class="af-evidence-ph" id="afEvImg_'+afEsc_(ev.id)+'"><i class="ti ti-photo"></i></div><div class="af-evidence-body"><div class="af-evidence-cap">'+afEsc_(ev.legenda||'Registro fotográfico')+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button class="btn btn-sm" onclick="afEditarLegendaEvidencia_(\''+afEsc_(ev.id)+'\')"><i class="ti ti-pencil"></i> Legenda</button><button class="btn btn-sm" onclick="afExcluirEvidencia_(\''+afEsc_(ev.id)+'\')"><i class="ti ti-trash"></i> Remover</button></div></div></div>';}).join('');es.forEach(function(ev){afCarregarThumbEvidencia_(ev);});}
+function afRenderEvidencias_(){var box=document.getElementById('afEvidGrid'),c=document.getElementById('afEvidCount');if(!box||!afEdit_)return;var es=afEdit_.evidencias||[];if(c)c.textContent=es.length+' evidência(s)';if(!es.length){box.innerHTML='<div class="af-empty" style="grid-column:1/-1"><b>Sem registro fotográfico anexado.</b><br>O PDF utilizará um registro complementar coerente com a destinação informada: descarte, disponibilidade para recolhimento ou situação mista.</div>';return;}box.innerHTML=es.map(function(ev){return '<div class="af-evidence"><div class="af-evidence-ph" id="afEvImg_'+afEsc_(ev.id)+'"><i class="ti ti-photo"></i></div><div class="af-evidence-body"><div class="af-evidence-cap">'+afEsc_(ev.legenda||'Registro fotográfico')+'</div><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px"><button class="btn btn-sm" onclick="afEditarLegendaEvidencia_(\''+afEsc_(ev.id)+'\')"><i class="ti ti-pencil"></i> Legenda</button><button class="btn btn-sm" onclick="afExcluirEvidencia_(\''+afEsc_(ev.id)+'\')"><i class="ti ti-trash"></i> Remover</button></div></div></div>';}).join('');es.forEach(function(ev){afCarregarThumbEvidencia_(ev);});}
 function afImagemEvidencia_(acaoId,fileId){return _gasGetJsonp('acaoFornecedorEvidencia','&acaoId='+encodeURIComponent(acaoId)+'&fileId='+encodeURIComponent(fileId),60000);}
 async function afCarregarThumbEvidencia_(ev){if(!afEdit_||!ev.fileId)return;var el=document.getElementById('afEvImg_'+ev.id);if(!el)return;var r=await afImagemEvidencia_(afEdit_.id,ev.fileId);if(r&&r.ok&&r.base64&&el){el.className='af-evidence-ph';el.innerHTML='<img src="data:'+afEsc_(r.mimeType||'image/jpeg')+';base64,'+r.base64+'" alt="Evidência">';}}
 function afComprimirImagem_(file){return new Promise(function(resolve,reject){var fr=new FileReader();fr.onerror=reject;fr.onload=function(){var im=new Image();im.onerror=reject;im.onload=function(){var max=1600,w=im.width,h=im.height;if(w>max||h>max){var r=Math.min(max/w,max/h);w=Math.round(w*r);h=Math.round(h*r);}var c=document.createElement('canvas');c.width=w;c.height=h;var ctx=c.getContext('2d');ctx.drawImage(im,0,0,w,h);var url=c.toDataURL('image/jpeg',.82);resolve({mimeType:'image/jpeg',base64:url.split(',')[1]});};im.src=fr.result;};fr.readAsDataURL(file);});}
@@ -12709,8 +12738,8 @@ async function afGerarDocumento_(a){
   if(tele&&rt.usarPdfComoAnexoI&&a.id)telePaginas=await afTeleconPdfPaginasDataUrl_(a.id);
   var imgHtml=evs.length?evs.map(function(ev,idx){var src=imgs[ev.id]||'',leg=String(ev.legenda||'').trim();if(!leg||/^registro fotogr[aá]fico/i.test(leg))leg='Registro fotográfico';return '<div class="photo">'+(src?'<img src="'+src+'">':'<div class="ph">Imagem indisponível</div>')+'<div class="cap"><b>Evidência '+String(idx+1).padStart(2,'0')+'</b> — '+afEsc_(leg)+'</div></div>';}).join(''):'';
   var evidenciaDocHtml=evs.length
-    ?('<div class="sec">Anexo II — Evidências fotográficas</div><p class="muted">Registros fotográficos efetivamente anexados a esta notificação.</p><div class="photos">'+imgHtml+'</div>')
-    :('<div class="sec">Registro complementar — ausência de evidência fotográfica</div><div class="no-photo"><b>Transparência documental</b><br>'+afEsc_(afSemFotoTexto_(a))+'</div>');
+    ?('<div class="sec">Anexo II — Evidências fotográficas</div><p class="muted">Registros fotográficos anexados a esta notificação.</p><div class="photos">'+imgHtml+'</div>')
+    :('<div class="sec">'+afEsc_(afRegistroComplementarTitulo_(a))+'</div><div class="no-photo"><b>'+afEsc_(afRegistroComplementarRotulo_(a))+'</b><br>'+afEsc_(afRegistroComplementarTexto_(a))+'</div>');
 
   var anexoI='';
   if(tele){
@@ -12741,7 +12770,7 @@ async function afGerarDocumento_(a){
   // Assim ela nunca compete por espaço com um relatório Telecon longo.
   var evidenciaPaginasHtml='<section class="a4-page a4-page-annex evidence-page">'
     +evidenciaDocHtml
-    +'<div class="foot">Documento '+afEsc_(a.numero||'')+' · registro complementar/evidências · gerado pelo sistema AURA Vencimentos — Supermercado Boas Compras · '+new Date().toLocaleString('pt-BR')+'</div>'
+    +'<div class="foot">Documento '+afEsc_(a.numero||'')+' · registro complementar · gerado pelo sistema AURA Vencimentos — Supermercado Boas Compras · '+new Date().toLocaleString('pt-BR')+'</div>'
     +'</section>';
 
   var fonteTexto=tele?'relacionados no Anexo I, conforme Relatório de Trocas do sistema Telecon':'relacionados no Anexo I (relação de produtos vencidos gerada a partir do sistema AURA Vencimentos)';
@@ -12770,7 +12799,7 @@ async function afGerarDocumento_(a){
     +'.sec{font-size:9.4px;font-weight:900;text-transform:uppercase;border-bottom:1px solid #aaa;padding-bottom:2px;margin:9px 0 5px;letter-spacing:.015em}.dest{border:1px solid #cfcfcf;border-radius:6px;padding:6px 7px;display:grid;grid-template-columns:1fr 1fr;gap:5px 14px}.dest div b{font-size:6.6px;text-transform:uppercase;color:#666;display:block;margin-bottom:1px}'
     +'.object{font-size:10.1px;line-height:1.43}.physical{border:1px solid #cfcfcf;border-left:4px solid #d71920;background:#fafafa;border-radius:4px;padding:7px 8px;line-height:1.4}.physical b{display:block;font-size:8.3px;text-transform:uppercase;margin-bottom:2px}.prov{margin:3px 0 5px 18px;padding:0}.prov li{margin:2px 0;padding-left:1px}.prov li::marker{color:#d71920}.deadline{border:1px solid #d8d8d8;border-left:4px solid #d71920;background:#fafafa;border-radius:4px;padding:7px 8px;margin:6px 0;line-height:1.38}.deadline .deadline-title{display:block;font-weight:900;font-size:8.4px;text-transform:uppercase;margin-bottom:2px}.risk{margin-top:6px;padding:5px 7px;background:#f7f7f7;border-radius:4px}'
     +'table{width:100%;border-collapse:collapse;font-size:7.3px;line-height:1.16;page-break-inside:auto}thead{display:table-header-group}tfoot{display:table-row-group}tr{page-break-inside:avoid;page-break-after:auto}th{background:#ececec;border:1px solid #bbb;padding:2.7px;text-align:left}td{border:1px solid #ccc;padding:2.7px;vertical-align:top}.n{text-align:right;white-space:nowrap}.total{font-weight:900}'
-    +'.source{border:1px solid #bbb;background:#fafafa;border-radius:5px;padding:5px;line-height:1.3}.source-clean{border-left:3px solid #d71920;padding:4px 7px;background:#fafafa;font-size:7.8px;margin:0 0 4px}.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-items:stretch}.photo{border:1px solid #cfcfcf;border-radius:3px;padding:4px;page-break-inside:avoid;display:flex;flex-direction:column;min-height:58mm}.photo img{height:51mm;width:auto;max-width:100%;object-fit:contain;background:#fafafa;display:block;margin:0 auto}.ph{height:51mm;display:flex;align-items:center;justify-content:center;background:#eee;color:#777}.cap{font-size:7.1px;line-height:1.18;margin-top:4px}.muted{color:#6f6f6f}.no-photo{border:1px solid #c8c8c8;border-left:4px solid #777;background:#fafafa;border-radius:4px;padding:8px 9px;font-size:8.2px;line-height:1.45;color:#444}.no-photo b{font-size:8.6px;color:#222}.annex-start{break-before:page;page-break-before:always}.tele-page{page-break-inside:avoid;margin:4px 0 6px}.tele-page img{width:100%;height:auto;max-height:244mm;object-fit:contain;display:block;margin:0 auto;border:1px solid #bbb}.tele-page-label{font-size:7px;color:#777;margin-bottom:3px;text-align:right}.tele-original-page{display:flex;flex-direction:column}.tele-original-page .tele-page{flex:1;display:flex;flex-direction:column;justify-content:flex-start}.tele-original-page .tele-page img{max-width:100%}.evidence-page{min-height:297mm}.sign-wrap{page-break-inside:avoid;margin-top:7px}.sign{margin-top:12px;width:55%;border-top:1px solid #333;padding-top:4px;line-height:1.3}.foot{margin-top:8px;border-top:1px solid #ccc;padding-top:4px;color:#777;font-size:6.5px}'
+    +'.source{border:1px solid #bbb;background:#fafafa;border-radius:5px;padding:5px;line-height:1.3}.source-clean{border-left:3px solid #d71920;padding:4px 7px;background:#fafafa;font-size:7.8px;margin:0 0 4px}.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-items:stretch}.photo{border:1px solid #cfcfcf;border-radius:3px;padding:4px;page-break-inside:avoid;display:flex;flex-direction:column;min-height:58mm}.photo img{height:51mm;width:auto;max-width:100%;object-fit:contain;background:#fafafa;display:block;margin:0 auto}.ph{height:51mm;display:flex;align-items:center;justify-content:center;background:#eee;color:#777}.cap{font-size:7.1px;line-height:1.18;margin-top:4px}.muted{color:#6f6f6f}.no-photo{border:1px solid #c8c8c8;border-left:4px solid #d71920;background:#fafafa;border-radius:4px;padding:8px 9px;font-size:8.2px;line-height:1.45;color:#444}.no-photo b{font-size:8.6px;color:#222}.annex-start{break-before:page;page-break-before:always}.tele-page{page-break-inside:avoid;margin:4px 0 6px}.tele-page img{width:100%;height:auto;max-height:244mm;object-fit:contain;display:block;margin:0 auto;border:1px solid #bbb}.tele-page-label{font-size:7px;color:#777;margin-bottom:3px;text-align:right}.tele-original-page{display:flex;flex-direction:column}.tele-original-page .tele-page{flex:1;display:flex;flex-direction:column;justify-content:flex-start}.tele-original-page .tele-page img{max-width:100%}.evidence-page{min-height:297mm}.sign-wrap{page-break-inside:avoid;margin-top:7px}.sign{margin-top:12px;width:55%;border-top:1px solid #333;padding-top:4px;line-height:1.3}.foot{margin-top:8px;border-top:1px solid #ccc;padding-top:4px;color:#777;font-size:6.5px}'
     +'@media print{html,body{background:#fff!important}.a4-stack{padding:0}.a4-page{width:210mm;height:297mm;margin:0;padding:9mm 10mm 8mm;box-shadow:none;page-break-after:always;break-after:page;overflow:hidden}.a4-page:last-child{page-break-after:auto;break-after:auto}.photo,.tele-page,.sign-wrap{break-inside:avoid}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
     +'</style></head><body><div class="a4-stack"><section class="a4-page a4-page-notice">'
     +'<div class="brand"><div><div class="super">SUPERMERCADO BOAS COMPRAS</div><div class="tag">o super para toda a família</div></div><div class="tag">AURA Vencimentos · Dossiê do Fornecedor</div></div>'
@@ -12785,7 +12814,7 @@ async function afGerarDocumento_(a){
     +'<p class="risk">A ocorrência de produtos com prazo de validade vencido demanda tratamento imediato e controle adequado, tanto para impedir sua disponibilização ao consumidor quanto para assegurar sua correta segregação, destinação e regularização comercial junto ao fornecedor. Por essa razão, solicitamos atenção prioritária e retorno dentro do prazo estabelecido.</p>'
     +afDocBonificacoes_(a)
     +(a.observacoes?'<p><b>Observações:</b> '+afEsc_(a.observacoes)+'</p>':'')
-    +'<div class="doc-index"><b>Documentos que integram esta notificação</b><br>Anexo I — '+(tele?'Relatório de Trocas Telecon'+(resumoRegistros?' ('+afEsc_(resumoRegistros)+' registros)':''):'Relação de produtos vencidos')+(evs.length?' · Anexo II — '+afEsc_(evs.length)+' evidência(s) fotográfica(s).':' · Registro complementar — ausência de evidência fotográfica.')+'</div>'
+    +'<div class="doc-index"><b>Documentos que integram esta notificação</b><br>Anexo I — '+(tele?'Relatório de Trocas Telecon'+(resumoRegistros?' ('+afEsc_(resumoRegistros)+' registros)':''):'Relação de produtos vencidos')+(evs.length?' · Anexo II — '+afEsc_(evs.length)+' evidência(s) fotográfica(s).':' · '+afEsc_(afRegistroComplementarTitulo_(a))+'.')+'</div>'
     +'<div class="notice-sign sign-wrap"><div class="sec">Assinatura</div><div class="sign">'+afEsc_(assinatura.nome)+'<br>'+afEsc_(assinatura.cargo)+'<br>Supermercado Boas Compras</div></div>'
     +'</section>'
     +anexoPaginasHtml
@@ -12802,7 +12831,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.92-dossie-exclusao';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.93-dossie-registro-operacional';
 var currentTabName='dashboard';
 function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma visão de Estoque */ return 'unificado'; }
 function goTab(name){
