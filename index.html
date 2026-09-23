@@ -3718,14 +3718,6 @@ function toggleTheme() {
       </div>
     </div>
 
-    <div class="af-box" id="afSelecaoBox">
-      <div class="af-box-hd">
-        <div><div class="af-box-title">Alternativa — selecionar lotes vencidos da AURA</div><div class="af-box-sub">Use esta opção apenas quando não houver relatório Telecon. Para cobrança formal, prefira o PDF de Trocas da Telecon acima.</div></div>
-        <div class="af-filters"><select id="afFiltroFornecedor" onchange="afRenderVencidos_()"><option value="">Todos os fornecedores</option></select><input id="afBuscaVencido" placeholder="Buscar produto / código" oninput="afRenderVencidos_()"><button class="btn btn-green" onclick="afCriarComSelecionados_()"><i class="ti ti-file-plus"></i> Criar dossiê</button></div>
-      </div>
-      <div class="af-table-wrap"><table class="af-table"><thead><tr><th></th><th>Fornecedor</th><th>Produto</th><th>Código</th><th>Lote</th><th>Vencimento</th><th>Qtd.</th><th>Custo</th><th>Valor</th></tr></thead><tbody id="afVencidosBody"></tbody></table></div>
-    </div>
-
     <div class="af-box">
       <div class="af-box-hd"><div><div class="af-box-title">Dossiês cadastrados</div><div class="af-box-sub">Histórico de notificações, documentos, evidências, retornos e valores recuperados.</div></div><div class="af-filters"><select id="afFiltroStatus" onchange="afRenderLista_()"><option value="">Todos os status</option><option value="RASCUNHO">Rascunho</option><option value="AGUARDANDO_RETORNO">Aguardando retorno</option><option value="RETIRADA_AGENDADA">Retirada agendada</option><option value="PARCIAL">Parcial</option><option value="RESOLVIDA">Resolvida</option></select><input id="afBuscaAcoes" placeholder="Fornecedor / documento" oninput="afRenderLista_()"></div></div>
       <div class="af-list" id="afLista"><div class="af-empty">Carregando...</div></div>
@@ -11971,7 +11963,7 @@ function nfeHistoricoRetomarPendente_(chave){
 // AÇÕES FORNECEDORES — produtos vencidos / evidências / notificação
 // v6.60
 // ═══════════════════════════════════════════════════════════════
-var afAcoes_=[],afCarregado_=false,afEdit_=null,afSelecionados_={},afTeleconImport_=null,afTeleconModo_='novo',afTeleconAcaoAtualizar_=null;
+var afAcoes_=[],afCarregado_=false,afEdit_=null,afTeleconImport_=null,afTeleconModo_='novo',afTeleconAcaoAtualizar_=null;
 var AF_PDFJS_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
 var AF_PDFJS_WORKER='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 var AF_TESSERACT_URL='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
@@ -12134,11 +12126,6 @@ function afQtd_(v){return Number(v||0).toLocaleString('pt-BR',{maximumFractionDi
 function afHoje_(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function afFmtData_(iso){if(!iso)return '—';var p=String(iso).substring(0,10).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:String(iso);}
 function afUsuarioAtual_(){try{var x=JSON.parse(sessionStorage.getItem(_SESSAO_KEY)||'{}');if(x&&x.usuario)return x.usuario.charAt(0).toUpperCase()+x.usuario.slice(1);}catch(e){}return '';}
-function afFornecedorProduto_(p){var cod=String(p&&p.cod||'').replace(/\D/g,'');return String((p&&p.fornecedor)||bancoFornecedor[cod]||bancoFornecedorNome[normNome((p&&p.nome)||'')]||'').trim();}
-function afCustoProduto_(p){var cod=String(p&&p.cod||'').replace(/\D/g,'');return Number((p&&p.custo)||bancoCusto[cod]||0)||0;}
-function afQtdProduto_(p){var n=Number(p&&p.qtde);return isFinite(n)?n:qtdeEfetiva(p&&p.qtde);}
-function afKeyProduto_(p,i){return [String(p.cod||''),String(p.validade||''),String(p.lote||p.loteId||''),String(i==null?'':i)].join('|');}
-function afVencidos_(){return (products||[]).map(function(p,i){return {p:p,i:i,key:afKeyProduto_(p,i)};}).filter(function(x){var d=daysDiff(x.p.validade),q=afQtdProduto_(x.p);return d!==null&&d<=0&&q>0;});}
 function afGet_(action,extra){var cfg=loadCfg();if(!cfg.url)return Promise.resolve({ok:false,erro:'API AURA não configurada.'});var sep=cfg.url.indexOf('?')>=0?'&':'?';return fetch(cfg.url+sep+'action='+encodeURIComponent(action)+(extra||'')+'&_='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){try{return JSON.parse(t);}catch(e){return {ok:false,erro:'Resposta inválida do servidor.'};}}).catch(function(e){return {ok:false,erro:e.message};});}
 function afPost_(body){var cfg=loadCfg();if(!cfg.url)return Promise.resolve({ok:false,erro:'API AURA não configurada.'});return fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(body)}).then(function(r){return r.text();}).then(function(t){try{return JSON.parse(t);}catch(e){return {ok:false,erro:'Resposta inválida do servidor.'};}}).catch(function(e){return {ok:false,erro:e.message};});}
 function afStatusEfetivo_(a){var st=String(a.status||'RASCUNHO').toUpperCase();if(st!=='RESOLVIDA'&&a.prazoResposta&&a.prazoResposta<afHoje_()&&st!=='RASCUNHO')return 'VENCIDA';return st;}
@@ -12286,185 +12273,8 @@ function afTemBonificacaoPendente_(a){
 function afAtualizarKpis_(){var agu=0,venc=0,ab=0,res=0;(afAcoes_||[]).forEach(function(a){var st=afStatusEfetivo_(a),vr=afTotalRecuperadoDossie_(a);if(st==='VENCIDA')venc++;if(['AGUARDANDO_RETORNO','RETIRADA_AGENDADA','PARCIAL','VENCIDA'].indexOf(st)>=0){agu++;ab+=afSaldoOperacional_(a);}if(st==='RESOLVIDA'||vr>0)res+=vr;});
   var el=document.getElementById('afKpiAguardando');if(el)el.textContent=agu;el=document.getElementById('afKpiVencidas');if(el)el.textContent=venc;el=document.getElementById('afKpiAberto');if(el)el.textContent=afMoney_(ab);el=document.getElementById('afKpiResolvido');if(el)el.textContent=afMoney_(res);var b=document.getElementById('afNavBadge');if(b){var c=agu+venc;if(c){b.textContent=c;b.style.display='inline-flex';}else b.style.display='none';}}
 async function afCarregar(force){if(afCarregado_&&!force){afRenderTudo_();return;}var r=await afGet_('buscarAcoesFornecedorVencidos');if(r&&r.ok){afAcoes_=r.dados||[];afCarregado_=true;}else if(force)mostrarToast('Falha ao carregar ações: '+((r&&r.erro)||'erro'),'err');afRenderTudo_();}
-function afRenderTudo_(){afAtualizarKpis_();afRenderVencidos_();afRenderLista_();}
-function afRenderVencidos_(){var body=document.getElementById('afVencidosBody');if(!body)return;var lista=afVencidos_(),forns={};lista.forEach(function(x){var f=afFornecedorProduto_(x.p)||'SEM FORNECEDOR';forns[f]=true;});var sel=document.getElementById('afFiltroFornecedor'),atual=sel?sel.value:'';if(sel){sel.innerHTML='<option value="">Todos os fornecedores</option>'+Object.keys(forns).sort().map(function(f){return '<option value="'+afEsc_(f)+'">'+afEsc_(f)+'</option>';}).join('');sel.value=atual;}
-  var filtro=String((sel&&sel.value)||''),q=String((document.getElementById('afBuscaVencido')||{}).value||'').toLowerCase().trim();lista=lista.filter(function(x){var p=x.p,f=afFornecedorProduto_(p)||'SEM FORNECEDOR';if(filtro&&f!==filtro)return false;if(q&&([p.nome,p.cod,f,p.lote].join(' ').toLowerCase().indexOf(q)<0))return false;return true;});
-  if(!lista.length){body.innerHTML='<tr><td colspan="9" class="af-empty">Nenhum lote vencido com quantidade disponível.</td></tr>';return;}
-  body.innerHTML=lista.map(function(x){var p=x.p,f=afFornecedorProduto_(p)||'SEM FORNECEDOR',c=afCustoProduto_(p),qt=afQtdProduto_(p),v=c*qt;return '<tr><td><input type="checkbox" '+(afSelecionados_[x.key]?'checked':'')+' onchange="afToggleProduto_(\''+afEsc_(x.key)+'\',this.checked)"></td><td>'+afEsc_(f)+'</td><td><b>'+afEsc_(p.nome||'Produto')+'</b><div style="font-size:8px;color:var(--tx2)">'+afEsc_(p.setor||'')+'</div></td><td>'+afEsc_(p.cod||'—')+'</td><td>'+afEsc_(p.lote||p.loteId||'—')+'</td><td>'+afFmtData_(p.validade)+'</td><td class="num">'+afQtd_(qt)+'</td><td class="num">'+afMoney_(c)+'</td><td class="num"><b>'+afMoney_(v)+'</b></td></tr>';}).join('');}
-function afToggleProduto_(key,on){if(on)afSelecionados_[key]=true;else delete afSelecionados_[key];}
-function afFocarSelecao_(){var b=document.getElementById('afSelecaoBox');if(b)b.scrollIntoView({behavior:'smooth',block:'start'});}
+function afRenderTudo_(){afAtualizarKpis_();afRenderLista_();}
 function afPerfilAnterior_(forn){var n=String(forn||'').trim().toLowerCase();if(!n)return null;for(var i=0;i<afAcoes_.length;i++){var a=afAcoes_[i];if(String(a.fornecedor||'').trim().toLowerCase()===n)return a;}return null;}
-function afCriarComSelecionados_(){var mapa={};afVencidos_().forEach(function(x){mapa[x.key]=x;});var xs=Object.keys(afSelecionados_).map(function(k){return mapa[k];}).filter(Boolean);if(!xs.length){mostrarToast('Selecione pelo menos um produto vencido.','warn');return;}var fornecedores={};xs.forEach(function(x){var f=afFornecedorProduto_(x.p)||'SEM FORNECEDOR';fornecedores[f]=true;});if(Object.keys(fornecedores).length>1){mostrarToast('Selecione produtos de um único fornecedor por ação.','warn');return;}var forn=Object.keys(fornecedores)[0];if(forn==='SEM FORNECEDOR')forn='';var ant=afPerfilAnterior_(forn)||{};
-  var itens=xs.map(function(x){var p=x.p,q=afQtdProduto_(p),c=afCustoProduto_(p);return {key:x.key,codigo:p.cod||'',nome:p.nome||'',lote:p.lote||p.loteId||'',quantidade:q,unidade:p.unidade||bancoUnidade[String(p.cod||'').replace(/\D/g,'')]||'',validade:p.validade||'',custoUnit:c,valorTotal:q*c,setor:p.setor||'',fornecedor:forn};});
-  afEdit_={id:'',numero:'',status:'RASCUNHO',origemDados:'AURA',dataEmissao:afHoje_(),prazoDiasUteis:10,prazoResposta:'',loja:'Supermercado Boas Compras',operador:afUsuarioAtual_(),assinanteId:afAssinantePadraoId_({operador:afUsuarioAtual_()}),fornecedor:forn,cnpj:ant.cnpj||'',codigoFornecedor:ant.codigoFornecedor||'',contato:ant.contato||'',telefone:ant.telefone||'',email:ant.email||'',situacoes:{vencidos:true},destinoProdutos:'',destinoObservacao:'',providencias:{troca:false,recolhimento:true,credito:true,ressarcimento:false,notaDevolucao:false,boleto:false},itens:itens,evidencias:[],observacoes:'',dataRetorno:'',retorno:'',valorRecuperado:0,compensacoes:[]};afAbrirEditor_();}
-function afSomarDiasUteisFront_(iso,dias){var p=String(iso||afHoje_()).split('-'),d=new Date(+p[0],+p[1]-1,+p[2],12,0,0),r=Math.max(0,Number(dias)||0);while(r>0){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)r--;}return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function afAtualizarPrazo_(){var e=document.getElementById('afDataEmissao'),d=document.getElementById('afPrazoDias'),p=document.getElementById('afPrazoResposta');if(e&&d&&p)p.value=afSomarDiasUteisFront_(e.value,Number(d.value)||10);}
-function afAssinantePadraoId_(a){var salvo=String((a&&a.assinanteId)||'').toUpperCase();if(salvo==='WAGNER'||salvo==='LEONARDO')return salvo;var nome=String((a&&a.assinanteNome)||'').toLowerCase();if(nome.indexOf('wagner')>=0)return 'WAGNER';if(nome.indexOf('leonardo')>=0)return 'LEONARDO';var op=String((a&&a.operador)||afUsuarioAtual_()||'').toLowerCase();return op.indexOf('wagner')>=0?'WAGNER':'LEONARDO';}
-function afAssinanteDados_(a){var id=afAssinantePadraoId_(a);return id==='WAGNER'?{id:'WAGNER',nome:'Wagner Lima',cargo:'Gerência'}:{id:'LEONARDO',nome:'Leonardo Souza',cargo:'Agente de Prevenção de Perdas'};}
-function afNormPerecivel_(s){
-  return String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
-}
-function afItemEhPerecivelRefrigerado_(it){
-  var n=afNormPerecivel_(it&&it.nome||'');
-  if(!n)return false;
-  var termos=[
-    'IOGUR','MANTEIGA','MARGARINA','REQUEIJAO','CREAM CHEESE',
-    'BEBIDA LACTEA','LEITE FERMENTADO','SOBREMESA LACTEA','PETIT SUISSE',
-    'COALHADA','NATA','RICOTA','MASCARPONE','QUEIJO','QUEIJO CREMOSO',
-    'CREME DE QUEIJO','SUCO NATURAL','SUCO INTEGRAL','SUCO REFRIGERADO'
-  ];
-  for(var i=0;i<termos.length;i++)if(n.indexOf(termos[i])>=0)return true;
-  return false;
-}
-function afAnalisePereciveis_(a){
-  var itens=(a&&Array.isArray(a.itens))?a.itens.filter(function(it){return String(it&&it.nome||'').trim();}):[];
-  var p=itens.filter(afItemEhPerecivelRefrigerado_);
-  var pct=itens.length?p.length/itens.length:0;
-  return {total:itens.length,pereciveis:p.length,pct:pct,automatico:itens.length>0&&(p.length===itens.length||(itens.length>=5&&pct>=0.80))};
-}
-function afAplicarMotivoFotoAutomatico_(a,atualizarUI){
-  if(!a)return false;
-  var temFotos=Array.isArray(a.evidencias)&&a.evidencias.length>0;
-  var destino=String(a.destinoProdutos||'').toUpperCase();
-  var analise=afAnalisePereciveis_(a);
-  var atual=String(a.semFotoMotivo||'').toUpperCase();
-
-  if(temFotos){
-    if(atual==='AUTO_PERECIVEL_DESCARTADO'){a.semFotoMotivo='';a.semFotoObservacao='';}
-  }else if(destino==='DESCARTADOS'&&analise.automatico){
-    // Só preenche automaticamente se o usuário não tiver escolhido um motivo manual.
-    if(!atual||atual==='AUTO_PERECIVEL_DESCARTADO'){
-      a.semFotoMotivo='AUTO_PERECIVEL_DESCARTADO';
-      a.semFotoObservacao='';
-    }
-  }else if(atual==='AUTO_PERECIVEL_DESCARTADO'){
-    a.semFotoMotivo='';
-    a.semFotoObservacao='';
-  }
-
-  if(atualizarUI){
-    var sel=document.getElementById('afSemFotoMotivo');
-    if(sel)sel.value=a.semFotoMotivo||'';
-    afAtualizarSemFotoUI_();
-    var box=document.getElementById('afSemFotoAutoInfo');
-    if(box){
-      if(!temFotos&&String(a.semFotoMotivo||'')==='AUTO_PERECIVEL_DESCARTADO'){
-        box.style.display='block';
-        box.innerHTML='<b><i class="ti ti-snowflake"></i> Motivo identificado automaticamente.</b> '+analise.pereciveis+' de '+analise.total+' item(ns) foram reconhecidos como perecíveis/refrigerados e a destinação está marcada como descarte.';
-      }else box.style.display='none';
-    }
-  }
-  return String(a.semFotoMotivo||'')==='AUTO_PERECIVEL_DESCARTADO';
-}
-function afSemFotoMotivoManual_(){
-  if(afEdit_){
-    var sel=document.getElementById('afSemFotoMotivo');
-    afEdit_.semFotoMotivo=sel?sel.value:'';
-    afEdit_.semFotoObservacao=String((document.getElementById('afSemFotoObs')||{}).value||'');
-  }
-  afAtualizarSemFotoUI_();
-  var box=document.getElementById('afSemFotoAutoInfo');if(box)box.style.display='none';
-}
-function afDestinoValido_(a){
-  return ['SEGREGADOS','DESCARTADOS','MISTO'].indexOf(String((a&&a.destinoProdutos)||'').toUpperCase())>=0;
-}
-function afDestinoLabel_(v){
-  v=String(v||'').toUpperCase();
-  if(v==='SEGREGADOS')return 'Segregados para conferência/recolhimento';
-  if(v==='DESCARTADOS')return 'Descartados conforme rotina operacional';
-  if(v==='MISTO')return 'Situação mista';
-  return 'Destinação não informada';
-}
-function afTextoDestinoBase_(v){
-  v=String(v||'').toUpperCase();
-  if(v==='SEGREGADOS')return 'Os produtos relacionados permanecem segregados do estoque comercial, devidamente identificados e disponíveis para conferência e recolhimento pelo fornecedor.';
-  if(v==='DESCARTADOS')return 'Os produtos relacionados foram devidamente registrados no controle de vencimentos e, em razão de sua natureza perecível e/ou necessidade de conservação refrigerada, posteriormente descartados conforme rotina operacional do estabelecimento, não permanecendo disponíveis para recolhimento físico.';
-  if(v==='MISTO')return 'Os produtos relacionados receberam tratamento conforme sua natureza e condição operacional. Parte permanece segregada do estoque comercial e disponível para conferência e recolhimento pelo fornecedor, enquanto os produtos perecíveis e/ou sujeitos à conservação refrigerada foram posteriormente descartados conforme rotina operacional do estabelecimento, não permanecendo disponíveis para recolhimento físico.';
-  return '';
-}
-function afDocTextoDestino_(a){
-  var txt=afTextoDestinoBase_(a&&a.destinoProdutos),obs=String((a&&a.destinoObservacao)||'').trim();
-  if(obs)txt+=(txt?' ':'')+'Observação operacional: '+obs.replace(/[.]+$/,'')+'.';
-  return txt;
-}
-function afAlgumaProvidenciaMarcada_(){
-  return ['afProvTroca','afProvRecolhimento','afProvCredito','afProvRessarcimento','afProvNota','afProvBoleto'].some(function(id){
-    var e=document.getElementById(id);return !!(e&&e.checked);
-  });
-}
-function afAtualizarDestinoProdutosUI_(aplicarSugestao){
-  var sel=document.getElementById('afDestinoProdutos'),help=document.getElementById('afDestinoHelp');
-  if(!sel)return;
-  var v=String(sel.value||'').toUpperCase(),txt=afTextoDestinoBase_(v);
-  if(afEdit_){afEdit_.destinoProdutos=v;afAplicarMotivoFotoAutomatico_(afEdit_,true);}
-  if(help){
-    help.innerHTML=txt
-      ?('<b>'+afEsc_(afDestinoLabel_(v))+':</b> '+afEsc_(txt))
-      :'Selecione a situação física para que o documento descreva corretamente o que permanece disponível e o que já foi destinado.';
-  }
-  if(aplicarSugestao){
-    var recol=document.getElementById('afProvRecolhimento');
-    var cred=document.getElementById('afProvCredito');
-    if(v==='DESCARTADOS'){
-      if(recol)recol.checked=false;
-      if(cred&&!afAlgumaProvidenciaMarcada_())cred.checked=true;
-    }else if(v==='SEGREGADOS'){
-      if(recol&&!afAlgumaProvidenciaMarcada_())recol.checked=true;
-    }else if(v==='MISTO'){
-      if(recol)recol.checked=true;
-      if(cred)cred.checked=true;
-    }
-  }
-}
-function afAtualizarSemFotoUI_(){
-  var m=document.getElementById('afSemFotoMotivo'),o=document.getElementById('afSemFotoObs');
-  if(!m||!o)return;
-  if(m.value==='AUTO_PERECIVEL_DESCARTADO'){o.placeholder='Motivo definido automaticamente pela destinação e pelos produtos';o.disabled=true;}
-  else{o.disabled=false;if(m.value==='NAO_REALIZADO'&&!o.value.trim())o.placeholder='Ex.: registro fotográfico não realizado no momento da ocorrência';else if(m.value==='NAO_DISPONIVEL'&&!o.value.trim())o.placeholder='Ex.: registro fotográfico indisponível para esta ocorrência';else if(m.value==='OUTRO'&&!o.value.trim())o.placeholder='Descreva objetivamente o motivo informado pelo responsável';else if(!o.value.trim())o.placeholder='Observação opcional sobre a ausência do registro fotográfico';}
-}
-function afRegistroComplementarTitulo_(a){
-  var dest=String((a&&a.destinoProdutos)||'').toUpperCase();
-  if(dest==='DESCARTADOS')return 'Registro complementar — destinação operacional dos produtos';
-  if(dest==='SEGREGADOS')return 'Registro complementar — disponibilidade para conferência e recolhimento';
-  if(dest==='MISTO')return 'Registro complementar — situação e destinação operacional dos produtos';
-  return 'Registro complementar — situação operacional dos produtos';
-}
-function afRegistroComplementarRotulo_(a){
-  var dest=String((a&&a.destinoProdutos)||'').toUpperCase();
-  if(dest==='DESCARTADOS')return 'Destinação operacional';
-  if(dest==='SEGREGADOS')return 'Disponibilidade dos produtos';
-  if(dest==='MISTO')return 'Situação operacional';
-  return 'Registro operacional';
-}
-function afRegistroComplementarTexto_(a){
-  var dest=String((a&&a.destinoProdutos)||'').toUpperCase();
-  var tele=String((a&&a.origemDados)||'').toUpperCase()==='TELECON'&&a&&a.relatorioTelecon;
-  var fonte=tele
-    ?'O detalhamento dos itens, quantidades e valores encontra-se documentado no Relatório de Trocas Telecon, reproduzido integralmente no Anexo I desta notificação.'
-    :'O detalhamento dos itens, quantidades e valores encontra-se relacionado no Anexo I desta notificação.';
-
-  if(dest==='DESCARTADOS'){
-    return 'Os produtos relacionados foram devidamente registrados no controle de vencimentos e, em razão de sua natureza perecível e/ou necessidade de conservação refrigerada, foram posteriormente descartados conforme rotina operacional do estabelecimento. '+fonte;
-  }
-  if(dest==='SEGREGADOS'){
-    return 'Os produtos relacionados permanecem segregados do estoque comercial, devidamente identificados e disponíveis para conferência e recolhimento pelo fornecedor. '+fonte;
-  }
-  if(dest==='MISTO'){
-    return 'Os produtos relacionados receberam tratamento conforme sua natureza e condição operacional. Parte permanece segregada do estoque comercial e disponível para conferência e recolhimento pelo fornecedor, enquanto os produtos perecíveis e/ou sujeitos à conservação refrigerada foram descartados conforme rotina operacional do estabelecimento. '+fonte;
-  }
-  return afSemFotoTexto_(a);
-}
-function afSemFotoTexto_(a){
-  var motivo=String((a&&a.semFotoMotivo)||'').toUpperCase(),obs=String((a&&a.semFotoObservacao)||'').trim();
-  var base='Não há registro fotográfico anexado a este dossiê.';
-  var informado='';
-  if(motivo==='AUTO_PERECIVEL_DESCARTADO')informado='Os produtos constam como perecíveis e/ou sujeitos à conservação refrigerada e tiveram destinação conforme rotina operacional do estabelecimento.';
-  else if(motivo==='NAO_REALIZADO')informado='O registro fotográfico não foi realizado no momento da ocorrência.';
-  else if(motivo==='NAO_DISPONIVEL')informado='Não há registro fotográfico disponível para esta ocorrência.';
-  else if(motivo==='OUTRO'&&obs)informado=obs.replace(/[.]+$/,'')+'.';
-  else if(obs)informado=obs.replace(/[.]+$/,'')+'.';
-  return base+(informado?' '+informado:'');
-}
 function afAbrirEditor_(){var a=afEdit_;if(!a)return;
   if(!a.destinoProdutos&&String(a.semFotoMotivo||'').toUpperCase()==='DESCARTE'){
     a.destinoProdutos='DESCARTADOS';
@@ -12512,7 +12322,6 @@ async function afExcluirDossie_(id){
     }
     afAtualizarKpis_();
     afRenderLista_();
-    afRenderVencidos_();
 
     mostrarToast('Dossiê '+numero+' excluído da AURA'+(r.pastaEnviadaLixeira?' e pasta enviada para a lixeira do Drive.':'.'),'ok');
     return true;
@@ -12831,7 +12640,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.93-dossie-registro-operacional';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.94-dossie-somente-telecon';
 var currentTabName='dashboard';
 function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma visão de Estoque */ return 'unificado'; }
 function goTab(name){
@@ -12860,7 +12669,7 @@ function goTab(name){
   if(name==='tarefas'){renderTarefas();sincronizarTarefasCompleto();}
   if(name==='colaboradores'){colabAdminCarregar(false);}
 }
-function refresh(){renderMetrics();renderEstoque();atualizarNegBadge();renderDashboard();if(typeof bossAtualizarVencidosAura==='function')bossAtualizarVencidosAura();if(typeof afRenderVencidos_==='function')afRenderVencidos_();}
+function refresh(){renderMetrics();renderEstoque();atualizarNegBadge();renderDashboard();if(typeof bossAtualizarVencidosAura==='function')bossAtualizarVencidosAura();}
 
 // ── Encartes Ativos ──────────────────────────────────────────────────────────
 var ENC_KEY='boascompras_encartes_ativos';
