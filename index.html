@@ -3531,6 +3531,18 @@ function toggleTheme() {
           <div class="af-field"><label>Total informado (R$)</label><input id="afTeleconTotal" type="number" min="0" step="0.01" oninput="afTeleconResumoEditado_()"></div>
           <div class="af-field"><label>Linhas reconhecidas</label><input id="afTeleconReconhecidos" disabled></div>
         </div>
+        <div id="afTeleconUpdateReasonWrap" style="display:none;margin-top:8px;padding:9px 10px;border:1px solid var(--bd);border-radius:9px;background:var(--bg2)">
+          <div class="af-field"><label>Motivo da atualização do relatório</label>
+            <select id="afTeleconMotivoAtualizacao" style="width:100%">
+              <option value="Baixa realizada na Telecon">Baixa realizada na Telecon</option>
+              <option value="Correção de lançamento na Telecon">Correção de lançamento na Telecon</option>
+              <option value="Relatório atualizado / novo saldo">Relatório atualizado / novo saldo</option>
+              <option value="Correção de valor ou quantidade">Correção de valor ou quantidade</option>
+              <option value="Outro ajuste operacional">Outro ajuste operacional</option>
+            </select>
+          </div>
+          <div style="font-size:9px;color:var(--tx2);margin-top:5px">O novo PDF substituirá o anterior no mesmo dossiê. Número do dossiê, contatos, evidências e destinação física serão preservados.</div>
+        </div>
         <div id="afTeleconConferencia" class="af-telecon-warn"></div>
         <div class="af-table-wrap" id="afTeleconTabelaWrap"><table class="af-table af-telecon-table" style="min-width:1040px"><thead><tr><th>Produto</th><th>Cód. barras</th><th>NF origem</th><th>Data cad.</th><th>Qtd.</th><th>Qtd. rest.</th><th>Custo</th><th>Total</th><th></th></tr></thead><tbody id="afTeleconItens"></tbody></table></div>
         <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:9px;align-items:center">
@@ -3564,8 +3576,49 @@ function toggleTheme() {
       </div>
 
       <div id="afTeleconSourceBox" class="af-telecon-source" style="display:none">
-        <div><strong><i class="ti ti-file-type-pdf"></i> Documento de origem: Telecon</strong><small id="afTeleconSourceInfo"></small></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm" onclick="afAbrirRelatorioTelecon_()"><i class="ti ti-external-link"></i> Abrir relatório original</button><button class="btn btn-sm" onclick="afBaixarRelatorioTelecon_()"><i class="ti ti-download"></i> Baixar PDF original</button></div>
+        <div><strong id="afTeleconSourceTitle"><i class="ti ti-file-type-pdf"></i> Documento de origem: Telecon</strong><small id="afTeleconSourceInfo"></small></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-sm" id="afTeleconOpenBtn" onclick="afAbrirRelatorioTelecon_()"><i class="ti ti-external-link"></i> Abrir relatório</button>
+          <button class="btn btn-sm" id="afTeleconDownloadBtn" onclick="afBaixarRelatorioTelecon_()"><i class="ti ti-download"></i> Baixar PDF</button>
+          <button class="btn btn-sm" id="afTeleconUpdateBtn" onclick="afAtualizarRelatorioTelecon_()"><i class="ti ti-refresh"></i> Atualizar relatório</button>
+          <button class="btn btn-sm" id="afTeleconDeleteBtn" onclick="afRemoverRelatorioTelecon_()" style="color:var(--red)"><i class="ti ti-trash"></i> Remover relatório</button>
+          <input type="file" id="afTeleconUpdateFile" accept="application/pdf,.pdf" style="display:none" onchange="afTeleconArquivoAtualizacaoSelecionado_(this)">
+        </div>
+      </div>
+
+      <div class="af-box" id="afBonificacoesBox" style="margin-top:12px;margin-bottom:10px">
+        <div class="af-box-hd">
+          <div>
+            <div class="af-box-title"><i class="ti ti-receipt-refund"></i> Bonificações / compensações recebidas</div>
+            <div class="af-box-sub">Informe somente o número da NF de bonificação e o valor recebido. As baixas item a item permanecem registradas na Telecon e não precisam ser digitadas novamente na AURA.</div>
+          </div>
+          <span id="afBonifStatus" style="font-size:9px;color:var(--tx2)"></span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(180px,.8fr) minmax(160px,.7fr) auto;gap:8px;align-items:end">
+          <div class="af-field" style="min-width:0">
+            <label>Nº NF de bonificação</label>
+            <input id="afBonifNF" placeholder="Ex.: 123456" autocomplete="off">
+          </div>
+          <div class="af-field" style="min-width:0">
+            <label>Valor da bonificação (R$)</label>
+            <input id="afBonifValor" type="number" min="0.01" step="0.01" placeholder="0,00">
+          </div>
+          <button class="btn btn-green" id="afBonifRegistrarBtn" onclick="afRegistrarBonificacao_()"><i class="ti ti-plus"></i> Registrar bonificação</button>
+        </div>
+
+        <div id="afBonifResumo" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px"></div>
+
+        <div class="af-table-wrap" style="margin-top:9px">
+          <table class="af-table" style="min-width:720px">
+            <thead><tr><th>NF bonificação</th><th>Valor</th><th>Registrada em</th><th>Situação no saldo Telecon</th><th></th></tr></thead>
+            <tbody id="afBonifBody"></tbody>
+          </table>
+        </div>
+
+        <div style="font-size:9px;color:var(--tx2);line-height:1.45;margin-top:7px">
+          <b>Como funciona:</b> enquanto a bonificação ainda não estiver refletida em um relatório Telecon mais novo, a AURA mostra um <b>saldo estimado</b>. Ao substituir o relatório pelo saldo atualizado, a bonificação passa automaticamente a constar como refletida e o relatório Telecon volta a ser a referência do saldo exato.
+        </div>
       </div>
 
       <div class="af-box" style="margin-top:12px;margin-bottom:10px">
@@ -3626,8 +3679,9 @@ function toggleTheme() {
           <div style="font-size:10px;font-weight:850;margin-bottom:7px"><i class="ti ti-photo-off"></i> Quando não houver fotografia</div>
           <div style="display:grid;grid-template-columns:minmax(220px,1fr) minmax(260px,1.4fr);gap:8px">
             <div class="af-field" style="min-width:0"><label>Motivo da ausência de foto</label>
-              <select id="afSemFotoMotivo" onchange="afAtualizarSemFotoUI_()" style="width:100%">
+              <select id="afSemFotoMotivo" onchange="afSemFotoMotivoManual_()" style="width:100%">
                 <option value="">Não informado</option>
+                <option value="AUTO_PERECIVEL_DESCARTADO">Identificado automaticamente — perecíveis/refrigerados descartados</option>
                 <option value="NAO_REALIZADO">Registro fotográfico não realizado no momento da ocorrência</option>
                 <option value="NAO_DISPONIVEL">Registro fotográfico não disponível</option>
                 <option value="OUTRO">Outro motivo informado pelo responsável</option>
@@ -3637,7 +3691,8 @@ function toggleTheme() {
               <input id="afSemFotoObs" placeholder="Observação opcional sobre a ausência do registro fotográfico">
             </div>
           </div>
-          <div style="font-size:9px;color:var(--tx2);line-height:1.45;margin-top:7px"><b>Importante:</b> fotografia e destinação são informações independentes. A situação física dos produtos é descrita na seção própria; este campo explica somente a ausência de registro fotográfico.</div>
+          <div id="afSemFotoAutoInfo" style="display:none;margin-top:7px;padding:7px 8px;border-left:3px solid var(--green);background:rgba(29,158,117,.08);font-size:9px;line-height:1.45"></div>
+          <div style="font-size:9px;color:var(--tx2);line-height:1.45;margin-top:7px"><b>Importante:</b> fotografia e destinação são informações independentes. Quando a ação estiver marcada como <b>Descartados</b> e os itens forem reconhecidos como perecíveis/refrigerados, a AURA identifica automaticamente o motivo da ausência de foto. Você ainda pode substituir essa indicação manualmente.</div>
         </div>
       </div>
 
@@ -3645,9 +3700,9 @@ function toggleTheme() {
         <div class="af-field af-span4"><label>Observações da notificação</label><textarea id="afObservacoes" placeholder="Informações adicionais que devem constar no documento."></textarea></div>
         <div class="af-field"><label>Data do retorno</label><input type="date" id="afDataRetorno"></div>
         <div class="af-field af-span2"><label>Retorno do fornecedor / tratativa</label><textarea id="afRetorno" placeholder="Ex.: representante confirmou recolhimento em 20/09; crédito aguardando emissão..."></textarea></div>
-        <div class="af-field"><label>Valor recuperado (R$)</label><input type="number" min="0" step="0.01" id="afValorRecuperado" value="0"></div>
+        <div class="af-field"><label>Outros valores recuperados (R$)</label><input type="number" min="0" step="0.01" id="afValorRecuperado" value="0" placeholder="Use apenas para valores que não sejam NF de bonificação"></div>
       </div>
-      <div class="af-note"><i class="ti ti-info-circle"></i> A notificação agora separa três informações: <b>ocorrência</b>, <b>situação física/destinação</b> e <b>evidência fotográfica</b>. Assim, produtos guardados, descartados ou em situação mista são descritos sem contradição. Mau odor, pragas, deterioração e vazamento só entram no texto quando você marcar que foram constatados.</div>
+      <div class="af-note"><i class="ti ti-info-circle"></i> A notificação separa <b>ocorrência</b>, <b>destinação física</b>, <b>evidência fotográfica</b> e <b>regularização financeira</b>. Para bonificações, a AURA registra apenas NF e valor; a Telecon continua sendo a fonte detalhada das baixas por produto.</div>
 
       <div class="af-savebar">
         <div class="af-save-actions">
@@ -11915,7 +11970,7 @@ function nfeHistoricoRetomarPendente_(chave){
 // AÇÕES FORNECEDORES — produtos vencidos / evidências / notificação
 // v6.60
 // ═══════════════════════════════════════════════════════════════
-var afAcoes_=[],afCarregado_=false,afEdit_=null,afSelecionados_={},afTeleconImport_=null;
+var afAcoes_=[],afCarregado_=false,afEdit_=null,afSelecionados_={},afTeleconImport_=null,afTeleconModo_='novo',afTeleconAcaoAtualizar_=null;
 var AF_PDFJS_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
 var AF_PDFJS_WORKER='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 var AF_TESSERACT_URL='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
@@ -11931,9 +11986,27 @@ function afTeleconTextLines_(tc){var groups={};(tc.items||[]).forEach(function(i
 async function afTeleconOCRPagina_(page,pag,totalP){await afLoadScript_(AF_TESSERACT_URL,'afTesseractJs');var vp=page.getViewport({scale:2.2}),maxW=2800,scale=vp.width>maxW?(2.2*maxW/vp.width):2.2;vp=page.getViewport({scale:scale});var c=document.createElement('canvas'),ctx=c.getContext('2d');c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);await page.render({canvasContext:ctx,viewport:vp}).promise;var r=await Tesseract.recognize(c,'por',{logger:function(m){if(m&&m.status==='recognizing text')afTeleconStatus_('<i class="ti ti-scan"></i> OCR da página '+pag+'/'+totalP+' · '+Math.round((m.progress||0)*100)+'%','warn');}});return r&&r.data&&r.data.text?r.data.text:'';}
 async function afTeleconLerPdf_(file){afTeleconStatus_('<i class="ti ti-loader-2 spin"></i> Abrindo relatório Telecon...','warn');await afLoadScript_(AF_PDFJS_URL,'afPdfJs');pdfjsLib.GlobalWorkerOptions.workerSrc=AF_PDFJS_WORKER;var buf=await file.arrayBuffer(),pdf=await pdfjsLib.getDocument({data:buf}).promise,textos=[],paginas=[];for(var p=1;p<=pdf.numPages;p++){afTeleconStatus_('<i class="ti ti-loader-2 spin"></i> Lendo página '+p+' de '+pdf.numPages+'...','warn');var page=await pdf.getPage(p);paginas.push(page);try{var tc=await page.getTextContent();textos.push(afTeleconTextLines_(tc));}catch(e){textos.push('');}}var base=afTeleconParseTexto_(textos.join('\n'));var precisaOcr=base.itens.length<3||(!base.fornecedor&&!base.registrosInformados&&!base.totalInformado);if(precisaOcr){afTeleconStatus_('<i class="ti ti-scan"></i> O PDF é visual. Fazendo leitura automática para auxiliar a conferência...','warn');var ocr=[];for(var j=0;j<paginas.length;j++){ocr.push(await afTeleconOCRPagina_(paginas[j],j+1,paginas.length));}var po=afTeleconParseTexto_(ocr.join('\n'));if(po.itens.length>=base.itens.length)base=po;}return base;}
 function afTeleconLerBase64_(file){return new Promise(function(resolve,reject){var fr=new FileReader();fr.onerror=reject;fr.onload=function(){resolve(String(fr.result||'').split(',')[1]||'');};fr.readAsDataURL(file);});}
-function afAbrirImportTelecon_(){var b=document.getElementById('afTeleconBox');if(b)b.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(function(){var f=document.getElementById('afTeleconFile');if(f)f.click();},250);}
-async function afTeleconArquivoSelecionado_(input){var file=input.files&&input.files[0];input.value='';if(!file)return;if(!/pdf/i.test(file.type||file.name)){mostrarToast('Selecione um arquivo PDF da Telecon.','warn');return;}if(file.size>15*1024*1024){mostrarToast('O PDF deve ter no máximo 15 MB.','warn');return;}document.getElementById('afTeleconFileName').textContent=file.name+' · '+(file.size/1024/1024).toFixed(1)+' MB';try{var b64p=afTeleconLerBase64_(file),dados=await afTeleconLerPdf_(file),b64=await b64p;afTeleconImport_={file:file,pdfBase64:b64,nomeArquivo:file.name,dados:dados};afTeleconMostrarReview_();afTeleconStatus_('<i class="ti ti-check"></i> Relatório lido. Confira o resumo e os itens antes de criar a ação.','ok');}catch(e){afTeleconImport_={file:file,pdfBase64:await afTeleconLerBase64_(file),nomeArquivo:file.name,dados:{fornecedor:'',registrosInformados:0,totalInformado:0,itens:[]}};afTeleconMostrarReview_();afTeleconStatus_('<i class="ti ti-alert-triangle"></i> Não consegui extrair a tabela automaticamente. O PDF original continua válido: informe fornecedor, quantidade de registros e total e a AURA usará o próprio relatório como Anexo I.','warn');}}
-function afTeleconMostrarReview_(){var d=(afTeleconImport_&&afTeleconImport_.dados)||{};document.getElementById('afTeleconFornecedor').value=d.fornecedor||'';document.getElementById('afTeleconRegistros').value=d.registrosInformados||'';document.getElementById('afTeleconTotal').value=d.totalInformado||'';document.getElementById('afTeleconReview').classList.add('open');afTeleconRenderItens_();afTeleconAtualizarConferencia_();}
+function afAbrirImportTelecon_(){afTeleconModo_='novo';afTeleconAcaoAtualizar_=null;var b=document.getElementById('afTeleconBox');if(b)b.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(function(){var f=document.getElementById('afTeleconFile');if(f)f.click();},250);}
+async function afTeleconProcessarArquivo_(input,modo){
+  var file=input.files&&input.files[0];input.value='';if(!file)return;
+  afTeleconModo_=modo||'novo';
+  if(!/pdf/i.test(file.type||file.name)){mostrarToast('Selecione um arquivo PDF da Telecon.','warn');return;}
+  if(file.size>15*1024*1024){mostrarToast('O PDF deve ter no máximo 15 MB.','warn');return;}
+  document.getElementById('afTeleconFileName').textContent=file.name+' · '+(file.size/1024/1024).toFixed(1)+' MB';
+  try{
+    var b64p=afTeleconLerBase64_(file),dados=await afTeleconLerPdf_(file),b64=await b64p;
+    afTeleconImport_={file:file,pdfBase64:b64,nomeArquivo:file.name,dados:dados};
+    afTeleconMostrarReview_();
+    afTeleconStatus_('<i class="ti ti-check"></i> Relatório lido. Confira o resumo e os itens antes de '+(afTeleconModo_==='atualizar'?'atualizar este dossiê.':'criar a ação.'),'ok');
+  }catch(e){
+    afTeleconImport_={file:file,pdfBase64:await afTeleconLerBase64_(file),nomeArquivo:file.name,dados:{fornecedor:'',registrosInformados:0,totalInformado:0,itens:[]}};
+    afTeleconMostrarReview_();
+    afTeleconStatus_('<i class="ti ti-alert-triangle"></i> Não consegui extrair a tabela automaticamente. O PDF original continua válido: informe fornecedor, quantidade de registros e total.','warn');
+  }
+}
+async function afTeleconArquivoSelecionado_(input){return afTeleconProcessarArquivo_(input,'novo');}
+async function afTeleconArquivoAtualizacaoSelecionado_(input){return afTeleconProcessarArquivo_(input,'atualizar');}
+function afTeleconMostrarReview_(){var d=(afTeleconImport_&&afTeleconImport_.dados)||{};document.getElementById('afTeleconFornecedor').value=d.fornecedor||'';document.getElementById('afTeleconRegistros').value=d.registrosInformados||'';document.getElementById('afTeleconTotal').value=d.totalInformado||'';document.getElementById('afTeleconReview').classList.add('open');var rw=document.getElementById('afTeleconUpdateReasonWrap'),btn=document.getElementById('afTeleconConfirmar');if(rw)rw.style.display=afTeleconModo_==='atualizar'?'block':'none';if(btn)btn.innerHTML=afTeleconModo_==='atualizar'?'<i class="ti ti-refresh"></i> Atualizar este dossiê':'<i class="ti ti-check"></i> Confirmar e criar ação';afTeleconRenderItens_();afTeleconAtualizarConferencia_();var b=document.getElementById('afTeleconBox');if(b)b.scrollIntoView({behavior:'smooth',block:'start'});}
 function afTeleconResumoEditado_(){if(!afTeleconImport_)return;var d=afTeleconImport_.dados;d.fornecedor=String(document.getElementById('afTeleconFornecedor').value||'').trim();d.registrosInformados=Number(document.getElementById('afTeleconRegistros').value)||0;d.totalInformado=Number(document.getElementById('afTeleconTotal').value)||0;afTeleconAtualizarConferencia_();}
 function afTeleconRenderItens_(){var d=(afTeleconImport_&&afTeleconImport_.dados)||{},it=d.itens||[],b=document.getElementById('afTeleconItens');document.getElementById('afTeleconReconhecidos').value=it.length;if(!it.length){b.innerHTML='<tr><td colspan="9" class="af-empty">Nenhuma linha foi reconhecida automaticamente. O relatório original ainda pode ser usado como Anexo I da notificação.</td></tr>';return;}b.innerHTML=it.map(function(x,i){return '<tr class="'+(x.ocrAjustado?'ocr-adjust':'')+'"><td><input class="desc" value="'+afEsc_(x.nome||'')+'" oninput="afTeleconEditar_('+i+',\'nome\',this.value)"><div style="font-size:7.5px;color:var(--tx2);margin-top:2px">Cód. interno '+afEsc_(x.codigoInterno||'—')+'</div></td><td><input class="barcode" value="'+afEsc_(x.codigoBarras||'')+'" oninput="afTeleconEditar_('+i+',\'codigoBarras\',this.value)"></td><td><input class="nf" value="'+afEsc_(x.nfOrigem||'')+'" oninput="afTeleconEditar_('+i+',\'nfOrigem\',this.value)"></td><td>'+afEsc_(x.dataCadastro||'—')+'</td><td class="num">'+afQtd_(x.quantidadeOriginal)+'</td><td><input type="number" min="0" step="0.001" value="'+afEsc_(x.quantidade)+'" oninput="afTeleconEditar_('+i+',\'quantidade\',this.value)"></td><td><input type="number" min="0" step="0.0001" value="'+afEsc_(x.custoUnit)+'" oninput="afTeleconEditar_('+i+',\'custoUnit\',this.value)"></td><td><input type="number" min="0" step="0.01" value="'+afEsc_(x.valorTelecon)+'" oninput="afTeleconEditar_('+i+',\'valorTelecon\',this.value)"></td><td><button class="btn btn-sm" onclick="afTeleconRemover_('+i+')"><i class="ti ti-x"></i></button></td></tr>';}).join('');}
 function afTeleconEditar_(i,campo,val){if(!afTeleconImport_||!afTeleconImport_.dados.itens[i])return;var x=afTeleconImport_.dados.itens[i];if(['quantidade','custoUnit','valorTelecon','quantidadeOriginal'].indexOf(campo)>=0)x[campo]=Number(val)||0;else x[campo]=String(val||'').trim();if(campo==='codigoBarras')x.codigo=x.codigoBarras;x.valorTotal=Number(x.valorTelecon)||0;afTeleconAtualizarConferencia_();}
@@ -11941,9 +12014,115 @@ function afTeleconRemover_(i){if(!afTeleconImport_)return;afTeleconImport_.dados
 function afTeleconAdicionarLinha_(){if(!afTeleconImport_)return;var d=afTeleconImport_.dados;d.itens.push({key:'tele_manual_'+Date.now(),codigoInterno:'',codigoBarras:'',codigo:'',nome:'',nfOrigem:'',dataCadastro:'',operadorTelecon:'',quantidadeOriginal:0,quantidade:0,unidade:'UN',custoUnit:0,valorTelecon:0,valorTotal:0,lojaTelecon:'',origem:'TELECON'});afTeleconRenderItens_();afTeleconAtualizarConferencia_();}
 function afTeleconConferenciaInfo_(){var d=(afTeleconImport_&&afTeleconImport_.dados)||{},it=d.itens||[],sum=it.reduce(function(s,x){return s+(Number(x.valorTelecon)||0);},0),countOk=!d.registrosInformados||it.length===Number(d.registrosInformados),totalOk=!d.totalInformado||Math.abs(sum-Number(d.totalInformado))<=Math.max(.05,Number(d.totalInformado)*.001);return {sum:sum,countOk:countOk,totalOk:totalOk,completa:countOk&&totalOk&&it.length>0};}
 function afTeleconAtualizarConferencia_(){if(!afTeleconImport_)return;var d=afTeleconImport_.dados,info=afTeleconConferenciaInfo_(),e=document.getElementById('afTeleconConferencia');document.getElementById('afTeleconReconhecidos').value=(d.itens||[]).length;var partes=[];if(d.registrosInformados)partes.push('Relatório informa <b>'+d.registrosInformados+' registro(s)</b>; leitura reconheceu <b>'+(d.itens||[]).length+'</b>.');if(d.totalInformado)partes.push('Total do relatório: <b>'+afMoney_(d.totalInformado)+'</b>; soma reconhecida: <b>'+afMoney_(info.sum)+'</b>.');if(info.completa){e.style.borderLeftColor='var(--green)';e.innerHTML='<b style="color:var(--green)">Conferência automática fechou.</b> '+partes.join(' ')+' Mesmo assim, o PDF original continuará arquivado como evidência.';}else{e.style.borderLeftColor='var(--amber)';e.innerHTML='<b style="color:var(--amber)">Atenção: a leitura automática não fechou 100%.</b> '+(partes.join(' ')||'Confira o cabeçalho do relatório.')+' Por segurança, a notificação usará o <b>PDF original Telecon como Anexo I oficial</b>, e não tratará a leitura parcial como prova completa.';}}
-function afTeleconCancelar_(){afTeleconImport_=null;document.getElementById('afTeleconReview').classList.remove('open');document.getElementById('afTeleconFileName').textContent='Nenhum relatório selecionado.';afTeleconStatus_('A importação foi cancelada. Nenhum dado foi gravado.','');}
-function afTeleconAcaoBase_(){var d=afTeleconImport_.dados||{},forn=String(document.getElementById('afTeleconFornecedor').value||d.fornecedor||'').trim(),reg=Number(document.getElementById('afTeleconRegistros').value)||d.registrosInformados||0,total=Number(document.getElementById('afTeleconTotal').value)||d.totalInformado||0,info=afTeleconConferenciaInfo_(),ant=afPerfilAnterior_(forn)||{},mod=afTeleconModalidade_(forn)||{},fone=ant.telefone||afTeleconExtrairFone_(mod.contato||mod.obs||'');var itens=(d.itens||[]).map(function(x,i){x.key=x.key||('tele_'+i);x.codigo=x.codigoBarras||x.codigo||'';x.valorTotal=Number(x.valorTelecon)||0;x.origem='TELECON';return x;});return {id:'',numero:'',status:'RASCUNHO',dataEmissao:afHoje_(),prazoDiasUteis:10,prazoResposta:'',loja:'Supermercado Boas Compras',operador:afUsuarioAtual_(),assinanteId:afAssinantePadraoId_({operador:afUsuarioAtual_()}),fornecedor:forn,cnpj:ant.cnpj||'',codigoFornecedor:ant.codigoFornecedor||'',contato:ant.contato||mod.contato||'',telefone:fone,email:ant.email||'',situacoes:{vencidos:true},destinoProdutos:'',destinoObservacao:'',providencias:{troca:false,recolhimento:true,credito:true,ressarcimento:false,notaDevolucao:false,boleto:false},itens:itens,evidencias:[],observacoes:'',dataRetorno:'',retorno:'',valorRecuperado:0,origemDados:'TELECON',relatorioTelecon:{nome:afTeleconImport_.nomeArquivo,fornecedorRelatorio:forn,registrosInformados:reg,totalInformado:total,registrosExtraidos:itens.length,totalExtraido:info.sum,extracaoCompleta:!!info.completa,usarPdfComoAnexoI:!info.completa,importadoEm:new Date().toISOString()}};}
-async function afTeleconConfirmar_(){if(!afTeleconImport_)return;afTeleconResumoEditado_();var a=afTeleconAcaoBase_();if(!a.fornecedor){mostrarToast('Informe o fornecedor do relatório.','warn');return;}if(!a.relatorioTelecon.registrosInformados&&!a.itens.length){mostrarToast('Informe ao menos a quantidade de registros do relatório ou confira as linhas reconhecidas.','warn');return;}var b=document.getElementById('afTeleconConfirmar');b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Criando ação...';var s=await afPost_({action:'salvarAcaoFornecedorVencidos',acao:a});if(!s||!s.ok){b.disabled=false;b.innerHTML='<i class="ti ti-check"></i> Confirmar e criar ação';mostrarToast('Falha ao criar ação: '+((s&&s.erro)||'erro'),'err');return;}var ac=s.acao;afTeleconStatus_('<i class="ti ti-upload"></i> Salvando o PDF original da Telecon no Drive da ação...','warn');var up=await afPost_({action:'salvarRelatorioTeleconAcaoFornecedor',acaoId:ac.id,pdfBase64:afTeleconImport_.pdfBase64,nomeArquivo:afTeleconImport_.nomeArquivo,meta:ac.relatorioTelecon});b.disabled=false;b.innerHTML='<i class="ti ti-check"></i> Confirmar e criar ação';if(up&&up.ok&&up.acao)ac=up.acao;else mostrarToast('A ação foi criada, mas o PDF original não foi salvo: '+((up&&up.erro)||'falha'),'warn');var pos=afAcoes_.findIndex(function(x){return x.id===ac.id;});if(pos>=0)afAcoes_[pos]=ac;else afAcoes_.unshift(ac);afEdit_=JSON.parse(JSON.stringify(ac));afTeleconImport_=null;document.getElementById('afTeleconReview').classList.remove('open');afCarregado_=true;afRenderTudo_();afAbrirEditor_();afTeleconStatus_('<i class="ti ti-check"></i> Relatório Telecon importado e ação criada. Agora anexe as fotos e gere a notificação.','ok');mostrarToast('Relatório Telecon vinculado à ação '+(ac.numero||'')+'.','ok');}
+function afTeleconCancelar_(){afTeleconImport_=null;afTeleconModo_='novo';afTeleconAcaoAtualizar_=null;document.getElementById('afTeleconReview').classList.remove('open');document.getElementById('afTeleconFileName').textContent='Nenhum relatório selecionado.';afTeleconStatus_('A importação foi cancelada. Nenhum dado foi gravado.','');}
+function afTeleconAcaoBase_(){var d=afTeleconImport_.dados||{},forn=String(document.getElementById('afTeleconFornecedor').value||d.fornecedor||'').trim(),reg=Number(document.getElementById('afTeleconRegistros').value)||d.registrosInformados||0,total=Number(document.getElementById('afTeleconTotal').value)||d.totalInformado||0,info=afTeleconConferenciaInfo_(),ant=afPerfilAnterior_(forn)||{},mod=afTeleconModalidade_(forn)||{},fone=ant.telefone||afTeleconExtrairFone_(mod.contato||mod.obs||'');var itens=(d.itens||[]).map(function(x,i){x.key=x.key||('tele_'+i);x.codigo=x.codigoBarras||x.codigo||'';x.valorTotal=Number(x.valorTelecon)||0;x.origem='TELECON';return x;});return {id:'',numero:'',status:'RASCUNHO',dataEmissao:afHoje_(),prazoDiasUteis:10,prazoResposta:'',loja:'Supermercado Boas Compras',operador:afUsuarioAtual_(),assinanteId:afAssinantePadraoId_({operador:afUsuarioAtual_()}),fornecedor:forn,cnpj:ant.cnpj||'',codigoFornecedor:ant.codigoFornecedor||'',contato:ant.contato||mod.contato||'',telefone:fone,email:ant.email||'',situacoes:{vencidos:true},destinoProdutos:'',destinoObservacao:'',providencias:{troca:false,recolhimento:true,credito:true,ressarcimento:false,notaDevolucao:false,boleto:false},itens:itens,evidencias:[],observacoes:'',dataRetorno:'',retorno:'',valorRecuperado:0,compensacoes:[],origemDados:'TELECON',relatorioTelecon:{nome:afTeleconImport_.nomeArquivo,fornecedorRelatorio:forn,registrosInformados:reg,totalInformado:total,registrosExtraidos:itens.length,totalExtraido:info.sum,extracaoCompleta:!!info.completa,usarPdfComoAnexoI:!info.completa,importadoEm:new Date().toISOString()}};}
+async function afTeleconConfirmar_(){
+  if(!afTeleconImport_)return;
+  afTeleconResumoEditado_();
+  var baseNova=afTeleconAcaoBase_();
+  if(!baseNova.fornecedor){mostrarToast('Informe o fornecedor do relatório.','warn');return;}
+  if(!baseNova.relatorioTelecon.registrosInformados&&!baseNova.itens.length){mostrarToast('Informe ao menos a quantidade de registros do relatório ou confira as linhas reconhecidas.','warn');return;}
+
+  var b=document.getElementById('afTeleconConfirmar');
+
+  if(afTeleconModo_==='atualizar'){
+    if(!afEdit_||!afEdit_.id){mostrarToast('Abra um dossiê salvo antes de atualizar o relatório.','warn');return;}
+
+    var fornAtual=afTeleconCompact_(afEdit_.fornecedor||''),fornNovo=afTeleconCompact_(baseNova.fornecedor||'');
+    if(fornAtual&&fornNovo&&fornAtual!==fornNovo&&fornAtual.indexOf(fornNovo)<0&&fornNovo.indexOf(fornAtual)<0){
+      if(!confirm('O fornecedor do novo relatório ('+baseNova.fornecedor+') é diferente do fornecedor do dossiê ('+(afEdit_.fornecedor||'')+'). Deseja continuar mesmo assim?'))return;
+    }
+
+    var motivo=String((document.getElementById('afTeleconMotivoAtualizacao')||{}).value||'Relatório atualizado / novo saldo');
+    b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Atualizando dossiê...';
+
+    // Preserva o dossiê e substitui apenas a fonte Telecon, itens e valor.
+    var ac=JSON.parse(JSON.stringify(afEdit_));
+    ac.itens=baseNova.itens;
+    ac.origemDados='TELECON';
+    ac.relatorioPendenteAtualizacao=false;
+    ac.relatorioTelecon=baseNova.relatorioTelecon;
+    ac.relatorioTelecon.motivoAtualizacao=motivo;
+
+    var s=await afPost_({action:'salvarAcaoFornecedorVencidos',acao:ac});
+    if(!s||!s.ok){
+      b.disabled=false;b.innerHTML='<i class="ti ti-refresh"></i> Atualizar este dossiê';
+      mostrarToast('Falha ao atualizar os dados do dossiê: '+((s&&s.erro)||'erro'),'err');return;
+    }
+
+    ac=s.acao;
+    afTeleconStatus_('<i class="ti ti-upload"></i> Substituindo o PDF Telecon no Drive...','warn');
+    var up=await afPost_({
+      action:'salvarRelatorioTeleconAcaoFornecedor',
+      acaoId:ac.id,
+      pdfBase64:afTeleconImport_.pdfBase64,
+      nomeArquivo:afTeleconImport_.nomeArquivo,
+      meta:ac.relatorioTelecon,
+      motivoAtualizacao:motivo
+    });
+
+    b.disabled=false;b.innerHTML='<i class="ti ti-refresh"></i> Atualizar este dossiê';
+    if(!up||!up.ok){
+      mostrarToast('Os dados foram atualizados, mas o novo PDF não foi salvo. O relatório anterior foi preservado. '+((up&&up.erro)||''),'err');
+      return;
+    }
+
+    ac=up.acao||ac;
+    afEdit_=JSON.parse(JSON.stringify(ac));
+    afAplicarMotivoFotoAutomatico_(afEdit_,false);
+
+    var pos=afAcoes_.findIndex(function(x){return x.id===ac.id;});
+    if(pos>=0)afAcoes_[pos]=afEdit_;else afAcoes_.unshift(afEdit_);
+
+    afTeleconImport_=null;afTeleconModo_='novo';afTeleconAcaoAtualizar_=null;
+    document.getElementById('afTeleconReview').classList.remove('open');
+    afRenderTudo_();afAbrirEditor_();
+    afTeleconStatus_('<i class="ti ti-check"></i> Relatório Telecon atualizado no mesmo dossiê. Valor, itens e bonificações foram conciliados com a nova versão.','ok');
+    mostrarToast('Relatório atualizado no dossiê '+(ac.numero||'')+'.','ok');
+    return;
+  }
+
+  b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Criando ação...';
+  var s=await afPost_({action:'salvarAcaoFornecedorVencidos',acao:baseNova});
+  if(!s||!s.ok){
+    b.disabled=false;b.innerHTML='<i class="ti ti-check"></i> Confirmar e criar ação';
+    mostrarToast('Falha ao criar ação: '+((s&&s.erro)||'erro'),'err');return;
+  }
+  var ac=s.acao;
+  afTeleconStatus_('<i class="ti ti-upload"></i> Salvando o PDF original da Telecon no Drive da ação...','warn');
+  var up=await afPost_({action:'salvarRelatorioTeleconAcaoFornecedor',acaoId:ac.id,pdfBase64:afTeleconImport_.pdfBase64,nomeArquivo:afTeleconImport_.nomeArquivo,meta:ac.relatorioTelecon});
+  b.disabled=false;b.innerHTML='<i class="ti ti-check"></i> Confirmar e criar ação';
+  if(up&&up.ok&&up.acao)ac=up.acao;else mostrarToast('A ação foi criada, mas o PDF original não foi salvo: '+((up&&up.erro)||'falha'),'warn');
+  var pos=afAcoes_.findIndex(function(x){return x.id===ac.id;});if(pos>=0)afAcoes_[pos]=ac;else afAcoes_.unshift(ac);
+  afEdit_=JSON.parse(JSON.stringify(ac));afTeleconImport_=null;afTeleconModo_='novo';document.getElementById('afTeleconReview').classList.remove('open');afCarregado_=true;afRenderTudo_();afAbrirEditor_();
+  afTeleconStatus_('<i class="ti ti-check"></i> Relatório Telecon importado e ação criada. Agora defina a destinação e, se houver, anexe as fotos.','ok');
+  mostrarToast('Relatório Telecon vinculado à ação '+(ac.numero||'')+'.','ok');
+}
+async function afAtualizarRelatorioTelecon_(){
+  if(!afEdit_||!afEdit_.id){mostrarToast('Salve o dossiê antes de vincular um relatório.','warn');return;}
+  // Salva eventuais alterações do editor antes de trocar a fonte documental.
+  var salvo=await afSalvarAcao_(true);
+  if(!salvo)return;
+  afTeleconModo_='atualizar';
+  afTeleconAcaoAtualizar_=afEdit_.id;
+  var f=document.getElementById('afTeleconUpdateFile');if(f)f.click();
+}
+async function afRemoverRelatorioTelecon_(){
+  if(!afEdit_||!afEdit_.id)return;
+  if(!afEdit_.relatorioTelecon){
+    mostrarToast('Este dossiê não possui relatório Telecon vinculado.','warn');return;
+  }
+  var msg='Remover o relatório Telecon deste dossiê?\n\nO PDF arquivado e as linhas importadas deste relatório serão removidos do dossiê, o valor será recalculado e o status voltará para RASCUNHO.\n\nO número do dossiê, contatos, evidências e destinação física serão preservados para que você possa inserir o relatório atualizado.';
+  if(!confirm(msg))return;
+  var motivo=prompt('Motivo da remoção do relatório:', 'Correção/baixa na Telecon — relatório será atualizado')||'Removido para correção/atualização do relatório Telecon';
+  var r=await afPost_({action:'excluirRelatorioTeleconAcaoFornecedor',acaoId:afEdit_.id,motivo:motivo});
+  if(!r||!r.ok){mostrarToast('Não foi possível remover o relatório: '+((r&&r.erro)||'falha'),'err');return;}
+  afEdit_=r.acao;
+  afAplicarMotivoFotoAutomatico_(afEdit_,false);
+  var p=afAcoes_.findIndex(function(x){return x.id===afEdit_.id;});if(p>=0)afAcoes_[p]=afEdit_;
+  afRenderTudo_();afAbrirEditor_();
+  mostrarToast('Relatório removido. O mesmo dossiê está aguardando um PDF Telecon atualizado.','ok');
+}
 function afRelatorioTeleconGet_(acaoId){return _gasGetJsonp('acaoFornecedorRelatorioTelecon','&acaoId='+encodeURIComponent(acaoId),90000);}
 async function afAbrirRelatorioTelecon_(){if(!afEdit_||!afEdit_.id)return;var w=window.open('','_blank');if(!w){mostrarToast('Permita pop-ups para abrir o relatório.','warn');return;}w.document.write('<div style="font-family:Arial;padding:30px">Carregando relatório Telecon...</div>');var r=await afRelatorioTeleconGet_(afEdit_.id);if(!r||!r.ok||!r.base64){w.close();mostrarToast('Não foi possível abrir o relatório Telecon.','err');return;}var bin=atob(r.base64),u8=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);var url=URL.createObjectURL(new Blob([u8],{type:'application/pdf'}));w.location.href=url;setTimeout(function(){URL.revokeObjectURL(url);},120000);}
 async function afBaixarRelatorioTelecon_(){if(!afEdit_||!afEdit_.id)return;var r=await afRelatorioTeleconGet_(afEdit_.id);if(!r||!r.ok||!r.base64){mostrarToast('Não foi possível baixar o relatório Telecon.','err');return;}var bin=atob(r.base64),u8=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);var url=URL.createObjectURL(new Blob([u8],{type:'application/pdf'})),a=document.createElement('a');a.href=url;a.download=(r.nome||'Relatorio_Telecon.pdf');document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},30000);}
@@ -11963,7 +12142,147 @@ function afGet_(action,extra){var cfg=loadCfg();if(!cfg.url)return Promise.resol
 function afPost_(body){var cfg=loadCfg();if(!cfg.url)return Promise.resolve({ok:false,erro:'API AURA não configurada.'});return fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(body)}).then(function(r){return r.text();}).then(function(t){try{return JSON.parse(t);}catch(e){return {ok:false,erro:'Resposta inválida do servidor.'};}}).catch(function(e){return {ok:false,erro:e.message};});}
 function afStatusEfetivo_(a){var st=String(a.status||'RASCUNHO').toUpperCase();if(st!=='RESOLVIDA'&&a.prazoResposta&&a.prazoResposta<afHoje_()&&st!=='RASCUNHO')return 'VENCIDA';return st;}
 function afStatusLabel_(st){return {RASCUNHO:'Rascunho',AGUARDANDO_RETORNO:'Aguardando retorno',RETIRADA_AGENDADA:'Retirada agendada',PARCIAL:'Parcialmente resolvido',RESOLVIDA:'Resolvida',VENCIDA:'Prazo vencido'}[st]||st;}
-function afAtualizarKpis_(){var agu=0,venc=0,ab=0,res=0;(afAcoes_||[]).forEach(function(a){var st=afStatusEfetivo_(a),v=Number(a.valorTotal)||0,vr=Number(a.valorRecuperado)||0;if(st==='VENCIDA')venc++;if(['AGUARDANDO_RETORNO','RETIRADA_AGENDADA','PARCIAL','VENCIDA'].indexOf(st)>=0){agu++;ab+=Math.max(0,v-vr);}if(st==='RESOLVIDA'||vr>0)res+=vr;});
+function afRelatorioVersaoAtual_(a){
+  var r=a&&a.relatorioTelecon||{};
+  return Math.max(1,Number(r.versao)||1);
+}
+function afBonificacoes_(a){
+  return a&&Array.isArray(a.compensacoes)?a.compensacoes:[];
+}
+function afBonificacaoRefletida_(a,c){
+  if(!c)return false;
+  var atual=afRelatorioVersaoAtual_(a);
+  if(Number(c.refletidaVersao)>0&&atual>=Number(c.refletidaVersao))return true;
+  var base=Math.max(1,Number(c.relatorioVersaoBase)||1);
+  return atual>base;
+}
+function afResumoBonificacoes_(a){
+  var cs=afBonificacoes_(a),total=0,pend=0,ref=0;
+  cs.forEach(function(c){
+    var v=Math.max(0,Number(c.valor)||0);
+    total+=v;
+    if(afBonificacaoRefletida_(a,c))ref+=v;else pend+=v;
+  });
+  return {quantidade:cs.length,total:total,pendente:pend,refletido:ref};
+}
+function afSaldoRelatorioAtual_(a){
+  var r=a&&a.relatorioTelecon||{};
+  if(Number(r.totalInformado)>=0&&a&&String(a.origemDados||'').toUpperCase()==='TELECON')return Math.max(0,Number(r.totalInformado)||0);
+  return Math.max(0,Number(a&&a.valorTotal)||0);
+}
+function afSaldoOperacional_(a){
+  if(!a)return 0;
+  var tele=String(a.origemDados||'').toUpperCase()==='TELECON'&&a.relatorioTelecon;
+  if(tele){
+    var saldo=afSaldoRelatorioAtual_(a),rb=afResumoBonificacoes_(a);
+    return Math.max(0,saldo-rb.pendente);
+  }
+  return Math.max(0,(Number(a.valorTotal)||0)-(Number(a.valorRecuperado)||0)-afResumoBonificacoes_(a).total);
+}
+function afTotalRecuperadoDossie_(a){
+  return Math.max(0,Number(a&&a.valorRecuperado)||0)+afResumoBonificacoes_(a).total;
+}
+function afBonificacaoStatusTexto_(a,c){
+  var atual=afRelatorioVersaoAtual_(a),base=Math.max(1,Number(c&&c.relatorioVersaoBase)||1);
+  if(afBonificacaoRefletida_(a,c))return 'Refletida no relatório Telecon v'+atual;
+  return 'Aguardando relatório Telecon posterior à v'+base;
+}
+function afFmtDataHoraCurta_(iso){
+  if(!iso)return '—';
+  var d=new Date(iso);if(isNaN(d.getTime()))return '—';
+  return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function afTentarVincularBonificacaoAoRelatorioAtual_(a,valor){
+  var r=a&&a.relatorioTelecon||{},atual=afRelatorioVersaoAtual_(a);
+  if(atual<=1)return null;
+  var antes=Number(r.totalAnterior),agora=Number(r.totalInformado);
+  if(!(antes>agora))return null;
+  var delta=antes-agora,tol=Math.max(2,Math.abs(valor)*0.02);
+  if(Math.abs(delta-valor)<=tol)return atual;
+  return null;
+}
+function afRenderBonificacoes_(){
+  var body=document.getElementById('afBonifBody'),res=document.getElementById('afBonifResumo'),st=document.getElementById('afBonifStatus');
+  if(!body||!res||!afEdit_)return;
+  var cs=afBonificacoes_(afEdit_),rb=afResumoBonificacoes_(afEdit_),saldo=afSaldoRelatorioAtual_(afEdit_),oper=afSaldoOperacional_(afEdit_);
+  var tele=String(afEdit_.origemDados||'').toUpperCase()==='TELECON'&&afEdit_.relatorioTelecon;
+  var vers=tele?afRelatorioVersaoAtual_(afEdit_):0;
+
+  function card(lbl,val,sub){
+    return '<div style="border:1px solid var(--bd);border-radius:9px;background:var(--bg2);padding:8px 9px"><div style="font-size:8px;text-transform:uppercase;font-weight:800;color:var(--tx2)">'+afEsc_(lbl)+'</div><div style="font-size:16px;font-weight:900;margin-top:3px">'+afEsc_(val)+'</div><div style="font-size:8px;color:var(--tx2);margin-top:2px">'+afEsc_(sub||'')+'</div></div>';
+  }
+  res.innerHTML=
+    card('Saldo do relatório',afMoney_(saldo),tele?'Telecon v'+vers:'Valor atual do dossiê')+
+    card('Bonificações registradas',afMoney_(rb.total),rb.quantidade+' NF(s)')+
+    card('Ainda não refletidas',afMoney_(rb.pendente),rb.pendente>0?'Aguardando relatório atualizado':'Tudo conciliado')+
+    card(rb.pendente>0?'Saldo estimado':'Saldo atual',afMoney_(oper),rb.pendente>0?'Até atualizar a Telecon':'Conforme relatório vigente');
+
+  if(st)st.textContent=rb.quantidade?(rb.quantidade+' bonificação(ões) · '+afMoney_(rb.total)):'Nenhuma bonificação registrada';
+
+  if(!cs.length){
+    body.innerHTML='<tr><td colspan="5" class="af-empty">Nenhuma NF de bonificação registrada neste dossiê.</td></tr>';
+    return;
+  }
+  body.innerHTML=cs.slice().reverse().map(function(c){
+    var reflet=afBonificacaoRefletida_(afEdit_,c);
+    return '<tr>'
+      +'<td><b>'+afEsc_(c.nf||'—')+'</b></td>'
+      +'<td class="num"><b>'+afMoney_(c.valor||0)+'</b></td>'
+      +'<td>'+afEsc_(afFmtDataHoraCurta_(c.registradoEm))+'</td>'
+      +'<td><span style="font-size:9px;font-weight:800;color:'+(reflet?'var(--green)':'var(--amber)')+'">'+afEsc_(afBonificacaoStatusTexto_(afEdit_,c))+'</span></td>'
+      +'<td><button class="btn btn-sm" style="color:var(--red)" onclick="afExcluirBonificacao_(&quot;'+afEsc_(c.id)+'&quot;)"><i class="ti ti-trash"></i></button></td>'
+      +'</tr>';
+  }).join('');
+}
+async function afRegistrarBonificacao_(){
+  if(!afEdit_)return;
+  var nf=String((document.getElementById('afBonifNF')||{}).value||'').trim();
+  var valor=Number((document.getElementById('afBonifValor')||{}).value)||0;
+  if(!nf){mostrarToast('Informe o número da NF de bonificação.','warn');return;}
+  if(!(valor>0)){mostrarToast('Informe o valor da bonificação.','warn');return;}
+  if(!afEdit_.relatorioTelecon){mostrarToast('Vincule primeiro um relatório Telecon ao dossiê.','warn');return;}
+
+  var cs=afBonificacoes_(afEdit_);
+  var duplicada=cs.some(function(c){return String(c.nf||'').trim().toUpperCase()===nf.toUpperCase();});
+  if(duplicada&&!confirm('Já existe uma bonificação com esta NF neste dossiê. Registrar outra mesmo assim?'))return;
+
+  var vers=afRelatorioVersaoAtual_(afEdit_);
+  var refletida=afTentarVincularBonificacaoAoRelatorioAtual_(afEdit_,valor);
+  cs.push({
+    id:'bon_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+    tipo:'BONIFICACAO',
+    nf:nf,
+    valor:Math.round(valor*100)/100,
+    registradoEm:new Date().toISOString(),
+    relatorioVersaoBase:refletida?Math.max(1,vers-1):vers,
+    relatorioTotalBase:afSaldoRelatorioAtual_(afEdit_),
+    refletidaVersao:refletida||0
+  });
+  afEdit_.compensacoes=cs;
+  document.getElementById('afBonifNF').value='';
+  document.getElementById('afBonifValor').value='';
+  afRenderBonificacoes_();
+  afAtualizarKpis_();afRenderLista_();
+
+  var r=await afSalvarAcao_(true);
+  if(!r)return;
+  if(refletida)mostrarToast('Bonificação registrada e conciliada com o relatório Telecon atual.','ok');
+  else mostrarToast('Bonificação registrada. O saldo exibido fica estimado até a próxima atualização do relatório Telecon.','ok');
+}
+async function afExcluirBonificacao_(id){
+  if(!afEdit_)return;
+  var c=afBonificacoes_(afEdit_).find(function(x){return String(x.id)===String(id);});
+  if(!c)return;
+  if(!confirm('Remover a NF de bonificação '+(c.nf||'')+' no valor de '+afMoney_(c.valor||0)+'?'))return;
+  afEdit_.compensacoes=afBonificacoes_(afEdit_).filter(function(x){return String(x.id)!==String(id);});
+  afRenderBonificacoes_();afAtualizarKpis_();afRenderLista_();
+  await afSalvarAcao_(true);
+  mostrarToast('Bonificação removida do dossiê.','ok');
+}
+function afTemBonificacaoPendente_(a){
+  return afResumoBonificacoes_(a).pendente>0.004;
+}
+function afAtualizarKpis_(){var agu=0,venc=0,ab=0,res=0;(afAcoes_||[]).forEach(function(a){var st=afStatusEfetivo_(a),vr=afTotalRecuperadoDossie_(a);if(st==='VENCIDA')venc++;if(['AGUARDANDO_RETORNO','RETIRADA_AGENDADA','PARCIAL','VENCIDA'].indexOf(st)>=0){agu++;ab+=afSaldoOperacional_(a);}if(st==='RESOLVIDA'||vr>0)res+=vr;});
   var el=document.getElementById('afKpiAguardando');if(el)el.textContent=agu;el=document.getElementById('afKpiVencidas');if(el)el.textContent=venc;el=document.getElementById('afKpiAberto');if(el)el.textContent=afMoney_(ab);el=document.getElementById('afKpiResolvido');if(el)el.textContent=afMoney_(res);var b=document.getElementById('afNavBadge');if(b){var c=agu+venc;if(c){b.textContent=c;b.style.display='inline-flex';}else b.style.display='none';}}
 async function afCarregar(force){if(afCarregado_&&!force){afRenderTudo_();return;}var r=await afGet_('buscarAcoesFornecedorVencidos');if(r&&r.ok){afAcoes_=r.dados||[];afCarregado_=true;}else if(force)mostrarToast('Falha ao carregar ações: '+((r&&r.erro)||'erro'),'err');afRenderTudo_();}
 function afRenderTudo_(){afAtualizarKpis_();afRenderVencidos_();afRenderLista_();}
@@ -11976,11 +12295,75 @@ function afFocarSelecao_(){var b=document.getElementById('afSelecaoBox');if(b)b.
 function afPerfilAnterior_(forn){var n=String(forn||'').trim().toLowerCase();if(!n)return null;for(var i=0;i<afAcoes_.length;i++){var a=afAcoes_[i];if(String(a.fornecedor||'').trim().toLowerCase()===n)return a;}return null;}
 function afCriarComSelecionados_(){var mapa={};afVencidos_().forEach(function(x){mapa[x.key]=x;});var xs=Object.keys(afSelecionados_).map(function(k){return mapa[k];}).filter(Boolean);if(!xs.length){mostrarToast('Selecione pelo menos um produto vencido.','warn');return;}var fornecedores={};xs.forEach(function(x){var f=afFornecedorProduto_(x.p)||'SEM FORNECEDOR';fornecedores[f]=true;});if(Object.keys(fornecedores).length>1){mostrarToast('Selecione produtos de um único fornecedor por ação.','warn');return;}var forn=Object.keys(fornecedores)[0];if(forn==='SEM FORNECEDOR')forn='';var ant=afPerfilAnterior_(forn)||{};
   var itens=xs.map(function(x){var p=x.p,q=afQtdProduto_(p),c=afCustoProduto_(p);return {key:x.key,codigo:p.cod||'',nome:p.nome||'',lote:p.lote||p.loteId||'',quantidade:q,unidade:p.unidade||bancoUnidade[String(p.cod||'').replace(/\D/g,'')]||'',validade:p.validade||'',custoUnit:c,valorTotal:q*c,setor:p.setor||'',fornecedor:forn};});
-  afEdit_={id:'',numero:'',status:'RASCUNHO',origemDados:'AURA',dataEmissao:afHoje_(),prazoDiasUteis:10,prazoResposta:'',loja:'Supermercado Boas Compras',operador:afUsuarioAtual_(),assinanteId:afAssinantePadraoId_({operador:afUsuarioAtual_()}),fornecedor:forn,cnpj:ant.cnpj||'',codigoFornecedor:ant.codigoFornecedor||'',contato:ant.contato||'',telefone:ant.telefone||'',email:ant.email||'',situacoes:{vencidos:true},destinoProdutos:'',destinoObservacao:'',providencias:{troca:false,recolhimento:true,credito:true,ressarcimento:false,notaDevolucao:false,boleto:false},itens:itens,evidencias:[],observacoes:'',dataRetorno:'',retorno:'',valorRecuperado:0};afAbrirEditor_();}
+  afEdit_={id:'',numero:'',status:'RASCUNHO',origemDados:'AURA',dataEmissao:afHoje_(),prazoDiasUteis:10,prazoResposta:'',loja:'Supermercado Boas Compras',operador:afUsuarioAtual_(),assinanteId:afAssinantePadraoId_({operador:afUsuarioAtual_()}),fornecedor:forn,cnpj:ant.cnpj||'',codigoFornecedor:ant.codigoFornecedor||'',contato:ant.contato||'',telefone:ant.telefone||'',email:ant.email||'',situacoes:{vencidos:true},destinoProdutos:'',destinoObservacao:'',providencias:{troca:false,recolhimento:true,credito:true,ressarcimento:false,notaDevolucao:false,boleto:false},itens:itens,evidencias:[],observacoes:'',dataRetorno:'',retorno:'',valorRecuperado:0,compensacoes:[]};afAbrirEditor_();}
 function afSomarDiasUteisFront_(iso,dias){var p=String(iso||afHoje_()).split('-'),d=new Date(+p[0],+p[1]-1,+p[2],12,0,0),r=Math.max(0,Number(dias)||0);while(r>0){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)r--;}return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function afAtualizarPrazo_(){var e=document.getElementById('afDataEmissao'),d=document.getElementById('afPrazoDias'),p=document.getElementById('afPrazoResposta');if(e&&d&&p)p.value=afSomarDiasUteisFront_(e.value,Number(d.value)||10);}
 function afAssinantePadraoId_(a){var salvo=String((a&&a.assinanteId)||'').toUpperCase();if(salvo==='WAGNER'||salvo==='LEONARDO')return salvo;var nome=String((a&&a.assinanteNome)||'').toLowerCase();if(nome.indexOf('wagner')>=0)return 'WAGNER';if(nome.indexOf('leonardo')>=0)return 'LEONARDO';var op=String((a&&a.operador)||afUsuarioAtual_()||'').toLowerCase();return op.indexOf('wagner')>=0?'WAGNER':'LEONARDO';}
 function afAssinanteDados_(a){var id=afAssinantePadraoId_(a);return id==='WAGNER'?{id:'WAGNER',nome:'Wagner Lima',cargo:'Gerência'}:{id:'LEONARDO',nome:'Leonardo Souza',cargo:'Agente de Prevenção de Perdas'};}
+function afNormPerecivel_(s){
+  return String(s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+}
+function afItemEhPerecivelRefrigerado_(it){
+  var n=afNormPerecivel_(it&&it.nome||'');
+  if(!n)return false;
+  var termos=[
+    'IOGUR','MANTEIGA','MARGARINA','REQUEIJAO','CREAM CHEESE',
+    'BEBIDA LACTEA','LEITE FERMENTADO','SOBREMESA LACTEA','PETIT SUISSE',
+    'COALHADA','NATA','RICOTA','MASCARPONE','QUEIJO','QUEIJO CREMOSO',
+    'CREME DE QUEIJO','SUCO NATURAL','SUCO INTEGRAL','SUCO REFRIGERADO'
+  ];
+  for(var i=0;i<termos.length;i++)if(n.indexOf(termos[i])>=0)return true;
+  return false;
+}
+function afAnalisePereciveis_(a){
+  var itens=(a&&Array.isArray(a.itens))?a.itens.filter(function(it){return String(it&&it.nome||'').trim();}):[];
+  var p=itens.filter(afItemEhPerecivelRefrigerado_);
+  var pct=itens.length?p.length/itens.length:0;
+  return {total:itens.length,pereciveis:p.length,pct:pct,automatico:itens.length>0&&(p.length===itens.length||(itens.length>=5&&pct>=0.80))};
+}
+function afAplicarMotivoFotoAutomatico_(a,atualizarUI){
+  if(!a)return false;
+  var temFotos=Array.isArray(a.evidencias)&&a.evidencias.length>0;
+  var destino=String(a.destinoProdutos||'').toUpperCase();
+  var analise=afAnalisePereciveis_(a);
+  var atual=String(a.semFotoMotivo||'').toUpperCase();
+
+  if(temFotos){
+    if(atual==='AUTO_PERECIVEL_DESCARTADO'){a.semFotoMotivo='';a.semFotoObservacao='';}
+  }else if(destino==='DESCARTADOS'&&analise.automatico){
+    // Só preenche automaticamente se o usuário não tiver escolhido um motivo manual.
+    if(!atual||atual==='AUTO_PERECIVEL_DESCARTADO'){
+      a.semFotoMotivo='AUTO_PERECIVEL_DESCARTADO';
+      a.semFotoObservacao='';
+    }
+  }else if(atual==='AUTO_PERECIVEL_DESCARTADO'){
+    a.semFotoMotivo='';
+    a.semFotoObservacao='';
+  }
+
+  if(atualizarUI){
+    var sel=document.getElementById('afSemFotoMotivo');
+    if(sel)sel.value=a.semFotoMotivo||'';
+    afAtualizarSemFotoUI_();
+    var box=document.getElementById('afSemFotoAutoInfo');
+    if(box){
+      if(!temFotos&&String(a.semFotoMotivo||'')==='AUTO_PERECIVEL_DESCARTADO'){
+        box.style.display='block';
+        box.innerHTML='<b><i class="ti ti-snowflake"></i> Motivo identificado automaticamente.</b> '+analise.pereciveis+' de '+analise.total+' item(ns) foram reconhecidos como perecíveis/refrigerados e a destinação está marcada como descarte.';
+      }else box.style.display='none';
+    }
+  }
+  return String(a.semFotoMotivo||'')==='AUTO_PERECIVEL_DESCARTADO';
+}
+function afSemFotoMotivoManual_(){
+  if(afEdit_){
+    var sel=document.getElementById('afSemFotoMotivo');
+    afEdit_.semFotoMotivo=sel?sel.value:'';
+    afEdit_.semFotoObservacao=String((document.getElementById('afSemFotoObs')||{}).value||'');
+  }
+  afAtualizarSemFotoUI_();
+  var box=document.getElementById('afSemFotoAutoInfo');if(box)box.style.display='none';
+}
 function afDestinoValido_(a){
   return ['SEGREGADOS','DESCARTADOS','MISTO'].indexOf(String((a&&a.destinoProdutos)||'').toUpperCase())>=0;
 }
@@ -12012,6 +12395,7 @@ function afAtualizarDestinoProdutosUI_(aplicarSugestao){
   var sel=document.getElementById('afDestinoProdutos'),help=document.getElementById('afDestinoHelp');
   if(!sel)return;
   var v=String(sel.value||'').toUpperCase(),txt=afTextoDestinoBase_(v);
+  if(afEdit_){afEdit_.destinoProdutos=v;afAplicarMotivoFotoAutomatico_(afEdit_,true);}
   if(help){
     help.innerHTML=txt
       ?('<b>'+afEsc_(afDestinoLabel_(v))+':</b> '+afEsc_(txt))
@@ -12034,13 +12418,14 @@ function afAtualizarDestinoProdutosUI_(aplicarSugestao){
 function afAtualizarSemFotoUI_(){
   var m=document.getElementById('afSemFotoMotivo'),o=document.getElementById('afSemFotoObs');
   if(!m||!o)return;
-  if(m.value==='NAO_REALIZADO'&&!o.value.trim())o.placeholder='Ex.: registro fotográfico não realizado no momento da ocorrência';
-  else if(m.value==='NAO_DISPONIVEL'&&!o.value.trim())o.placeholder='Ex.: registro fotográfico indisponível para esta ocorrência';
-  else if(m.value==='OUTRO'&&!o.value.trim())o.placeholder='Descreva objetivamente o motivo informado pelo responsável';
-  else if(!o.value.trim())o.placeholder='Observação opcional sobre a ausência do registro fotográfico';
+  if(m.value==='AUTO_PERECIVEL_DESCARTADO'){o.placeholder='Motivo definido automaticamente pela destinação e pelos produtos';o.disabled=true;}
+  else{o.disabled=false;if(m.value==='NAO_REALIZADO'&&!o.value.trim())o.placeholder='Ex.: registro fotográfico não realizado no momento da ocorrência';else if(m.value==='NAO_DISPONIVEL'&&!o.value.trim())o.placeholder='Ex.: registro fotográfico indisponível para esta ocorrência';else if(m.value==='OUTRO'&&!o.value.trim())o.placeholder='Descreva objetivamente o motivo informado pelo responsável';else if(!o.value.trim())o.placeholder='Observação opcional sobre a ausência do registro fotográfico';}
 }
 function afSemFotoTexto_(a){
   var motivo=String((a&&a.semFotoMotivo)||'').toUpperCase(),obs=String((a&&a.semFotoObservacao)||'').trim();
+  if(motivo==='AUTO_PERECIVEL_DESCARTADO'){
+    return 'Não foram anexadas evidências fotográficas a esta notificação. Os produtos relacionados foram identificados como perecíveis e/ou sujeitos à conservação refrigerada e constam como descartados conforme rotina operacional do estabelecimento, razão pela qual não permanecem disponíveis para registro fotográfico posterior. A relação dos itens e valores permanece vinculada à fonte documental e aos controles internos do dossiê.';
+  }
   var base='Não foram anexadas evidências fotográficas a esta notificação. A situação física e a destinação dos produtos constam em seção específica deste documento; a ausência de fotografia não é apresentada como prova visual da condição física, do lote ou da quantidade.';
   var informado='';
   if(motivo==='NAO_REALIZADO')informado='Motivo informado pelo responsável: o registro fotográfico não foi realizado no momento da ocorrência.';
@@ -12053,21 +12438,22 @@ function afSemFotoTexto_(a){
 function afAbrirEditor_(){var a=afEdit_;if(!a)return;
   if(!a.destinoProdutos&&String(a.semFotoMotivo||'').toUpperCase()==='DESCARTE'){
     a.destinoProdutos='DESCARTADOS';
-    a.semFotoMotivo='NAO_DISPONIVEL';
+    a.semFotoMotivo='';
   }
+  afAplicarMotivoFotoAutomatico_(a,false);
   document.getElementById('afEditor').classList.add('open');document.getElementById('afEditorTitulo').textContent=(a.numero||'Novo dossiê')+' · '+(a.fornecedor||'Fornecedor a informar');
-  function v(id,val){var e=document.getElementById(id);if(e)e.value=val==null?'':val;}v('afNumero',a.numero||'');v('afDataEmissao',a.dataEmissao||afHoje_());v('afPrazoDias',a.prazoDiasUteis||10);v('afPrazoResposta',a.prazoResposta||afSomarDiasUteisFront_(a.dataEmissao||afHoje_(),a.prazoDiasUteis||10));v('afLoja',a.loja||'Supermercado Boas Compras');v('afStatus',a.status||'RASCUNHO');v('afOperador',a.operador||afUsuarioAtual_());v('afAssinante',afAssinantePadraoId_(a));v('afFornecedor',a.fornecedor||'');v('afCnpj',a.cnpj||'');v('afCodigoFornecedor',a.codigoFornecedor||'');v('afContato',a.contato||'');v('afTelefone',a.telefone||'');v('afEmail',a.email||'');v('afObservacoes',a.observacoes||'');v('afDataRetorno',a.dataRetorno||'');v('afRetorno',a.retorno||'');v('afValorRecuperado',a.valorRecuperado||0);v('afDestinoProdutos',a.destinoProdutos||'');v('afDestinoObs',a.destinoObservacao||'');v('afSemFotoMotivo',a.semFotoMotivo||'');v('afSemFotoObs',a.semFotoObservacao||'');afAtualizarDestinoProdutosUI_(false);afAtualizarSemFotoUI_();
+  function v(id,val){var e=document.getElementById(id);if(e)e.value=val==null?'':val;}v('afNumero',a.numero||'');v('afDataEmissao',a.dataEmissao||afHoje_());v('afPrazoDias',a.prazoDiasUteis||10);v('afPrazoResposta',a.prazoResposta||afSomarDiasUteisFront_(a.dataEmissao||afHoje_(),a.prazoDiasUteis||10));v('afLoja',a.loja||'Supermercado Boas Compras');v('afStatus',a.status||'RASCUNHO');v('afOperador',a.operador||afUsuarioAtual_());v('afAssinante',afAssinantePadraoId_(a));v('afFornecedor',a.fornecedor||'');v('afCnpj',a.cnpj||'');v('afCodigoFornecedor',a.codigoFornecedor||'');v('afContato',a.contato||'');v('afTelefone',a.telefone||'');v('afEmail',a.email||'');v('afObservacoes',a.observacoes||'');v('afDataRetorno',a.dataRetorno||'');v('afRetorno',a.retorno||'');v('afValorRecuperado',a.valorRecuperado||0);v('afDestinoProdutos',a.destinoProdutos||'');v('afDestinoObs',a.destinoObservacao||'');v('afSemFotoMotivo',a.semFotoMotivo||'');v('afSemFotoObs',a.semFotoObservacao||'');afAtualizarDestinoProdutosUI_(false);afAtualizarSemFotoUI_();afAplicarMotivoFotoAutomatico_(a,true);
   var s=a.situacoes||{},p=a.providencias||{};[['afSitVencidos','vencidos'],['afSitOdor','odor'],['afSitPragas','pragas'],['afSitDeteriorada','deteriorada'],['afSitVazamento','vazamento']].forEach(function(z){document.getElementById(z[0]).checked=!!s[z[1]];});[['afProvTroca','troca'],['afProvRecolhimento','recolhimento'],['afProvCredito','credito'],['afProvRessarcimento','ressarcimento'],['afProvNota','notaDevolucao'],['afProvBoleto','boleto']].forEach(function(z){document.getElementById(z[0]).checked=!!p[z[1]];});
-  afRenderEditorItens_();afRenderEvidencias_();afRenderRelatorioTelecon_();document.getElementById('afEditor').scrollIntoView({behavior:'smooth',block:'start'});}
+  afRenderEditorItens_();afRenderEvidencias_();afRenderRelatorioTelecon_();afRenderBonificacoes_();document.getElementById('afEditor').scrollIntoView({behavior:'smooth',block:'start'});}
 function afFecharEditor_(){document.getElementById('afEditor').classList.remove('open');afEdit_=null;}
-function afColetarEditor_(){if(!afEdit_)return null;var a=JSON.parse(JSON.stringify(afEdit_));function v(id){return String((document.getElementById(id)||{}).value||'').trim();}a.numero=v('afNumero')||a.numero||'';a.dataEmissao=v('afDataEmissao')||afHoje_();a.prazoDiasUteis=Number(v('afPrazoDias'))||10;a.prazoResposta=v('afPrazoResposta')||afSomarDiasUteisFront_(a.dataEmissao,a.prazoDiasUteis);a.loja=v('afLoja');a.status=v('afStatus')||'RASCUNHO';a.operador=v('afOperador');a.assinanteId=v('afAssinante')||afAssinantePadraoId_(a);var _ass=afAssinanteDados_(a);a.assinanteId=_ass.id;a.assinanteNome=_ass.nome;a.assinanteCargo=_ass.cargo;a.fornecedor=v('afFornecedor');a.cnpj=v('afCnpj');a.codigoFornecedor=v('afCodigoFornecedor');a.contato=v('afContato');a.telefone=v('afTelefone');a.email=v('afEmail');a.observacoes=v('afObservacoes');a.dataRetorno=v('afDataRetorno');a.retorno=v('afRetorno');a.valorRecuperado=Number(v('afValorRecuperado'))||0;a.destinoProdutos=v('afDestinoProdutos');a.destinoObservacao=v('afDestinoObs');a.semFotoMotivo=v('afSemFotoMotivo');a.semFotoObservacao=v('afSemFotoObs');a.situacoes={vencidos:document.getElementById('afSitVencidos').checked,odor:document.getElementById('afSitOdor').checked,pragas:document.getElementById('afSitPragas').checked,deteriorada:document.getElementById('afSitDeteriorada').checked,vazamento:document.getElementById('afSitVazamento').checked};a.providencias={troca:document.getElementById('afProvTroca').checked,recolhimento:document.getElementById('afProvRecolhimento').checked,credito:document.getElementById('afProvCredito').checked,ressarcimento:document.getElementById('afProvRessarcimento').checked,notaDevolucao:document.getElementById('afProvNota').checked,boleto:document.getElementById('afProvBoleto').checked};var tot=0;(a.itens||[]).forEach(function(it){it.quantidade=Number(it.quantidade)||0;it.custoUnit=Number(it.custoUnit)||0;if(String(it.origem||'').toUpperCase()==='TELECON'){it.valorTelecon=Number(it.valorTelecon)||0;it.valorTotal=it.valorTelecon;}else it.valorTotal=it.quantidade*it.custoUnit;tot+=Number(it.valorTotal)||0;});a.valorTotal=tot;return a;}
-function afRenderRelatorioTelecon_(){var box=document.getElementById('afTeleconSourceBox'),info=document.getElementById('afTeleconSourceInfo');if(!box||!afEdit_)return;var r=afEdit_.relatorioTelecon||{},tele=String(afEdit_.origemDados||'').toUpperCase()==='TELECON';box.style.display=tele?'flex':'none';if(!tele)return;var txt=(r.nome||'Relatório Telecon')+(r.registrosInformados?' · '+r.registrosInformados+' registro(s)':'')+(r.totalInformado?' · '+afMoney_(r.totalInformado):'');if(r.fileId)txt+=' · PDF original arquivado';else txt+=' · PDF original pendente';if(info)info.textContent=txt;}
+function afColetarEditor_(){if(!afEdit_)return null;var a=JSON.parse(JSON.stringify(afEdit_));function v(id){return String((document.getElementById(id)||{}).value||'').trim();}a.numero=v('afNumero')||a.numero||'';a.dataEmissao=v('afDataEmissao')||afHoje_();a.prazoDiasUteis=Number(v('afPrazoDias'))||10;a.prazoResposta=v('afPrazoResposta')||afSomarDiasUteisFront_(a.dataEmissao,a.prazoDiasUteis);a.loja=v('afLoja');a.status=v('afStatus')||'RASCUNHO';a.operador=v('afOperador');a.assinanteId=v('afAssinante')||afAssinantePadraoId_(a);var _ass=afAssinanteDados_(a);a.assinanteId=_ass.id;a.assinanteNome=_ass.nome;a.assinanteCargo=_ass.cargo;a.fornecedor=v('afFornecedor');a.cnpj=v('afCnpj');a.codigoFornecedor=v('afCodigoFornecedor');a.contato=v('afContato');a.telefone=v('afTelefone');a.email=v('afEmail');a.observacoes=v('afObservacoes');a.dataRetorno=v('afDataRetorno');a.retorno=v('afRetorno');a.valorRecuperado=Number(v('afValorRecuperado'))||0;a.destinoProdutos=v('afDestinoProdutos');a.destinoObservacao=v('afDestinoObs');a.semFotoMotivo=v('afSemFotoMotivo');a.semFotoObservacao=v('afSemFotoObs');a.situacoes={vencidos:document.getElementById('afSitVencidos').checked,odor:document.getElementById('afSitOdor').checked,pragas:document.getElementById('afSitPragas').checked,deteriorada:document.getElementById('afSitDeteriorada').checked,vazamento:document.getElementById('afSitVazamento').checked};a.providencias={troca:document.getElementById('afProvTroca').checked,recolhimento:document.getElementById('afProvRecolhimento').checked,credito:document.getElementById('afProvCredito').checked,ressarcimento:document.getElementById('afProvRessarcimento').checked,notaDevolucao:document.getElementById('afProvNota').checked,boleto:document.getElementById('afProvBoleto').checked};afAplicarMotivoFotoAutomatico_(a,false);var tot=0;(a.itens||[]).forEach(function(it){it.quantidade=Number(it.quantidade)||0;it.custoUnit=Number(it.custoUnit)||0;if(String(it.origem||'').toUpperCase()==='TELECON'){it.valorTelecon=Number(it.valorTelecon)||0;it.valorTotal=it.valorTelecon;}else it.valorTotal=it.quantidade*it.custoUnit;tot+=Number(it.valorTotal)||0;});a.valorTotal=tot;return a;}
+function afRenderRelatorioTelecon_(){var box=document.getElementById('afTeleconSourceBox'),info=document.getElementById('afTeleconSourceInfo'),title=document.getElementById('afTeleconSourceTitle'),open=document.getElementById('afTeleconOpenBtn'),down=document.getElementById('afTeleconDownloadBtn'),upd=document.getElementById('afTeleconUpdateBtn'),del=document.getElementById('afTeleconDeleteBtn');if(!box||!afEdit_)return;var salvo=!!afEdit_.id,r=afEdit_.relatorioTelecon||null,tem=!!r;box.style.display=salvo?'flex':'none';if(!salvo)return;if(tem){if(title)title.innerHTML='<i class="ti ti-file-type-pdf"></i> Documento de origem: Telecon';var txt=(r.nome||'Relatório Telecon')+(r.versao?' · v'+r.versao:'')+(r.registrosInformados?' · '+r.registrosInformados+' registro(s)':'')+(r.totalInformado?' · '+afMoney_(r.totalInformado):'');if(r.fileId)txt+=' · PDF arquivado';else txt+=' · PDF pendente';if(r.motivoAtualizacao)txt+=' · '+r.motivoAtualizacao;if(info)info.textContent=txt;if(open)open.style.display='';if(down)down.style.display='';if(del)del.style.display='';if(upd){upd.style.display='';upd.innerHTML='<i class="ti ti-refresh"></i> Atualizar relatório';}}else{if(title)title.innerHTML='<i class="ti ti-file-off"></i> Relatório Telecon não vinculado';if(info)info.textContent=afEdit_.relatorioPendenteAtualizacao?'O relatório anterior foi removido. Insira o PDF atualizado mantendo este mesmo dossiê.':'Você pode vincular um relatório Telecon a este dossiê.';if(open)open.style.display='none';if(down)down.style.display='none';if(del)del.style.display='none';if(upd){upd.style.display='';upd.innerHTML='<i class="ti ti-file-upload"></i> Inserir relatório Telecon';}}}
 function afRenderEditorItens_(){if(!afEdit_)return;var body=document.getElementById('afEditorItens'),head=document.getElementById('afEditorItensHead'),titulo=document.getElementById('afItensTitulo'),sub=document.getElementById('afItensSub'),itens=afEdit_.itens||[],tele=String(afEdit_.origemDados||'').toUpperCase()==='TELECON';if(tele){if(titulo)titulo.textContent='Anexo I — Relatório Telecon';if(sub)sub.textContent=(afEdit_.relatorioTelecon&&afEdit_.relatorioTelecon.extracaoCompleta)?'Itens extraídos do relatório Telecon e conferidos com o total do PDF. O arquivo original permanece arquivado.':'O PDF original Telecon é o Anexo I oficial. As linhas abaixo são auxiliares e não substituem o relatório quando a extração não fecha 100%.';if(head)head.innerHTML='<tr><th>Produto</th><th>Cód. barras</th><th>NF origem</th><th>Qtd. rest.</th><th>Custo</th><th>Total Telecon</th><th></th></tr>';if(!itens.length)body.innerHTML='<tr><td colspan="7" class="af-empty">A notificação usará o PDF original da Telecon como Anexo I. Nenhuma linha auxiliar foi extraída.</td></tr>';else body.innerHTML=itens.map(function(it,i){return '<tr><td><b>'+afEsc_(it.nome||'Produto')+'</b><div style="font-size:8px;color:var(--tx2)">Cód. interno '+afEsc_(it.codigoInterno||'—')+(it.dataCadastro?' · cad. '+afEsc_(it.dataCadastro):'')+'</div></td><td>'+afEsc_(it.codigoBarras||it.codigo||'—')+'</td><td>'+afEsc_(it.nfOrigem||'—')+'</td><td><input type="number" min="0" step="0.001" value="'+afEsc_(it.quantidade)+'" oninput="afEditarItem_('+i+',\'quantidade\',this.value)"></td><td><input type="number" min="0" step="0.0001" value="'+afEsc_(it.custoUnit)+'" oninput="afEditarItem_('+i+',\'custoUnit\',this.value)"></td><td><input type="number" min="0" step="0.01" value="'+afEsc_(it.valorTelecon)+'" oninput="afEditarItem_('+i+',\'valorTelecon\',this.value)"></td><td><button class="btn btn-sm" onclick="afRemoverItem_('+i+')"><i class="ti ti-x"></i></button></td></tr>';}).join('');}else{if(titulo)titulo.textContent='Anexo I — Produtos vencidos';if(sub)sub.textContent='O valor usa o custo disponível no Banco AURA e pode ser corrigido antes de emitir.';if(head)head.innerHTML='<tr><th>Produto</th><th>Código</th><th>Lote</th><th>Vencimento</th><th>Qtd.</th><th>Un.</th><th>Custo un.</th><th>Valor</th><th></th></tr>';if(!itens.length)body.innerHTML='<tr><td colspan="9" class="af-empty">Nenhum item.</td></tr>';else body.innerHTML=itens.map(function(it,i){return '<tr><td><b>'+afEsc_(it.nome||'Produto')+'</b></td><td>'+afEsc_(it.codigo||'—')+'</td><td>'+afEsc_(it.lote||'—')+'</td><td>'+afFmtData_(it.validade)+'</td><td><input type="number" min="0" step="0.001" value="'+afEsc_(it.quantidade)+'" oninput="afEditarItem_('+i+',\'quantidade\',this.value)"></td><td>'+afEsc_(it.unidade||'')+'</td><td><input type="number" min="0" step="0.01" value="'+afEsc_(it.custoUnit)+'" oninput="afEditarItem_('+i+',\'custoUnit\',this.value)"></td><td class="num" id="afItemValor_'+i+'">'+afMoney_(afValorItem_(it))+'</td><td><button class="btn btn-sm" onclick="afRemoverItem_('+i+')"><i class="ti ti-x"></i></button></td></tr>';}).join('');}afAtualizarTotalEditor_();var s=document.getElementById('afEvidItem');if(s)s.innerHTML='<option value="">Evidência geral</option>'+itens.map(function(it){return '<option value="'+afEsc_(it.key||it.codigoBarras||it.codigo||it.nome)+'">'+afEsc_(((it.codigoBarras||it.codigo)?(it.codigoBarras||it.codigo)+' · ':'')+it.nome)+'</option>';}).join('');}
 function afEditarItem_(i,campo,val){if(!afEdit_||!afEdit_.itens[i])return;var it=afEdit_.itens[i];it[campo]=Number(val)||0;if(String(it.origem||'').toUpperCase()==='TELECON'){if(campo!=='valorTelecon')it.valorTelecon=(Number(it.quantidade)||0)*(Number(it.custoUnit)||0);it.valorTotal=Number(it.valorTelecon)||0;afRenderEditorItens_();return;}var e=document.getElementById('afItemValor_'+i);if(e)e.textContent=afMoney_(afValorItem_(it));afAtualizarTotalEditor_();}
 function afRemoverItem_(i){if(!afEdit_)return;if(!confirm('Remover este item da ação?'))return;afEdit_.itens.splice(i,1);afRenderEditorItens_();}
-function afAtualizarTotalEditor_(){if(!afEdit_)return;var t=0;(afEdit_.itens||[]).forEach(function(it){t+=afValorItem_(it);});if(String(afEdit_.origemDados||'').toUpperCase()==='TELECON'&&afEdit_.relatorioTelecon&&afEdit_.relatorioTelecon.usarPdfComoAnexoI&&Number(afEdit_.relatorioTelecon.totalInformado)>0)t=Number(afEdit_.relatorioTelecon.totalInformado);afEdit_.valorTotal=t;var e=document.getElementById('afEditorTotal');if(e)e.textContent=afMoney_(t);}
-async function afSalvarAcao_(silencioso){if(!afEdit_)return null;var a=afColetarEditor_();if(!a.fornecedor){mostrarToast('Informe o fornecedor.','warn');return null;}if(!a.itens.length&&!(String(a.origemDados||'').toUpperCase()==='TELECON'&&a.relatorioTelecon)){mostrarToast('Inclua pelo menos um produto.','warn');return null;}var b=document.getElementById('afSalvarBtn');if(b&&!silencioso){b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Salvando...';}var r=await afPost_({action:'salvarAcaoFornecedorVencidos',acao:a});if(b&&!silencioso){b.disabled=false;b.innerHTML='<i class="ti ti-device-floppy"></i> Salvar ação';}if(!r||!r.ok){mostrarToast('Erro ao salvar ação: '+((r&&r.erro)||'falha'),'err');return null;}afEdit_=r.acao;var pos=afAcoes_.findIndex(function(x){return x.id===afEdit_.id;});if(pos>=0)afAcoes_[pos]=afEdit_;else afAcoes_.unshift(afEdit_);afAbrirEditor_();afAtualizarKpis_();afRenderLista_();if(!silencioso)mostrarToast('Ação '+afEdit_.numero+' salva.','ok');return r;}
-function afRenderLista_(){var box=document.getElementById('afLista');if(!box)return;var st=String((document.getElementById('afFiltroStatus')||{}).value||''),q=String((document.getElementById('afBuscaAcoes')||{}).value||'').toLowerCase().trim();var lista=(afAcoes_||[]).filter(function(a){var ef=afStatusEfetivo_(a);if(st&&String(a.status||'')!==st&&ef!==st)return false;if(q&&([a.numero,a.fornecedor,a.contato,a.cnpj].join(' ').toLowerCase().indexOf(q)<0))return false;return true;});if(!lista.length){box.innerHTML='<div class="af-empty" style="grid-column:1/-1">Nenhuma ação cadastrada.</div>';return;}box.innerHTML=lista.map(function(a){var ef=afStatusEfetivo_(a),rest=Math.max(0,(Number(a.valorTotal)||0)-(Number(a.valorRecuperado)||0));return '<div class="af-card"><div class="af-card-top"><div><div class="af-card-num">'+afEsc_(a.numero||'SEM NÚMERO')+'</div><div class="af-card-forn">'+afEsc_(a.fornecedor||'Fornecedor')+'</div></div><span class="af-status '+ef+'">'+afEsc_(afStatusLabel_(ef))+'</span></div><div class="af-card-meta">Emissão '+afFmtData_(a.dataEmissao)+' · prazo '+afFmtData_(a.prazoResposta)+'<br>'+(String(a.origemDados||'').toUpperCase()==='TELECON'?'Fonte: Telecon · ':'')+(a.itens||[]).length+' linha(s) · '+(a.evidencias||[]).length+' evidência(s)'+(afDestinoValido_(a)?' · '+afEsc_(afDestinoLabel_(a.destinoProdutos)):' · <b>destinação pendente</b>')+'</div><div class="af-card-total">'+afMoney_(a.valorTotal||0)+'</div><div class="af-card-meta">Em aberto: '+afMoney_(rest)+' · recuperado: '+afMoney_(a.valorRecuperado||0)+'</div><div class="af-card-actions"><button class="btn btn-sm" onclick="afAbrirAcao_(\''+afEsc_(a.id)+'\')"><i class="ti ti-pencil"></i> Abrir</button><button class="btn btn-sm" onclick="afGerarDocumentoId_(\''+afEsc_(a.id)+'\')"><i class="ti ti-file-type-pdf"></i> PDF</button>'+(String(a.status||'')==='RASCUNHO'?'<button class="btn btn-sm" onclick="afMarcarEnviadaId_(\''+afEsc_(a.id)+'\')"><i class="ti ti-send"></i> Enviada</button>':'')+'</div></div>';}).join('');}
+function afAtualizarTotalEditor_(){if(!afEdit_)return;var t=0;(afEdit_.itens||[]).forEach(function(it){t+=afValorItem_(it);});if(String(afEdit_.origemDados||'').toUpperCase()==='TELECON'&&afEdit_.relatorioTelecon&&afEdit_.relatorioTelecon.usarPdfComoAnexoI&&Number(afEdit_.relatorioTelecon.totalInformado)>0)t=Number(afEdit_.relatorioTelecon.totalInformado);afEdit_.valorTotal=t;var e=document.getElementById('afEditorTotal');if(e)e.textContent=afMoney_(t);if(document.getElementById('afBonifBody'))afRenderBonificacoes_();}
+async function afSalvarAcao_(silencioso){if(!afEdit_)return null;var a=afColetarEditor_();if(!a.fornecedor){mostrarToast('Informe o fornecedor.','warn');return null;}if(!a.itens.length&&!(String(a.origemDados||'').toUpperCase()==='TELECON'&&a.relatorioTelecon)&&a.relatorioPendenteAtualizacao!==true){mostrarToast('Inclua pelo menos um produto ou vincule um relatório Telecon.','warn');return null;}var b=document.getElementById('afSalvarBtn');if(b&&!silencioso){b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Salvando...';}var r=await afPost_({action:'salvarAcaoFornecedorVencidos',acao:a});if(b&&!silencioso){b.disabled=false;b.innerHTML='<i class="ti ti-device-floppy"></i> Salvar ação';}if(!r||!r.ok){mostrarToast('Erro ao salvar ação: '+((r&&r.erro)||'falha'),'err');return null;}afEdit_=r.acao;var pos=afAcoes_.findIndex(function(x){return x.id===afEdit_.id;});if(pos>=0)afAcoes_[pos]=afEdit_;else afAcoes_.unshift(afEdit_);afAbrirEditor_();afAtualizarKpis_();afRenderLista_();if(!silencioso)mostrarToast('Ação '+afEdit_.numero+' salva.','ok');return r;}
+function afRenderLista_(){var box=document.getElementById('afLista');if(!box)return;var st=String((document.getElementById('afFiltroStatus')||{}).value||''),q=String((document.getElementById('afBuscaAcoes')||{}).value||'').toLowerCase().trim();var lista=(afAcoes_||[]).filter(function(a){var ef=afStatusEfetivo_(a);if(st&&String(a.status||'')!==st&&ef!==st)return false;if(q&&([a.numero,a.fornecedor,a.contato,a.cnpj].join(' ').toLowerCase().indexOf(q)<0))return false;return true;});if(!lista.length){box.innerHTML='<div class="af-empty" style="grid-column:1/-1">Nenhuma ação cadastrada.</div>';return;}box.innerHTML=lista.map(function(a){var ef=afStatusEfetivo_(a),saldo=afSaldoOperacional_(a),rec=afTotalRecuperadoDossie_(a),rb=afResumoBonificacoes_(a),tele=String(a.origemDados||'').toUpperCase()==='TELECON'&&a.relatorioTelecon;return '<div class="af-card"><div class="af-card-top"><div><div class="af-card-num">'+afEsc_(a.numero||'SEM NÚMERO')+'</div><div class="af-card-forn">'+afEsc_(a.fornecedor||'Fornecedor')+'</div></div><span class="af-status '+ef+'">'+afEsc_(afStatusLabel_(ef))+'</span></div><div class="af-card-meta">Emissão '+afFmtData_(a.dataEmissao)+' · prazo '+afFmtData_(a.prazoResposta)+'<br>'+(tele?'Fonte: Telecon v'+afRelatorioVersaoAtual_(a)+' · ':'')+(a.itens||[]).length+' linha(s) · '+(a.evidencias||[]).length+' evidência(s)'+(afDestinoValido_(a)?' · '+afEsc_(afDestinoLabel_(a.destinoProdutos)):' · <b>destinação pendente</b>')+'</div><div class="af-card-total">'+afMoney_(saldo)+'</div><div class="af-card-meta">'+(rb.pendente>0?'<b>Em aberto estimado:</b> ':'Em aberto: ')+afMoney_(saldo)+' · bonificações: '+afMoney_(rb.total)+(rec>rb.total?' · outros recuperados: '+afMoney_(rec-rb.total):'')+(rb.pendente>0?'<br><span style="color:var(--amber)">Há '+afMoney_(rb.pendente)+' em bonificação aguardando relatório Telecon atualizado.</span>':'')+'</div><div class="af-card-actions"><button class="btn btn-sm" onclick="afAbrirAcao_(\''+afEsc_(a.id)+'\')"><i class="ti ti-pencil"></i> Abrir</button><button class="btn btn-sm" onclick="afGerarDocumentoId_(\''+afEsc_(a.id)+'\')"><i class="ti ti-file-type-pdf"></i> PDF</button>'+(String(a.status||'')==='RASCUNHO'?'<button class="btn btn-sm" onclick="afMarcarEnviadaId_(\''+afEsc_(a.id)+'\')"><i class="ti ti-send"></i> Enviada</button>':'')+'</div></div>';}).join('');}
 function afAbrirAcao_(id){var a=afAcoes_.find(function(x){return String(x.id)===String(id);});if(!a)return;afEdit_=JSON.parse(JSON.stringify(a));afAbrirEditor_();}
 async function afMarcarEnviadaAtual_(){if(!afEdit_)return;afEdit_=afColetarEditor_();if(!afDestinoValido_(afEdit_)){mostrarToast('Informe a situação física / destinação dos produtos antes de marcar a notificação como enviada.','warn');var sel=document.getElementById('afDestinoProdutos');if(sel){sel.focus();sel.scrollIntoView({behavior:'smooth',block:'center'});}return;}afEdit_.status='AGUARDANDO_RETORNO';afEdit_.enviadoEm=new Date().toISOString();document.getElementById('afStatus').value='AGUARDANDO_RETORNO';var r=await afSalvarAcao_(true);if(r)mostrarToast('Ação marcada como enviada. Prazo de resposta em acompanhamento.','ok');}
 async function afMarcarEnviadaId_(id){afAbrirAcao_(id);await afMarcarEnviadaAtual_();}
@@ -12075,9 +12461,9 @@ function afRenderEvidencias_(){var box=document.getElementById('afEvidGrid'),c=d
 function afImagemEvidencia_(acaoId,fileId){return _gasGetJsonp('acaoFornecedorEvidencia','&acaoId='+encodeURIComponent(acaoId)+'&fileId='+encodeURIComponent(fileId),60000);}
 async function afCarregarThumbEvidencia_(ev){if(!afEdit_||!ev.fileId)return;var el=document.getElementById('afEvImg_'+ev.id);if(!el)return;var r=await afImagemEvidencia_(afEdit_.id,ev.fileId);if(r&&r.ok&&r.base64&&el){el.className='af-evidence-ph';el.innerHTML='<img src="data:'+afEsc_(r.mimeType||'image/jpeg')+';base64,'+r.base64+'" alt="Evidência">';}}
 function afComprimirImagem_(file){return new Promise(function(resolve,reject){var fr=new FileReader();fr.onerror=reject;fr.onload=function(){var im=new Image();im.onerror=reject;im.onload=function(){var max=1600,w=im.width,h=im.height;if(w>max||h>max){var r=Math.min(max/w,max/h);w=Math.round(w*r);h=Math.round(h*r);}var c=document.createElement('canvas');c.width=w;c.height=h;var ctx=c.getContext('2d');ctx.drawImage(im,0,0,w,h);var url=c.toDataURL('image/jpeg',.82);resolve({mimeType:'image/jpeg',base64:url.split(',')[1]});};im.src=fr.result;};fr.readAsDataURL(file);});}
-async function afEvidenciasSelecionadas_(input){var files=Array.from(input.files||[]);input.value='';if(!files.length||!afEdit_)return;if(!afEdit_.id){var sr=await afSalvarAcao_(true);if(!sr)return;}var itemKey=String((document.getElementById('afEvidItem')||{}).value||''),itemEv=(afEdit_.itens||[]).find(function(it){return String(it.key||it.codigo||it.nome)===itemKey;}),legendaBase=itemEv?('Evidência — '+(itemEv.codigo?itemEv.codigo+' · ':'')+itemEv.nome):('Registro fotográfico '+afFmtData_(afHoje_()));for(var i=0;i<files.length;i++){mostrarToast('Enviando evidência '+(i+1)+' de '+files.length+'...','warn');try{var img=await afComprimirImagem_(files[i]);var r=await afPost_({action:'salvarEvidenciaAcaoFornecedor',acaoId:afEdit_.id,itemKey:itemKey,legenda:legendaBase,imagemBase64:img.base64,mimeType:img.mimeType,nomeArquivo:files[i].name||''});if(!r||!r.ok)throw new Error((r&&r.erro)||'Falha no upload');if(r.acao)afEdit_=r.acao;}catch(e){mostrarToast('Falha na evidência: '+e.message,'err');}}var p=afAcoes_.findIndex(function(x){return x.id===afEdit_.id;});if(p>=0)afAcoes_[p]=afEdit_;afRenderEvidencias_();afRenderLista_();mostrarToast('Evidências salvas no Drive da AURA.','ok');}
+async function afEvidenciasSelecionadas_(input){var files=Array.from(input.files||[]);input.value='';if(!files.length||!afEdit_)return;if(!afEdit_.id){var sr=await afSalvarAcao_(true);if(!sr)return;}var itemKey=String((document.getElementById('afEvidItem')||{}).value||''),itemEv=(afEdit_.itens||[]).find(function(it){return String(it.key||it.codigo||it.nome)===itemKey;}),legendaBase=itemEv?('Evidência — '+(itemEv.codigo?itemEv.codigo+' · ':'')+itemEv.nome):('Registro fotográfico '+afFmtData_(afHoje_()));for(var i=0;i<files.length;i++){mostrarToast('Enviando evidência '+(i+1)+' de '+files.length+'...','warn');try{var img=await afComprimirImagem_(files[i]);var r=await afPost_({action:'salvarEvidenciaAcaoFornecedor',acaoId:afEdit_.id,itemKey:itemKey,legenda:legendaBase,imagemBase64:img.base64,mimeType:img.mimeType,nomeArquivo:files[i].name||''});if(!r||!r.ok)throw new Error((r&&r.erro)||'Falha no upload');if(r.acao)afEdit_=r.acao;}catch(e){mostrarToast('Falha na evidência: '+e.message,'err');}}afAplicarMotivoFotoAutomatico_(afEdit_,true);var p=afAcoes_.findIndex(function(x){return x.id===afEdit_.id;});if(p>=0)afAcoes_[p]=afEdit_;afRenderEvidencias_();afRenderLista_();mostrarToast('Evidências salvas no Drive da AURA.','ok');}
 async function afEditarLegendaEvidencia_(id){if(!afEdit_)return;var ev=(afEdit_.evidencias||[]).find(function(x){return String(x.id)===String(id);});if(!ev)return;var nova=prompt('Legenda da evidência:',ev.legenda||'Registro fotográfico');if(nova===null)return;ev.legenda=String(nova||'').trim()||'Registro fotográfico';var r=await afSalvarAcao_(true);if(r){afRenderEvidencias_();mostrarToast('Legenda atualizada.','ok');}}
-async function afExcluirEvidencia_(id){if(!afEdit_||!confirm('Remover esta evidência?'))return;var r=await afPost_({action:'excluirEvidenciaAcaoFornecedor',acaoId:afEdit_.id,evidenciaId:id});if(!r||!r.ok){mostrarToast('Erro ao remover evidência.','err');return;}afEdit_=r.acao;var p=afAcoes_.findIndex(function(x){return x.id===afEdit_.id;});if(p>=0)afAcoes_[p]=afEdit_;afRenderEvidencias_();afRenderLista_();}
+async function afExcluirEvidencia_(id){if(!afEdit_||!confirm('Remover esta evidência?'))return;var r=await afPost_({action:'excluirEvidenciaAcaoFornecedor',acaoId:afEdit_.id,evidenciaId:id});if(!r||!r.ok){mostrarToast('Erro ao remover evidência.','err');return;}afEdit_=r.acao;afAplicarMotivoFotoAutomatico_(afEdit_,true);var p=afAcoes_.findIndex(function(x){return x.id===afEdit_.id;});if(p>=0)afAcoes_[p]=afEdit_;afRenderEvidencias_();afRenderLista_();}
 function afDocTextoSituacao_(a){var s=a.situacoes||{},partes=[];if(s.odor)partes.push('mau odor');if(s.pragas)partes.push('indícios/presença de pragas');if(s.deteriorada)partes.push('embalagens deterioradas');if(s.vazamento)partes.push('vazamento de produtos');var base='Vimos, por meio deste documento, formalizar notificação referente à identificação de produtos fornecidos por essa empresa com prazo de validade vencido, devidamente registrados nos controles internos do estabelecimento e relacionados no Anexo I.';if(partes.length)base+=' Também foram registradas as seguintes condições observadas: '+partes.join(', ')+'.';return base;}
 function afDocProvidencias_(a){var p=a.providencias||{},x=[];if(p.troca)x.push('Substituição dos produtos por itens equivalentes e dentro do prazo de validade, conforme tratativa comercial aplicável');if(p.recolhimento)x.push('Recolhimento físico dos produtos que permanecem segregados e disponíveis nesta loja, em data a ser agendada');if(p.credito)x.push('Concessão de crédito financeiro referente aos itens não substituídos');if(p.ressarcimento)x.push('Ressarcimento financeiro correspondente aos itens relacionados, conforme tratativa comercial entre as partes');if(p.notaDevolucao)x.push('Emissão de nota de devolução para os itens cuja regularização ocorrer por esse procedimento');if(p.boleto)x.push('Pagamento do valor correspondente via boleto bancário, quando aplicável');if(!x.length)x.push('Manifestação formal do fornecedor para definição da forma de regularização comercial aplicável aos itens relacionados');return x;}
 var _afDocPrintNumero_='';
@@ -12165,6 +12551,12 @@ async function afGerarDocumentoAtual_(){
       var sel=document.getElementById('afDestinoProdutos');if(sel){sel.focus();sel.scrollIntoView({behavior:'smooth',block:'center'});}
       return;
     }
+    if(!a.itens.length&&!a.relatorioTelecon){
+      mostrarToast('Este dossiê está sem fonte documental. Insira o relatório Telecon atualizado antes de gerar o PDF.','warn');return;
+    }
+    if(afTemBonificacaoPendente_(a)){
+      mostrarToast('Existe bonificação registrada ainda não refletida no relatório Telecon. Atualize o relatório antes de emitir o PDF formal para manter o saldo exato.','warn');return;
+    }
     afPreviewCarregando_('Preparando notificação...');
     if(!a.id||!a.numero){
       afEdit_=a;
@@ -12183,6 +12575,8 @@ async function afGerarDocumentoId_(id){
     setTimeout(function(){var sel=document.getElementById('afDestinoProdutos');if(sel){sel.focus();sel.scrollIntoView({behavior:'smooth',block:'center'});}},120);
     return;
   }
+  if(!(a.itens||[]).length&&!a.relatorioTelecon){afAbrirAcao_(id);mostrarToast('Este dossiê está sem fonte documental. Insira o relatório Telecon atualizado antes de gerar o PDF.','warn');return;}
+  if(afTemBonificacaoPendente_(a)){afAbrirAcao_(id);mostrarToast('Existe bonificação ainda não refletida no relatório Telecon. Atualize o relatório antes de emitir o PDF formal.','warn');return;}
   afPreviewCarregando_('Preparando '+(a.numero||'notificação')+'...');
   try{return await afGerarDocumento_(a);}catch(e){console.error('[AURA] gerar documento por id:',e);afErroPreviewDocumento_(e&&e.message?e.message:e);}
 }
@@ -12231,6 +12625,17 @@ function afDocTabelaTelecon_(itens,total){
   return '<table><thead><tr><th>Cód. barras</th><th>Produto</th><th>NF Orig.</th><th>Qtd. rest.</th><th>Custo</th><th>Valor</th></tr></thead><tbody>'
     +itens.map(function(it){return '<tr><td>'+afEsc_(it.codigoBarras||it.codigo||'—')+'</td><td>'+afEsc_(it.nome||'')+'</td><td>'+afEsc_(it.nfOrigem||'—')+'</td><td class="n">'+afQtd_(it.quantidade)+'</td><td class="n">'+afMoney_(it.custoUnit)+'</td><td class="n">'+afMoney_(afValorItem_(it))+'</td></tr>';}).join('')
     +'</tbody><tfoot><tr><td colspan="5" class="n total">TOTAL GERAL</td><td class="n total">'+afMoney_(total)+'</td></tr></tfoot></table>';
+}
+function afDocBonificacoes_(a){
+  var cs=afBonificacoes_(a);
+  if(!cs.length)return '';
+  var total=afResumoBonificacoes_(a).total;
+  var rows=cs.map(function(c){
+    return '<tr><td>'+afEsc_(c.nf||'—')+'</td><td>'+afEsc_(afFmtDataHoraCurta_(c.registradoEm).split(' ')[0])+'</td><td class="n">'+afMoney_(c.valor||0)+'</td></tr>';
+  }).join('');
+  return '<div class="sec">Regularizações já recebidas</div>'
+    +'<p class="muted">Bonificações/compensações informadas neste dossiê. As baixas detalhadas por produto permanecem registradas no sistema Telecon.</p>'
+    +'<table><thead><tr><th>NF de bonificação</th><th>Registro</th><th>Valor recebido</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td colspan="2" class="n total">TOTAL BONIFICADO</td><td class="n total">'+afMoney_(total)+'</td></tr></tfoot></table>';
 }
 async function afGerarDocumento_(a){
   try{
@@ -12301,6 +12706,7 @@ async function afGerarDocumento_(a){
     +'<div class="sec">Providências solicitadas</div><p>Solicitamos a adoção das seguintes providências em relação aos itens '+afEsc_(fonteTexto)+', conforme aplicável à situação física e à tratativa comercial deste dossiê:</p><ul class="prov">'+prov.map(function(x){return '<li>'+afEsc_(x)+'</li>';}).join('')+'</ul>'
     +'<div class="deadline"><span class="deadline-title">Prazo para resposta: '+afFmtData_(a.prazoResposta)+'</span>Tratando-se de relação empresarial B2B, esta notificação é formulada no âmbito da relação contratual privada entre as partes, observando-se a liberdade contratual, a alocação de riscos pactuada e os deveres de probidade e boa-fé previstos nos arts. 421, 421-A e 422 da Lei nº 10.406/2002 (Código Civil), sem prejuízo das condições comerciais e contratuais vigentes entre as partes. Para fins operacionais desta notificação, solicita-se manifestação e regularização no prazo comercial de <b>'+afEsc_(a.prazoDiasUteis||10)+' dias úteis</b>, contados do recebimento deste documento.</div>'
     +'<p class="risk">A ocorrência de produtos com prazo de validade vencido demanda tratamento imediato e controle adequado, tanto para impedir sua disponibilização ao consumidor quanto para assegurar sua correta segregação, destinação e regularização comercial junto ao fornecedor. Por essa razão, solicitamos atenção prioritária e retorno dentro do prazo estabelecido.</p>'
+    +afDocBonificacoes_(a)
     +(a.observacoes?'<p><b>Observações:</b> '+afEsc_(a.observacoes)+'</p>':'')
     +'<div class="doc-index"><b>Documentos que integram esta notificação</b><br>Anexo I — '+(tele?'Relatório de Trocas Telecon'+(resumoRegistros?' ('+afEsc_(resumoRegistros)+' registros)':''):'Relação de produtos vencidos')+(evs.length?' · Anexo II — '+afEsc_(evs.length)+' evidência(s) fotográfica(s).':' · Registro complementar — ausência de evidência fotográfica.')+'</div>'
     +'<div class="notice-sign sign-wrap"><div class="sec">Assinatura</div><div class="sign">'+afEsc_(assinatura.nome)+'<br>'+afEsc_(assinatura.cargo)+'<br>Supermercado Boas Compras</div></div>'
@@ -12320,7 +12726,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.87-dossie-destinacao-flexivel';
+var AURA_CONTROLE_VALIDADE_BUILD='v6.89-dossie-bonificacoes';
 var currentTabName='dashboard';
 function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma visão de Estoque */ return 'unificado'; }
 function goTab(name){
