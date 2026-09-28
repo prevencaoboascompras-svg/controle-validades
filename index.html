@@ -15161,7 +15161,12 @@ function abrirRelatorioRetirada() {
   var isoAlvo = sel && sel.value ? sel.value : null;
   var dataAlvo = isoAlvo ? new Date(isoAlvo + 'T00:00:00') : new Date();
 
+  // Regra operacional: lote confirmado com 0 unidades está encerrado.
+  // Ele permanece no histórico/auditoria do produto, mas NÃO entra mais
+  // no relatório/filtro da data de validade correspondente.
+  var zeroIdxRet=_auraZeroConfirmadoIndex_();
   var doDia = products.filter(function(p) {
+    if (_auraZeroInfoLote_(p,zeroIdxRet)) return false;
     if (isoAlvo) return p.validade === isoAlvo;
     var d = daysDiff(p.validade);
     return d !== null && d === 0;
@@ -15176,8 +15181,8 @@ function abrirRelatorioRetirada() {
   var dataFmtCurta = dataAlvo.toLocaleDateString('pt-BR');
 
   var totalQtde = doDia.reduce(function(s,p){ return s+qtdeEfetiva(p.qtde); }, 0);
-  var zeroIdxRet=_auraZeroConfirmadoIndex_();
-  var totalZeroConfirmado=doDia.reduce(function(s,p){return s+(_auraZeroInfoLote_(p,zeroIdxRet)?1:0);},0);
+  // Lotes zerados já foram excluídos acima do filtro operacional.
+  var totalZeroConfirmado=0;
 
   var ehPassado = !ehHoje && dataAlvo < hojeReal;
   var msgVazio = ehHoje ? 'Nenhum produto vence hoje' : (ehPassado ? 'Nenhum produto venceu nesse dia' : 'Nenhum produto vence nesse dia');
@@ -17095,7 +17100,7 @@ function renderEstoque(){
   }
   var ativos=[],resolvidosHtml=[];
   grupos.forEach(function(g){var h=renderGrupoEstoque_(g);if(grupoResolvido_(g))resolvidosHtml.push(h);else ativos.push(h);});
-  var sep=resolvidosHtml.length?'<div class="estoque-unico-resolvidos-divider"><i class="ti ti-circle-check"></i><span><b>Resolvidos</b> · inclui produtos confirmados com estoque 0 pelos colaboradores. Eles não entram mais nos filtros de urgência, mas continuam na lista de retirada da data de validade.</span></div>':'';
+  var sep=resolvidosHtml.length?'<div class="estoque-unico-resolvidos-divider"><i class="ti ti-circle-check"></i><span><b>Resolvidos</b> · inclui produtos confirmados com estoque 0 pelos colaboradores. Eles ficam no histórico do produto, mas não entram mais nos filtros de urgência nem na retirada da data de validade correspondente.</span></div>':'';
   container.innerHTML=ativos.join('')+(mostrarResolvidos?sep+resolvidosHtml.join(''):'');
   resolverFotosTarefasArea(container);
 }
