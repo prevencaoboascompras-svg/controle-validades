@@ -11557,16 +11557,31 @@ function cfAbrirRelatorio_(a,tipo){
 // ═══════════════════════════════════════════════════════════════
 var _nfeNota=null,_nfeAutoTimer=null;
 var NFE_DRAFT_KEY='aura_nfe_draft_v650',_nfeDraftTimer_=null;
+var _nfeServerSyncTimer_=null,_nfeServerSyncAtivo_=false,_nfeServerSyncPendente_=false;
+function nfeOperadorAtualAura_(){var el=document.getElementById('nfeOperador'),v=el&&el.value?el.value:'';if(!v)try{v=localStorage.getItem('aura_nfe_operador')||'';}catch(e){}return String(v||'').trim().toLowerCase();}
+function nfeNotaLimpaSyncAura_(nota){try{return JSON.parse(JSON.stringify(nota,function(k,v){if(k==='fotoDataUrl'||k==='fotoCarregando')return undefined;return v;}));}catch(e){return nota;}}
 function nfeSalvarRascunho_(){
   try{
     if(!_nfeNota||!_nfeNota.chave)return;
-    var copia=JSON.parse(JSON.stringify(_nfeNota,function(k,v){if(k==='fotoDataUrl'||k==='fotoCarregando')return undefined;return v;}));
-    localStorage.setItem(NFE_DRAFT_KEY,JSON.stringify({salvoEm:new Date().toISOString(),nota:copia}));
+    var copia=nfeNotaLimpaSyncAura_(_nfeNota),agora=new Date().toISOString(),ant=nfeLerRascunho_(),mesma=!!(ant&&ant.nota&&nfeDigitos_(ant.nota.chave)===nfeDigitos_(copia.chave));
+    localStorage.setItem(NFE_DRAFT_KEY,JSON.stringify({salvoEm:agora,operadorEmail:nfeOperadorAtualAura_(),nota:copia,serverVersion:mesma?(Number(ant.serverVersion)||0):0,serverSalvoEm:mesma?(ant.serverSalvoEm||''):'',dirty:true}));
+    nfeAgendarSyncServidorAura_(false);
   }catch(e){console.warn('Não foi possível salvar rascunho NF-e:',e);}
 }
-function nfeAgendarRascunho_(){if(_nfeDraftTimer_)clearTimeout(_nfeDraftTimer_);_nfeDraftTimer_=setTimeout(function(){_nfeDraftTimer_=null;nfeSalvarRascunho_();},180);}
-function nfeAutosaveAgora_(){if(_nfeDraftTimer_){clearTimeout(_nfeDraftTimer_);_nfeDraftTimer_=null;}nfeSalvarRascunho_();}
 function nfeLerRascunho_(){try{var s=localStorage.getItem(NFE_DRAFT_KEY);if(!s)return null;var d=JSON.parse(s);return d&&d.nota&&d.nota.chave?d:null;}catch(e){return null;}}
+function nfeEscreverRascunhoAura_(d){try{localStorage.setItem(NFE_DRAFT_KEY,JSON.stringify(d));return true;}catch(e){return false;}}
+function nfeAgendarSyncServidorAura_(imediato){if(_nfeServerSyncTimer_)clearTimeout(_nfeServerSyncTimer_);if(typeof navigator!=='undefined'&&navigator.onLine===false)return;_nfeServerSyncTimer_=setTimeout(function(){_nfeServerSyncTimer_=null;nfeSincronizarRascunhoServidorAura_();},imediato?20:1200);}
+async function nfeSincronizarRascunhoServidorAura_(){
+  if(_nfeServerSyncAtivo_){_nfeServerSyncPendente_=true;return null;}var d=nfeLerRascunho_();if(!d||!d.nota||!d.dirty)return null;if(typeof navigator!=='undefined'&&navigator.onLine===false)return null;
+  _nfeServerSyncAtivo_=true;var salvoLocal=String(d.salvoEm||''),ch=nfeDigitos_(d.nota.chave||'');
+  try{var j=await nfePost_({action:'nfeSalvarRascunhoAtivo',nota:nfeNotaLimpaSyncAura_(d.nota),chave:ch,operador:d.operadorEmail||nfeOperadorAtualAura_(),origemCliente:'aura_pc',baseVersion:Number(d.serverVersion)||0,clientSalvoEm:salvoLocal});var atual=nfeLerRascunho_();
+    if(j&&j.finalizada&&atual&&atual.nota&&nfeDigitos_(atual.nota.chave)===ch){var stFinal=await nfeConsultarStatus_(ch);var ckFinal=(stFinal&&typeof nfeConfirmacaoCompletaAura_==='function')?nfeConfirmacaoCompletaAura_(stFinal,atual.nota):null;if(ckFinal&&ckFinal.ok){nfeLimparRascunho_();if(_nfeNota&&nfeDigitos_(_nfeNota.chave)===ch)_nfeNota=null;mostrarToast('NF-e já estava 100% confirmada na planilha. Rascunho local encerrado com segurança.','ok');}}
+    else if(j&&j.ok&&atual&&atual.nota&&nfeDigitos_(atual.nota.chave)===ch){atual.serverVersion=Number(j.versao)||Number(atual.serverVersion)||0;atual.serverSalvoEm=j.salvoEm||atual.serverSalvoEm||'';atual.syncEm=new Date().toISOString();atual.serverConflict=false;if(String(atual.salvoEm||'')===salvoLocal)atual.dirty=false;nfeEscreverRascunhoAura_(atual);}else if(j&&j.conflito&&atual&&atual.nota&&nfeDigitos_(atual.nota.chave)===ch){atual.serverVersion=Math.max(Number(atual.serverVersion)||0,Number(j.versao)||0);atual.serverSalvoEm=j.salvoEm||atual.serverSalvoEm||'';atual.serverConflict=true;nfeEscreverRascunhoAura_(atual);}return j;
+  }catch(e){console.warn('[AURA NF-e] Rascunho local preservado; sincronização com servidor falhou:',e);return null;}finally{_nfeServerSyncAtivo_=false;if(_nfeServerSyncPendente_){_nfeServerSyncPendente_=false;nfeAgendarSyncServidorAura_(true);}}
+}
+async function nfeObterRascunhoServidorAura_(chave){try{var j=await nfePost_({action:'nfeRascunhoAtivo',chave:nfeDigitos_(chave)});return j&&j.ok?j:null;}catch(e){return null;}}
+function nfeAdotarRascunhoServidorAura_(r){if(!r||!r.nota)return false;var obj={salvoEm:r.salvoEm||new Date().toISOString(),operadorEmail:String(r.operador||'').toLowerCase(),nota:nfeNotaLimpaSyncAura_(r.nota),serverVersion:Number(r.versao)||0,serverSalvoEm:r.salvoEm||'',syncEm:new Date().toISOString(),dirty:false,serverConflict:false};nfeEscreverRascunhoAura_(obj);_nfeNota=obj.nota;nfePrepararItens_(_nfeNota);nfeRenderNota_();nfeRenderOperadores_();return true;}
+function nfeExcluirRascunhoServidorAura_(chave){try{if(typeof navigator!=='undefined'&&navigator.onLine===false)return;nfePost_({action:'nfeExcluirRascunhoAtivo',chave:nfeDigitos_(chave)}).catch(function(){});}catch(e){}}
 function nfeLimparRascunho_(){try{localStorage.removeItem(NFE_DRAFT_KEY);}catch(e){}}
 function nfeRestaurarRascunho_(silencioso){var d=nfeLerRascunho_();if(!d||!d.nota)return false;_nfeNota=d.nota;nfePrepararItens_(_nfeNota);nfeRenderNota_();if(!silencioso)nfeStatus_('ok','Rascunho da NF-e restaurado.');return true;}
 function nfeAjustarConversaoLive_(idx,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];if(!it)return;var f=Number(String(v||'').replace(',','.'));if(!(f>0))return;var antiga=Number(it.qtdEstoque||it.qCom||0)||0,nova=(Number(it.qCom)||0)*f;it.fatorConversaoSugerido=f;it.qtdConversaoSugerida=nova;if(it.conversaoDecisao==='converter'){if(Array.isArray(it.lotes)&&it.lotes.length){var soma=it.lotes.reduce(function(a,l){return a+(Number(l.quantidade)||0);},0);if(antiga>0&&soma>0&&Math.abs(soma-antiga)<0.001){var razao=nova/antiga;it.lotes.forEach(function(l){l.quantidade=(Number(l.quantidade)||0)*razao;});}else if(it.lotes.length===1&&(!(Number(it.lotes[0].quantidade)>0)||Math.abs((Number(it.lotes[0].quantidade)||0)-antiga)<0.001))it.lotes[0].quantidade=nova;}it.fatorConversao=f;it.qtdEstoque=nova;}nfeAgendarRascunho_();}
@@ -11635,7 +11650,20 @@ function nfePrepararItens_(nota){
     if(it.eanAura)it.eanAura=nfeDigitos_(it.eanAura);
   });
 }
-function nfeBuscarChave_(){var i=document.getElementById('nfeChave'),ch=nfeDigitos_(i&&i.value||'');if(ch.length!==44){nfeStatus_('warn','A chave precisa ter 44 dígitos.');return;}var b=document.getElementById('nfeBtnBuscar');if(b){b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Lendo...';}nfeStatus_('','Localizando XML e confrontando os itens com o Banco AURA...');nfePost_({action:'nfeBuscarChave',chave:ch}).then(function(r){if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}if(!r||!r.ok){if(r&&r.codigo==='XML_NAO_LOCALIZADO')nfeStatus_('warn','XML não localizado. Importe o XML desta nota ou configure a fonte fiscal automática.');else nfeStatus_('err',(r&&r.erro)||'Não foi possível ler a NF-e.');return;}nfeReceberNota_(r.nota);});}
+async function nfeBuscarChave_(){
+  var i=document.getElementById('nfeChave'),ch=nfeDigitos_(i&&i.value||'');if(ch.length!==44){nfeStatus_('warn','A chave precisa ter 44 dígitos.');return;}
+  var b=document.getElementById('nfeBtnBuscar');if(b){b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Lendo...';}
+  var local=nfeLerRascunho_(),mesma=!!(local&&local.nota&&nfeDigitos_(local.nota.chave||'')===ch);
+  if(local&&local.nota&&!mesma&&local.dirty){nfeStatus_('warn','Sincronizando a conferência atual antes de trocar de NF-e...');await nfeSincronizarRascunhoServidorAura_();local=nfeLerRascunho_();if(local&&local.dirty){if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}nfeStatus_('err','Não foi possível sincronizar a conferência atual. Ela foi mantida neste PC e a troca de NF-e foi bloqueada para evitar perda.');return;}}
+  if(mesma&&local.dirty&&!local.serverConflict){_nfeNota=local.nota;nfePrepararItens_(_nfeNota);nfeRenderNota_();nfeAgendarSyncServidorAura_(true);if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}nfeStatus_('ok','Conferência recuperada da memória deste PC e sincronizando com o servidor.');return;}
+  nfeStatus_('','Procurando rascunho compartilhado desta NF-e...');var srv=await nfeObterRascunhoServidorAura_(ch);
+  if(srv&&srv.encontrado&&srv.nota){
+    if(mesma&&local.serverConflict){var usarServidor=confirm('Existe uma versão mais nova desta NF-e no servidor.\n\nOK = abrir a versão do servidor.\nCancelar = manter a versão deste PC e sincronizá-la por cima do servidor.');if(!usarServidor){local.serverConflict=false;local.serverVersion=Number(srv.versao)||Number(local.serverVersion)||0;nfeEscreverRascunhoAura_(local);_nfeNota=local.nota;nfePrepararItens_(_nfeNota);nfeRenderNota_();nfeAgendarSyncServidorAura_(true);if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}return;}}
+    if(!mesma||Number(srv.versao||0)>Number(local.serverVersion||0)){nfeAdotarRascunhoServidorAura_(srv);if(i)i.value=ch;if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}nfeStatus_('ok','Conferência em andamento recuperada do servidor. Você pode continuar no PC de onde o tablet parou.');return;}
+  }
+  if(mesma){_nfeNota=local.nota;nfePrepararItens_(_nfeNota);nfeRenderNota_();if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}nfeStatus_('ok','Rascunho local restaurado.');return;}
+  nfeStatus_('','Nenhum rascunho encontrado. Localizando XML e confrontando os itens com o Banco AURA...');var r=await nfePost_({action:'nfeBuscarChave',chave:ch});if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}if(!r||!r.ok){if(r&&r.codigo==='XML_NAO_LOCALIZADO')nfeStatus_('warn','XML não localizado. Importe o XML desta nota ou configure a fonte fiscal automática.');else nfeStatus_('err',(r&&r.erro)||'Não foi possível ler a NF-e.');return;}nfeReceberNota_(r.nota);
+}
 function nfeImportarXml_(inp){var f=inp&&inp.files&&inp.files[0];if(!f)return;nfeStatus_('','Lendo XML '+f.name+'...');var rd=new FileReader();rd.onload=function(){nfePost_({action:'nfeLerXml',xml:String(rd.result||''),salvarDrive:true}).then(function(r){inp.value='';if(!r||!r.ok){nfeStatus_('err',(r&&r.erro)||'XML inválido.');return;}var ch=document.getElementById('nfeChave');if(ch)ch.value=r.nota.chave||'';nfeReceberNota_(r.nota);});};rd.onerror=function(){nfeStatus_('err','Não foi possível ler o arquivo XML.');};rd.readAsText(f);}
 function nfeReceberNota_(nota){_nfeNota=nota||null;if(!_nfeNota)return;nfePrepararItens_(_nfeNota);nfeSalvarRascunho_();nfeStatus_('ok','NF-e '+(_nfeNota.numero||'')+' carregada: '+(_nfeNota.totalEncontrados||0)+' de '+(_nfeNota.totalItens||0)+' itens reconhecidos.');nfeRenderNota_();setTimeout(function(){nfeRenderOperadores_();nfeCarregarFotosPendentes_();},0);}
 function nfeSetorOptions_(sel){return NFE_SETORES.map(function(s){return '<option value="'+nfeEsc_(s)+'" '+(s===sel?'selected':'')+'>'+nfeEsc_(s)+'</option>';}).join('');}
@@ -11799,18 +11827,15 @@ function nfeMostrarDiagnostico_(c,tipo,extra){
   if(extra)linhas.push(extra);
   el.className='nfe-diag show '+(tipo||(ok?'ok':'err'));el.innerHTML=linhas.join('<br>');
 }
+function nfeLinhasEsperadasAura_(nota){var total=0;((nota&&Array.isArray(nota.itens))?nota.itens:[]).forEach(function(it){if(!it||it.controlar===false)return;(Array.isArray(it.lotes)?it.lotes:[]).forEach(function(l){if(String(l&&l.validade||'').trim()&&(Number(l&&l.quantidade)||0)>0)total++;});});return total;}
+function nfeConfirmacaoCompletaAura_(info,nota){info=info||{};var esperadas=nfeLinhasEsperadasAura_(nota),srv=Number(info.lotesEsperados)||0;if(srv>esperadas)esperadas=srv;var fis=Number(info.linhasRespostas)||0,st=String(info.status||'').toUpperCase(),final=['REGISTRADA','COMPLETA','AGUARDANDO_CADASTRO'].indexOf(st)>=0,parcial=info.parcial===true||['PARCIAL','PENDENTE_ITENS','PROCESSANDO'].indexOf(st)>=0,pend=Array.isArray(info.pendentes)?info.pendentes.length:0;return {ok:!!(info.confirmacaoRespostas===true&&esperadas>0&&fis>=esperadas&&final&&!parcial&&!pend),esperadas:esperadas,fisicas:fis,status:st,final:final,parcial:parcial,pendentes:pend};}
 function nfeFinalizarGravacaoAura_(r,confirmado){
-  r=r||{};var gravados=Number(r.gravados!=null?r.gravados:r.lotes)||0,linhas=Number(r.linhasRespostas)||gravados,novos=Array.isArray(r.aguardandoCadastro)?r.aguardandoCadastro.length:0;
-  var msg='NF-e confirmada em Respostas ao formulário 1: '+linhas+' lote(s) presente(s)';
-  if(r.ignorados)msg+=' · '+r.ignorados+' já existentes';
-  if(novos)msg+=' · '+novos+' produto(s) novo(s) aguardando cadastro';
-  msg+='.';
-  nfeStatus_('ok',msg);
-  var diagEl=document.getElementById('nfeDiagnostico');if(diagEl){diagEl.className='nfe-diag show ok';diagEl.innerHTML='<span class="oktxt"><i class="ti ti-circle-check"></i> <strong>Gravação física confirmada.</strong> '+linhas+' linha(s) NFE desta nota foram localizadas em Respostas ao formulário 1.</span>'+(novos?'<br><span class="new">'+novos+' produto(s) novo(s) permanecem aguardando cadastro, sem perder a validade lançada.</span>':'');}
-  if(_nfeNota){_nfeNota.jaProcessada=true;_nfeNota.processadaEm=r.processadaEm||_nfeNota.processadaEm||'';}
-  nfeRenderNota_();
-  nfeLimparRascunho_();nfeAtualizarColetasAposGravacao_();
-  if(typeof syncAll==='function')setTimeout(syncAll,300);setTimeout(function(){try{nfeHistoricoGeralCarregar_(true);}catch(e){}},700);
+  r=r||{};var ck=nfeConfirmacaoCompletaAura_(r,_nfeNota);
+  if(!ck.ok){var msg='A NF-e NÃO foi encerrada: ';var m=[];if(r.confirmacaoRespostas!==true)m.push('sem confirmação física em Respostas');if(ck.esperadas>0&&ck.fisicas<ck.esperadas)m.push(ck.fisicas+' de '+ck.esperadas+' lote(s) encontrados');if(ck.parcial||!ck.final)m.push('status '+(ck.status||'não concluído'));if(ck.pendentes)m.push(ck.pendentes+' pendência(s)');msg+=m.join(' · ')||'confirmação incompleta';nfeStatus_('err',msg+'. O rascunho local e o compartilhado foram preservados.');nfeSalvarRascunho_();return false;}
+  var gravados=Number(r.gravados!=null?r.gravados:r.lotes)||0,linhas=ck.fisicas,novos=Array.isArray(r.aguardandoCadastro)?r.aguardandoCadastro.length:0;
+  var msg='NF-e confirmada em Respostas ao formulário 1: '+linhas+' de '+ck.esperadas+' lote(s) presentes';if(r.ignorados)msg+=' · '+r.ignorados+' já existentes';if(novos)msg+=' · '+novos+' produto(s) novo(s) aguardando cadastro';msg+='.';nfeStatus_('ok',msg);
+  var diagEl=document.getElementById('nfeDiagnostico');if(diagEl){diagEl.className='nfe-diag show ok';diagEl.innerHTML='<span class="oktxt"><i class="ti ti-circle-check"></i> <strong>Gravação completa confirmada.</strong> '+linhas+' de '+ck.esperadas+' linha(s)/lote(s) esperados foram localizados em Respostas ao formulário 1.</span>'+(novos?'<br><span class="new">'+novos+' produto(s) novo(s) permanecem aguardando cadastro, sem perder a validade lançada.</span>':'');}
+  if(_nfeNota){_nfeNota.jaProcessada=true;_nfeNota.processadaEm=r.processadaEm||_nfeNota.processadaEm||'';}nfeRenderNota_();nfeLimparRascunho_();nfeAtualizarColetasAposGravacao_();if(typeof syncAll==='function')setTimeout(syncAll,300);setTimeout(function(){try{nfeHistoricoGeralCarregar_(true);}catch(e){}},700);return true;
 }
 function nfeSalvar_(){
   var c=nfeColetarPayload_(),er=document.getElementById('nfeErros');
@@ -11867,7 +11892,7 @@ function nfeHistStatusInfo_(s){
   s=String(s||'').toUpperCase();
   if(['REGISTRADA','PROCESSANDO','COMPLETA'].indexOf(s)>=0)return {c:'ok',t:s==='COMPLETA'?'Completa':(s==='PROCESSANDO'?'Processando':'Registrada')};
   if(s==='AGUARDANDO_CADASTRO')return {c:'warn',t:'Aguardando cadastro'};
-  if(['PARCIAL','PENDENTE_ITENS'].indexOf(s)>=0)return {c:'warn',t:s==='PARCIAL'?'Parcial':'Pendente itens'};
+  if(['PARCIAL','PENDENTE_ITENS','RASCUNHO'].indexOf(s)>=0)return {c:'warn',t:s==='PARCIAL'?'Parcial':(s==='RASCUNHO'?'Rascunho em andamento':'Pendente itens')};
   if(['ERRO','FALHA'].indexOf(s)>=0)return {c:'err',t:s||'Erro'};
   return {c:'',t:s||'—'};
 }
@@ -11937,7 +11962,7 @@ function nfeHistoricoGeralRenderDetalhe_(r){
   var title=modal.querySelector('.nfe-hist-modal-title'),sub=modal.querySelector('.nfe-hist-modal-sub');if(title)title.innerHTML='<i class="ti ti-file-invoice"></i> NF '+nfeEsc_(n.numero||'—')+' · '+nfeEsc_(n.fornecedor||'Fornecedor');if(sub)sub.innerHTML='Chave '+nfeEsc_(n.chave||'')+' · <span class="nfe-hist-status '+si.c+'">'+nfeEsc_(si.t)+'</span>';
   var body=modal.querySelector('.nfe-hist-modal-body');if(!body)return;
   var rows=itens.map(function(it){var nome=it.nomeBanco||it.nomeNFe||'Item da NF-e',lotes=Array.isArray(it.lotes)?it.lotes:[];var lotHtml=lotes.length?lotes.map(function(l){return '<div class="nfe-hist-lote"><div><strong>Validade</strong> '+nfeEsc_(nfeHistDataExibir_(l.validade))+'</div><div><strong>Qtd.</strong> '+nfeFmtQtd_(l.quantidade)+'</div><div></div></div>';}).join(''):'<div class="nfe-hist-no-lote">Sem lotes/validades localizados no histórico consolidado.</div>';var conv=String(it.conversaoDecisao||'').toLowerCase()==='converter'?('<div class="nfe-hist-item-nf" style="color:#1D9E75;font-weight:800;margin-top:3px">Conversão registrada: '+nfeEsc_(it.unidadeNFe||'emb.')+' × '+nfeFmtQtd_(it.fatorConversao||1)+' → '+nfeEsc_(it.unidadeAura||it.unidadeBanco||'UN')+'</div>'):'';return '<div class="nfe-hist-item"><div class="nfe-hist-item-hd"><div><div class="nfe-hist-item-name">'+nfeEsc_(nome)+'</div><div class="nfe-hist-item-nf">'+(it.nomeBanco&&it.nomeNFe&&it.nomeBanco!==it.nomeNFe?'NF-e: '+nfeEsc_(it.nomeNFe):'Item '+nfeEsc_(it.nItem||it.itemId||'—'))+'</div>'+conv+'</div><div class="nfe-hist-item-cell"><span>EAN / Código</span><b>'+nfeEsc_(it.eanCanonico||it.ean||'—')+'</b></div><div class="nfe-hist-item-cell"><span>Setor</span><b>'+nfeEsc_(it.setor||'Outros')+'</b></div><div class="nfe-hist-item-cell"><span>Situação</span><b style="color:'+(it.gravado?'#1D9E75':'#E24B4A')+'">'+nfeEsc_(it.gravado?(it.cadastrado?'Gravado':'Gravado · aguarda cadastro'):'Pendente · não gravado')+'</b></div></div><div class="nfe-hist-lotes">'+lotHtml+'</div></div>';}).join('');
-  var podeRetomar=['PENDENTE_ITENS','PARCIAL'].indexOf(String(n.status||'').toUpperCase())>=0;
+  var podeRetomar=['PENDENTE_ITENS','PARCIAL','RASCUNHO'].indexOf(String(n.status||'').toUpperCase())>=0;
   body.innerHTML=(podeRetomar?'<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn btn-green" onclick="nfeHistoricoRetomarPendente_(\''+nfeEsc_(n.chave||'')+'\')"><i class="ti ti-player-play"></i> Retomar conferência pendente</button></div>':'')+'<div class="nfe-hist-meta-grid">'
     +'<div class="nfe-hist-meta"><span>Fornecedor</span><b>'+nfeEsc_(n.fornecedor||'—')+'</b></div><div class="nfe-hist-meta"><span>CNPJ</span><b>'+nfeEsc_(n.cnpj||'—')+'</b></div>'
     +'<div class="nfe-hist-meta"><span>Emissão</span><b>'+nfeEsc_(nfeHistDataExibir_(n.emissao))+'</b></div><div class="nfe-hist-meta"><span>Conferida em</span><b>'+nfeEsc_(nfeHistDataExibir_(n.processadaEm))+'</b></div>'
@@ -11953,7 +11978,7 @@ function nfeHistoricoRetomarPendente_(chave){
   var btn=document.querySelector('#nfeHistModalGlobal .btn-green');if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Restaurando...';}
   nfeHistoricoGeralApi_('nfeRetomarPendente','&chave='+encodeURIComponent(chave),{chave:chave},90000).then(function(r){
     if(!r||!r.ok||!r.nota){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-player-play"></i> Retomar conferência pendente';}mostrarToast((r&&r.erro)||'Não foi possível restaurar a conferência.','err');return;}
-    var m=document.getElementById('nfeHistModalGlobal');if(m)m.remove();_nfeNota=r.nota;nfePrepararItens_(_nfeNota);nfeSalvarRascunho_();nfeRenderNota_();nfeRenderOperadores_();
+    var m=document.getElementById('nfeHistModalGlobal');if(m)m.remove();if(r.origem==='rascunho_ativo'){nfeAdotarRascunhoServidorAura_(r);}else{_nfeNota=r.nota;nfePrepararItens_(_nfeNota);nfeSalvarRascunho_();nfeRenderNota_();nfeRenderOperadores_();}
     var chaveEl=document.getElementById('nfeChave');if(chaveEl)chaveEl.value=_nfeNota.chave||'';
     nfeStatus_('ok','Conferência pendente restaurada do servidor. Revise os itens marcados, confirme as conversões e grave novamente.');
     var box=document.getElementById('nfeNotaBox');if(box)box.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(nfeCarregarFotosPendentes_,0);
@@ -11968,7 +11993,7 @@ var afAcoes_=[],afCarregado_=false,afEdit_=null,afSelecionados_={},afTeleconImpo
 var AF_PDFJS_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
 var AF_PDFJS_WORKER='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 var AF_TESSERACT_URL='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-var AURA_TELECON_PARSER_BUILD='v6.98-nf-curta-ausente-campos-colados';
+var AURA_TELECON_PARSER_BUILD='v7.00-nfe-sync-multidispositivo-telecon-v6.99';
 console.info('[AURA] Telecon parser',AURA_TELECON_PARSER_BUILD);
 function afLoadScript_(src,id){return new Promise(function(resolve,reject){if(id&&document.getElementById(id)){resolve();return;}var s=document.createElement('script');s.src=src;s.async=true;if(id)s.id=id;s.onload=resolve;s.onerror=function(){reject(new Error('Não foi possível carregar o leitor necessário. Verifique a internet e tente novamente.'));};document.head.appendChild(s);});}
 function afTeleconStatus_(txt,cls){var e=document.getElementById('afTeleconStatus');if(e){e.className='af-telecon-status '+(cls||'');e.innerHTML=txt;}}
