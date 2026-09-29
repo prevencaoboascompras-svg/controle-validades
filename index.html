@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- AURA DOSSIÊ TELECON v6.99 — relatório original sempre como Anexo I + compactação apenas de áreas em branco -->
 <html lang="pt-BR" class="dark">
 <head>
 <meta charset="UTF-8">
@@ -12079,7 +12080,7 @@ function afTeleconAdicionarLinha_(){if(!afTeleconImport_)return;var d=afTeleconI
 function afTeleconConferenciaInfo_(){var d=(afTeleconImport_&&afTeleconImport_.dados)||{},it=d.itens||[],sum=it.reduce(function(s,x){return s+(Number(x.valorTelecon)||0);},0),countOk=!d.registrosInformados||it.length===Number(d.registrosInformados),totalOk=!d.totalInformado||Math.abs(sum-Number(d.totalInformado))<=Math.max(.05,Number(d.totalInformado)*.001);return {sum:sum,countOk:countOk,totalOk:totalOk,completa:countOk&&totalOk&&it.length>0};}
 function afTeleconAtualizarConferencia_(){if(!afTeleconImport_)return;var d=afTeleconImport_.dados,info=afTeleconConferenciaInfo_(),e=document.getElementById('afTeleconConferencia');document.getElementById('afTeleconReconhecidos').value=(d.itens||[]).length;var partes=[];if(d.registrosInformados)partes.push('Relatório informa <b>'+d.registrosInformados+' registro(s)</b>; leitura reconheceu <b>'+(d.itens||[]).length+'</b>.');if(d.totalInformado)partes.push('Total do relatório: <b>'+afMoney_(d.totalInformado)+'</b>; soma reconhecida: <b>'+afMoney_(info.sum)+'</b>.');if(info.completa){e.style.borderLeftColor='var(--green)';e.innerHTML='<b style="color:var(--green)">Conferência automática fechou.</b> '+partes.join(' ')+' Mesmo assim, o PDF original continuará arquivado como evidência.';}else{e.style.borderLeftColor='var(--amber)';e.innerHTML='<b style="color:var(--amber)">Atenção: a leitura automática não fechou 100%.</b> '+(partes.join(' ')||'Confira o cabeçalho do relatório.')+' Por segurança, a notificação usará o <b>PDF original Telecon como Anexo I oficial</b>, e não tratará a leitura parcial como prova completa.';}}
 function afTeleconCancelar_(){afTeleconImport_=null;afTeleconModo_='novo';afTeleconAcaoAtualizar_=null;document.getElementById('afTeleconReview').classList.remove('open');document.getElementById('afTeleconFileName').textContent='Nenhum relatório selecionado.';afTeleconStatus_('A importação foi cancelada. Nenhum dado foi gravado.','');}
-function afTeleconAcaoBase_(){var d=afTeleconImport_.dados||{},forn=String(document.getElementById('afTeleconFornecedor').value||d.fornecedor||'').trim(),reg=Number(document.getElementById('afTeleconRegistros').value)||d.registrosInformados||0,total=Number(document.getElementById('afTeleconTotal').value)||d.totalInformado||0,info=afTeleconConferenciaInfo_(),ant=afPerfilAnterior_(forn)||{},mod=afTeleconModalidade_(forn)||{},fone=ant.telefone||afTeleconExtrairFone_(mod.contato||mod.obs||'');var itens=(d.itens||[]).map(function(x,i){x.key=x.key||('tele_'+i);x.codigo=x.codigoBarras||x.codigo||'';x.valorTotal=Number(x.valorTelecon)||0;x.origem='TELECON';return x;});return {id:'',numero:'',status:'RASCUNHO',dataEmissao:afHoje_(),prazoDiasUteis:10,prazoResposta:'',loja:'Supermercado Boas Compras',operador:afUsuarioAtual_(),assinanteId:afAssinantePadraoId_({operador:afUsuarioAtual_()}),fornecedor:forn,cnpj:ant.cnpj||'',codigoFornecedor:ant.codigoFornecedor||'',contato:ant.contato||mod.contato||'',telefone:fone,email:ant.email||'',situacoes:{vencidos:true},destinoProdutos:'',destinoObservacao:'',providencias:{troca:false,recolhimento:true,credito:true,ressarcimento:false,notaDevolucao:false,boleto:false},itens:itens,evidencias:[],observacoes:'',dataRetorno:'',retorno:'',valorRecuperado:0,compensacoes:[],origemDados:'TELECON',relatorioTelecon:{nome:afTeleconImport_.nomeArquivo,fornecedorRelatorio:forn,registrosInformados:reg,totalInformado:total,registrosExtraidos:itens.length,totalExtraido:info.sum,extracaoCompleta:!!info.completa,usarPdfComoAnexoI:!info.completa,importadoEm:new Date().toISOString()}};}
+function afTeleconAcaoBase_(){var d=afTeleconImport_.dados||{},forn=String(document.getElementById('afTeleconFornecedor').value||d.fornecedor||'').trim(),reg=Number(document.getElementById('afTeleconRegistros').value)||d.registrosInformados||0,total=Number(document.getElementById('afTeleconTotal').value)||d.totalInformado||0,info=afTeleconConferenciaInfo_(),ant=afPerfilAnterior_(forn)||{},mod=afTeleconModalidade_(forn)||{},fone=ant.telefone||afTeleconExtrairFone_(mod.contato||mod.obs||'');var itens=(d.itens||[]).map(function(x,i){x.key=x.key||('tele_'+i);x.codigo=x.codigoBarras||x.codigo||'';x.valorTotal=Number(x.valorTelecon)||0;x.origem='TELECON';return x;});return {id:'',numero:'',status:'RASCUNHO',dataEmissao:afHoje_(),prazoDiasUteis:10,prazoResposta:'',loja:'Supermercado Boas Compras',operador:afUsuarioAtual_(),assinanteId:afAssinantePadraoId_({operador:afUsuarioAtual_()}),fornecedor:forn,cnpj:ant.cnpj||'',codigoFornecedor:ant.codigoFornecedor||'',contato:ant.contato||mod.contato||'',telefone:fone,email:ant.email||'',situacoes:{vencidos:true},destinoProdutos:'',destinoObservacao:'',providencias:{troca:false,recolhimento:true,credito:true,ressarcimento:false,notaDevolucao:false,boleto:false},itens:itens,evidencias:[],observacoes:'',dataRetorno:'',retorno:'',valorRecuperado:0,compensacoes:[],origemDados:'TELECON',relatorioTelecon:{nome:afTeleconImport_.nomeArquivo,fornecedorRelatorio:forn,registrosInformados:reg,totalInformado:total,registrosExtraidos:itens.length,totalExtraido:info.sum,extracaoCompleta:!!info.completa,usarPdfComoAnexoI:true,importadoEm:new Date().toISOString()}};}
 async function afTeleconConfirmar_(){
   if(!afTeleconImport_)return;
   afTeleconResumoEditado_();
@@ -12542,7 +12543,7 @@ function afRenderRelatorioTelecon_(){var box=document.getElementById('afTeleconS
 function afRenderEditorItens_(){if(!afEdit_)return;var body=document.getElementById('afEditorItens'),head=document.getElementById('afEditorItensHead'),titulo=document.getElementById('afItensTitulo'),sub=document.getElementById('afItensSub'),itens=afEdit_.itens||[],tele=String(afEdit_.origemDados||'').toUpperCase()==='TELECON';if(tele){if(titulo)titulo.textContent='Anexo I — Relatório Telecon';if(sub)sub.textContent=(afEdit_.relatorioTelecon&&afEdit_.relatorioTelecon.extracaoCompleta)?'Itens extraídos do relatório Telecon e conferidos com o total do PDF. O arquivo original permanece arquivado.':'O PDF original Telecon é o Anexo I oficial. As linhas abaixo são auxiliares e não substituem o relatório quando a extração não fecha 100%.';if(head)head.innerHTML='<tr><th>Produto</th><th>Cód. barras</th><th>NF origem</th><th>Qtd. rest.</th><th>Custo</th><th>Total Telecon</th><th></th></tr>';if(!itens.length)body.innerHTML='<tr><td colspan="7" class="af-empty">A notificação usará o PDF original da Telecon como Anexo I. Nenhuma linha auxiliar foi extraída.</td></tr>';else body.innerHTML=itens.map(function(it,i){return '<tr><td><b>'+afEsc_(it.nome||'Produto')+'</b><div style="font-size:8px;color:var(--tx2)">Cód. interno '+afEsc_(it.codigoInterno||'—')+(it.dataCadastro?' · cad. '+afEsc_(it.dataCadastro):'')+'</div></td><td>'+afEsc_(it.codigoBarras||it.codigo||'—')+'</td><td>'+afEsc_(it.nfOrigem||'—')+'</td><td><input type="number" min="0" step="0.001" value="'+afEsc_(it.quantidade)+'" oninput="afEditarItem_('+i+',\'quantidade\',this.value)"></td><td><input type="number" min="0" step="0.0001" value="'+afEsc_(it.custoUnit)+'" oninput="afEditarItem_('+i+',\'custoUnit\',this.value)"></td><td><input type="number" min="0" step="0.01" value="'+afEsc_(it.valorTelecon)+'" oninput="afEditarItem_('+i+',\'valorTelecon\',this.value)"></td><td><button class="btn btn-sm" onclick="afRemoverItem_('+i+')"><i class="ti ti-x"></i></button></td></tr>';}).join('');}else{if(titulo)titulo.textContent='Anexo I — Produtos vencidos';if(sub)sub.textContent='O valor usa o custo disponível no Banco AURA e pode ser corrigido antes de emitir.';if(head)head.innerHTML='<tr><th>Produto</th><th>Código</th><th>Lote</th><th>Vencimento</th><th>Qtd.</th><th>Un.</th><th>Custo un.</th><th>Valor</th><th></th></tr>';if(!itens.length)body.innerHTML='<tr><td colspan="9" class="af-empty">Nenhum item.</td></tr>';else body.innerHTML=itens.map(function(it,i){return '<tr><td><b>'+afEsc_(it.nome||'Produto')+'</b></td><td>'+afEsc_(it.codigo||'—')+'</td><td>'+afEsc_(it.lote||'—')+'</td><td>'+afFmtData_(it.validade)+'</td><td><input type="number" min="0" step="0.001" value="'+afEsc_(it.quantidade)+'" oninput="afEditarItem_('+i+',\'quantidade\',this.value)"></td><td>'+afEsc_(it.unidade||'')+'</td><td><input type="number" min="0" step="0.01" value="'+afEsc_(it.custoUnit)+'" oninput="afEditarItem_('+i+',\'custoUnit\',this.value)"></td><td class="num" id="afItemValor_'+i+'">'+afMoney_(afValorItem_(it))+'</td><td><button class="btn btn-sm" onclick="afRemoverItem_('+i+')"><i class="ti ti-x"></i></button></td></tr>';}).join('');}afAtualizarTotalEditor_();var s=document.getElementById('afEvidItem');if(s)s.innerHTML='<option value="">Evidência geral</option>'+itens.map(function(it){return '<option value="'+afEsc_(it.key||it.codigoBarras||it.codigo||it.nome)+'">'+afEsc_(((it.codigoBarras||it.codigo)?(it.codigoBarras||it.codigo)+' · ':'')+it.nome)+'</option>';}).join('');}
 function afEditarItem_(i,campo,val){if(!afEdit_||!afEdit_.itens[i])return;var it=afEdit_.itens[i];it[campo]=Number(val)||0;if(String(it.origem||'').toUpperCase()==='TELECON'){if(campo!=='valorTelecon')it.valorTelecon=(Number(it.quantidade)||0)*(Number(it.custoUnit)||0);it.valorTotal=Number(it.valorTelecon)||0;afRenderEditorItens_();return;}var e=document.getElementById('afItemValor_'+i);if(e)e.textContent=afMoney_(afValorItem_(it));afAtualizarTotalEditor_();}
 function afRemoverItem_(i){if(!afEdit_)return;if(!confirm('Remover este item da ação?'))return;afEdit_.itens.splice(i,1);afRenderEditorItens_();}
-function afAtualizarTotalEditor_(){if(!afEdit_)return;var t=0;(afEdit_.itens||[]).forEach(function(it){t+=afValorItem_(it);});if(String(afEdit_.origemDados||'').toUpperCase()==='TELECON'&&afEdit_.relatorioTelecon&&afEdit_.relatorioTelecon.usarPdfComoAnexoI&&Number(afEdit_.relatorioTelecon.totalInformado)>0)t=Number(afEdit_.relatorioTelecon.totalInformado);afEdit_.valorTotal=t;var e=document.getElementById('afEditorTotal');if(e)e.textContent=afMoney_(t);if(document.getElementById('afBonifBody'))afRenderBonificacoes_();}
+function afAtualizarTotalEditor_(){if(!afEdit_)return;var t=0;(afEdit_.itens||[]).forEach(function(it){t+=afValorItem_(it);});if(String(afEdit_.origemDados||'').toUpperCase()==='TELECON'&&afEdit_.relatorioTelecon&&Number(afEdit_.relatorioTelecon.totalInformado)>0)t=Number(afEdit_.relatorioTelecon.totalInformado);afEdit_.valorTotal=t;var e=document.getElementById('afEditorTotal');if(e)e.textContent=afMoney_(t);if(document.getElementById('afBonifBody'))afRenderBonificacoes_();}
 async function afSalvarAcao_(silencioso){if(!afEdit_)return null;var a=afColetarEditor_();if(!a.fornecedor){mostrarToast('Informe o fornecedor.','warn');return null;}if(!a.itens.length&&!(String(a.origemDados||'').toUpperCase()==='TELECON'&&a.relatorioTelecon)&&a.relatorioPendenteAtualizacao!==true){mostrarToast('Inclua pelo menos um produto ou vincule um relatório Telecon.','warn');return null;}var b=document.getElementById('afSalvarBtn');if(b&&!silencioso){b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Salvando...';}var r=await afPost_({action:'salvarAcaoFornecedorVencidos',acao:a});if(b&&!silencioso){b.disabled=false;b.innerHTML='<i class="ti ti-device-floppy"></i> Salvar ação';}if(!r||!r.ok){mostrarToast('Erro ao salvar ação: '+((r&&r.erro)||'falha'),'err');return null;}afEdit_=r.acao;var pos=afAcoes_.findIndex(function(x){return x.id===afEdit_.id;});if(pos>=0)afAcoes_[pos]=afEdit_;else afAcoes_.unshift(afEdit_);afAbrirEditor_();afAtualizarKpis_();afRenderLista_();if(!silencioso)mostrarToast('Ação '+afEdit_.numero+' salva.','ok');return r;}
 async function afExcluirDossie_(id){
   var a=(afAcoes_||[]).find(function(x){return String(x.id)===String(id);});
@@ -12744,12 +12745,75 @@ async function afTeleconPdfPaginasDataUrl_(acaoId){
     var bin=atob(r.base64),u8=new Uint8Array(bin.length);
     for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
     var pdf=await pdfjsLib.getDocument({data:u8}).promise,out=[];
+
+    // Mantém o relatório VISUALMENTE original. A única compactação permitida
+    // é retirar grandes faixas totalmente brancas, preservando tudo que contém
+    // informação (inclusive rodapé da Telecon quando existir).
+    function compactarBrancos_(canvas){
+      try{
+        var w=canvas.width,h=canvas.height,ctx=canvas.getContext('2d',{willReadFrequently:true});
+        if(!w||!h||!ctx)return canvas;
+        var img=ctx.getImageData(0,0,w,h),d=img.data,passoX=2,passoY=2;
+        var minInk=Math.max(12,Math.floor(w*0.004));
+        function linhaTemTinta(y){
+          var n=0;
+          for(var x=0;x<w;x+=passoX){
+            var k=(y*w+x)*4;
+            if(d[k]<242||d[k+1]<242||d[k+2]<242){if(++n>=minInk)return true;}
+          }
+          return false;
+        }
+        var first=-1,last=-1,rows=[];
+        for(var y=0;y<h;y+=passoY){
+          var ink=linhaTemTinta(y);rows.push([y,ink]);
+          if(ink){if(first<0)first=y;last=y;}
+        }
+        if(first<0||last<0)return canvas;
+
+        var gapMin=Math.max(70,Math.floor(h*0.075)),gapIni=-1,gapFim=-1,blankStart=-1;
+        for(var j=0;j<rows.length;j++){
+          var yy=rows[j][0],ink=rows[j][1];
+          if(yy<first)continue;
+          if(!ink){if(blankStart<0)blankStart=yy;}
+          else{
+            if(blankStart>=0 && yy-blankStart>=gapMin && blankStart>first+30 && yy<last+passoY){
+              gapIni=blankStart;gapFim=yy;break;
+            }
+            blankStart=-1;
+          }
+        }
+
+        var margem=10,top=Math.max(0,first-margem),bottom=Math.min(h,last+margem);
+        // Se há uma grande faixa branca no meio (caso típico dos relatórios Telecon),
+        // costura o conteúdo superior com o rodapé inferior. Nenhum texto é recriado.
+        if(gapIni>0&&gapFim>gapIni){
+          var topEnd=Math.min(h,gapIni+4),bottomStart=Math.max(0,gapFim-4);
+          var topH=Math.max(1,topEnd-top),bottomH=Math.max(1,bottom-bottomStart),sep=12;
+          var oc=document.createElement('canvas');oc.width=w;oc.height=topH+sep+bottomH;
+          var ox=oc.getContext('2d');ox.fillStyle='#fff';ox.fillRect(0,0,oc.width,oc.height);
+          ox.drawImage(canvas,0,top,w,topH,0,0,w,topH);
+          ox.drawImage(canvas,0,bottomStart,w,bottomH,0,topH+sep,w,bottomH);
+          return oc;
+        }
+
+        if(top>0||bottom<h){
+          var cc=document.createElement('canvas');cc.width=w;cc.height=Math.max(1,bottom-top);
+          var cx=cc.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cc.width,cc.height);
+          cx.drawImage(canvas,0,top,w,bottom-top,0,0,w,bottom-top);
+          return cc;
+        }
+        return canvas;
+      }catch(err){console.warn('[AURA] Não foi possível compactar áreas brancas do relatório Telecon:',err);return canvas;}
+    }
+
     for(var p=1;p<=pdf.numPages;p++){
-      var page=await pdf.getPage(p),vp0=page.getViewport({scale:1}),scale=Math.min(1.65,1500/Math.max(1,vp0.width));
+      var page=await pdf.getPage(p),vp0=page.getViewport({scale:1}),scale=Math.min(1.75,1650/Math.max(1,vp0.width));
       var vp=page.getViewport({scale:scale}),c=document.createElement('canvas'),ctx=c.getContext('2d');
       c.width=Math.ceil(vp.width);c.height=Math.ceil(vp.height);
+      ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
       await page.render({canvasContext:ctx,viewport:vp}).promise;
-      out.push(c.toDataURL('image/jpeg',0.9));
+      var cc=compactarBrancos_(c);
+      out.push({src:cc.toDataURL('image/jpeg',0.93),width:cc.width,height:cc.height,pagina:p,compactado:cc.height<c.height*0.93});
     }
     return out;
   }catch(e){console.warn('[AURA] Falha ao renderizar relatório Telecon no documento:',e);return [];}
@@ -12760,10 +12824,16 @@ function afDocTabelaTelecon_(itens,total){
     +itens.map(function(it){return '<tr><td>'+afEsc_(it.codigoBarras||it.codigo||'—')+'</td><td>'+afEsc_(it.nome||'')+'</td><td>'+afEsc_(it.nfOrigem||'—')+'</td><td class="n">'+afQtd_(it.quantidade)+'</td><td class="n">'+afMoney_(it.custoUnit)+'</td><td class="n">'+afMoney_(afValorItem_(it))+'</td></tr>';}).join('')
     +'</tbody><tfoot><tr><td colspan="5" class="n total">TOTAL GERAL</td><td class="n total">'+afMoney_(total)+'</td></tr></tfoot></table>';
 }
-function afDocPaginasTelecon_(telePaginas,rt,registroComplementarHtml,numeroDocumento){
+function afDocPaginasTelecon_(telePaginas,rt,conteudoExtraHtml,numeroDocumento,modoExtra){
   if(!Array.isArray(telePaginas)||!telePaginas.length)return '';
   var nome=rt&&rt.nome?String(rt.nome):'Relatório Telecon';
   var total=telePaginas.length,folhas=[],porFolha=2;
+  // Quando existe uma única página Telecon e até 9 evidências, o AURA aproveita
+  // a mesma folha do anexo para eliminar a página quase vazia entre os anexos.
+  if(total===1&&conteudoExtraHtml)porFolha=1;
+
+  function srcPagina_(pg){return typeof pg==='string'?pg:(pg&&pg.src)||'';}
+  function compactada_(pg){return !!(pg&&typeof pg==='object'&&pg.compactado);}
 
   for(var inicio=0;inicio<total;inicio+=porFolha){
     var fim=Math.min(inicio+porFolha,total);
@@ -12771,31 +12841,29 @@ function afDocPaginasTelecon_(telePaginas,rt,registroComplementarHtml,numeroDocu
     var ultimaFolha=fim>=total;
     var cab=primeiraFolha
       ?('<div class="sec">Anexo I — Relatório de Trocas Telecon</div>'
-        +'<p class="source-clean"><b>Origem dos dados:</b> Relatório de Trocas do sistema Telecon — '+afEsc_(nome)+'.</p>'
-        +'<p class="muted">Reprodução integral do relatório original utilizado como base desta notificação. '+total+' página(s) reproduzida(s), organizadas em '+Math.ceil(total/porFolha)+' folha(s) para melhor aproveitamento do espaço.</p>')
+        +'<p class="source-clean"><b>Documento de origem:</b> '+afEsc_(nome)+'. O PDF original permanece arquivado integralmente no dossiê.</p>'
+        +'<p class="muted">A reprodução abaixo é a imagem do próprio relatório Telecon. Para reduzir espaço desperdiçado, o AURA pode compactar somente grandes faixas totalmente em branco, sem recriar ou alterar os dados do relatório.</p>')
       :('<div class="sec tele-sec-compact">Anexo I — Relatório de Trocas Telecon <span style="font-weight:600;color:#777">· continuação</span></div>');
 
     var blocos='';
     for(var idx=inicio;idx<fim;idx++){
-      blocos+='<div class="tele-page">'
-        +'<div class="tele-page-label">Relatório Telecon · página '+(idx+1)+' de '+total+'</div>'
-        +'<img src="'+telePaginas[idx]+'" alt="Relatório Telecon página '+(idx+1)+' de '+total+'">'
+      var pg=telePaginas[idx],src=srcPagina_(pg);
+      blocos+='<div class="tele-page '+(compactada_(pg)?'white-compacted':'')+'">'
+        +'<div class="tele-page-label">Relatório Telecon original · página '+(idx+1)+' de '+total+(compactada_(pg)?' · espaços em branco compactados':'')+'</div>'
+        +'<img src="'+src+'" alt="Relatório Telecon original página '+(idx+1)+' de '+total+'">'
         +'</div>';
     }
 
-    var registro=(ultimaFolha&&registroComplementarHtml)
-      ?('<div class="tele-last-register">'+registroComplementarHtml+'</div>')
-      :'';
-
-    var rodape=ultimaFolha&&registroComplementarHtml
-      ?('Anexo I · páginas '+(inicio+1)+(fim>inicio+1?' a '+fim:'')+' de '+total+' · registro complementar · Documento '+afEsc_(numeroDocumento||''))
-      :('Anexo I · páginas '+(inicio+1)+(fim>inicio+1?' a '+fim:'')+' de '+total);
+    var extra=(ultimaFolha&&conteudoExtraHtml)?('<div class="tele-extra">'+conteudoExtraHtml+'</div>'):'';
+    var cls=modoExtra==='evidencias'?' tele-with-evidence':(modoExtra==='registro'?' tele-with-register':'');
+    var rodape='Anexo I · Relatório Telecon original · páginas '+(inicio+1)+(fim>inicio+1?' a '+fim:'')+' de '+total+' · Documento '+afEsc_(numeroDocumento||'');
+    if(ultimaFolha&&modoExtra==='evidencias')rodape+=' · Anexo II na mesma folha';
 
     folhas.push(
-      '<section class="a4-page a4-page-annex tele-original-page tele-pair-page">'
+      '<section class="a4-page a4-page-annex tele-original-page tele-pair-page'+cls+'">'
       +cab
       +'<div class="tele-pair">'+blocos+'</div>'
-      +registro
+      +extra
       +'<div class="foot">'+rodape+'</div>'
       +'</section>'
     );
@@ -12820,7 +12888,7 @@ async function afGerarDocumento_(a){
   var prov=afDocProvidencias_(a),itens=(a.itens||[]),tele=String(a.origemDados||'').toUpperCase()==='TELECON',rt=a.relatorioTelecon||{},assinatura=afAssinanteDados_(a);
   var total=tele&&Number(rt.totalInformado)>0?Number(rt.totalInformado):itens.reduce(function(s,it){return s+afValorItem_(it);},0);
   var telePaginas=[];
-  if(tele&&rt.usarPdfComoAnexoI&&a.id)telePaginas=await afTeleconPdfPaginasDataUrl_(a.id);
+  if(tele&&a.id)telePaginas=await afTeleconPdfPaginasDataUrl_(a.id);
   var imgHtml=evs.length?evs.map(function(ev,idx){var src=imgs[ev.id]||'',leg=String(ev.legenda||'').trim();if(!leg||/^registro fotogr[aá]fico/i.test(leg))leg='Registro fotográfico';return '<div class="photo">'+(src?'<img src="'+src+'">':'<div class="ph">Imagem indisponível</div>')+'<div class="cap"><b>Evidência '+String(idx+1).padStart(2,'0')+'</b> — '+afEsc_(leg)+'</div></div>';}).join(''):'';
   var evidenciaDocHtml=evs.length
     ?('<div class="sec">Anexo II — Evidências fotográficas</div><p class="muted">Registros fotográficos anexados a esta notificação.</p><div class="photos">'+imgHtml+'</div>')
@@ -12829,39 +12897,43 @@ async function afGerarDocumento_(a){
   var anexoI='';
   if(tele){
     var fonte='<p class="source-clean"><b>Origem dos dados:</b> Relatório de Trocas do sistema Telecon'+(rt.nome?' — '+afEsc_(rt.nome):'')+'.</p>';
-    if(rt.extracaoCompleta&&itens.length){
-      anexoI='<div class="sec">Anexo I — Relação de produtos</div>'+fonte+afDocTabelaTelecon_(itens,total);
-    }else if(telePaginas.length){
-      // O relatório original é montado fora da página genérica do anexo:
-      // uma página original Telecon por folha A4, evitando qualquer corte.
+    if(telePaginas.length){
+      // O Anexo I oficial é SEMPRE a reprodução do PDF original Telecon.
+      // Os itens extraídos servem para validação, totais e preenchimento do sistema,
+      // mas não substituem visualmente o documento de origem.
       anexoI='';
     }else if(itens.length){
-      anexoI='<div class="sec">Anexo I — Relação de produtos</div>'+fonte+afDocTabelaTelecon_(itens,total)+'<p class="muted">O relatório original Telecon integra o dossiê desta notificação.</p>';
+      // Fallback somente se o PDF original não puder ser recuperado do Drive.
+      anexoI='<div class="sec">Anexo I — Relação de produtos (fallback)</div>'+fonte
+        +'<div class="source" style="margin-bottom:6px"><b>Atenção:</b> o PDF original Telecon não pôde ser carregado neste momento. A tabela abaixo é apenas uma reprodução auxiliar dos dados extraídos.</div>'
+        +afDocTabelaTelecon_(itens,total);
     }else{
-      anexoI='<div class="sec">Anexo I — Relação de produtos</div>'+fonte+'<div class="source"><b>Fornecedor:</b> '+afEsc_(rt.fornecedorRelatorio||a.fornecedor||'')+(rt.registrosInformados?'<br><b>Registros:</b> '+afEsc_(rt.registrosInformados):'')+(rt.totalInformado?'<br><b>Total:</b> '+afMoney_(rt.totalInformado):'')+'<br>O relatório original Telecon integra o dossiê desta notificação.</div>';
+      anexoI='<div class="sec">Anexo I — Relatório Telecon</div>'+fonte+'<div class="source"><b>Fornecedor:</b> '+afEsc_(rt.fornecedorRelatorio||a.fornecedor||'')+(rt.registrosInformados?'<br><b>Registros:</b> '+afEsc_(rt.registrosInformados):'')+(rt.totalInformado?'<br><b>Total:</b> '+afMoney_(rt.totalInformado):'')+'<br>O PDF original Telecon permanece arquivado no dossiê, mas não pôde ser reproduzido nesta visualização.</div>';
     }
   }else{
     anexoI='<div class="sec">Anexo I — Relação de produtos vencidos</div><table><thead><tr><th>Código</th><th>Produto</th><th>Lote</th><th>Qtd.</th><th>Venc.</th><th>Custo un.</th><th>Valor</th></tr></thead><tbody>'+itens.map(function(it){return '<tr><td>'+afEsc_(it.codigo||'—')+'</td><td>'+afEsc_(it.nome||'')+'</td><td>'+afEsc_(it.lote||'—')+'</td><td class="n">'+afQtd_(it.quantidade)+'</td><td>'+afFmtData_(it.validade)+'</td><td class="n">'+afMoney_(it.custoUnit)+'</td><td class="n">'+afMoney_(afValorItem_(it))+'</td></tr>';}).join('')+'</tbody><tfoot><tr><td colspan="6" class="n total">TOTAL GERAL</td><td class="n total">'+afMoney_(total)+'</td></tr></tfoot></table>';
   }
 
   var anexoPaginasHtml='',evidenciaPaginasHtml='';
-  var podeCompactarRegistro=tele&&telePaginas.length&&!evs.length;
+  var podeCompactarFotos=tele&&telePaginas.length===1&&evs.length>0&&evs.length<=9;
+  var podeCompactarRegistro=tele&&telePaginas.length===1&&!evs.length;
+  var compactouExtra=podeCompactarFotos||podeCompactarRegistro;
 
   if(tele&&telePaginas.length){
     anexoPaginasHtml=afDocPaginasTelecon_(
       telePaginas,
       rt,
-      podeCompactarRegistro?evidenciaDocHtml:'',
-      a.numero||''
+      compactouExtra?evidenciaDocHtml:'',
+      a.numero||'',
+      podeCompactarFotos?'evidencias':(podeCompactarRegistro?'registro':'')
     );
   }else{
     anexoPaginasHtml='<section class="a4-page a4-page-annex">'+anexoI+'</section>';
   }
 
-  // Quando não há fotos e existe o PDF Telecon, o registro operacional aproveita
-  // o espaço livre da última folha do Anexo I. Se houver fotos, o Anexo II continua
-  // em folha própria. Nos demais cenários, o registro complementar também fica separado.
-  if(!podeCompactarRegistro){
+  // Com uma única página de relatório e até 9 fotos, Anexo I e Anexo II dividem
+  // a mesma folha A4. Assim desaparece a página intermediária com grande área vazia.
+  if(!compactouExtra){
     evidenciaPaginasHtml='<section class="a4-page a4-page-annex evidence-page">'
       +evidenciaDocHtml
       +'<div class="foot">Documento '+afEsc_(a.numero||'')+' · '+(evs.length?'evidências fotográficas':'registro complementar')+' · gerado pelo sistema AURA Vencimentos — Supermercado Boas Compras · '+new Date().toLocaleString('pt-BR')+'</div>'
@@ -12894,7 +12966,7 @@ async function afGerarDocumento_(a){
     +'.sec{font-size:9.4px;font-weight:900;text-transform:uppercase;border-bottom:1px solid #aaa;padding-bottom:2px;margin:9px 0 5px;letter-spacing:.015em}.dest{border:1px solid #cfcfcf;border-radius:6px;padding:6px 7px;display:grid;grid-template-columns:1fr 1fr;gap:5px 14px}.dest div b{font-size:6.6px;text-transform:uppercase;color:#666;display:block;margin-bottom:1px}'
     +'.object{font-size:10.1px;line-height:1.43}.physical{border:1px solid #cfcfcf;border-left:4px solid #d71920;background:#fafafa;border-radius:4px;padding:7px 8px;line-height:1.4}.physical b{display:block;font-size:8.3px;text-transform:uppercase;margin-bottom:2px}.prov{margin:3px 0 5px 18px;padding:0}.prov li{margin:2px 0;padding-left:1px}.prov li::marker{color:#d71920}.deadline{border:1px solid #d8d8d8;border-left:4px solid #d71920;background:#fafafa;border-radius:4px;padding:7px 8px;margin:6px 0;line-height:1.38}.deadline .deadline-title{display:block;font-weight:900;font-size:8.4px;text-transform:uppercase;margin-bottom:2px}.risk{margin-top:6px;padding:5px 7px;background:#f7f7f7;border-radius:4px}'
     +'table{width:100%;border-collapse:collapse;font-size:7.3px;line-height:1.16;page-break-inside:auto}thead{display:table-header-group}tfoot{display:table-row-group}tr{page-break-inside:avoid;page-break-after:auto}th{background:#ececec;border:1px solid #bbb;padding:2.7px;text-align:left}td{border:1px solid #ccc;padding:2.7px;vertical-align:top}.n{text-align:right;white-space:nowrap}.total{font-weight:900}'
-    +'.source{border:1px solid #bbb;background:#fafafa;border-radius:5px;padding:5px;line-height:1.3}.source-clean{border-left:3px solid #d71920;padding:4px 7px;background:#fafafa;font-size:7.8px;margin:0 0 4px}.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-items:stretch}.photo{border:1px solid #cfcfcf;border-radius:3px;padding:4px;page-break-inside:avoid;display:flex;flex-direction:column;min-height:58mm}.photo img{height:51mm;width:auto;max-width:100%;object-fit:contain;background:#fafafa;display:block;margin:0 auto}.ph{height:51mm;display:flex;align-items:center;justify-content:center;background:#eee;color:#777}.cap{font-size:7.1px;line-height:1.18;margin-top:4px}.muted{color:#6f6f6f}.no-photo{border:1px solid #c8c8c8;border-left:4px solid #d71920;background:#fafafa;border-radius:4px;padding:8px 9px;font-size:8.2px;line-height:1.45;color:#444}.no-photo b{font-size:8.6px;color:#222}.annex-start{break-before:page;page-break-before:always}.tele-pair-page{display:flex;flex-direction:column}.tele-pair{display:flex;flex-direction:column;gap:3.5mm;flex:1;min-height:0}.tele-page{page-break-inside:avoid;margin:0;display:flex;flex-direction:column;align-items:stretch}.tele-page img{width:auto;max-width:100%;height:auto;max-height:112mm;object-fit:contain;display:block;margin:0 auto;border:1px solid #bbb}.tele-page-label{font-size:6.7px;color:#777;margin:0 0 1.5mm;text-align:right}.tele-sec-compact{margin-bottom:2mm}.tele-original-page{display:flex;flex-direction:column}.tele-last-register{margin-top:3.5mm;page-break-inside:avoid}.tele-last-register .sec{margin-top:0}.tele-last-register .no-photo{padding:6px 8px;font-size:7.9px;line-height:1.35}.tele-last-register .no-photo b{font-size:8.3px}.evidence-page{min-height:297mm}.sign-wrap{page-break-inside:avoid;margin-top:7px}.sign{margin-top:12px;width:55%;border-top:1px solid #333;padding-top:4px;line-height:1.3}.foot{margin-top:8px;border-top:1px solid #ccc;padding-top:4px;color:#777;font-size:6.5px}'
+    +'.source{border:1px solid #bbb;background:#fafafa;border-radius:5px;padding:5px;line-height:1.3}.source-clean{border-left:3px solid #d71920;padding:4px 7px;background:#fafafa;font-size:7.8px;margin:0 0 4px}.photos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-items:stretch}.photo{border:1px solid #cfcfcf;border-radius:3px;padding:4px;page-break-inside:avoid;display:flex;flex-direction:column;min-height:58mm}.photo img{height:51mm;width:auto;max-width:100%;object-fit:contain;background:#fafafa;display:block;margin:0 auto}.ph{height:51mm;display:flex;align-items:center;justify-content:center;background:#eee;color:#777}.cap{font-size:7.1px;line-height:1.18;margin-top:4px}.muted{color:#6f6f6f}.no-photo{border:1px solid #c8c8c8;border-left:4px solid #d71920;background:#fafafa;border-radius:4px;padding:8px 9px;font-size:8.2px;line-height:1.45;color:#444}.no-photo b{font-size:8.6px;color:#222}.annex-start{break-before:page;page-break-before:always}.tele-pair-page{display:flex;flex-direction:column}.tele-pair{display:flex;flex-direction:column;gap:3.5mm;min-height:0}.tele-page{page-break-inside:avoid;margin:0;display:flex;flex-direction:column;align-items:stretch}.tele-page img{width:100%;max-width:100%;height:auto;max-height:112mm;object-fit:contain;display:block;margin:0 auto;border:1px solid #bbb}.tele-page-label{font-size:6.7px;color:#777;margin:0 0 1.5mm;text-align:right}.tele-page.white-compacted img{border-color:#aaa}.tele-sec-compact{margin-bottom:2mm}.tele-original-page{display:flex;flex-direction:column}.tele-extra{margin-top:3mm;page-break-inside:avoid}.tele-extra .sec{margin-top:3px}.tele-with-evidence .tele-page img{max-height:66mm}.tele-with-evidence .tele-pair{gap:2mm}.tele-with-evidence .tele-extra{margin-top:2mm}.tele-with-evidence .photos{grid-template-columns:repeat(3,1fr);gap:4px}.tele-with-evidence .photo{min-height:42mm;padding:3px}.tele-with-evidence .photo img{height:35mm}.tele-with-evidence .ph{height:35mm}.tele-with-evidence .cap{font-size:6.3px;line-height:1.12;margin-top:2px}.tele-with-evidence .muted{margin:2px 0 4px;font-size:7.2px}.tele-with-register .tele-page img{max-height:145mm}.tele-with-register .tele-extra{margin-top:3mm}.evidence-page{min-height:297mm}.sign-wrap{page-break-inside:avoid;margin-top:7px}.sign{margin-top:12px;width:55%;border-top:1px solid #333;padding-top:4px;line-height:1.3}.foot{margin-top:8px;border-top:1px solid #ccc;padding-top:4px;color:#777;font-size:6.5px}'
     +'@media print{html,body{background:#fff!important}.a4-stack{padding:0}.a4-page{width:210mm;height:297mm;margin:0;padding:9mm 10mm 8mm;box-shadow:none;page-break-after:always;break-after:page;overflow:hidden}.tele-pair-page{padding:7mm 8mm 7mm}.a4-page:last-child{page-break-after:auto;break-after:auto}.photo,.tele-page,.sign-wrap{break-inside:avoid}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
     +'</style></head><body><div class="a4-stack"><section class="a4-page a4-page-notice">'
     +'<div class="brand"><div><div class="super">SUPERMERCADO BOAS COMPRAS</div><div class="tag">o super para toda a família</div></div><div class="tag">AURA Vencimentos · Dossiê do Fornecedor</div></div>'
