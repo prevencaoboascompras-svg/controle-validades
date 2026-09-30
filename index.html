@@ -5798,6 +5798,16 @@ async function syncAll(){
     setDot('ok','Conectado &mdash; '+sheetsData.length+' registros carregados');
     (function(){var t='Última sinc: '+new Date().toLocaleTimeString('pt-BR');document.getElementById('syncTime').textContent=t;var sa=document.getElementById('syncTimeAlert');if(sa)sa.textContent=t;})();
     refresh();
+    // v7.01: o navegador já está com o BANCO DE DADOS novo; agora força o
+    // backend a descartar o cache EAN antigo e reprocessar AGUARDANDO_CADASTRO.
+    if(typeof nfeReconciliarCadastrosAura_==='function'){
+      nfeReconciliarCadastrosAura_(true).then(function(rec){
+        if(rec&&rec.ok&&Number(rec.completas)>0){
+          mostrarToast(Number(rec.completas)+' NF-e(s) reconciliada(s) com o banco atualizado.','ok');
+          try{if(_nfeHistGeralCarregado_){_nfeHistGeralCarregado_=false;nfeHistoricoGeralCarregar_(false);}}catch(eHist){}
+        }
+      });
+    }
   }catch(e){setDot('err','Erro: '+e.message);console.error(e);}
   finally{btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Sincronizar';}
 }
@@ -11584,6 +11594,19 @@ function nfeAdotarRascunhoServidorAura_(r){if(!r||!r.nota)return false;var obj={
 function nfeExcluirRascunhoServidorAura_(chave){try{if(typeof navigator!=='undefined'&&navigator.onLine===false)return;nfePost_({action:'nfeExcluirRascunhoAtivo',chave:nfeDigitos_(chave)}).catch(function(){});}catch(e){}}
 function nfeLimparRascunho_(){try{localStorage.removeItem(NFE_DRAFT_KEY);}catch(e){}}
 function nfeRestaurarRascunho_(silencioso){var d=nfeLerRascunho_();if(!d||!d.nota)return false;_nfeNota=d.nota;nfePrepararItens_(_nfeNota);nfeRenderNota_();if(!silencioso)nfeStatus_('ok','Rascunho da NF-e restaurado.');return true;}
+// v7.01 — funções que existiam no Tablet/Individual e faltavam no AURA PC.
+// Evita o ReferenceError ao cancelar/limpar e garante que alterações sejam
+// persistidas localmente + enviadas ao rascunho compartilhado.
+function nfeAutosaveAgora_(){
+  if(_nfeDraftTimer_){clearTimeout(_nfeDraftTimer_);_nfeDraftTimer_=null;}
+  if(!_nfeNota||!_nfeNota.chave)return;
+  nfeSalvarRascunho_();
+  nfeAgendarSyncServidorAura_(true);
+}
+function nfeAgendarRascunho_(){
+  if(_nfeDraftTimer_)clearTimeout(_nfeDraftTimer_);
+  _nfeDraftTimer_=setTimeout(function(){_nfeDraftTimer_=null;nfeSalvarRascunho_();},180);
+}
 function nfeAjustarConversaoLive_(idx,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];if(!it)return;var f=Number(String(v||'').replace(',','.'));if(!(f>0))return;var antiga=Number(it.qtdEstoque||it.qCom||0)||0,nova=(Number(it.qCom)||0)*f;it.fatorConversaoSugerido=f;it.qtdConversaoSugerida=nova;if(it.conversaoDecisao==='converter'){if(Array.isArray(it.lotes)&&it.lotes.length){var soma=it.lotes.reduce(function(a,l){return a+(Number(l.quantidade)||0);},0);if(antiga>0&&soma>0&&Math.abs(soma-antiga)<0.001){var razao=nova/antiga;it.lotes.forEach(function(l){l.quantidade=(Number(l.quantidade)||0)*razao;});}else if(it.lotes.length===1&&(!(Number(it.lotes[0].quantidade)>0)||Math.abs((Number(it.lotes[0].quantidade)||0)-antiga)<0.001))it.lotes[0].quantidade=nova;}it.fatorConversao=f;it.qtdEstoque=nova;}nfeAgendarRascunho_();}
 window.addEventListener('pagehide',function(){try{nfeAutosaveAgora_();}catch(e){}});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){try{nfeAutosaveAgora_();}catch(e){}}});
@@ -11888,6 +11911,21 @@ function nfeHistNomeOperador_(email){
   }
   return String(email||'Não informado');
 }
+async function nfeReconciliarCadastrosAura_(silencioso){
+  try{
+    var r=await nfeHistoricoGeralApi_('nfeReconciliarCadastrosAgora','',{forcar:true},180000);
+    if(r&&r.ok){
+      if(!silencioso&&Number(r.completas)>0)mostrarToast(Number(r.completas)+' NF-e(s) deixaram de aguardar cadastro.','ok');
+      return r;
+    }
+    if(!silencioso)mostrarToast((r&&r.erro)||'Não foi possível reconciliar os cadastros da NF-e.','warn');
+    return r;
+  }catch(e){
+    if(!silencioso)mostrarToast('Falha ao reconciliar cadastros da NF-e.','warn');
+    return null;
+  }
+}
+
 function nfeHistStatusInfo_(s){
   s=String(s||'').toUpperCase();
   if(['REGISTRADA','PROCESSANDO','COMPLETA'].indexOf(s)>=0)return {c:'ok',t:s==='COMPLETA'?'Completa':(s==='PROCESSANDO'?'Processando':'Registrada')};
@@ -11908,19 +11946,38 @@ function nfeHistoricoGeralApi_(action,extra,postBody,timeoutMs){
   });
 }
 function nfeHistoricoGeralCarregar_(forcar){
-  if(_nfeHistGeralCarregando_)return;if(_nfeHistGeralCarregado_&&!forcar){nfeHistoricoGeralRender_();return;}
+  if(_nfeHistGeralCarregando_)return;
+  if(_nfeHistGeralCarregado_&&!forcar){nfeHistoricoGeralRender_();return;}
   var body=document.getElementById('nfeHistBody'),btn=document.getElementById('nfeHistAtualizarBtn');
-  if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty"><i class="ti ti-loader-2 spin"></i> Carregando todas as NF-e...</div></td></tr>';
-  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Atualizando...';}
+  if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty"><i class="ti ti-loader-2 spin"></i> '+(forcar?'Reconciliando cadastros e atualizando NF-e...':'Carregando todas as NF-e...')+'</div></td></tr>';
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> '+(forcar?'Reconciliando...':'Atualizando...');}
   _nfeHistGeralCarregando_=true;
-  nfeHistoricoGeralApi_('nfeHistoricoTodos','&limite=1000',{limite:1000},90000).then(function(r){
-    _nfeHistGeralCarregando_=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
-    if(!r||!r.ok){if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Não foi possível carregar o histórico: '+nfeEsc_((r&&r.erro)||'verifique se o Code.gs v6.74 foi implantado')+'</div></td></tr>';return;}
-    _nfeHistGeralDados_=Array.isArray(r.notas)?r.notas:[];_nfeHistGeralFontes_=r.fontes||null;_nfeHistGeralCarregado_=true;
-    nfeHistoricoGeralPopularFiltros_();nfeHistoricoGeralRender_();
-  }).catch(function(){
-    _nfeHistGeralCarregando_=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
-    if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Falha ao consultar o histórico. Confirme a implantação do Code.gs v6.74.</div></td></tr>';
+
+  var prep=forcar
+    ?nfeHistoricoGeralApi_('nfeReconciliarCadastrosAgora','',{forcar:true},180000).catch(function(e){console.warn('[AURA NF-e] Falha ao reconciliar cadastros:',e);return null;})
+    :Promise.resolve(null);
+
+  prep.then(function(rec){
+    if(rec&&rec.ok&&Number(rec.completas)>0){
+      mostrarToast(Number(rec.completas)+' NF-e(s) atualizada(s) após localizar os produtos no Banco de Dados.','ok');
+    }
+    return nfeHistoricoGeralApi_('nfeHistoricoTodos','&limite=1000',{limite:1000},90000);
+  }).then(function(r){
+    _nfeHistGeralCarregando_=false;
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
+    if(!r||!r.ok){
+      if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Não foi possível carregar o histórico: '+nfeEsc_((r&&r.erro)||'verifique a implantação atual do Code.gs')+'</div></td></tr>';
+      return;
+    }
+    _nfeHistGeralDados_=Array.isArray(r.notas)?r.notas:[];
+    _nfeHistGeralFontes_=r.fontes||null;
+    _nfeHistGeralCarregado_=true;
+    nfeHistoricoGeralPopularFiltros_();
+    nfeHistoricoGeralRender_();
+  }).catch(function(e){
+    _nfeHistGeralCarregando_=false;
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
+    if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Falha ao consultar o histórico. '+nfeEsc_(String(e&&e.message||''))+'</div></td></tr>';
   });
 }
 
@@ -11993,7 +12050,7 @@ var afAcoes_=[],afCarregado_=false,afEdit_=null,afSelecionados_={},afTeleconImpo
 var AF_PDFJS_URL='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
 var AF_PDFJS_WORKER='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 var AF_TESSERACT_URL='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-var AURA_TELECON_PARSER_BUILD='v7.00-nfe-sync-multidispositivo-telecon-v6.99';
+var AURA_TELECON_PARSER_BUILD='v7.00-nfe-sync-reconciliacao-cache-v7.01';
 console.info('[AURA] Telecon parser',AURA_TELECON_PARSER_BUILD);
 function afLoadScript_(src,id){return new Promise(function(resolve,reject){if(id&&document.getElementById(id)){resolve();return;}var s=document.createElement('script');s.src=src;s.async=true;if(id)s.id=id;s.onload=resolve;s.onerror=function(){reject(new Error('Não foi possível carregar o leitor necessário. Verifique a internet e tente novamente.'));};document.head.appendChild(s);});}
 function afTeleconStatus_(txt,cls){var e=document.getElementById('afTeleconStatus');if(e){e.className='af-telecon-status '+(cls||'');e.innerHTML=txt;}}
