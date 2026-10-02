@@ -5501,17 +5501,104 @@ function loadAsset(src){return new Promise(function(r){var i=new Image();i.onloa
 var CFG_KEY='aura_cfg',PROD_KEY='aura_prod';
 var TODAY=new Date();TODAY.setHours(0,0,0,0);
 var fotoImg=null;
-// v6.31.1 PAINEL: inicia com o último snapshot local para renderizar o dashboard
-// imediatamente. A sincronização com a planilha continua logo depois em background.
-var products=(function(){
+// v7.05 — CACHE GRANDE DE PRODUTOS FORA DO localStorage
+// O snapshot completo já ultrapassa a cota de ~5 MB de alguns navegadores.
+// A partir desta versão ele fica no IndexedDB; no localStorage permanecem apenas
+// configurações e o pequeno subconjunto de lançamentos manuais/offline.
+var products=[];
+var AURA_PROD_DB_NAME='aura_produtos_cache_v1';
+var AURA_PROD_DB_STORE='cache';
+var AURA_PROD_DB_KEY='snapshot';
+var AURA_PROD_MANUAL_KEY='aura_prod_manual_v1';
+var _auraProdDbPromise=null;
+var _auraProdSaveTimer=null;
+var _auraProdSavePendente=null;
+
+function auraProdDbAbrir_(){
+  if(_auraProdDbPromise)return _auraProdDbPromise;
+  _auraProdDbPromise=new Promise(function(resolve,reject){
+    if(!window.indexedDB){reject(new Error('IndexedDB indisponível'));return;}
+    var req=indexedDB.open(AURA_PROD_DB_NAME,1);
+    req.onupgradeneeded=function(){
+      var db=req.result;
+      if(!db.objectStoreNames.contains(AURA_PROD_DB_STORE))db.createObjectStore(AURA_PROD_DB_STORE);
+    };
+    req.onsuccess=function(){resolve(req.result);};
+    req.onerror=function(){reject(req.error||new Error('Falha ao abrir IndexedDB'));};
+  });
+  return _auraProdDbPromise;
+}
+function auraProdDbLer_(){
+  return auraProdDbAbrir_().then(function(db){
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction(AURA_PROD_DB_STORE,'readonly');
+      var req=tx.objectStore(AURA_PROD_DB_STORE).get(AURA_PROD_DB_KEY);
+      req.onsuccess=function(){resolve(Array.isArray(req.result)?req.result:[]);};
+      req.onerror=function(){reject(req.error||new Error('Falha ao ler cache de produtos'));};
+    });
+  });
+}
+function auraProdDbSalvar_(lista){
+  return auraProdDbAbrir_().then(function(db){
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction(AURA_PROD_DB_STORE,'readwrite');
+      tx.objectStore(AURA_PROD_DB_STORE).put(Array.isArray(lista)?lista:[],AURA_PROD_DB_KEY);
+      tx.oncomplete=function(){resolve(true);};
+      tx.onerror=function(){reject(tx.error||new Error('Falha ao salvar cache de produtos'));};
+      tx.onabort=function(){reject(tx.error||new Error('Gravação do cache abortada'));};
+    });
+  });
+}
+function auraProdSalvarManuais_(lista){
   try{
-    var cache=JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
-    return Array.isArray(cache)?cache:[];
-  }catch(e){
-    console.warn('Cache local de produtos inválido; iniciando vazio.',e);
-    return [];
+    var manuais=(Array.isArray(lista)?lista:[]).filter(function(p){return p&&p.src==='manual';});
+    localStorage.setItem(AURA_PROD_MANUAL_KEY,JSON.stringify(manuais));
+  }catch(e){console.warn('[AURA] Não foi possível salvar os lançamentos manuais locais:',e.message);}
+}
+function auraProdLerManuais_(){
+  try{
+    var x=JSON.parse(localStorage.getItem(AURA_PROD_MANUAL_KEY)||'[]');
+    return Array.isArray(x)?x:[];
+  }catch(e){return [];}
+}
+function auraProdRemoverLegacy_(){
+  try{localStorage.removeItem(PROD_KEY);}catch(e){}
+}
+async function auraProdCarregarCache_(){
+  var cache=[];
+  try{cache=await auraProdDbLer_();}catch(e){console.warn('[AURA] IndexedDB de produtos ainda não disponível:',e.message);}
+  // Migração única da versão antiga: se ainda houver aura_prod no localStorage,
+  // leva o snapshot para IndexedDB antes de liberar imediatamente a cota.
+  if(!cache.length){
+    try{
+      var legado=JSON.parse(localStorage.getItem(PROD_KEY)||'[]');
+      if(Array.isArray(legado)&&legado.length){
+        cache=legado;
+        try{await auraProdDbSalvar_(legado);}catch(eDb){console.warn('[AURA] Falha ao migrar aura_prod para IndexedDB:',eDb.message);}
+      }
+    }catch(eLeg){console.warn('[AURA] Cache aura_prod legado inválido; será descartado.',eLeg.message);}
   }
-})();
+  auraProdRemoverLegacy_();
+  if(!cache.length)cache=auraProdLerManuais_();
+  return cache;
+}
+function auraProdAgendarIndexedDb_(lista){
+  _auraProdSavePendente=Array.isArray(lista)?lista.slice():[];
+  if(_auraProdSaveTimer)clearTimeout(_auraProdSaveTimer);
+  _auraProdSaveTimer=setTimeout(function(){
+    _auraProdSaveTimer=null;
+    var snap=_auraProdSavePendente;_auraProdSavePendente=null;
+    auraProdDbSalvar_(snap).catch(function(e){console.warn('[AURA] Falha ao persistir snapshot no IndexedDB:',e.message);});
+  },120);
+}
+function auraLocalStorageLiberarCachesPesados_(){
+  // aura_prod é legado e é o responsável direto pelo estouro observado.
+  auraProdRemoverLegacy_();
+  // Thumbnails são apenas cache reconstruível; versões antigas podiam crescer muito.
+  try{localStorage.removeItem('boascompras_thumb_cache_v1');}catch(e){}
+  try{localStorage.removeItem('boascompras_thumb_cache_v3_drive_cosmos');}catch(e){}
+}
+auraLocalStorageLiberarCachesPesados_();
 var setorAtivo='';
 var SETOR_CORRIGIDO_KEY='aura_setor_corrigido';
 var _setorCorrigido=JSON.parse(localStorage.getItem(SETOR_CORRIGIDO_KEY)||'{}');
@@ -5525,8 +5612,13 @@ function aplicarSetorCorrigido(){
 var GAS_URL='https://script.google.com/macros/s/AKfycbwjsogX93Xxfb5jyFy1IqknZ7lk2OOaOOG_oOhpGdKETgZgIkTrZOBY36_UzS35Ns8s/exec';
 var AURA_INDEX_BUILD='CEASA-AUTOCOMPLETE-20260825-1845';
 console.info('[AURA] index build',AURA_INDEX_BUILD,'— CEASA com autocomplete do BANCO DE DADOS + Boss periodo + imagens API AURA');
+console.info('[AURA] armazenamento v7.05 — produtos em IndexedDB; localStorage reservado para dados leves');
 function loadCfg(){var d={id:'1HDJvgbKqYRUh8YvKeNTJZ5PhjbqyqZTsYT3bUnjp0VQ',aba:'2025',idBanco:'1HDJvgbKqYRUh8YvKeNTJZ5PhjbqyqZTsYT3bUnjp0VQ',abaBanco:'BANCO DE DADOS',abaResp:'Respostas ao formulario 1',url:GAS_URL};var s=localStorage.getItem(CFG_KEY);if(!s)return d;var c=JSON.parse(s);return Object.assign(d,c);}
-function saveProd(){try{localStorage.setItem(PROD_KEY,JSON.stringify(products));}catch(e){console.warn('localStorage cheio — dados mantidos só em memória:',e.message);}}
+function saveProd(){
+  // Nunca mais grava os 13+ mil produtos no localStorage.
+  auraProdSalvarManuais_(products);
+  auraProdAgendarIndexedDb_(products);
+}
 
 function saveConfig(){
   var cfg={id:document.getElementById('cId').value.trim(),aba:document.getElementById('cAba').value.trim()||'2025',idBanco:document.getElementById('cIdBanco').value.trim(),abaBanco:document.getElementById('cAbaBanco').value.trim()||'BANCO DE DADOS',abaResp:document.getElementById('cAbaResp').value.trim()||'Respostas ao formulario 1'};
@@ -14904,17 +14996,21 @@ function _iniciarDadosSecundariosAposCarga_(){
   sincronizarTarefasCompleto();
   cloudLoad();
 }
-if(_cfg.id){
-  if(products.length){
-    aplicarSetorCorrigido();
-    setDot('loading','Dados locais exibidos — atualizando...');
-    // Aguarda o fim da inicialização síncrona do script antes do primeiro render.
-    // Evita acessar variáveis globais (ex.: _promoAtivas) antes de serem inicializadas.
-    setTimeout(function(){
-      try{ refresh(); }catch(e){ console.error('Falha no refresh inicial do cache:',e); }
-    },0);
-  }else{
-    setDot('loading','Reconectando...');
+async function auraIniciarDadosPrincipais_(){
+  setDot('loading','Abrindo cache seguro…');
+  try{
+    var cache=await auraProdCarregarCache_();
+    if(cache&&cache.length){
+      products=cache;
+      aplicarSetorCorrigido();
+      setDot('loading','Dados locais exibidos — atualizando…');
+      try{refresh();}catch(e){console.error('Falha no refresh inicial do cache IndexedDB:',e);}
+    }else{
+      setDot('loading','Reconectando...');
+    }
+  }catch(eCache){
+    console.warn('[AURA] Falha ao restaurar cache seguro de produtos:',eCache);
+    products=auraProdLerManuais_();
   }
 
   var _syncInicial=syncAll();
@@ -14927,8 +15023,12 @@ if(_cfg.id){
   // Fallback: se a leitura principal demorar demais, não segura tarefas/nuvem indefinidamente.
   setTimeout(_iniciarDadosSecundariosAposCarga_,3500);
   setTimeout(migarDadosLocaisParaNuvem,4500);
+}
+if(_cfg.id){
+  auraIniciarDadosPrincipais_();
 }else{
-  refresh();
+  // Mesmo sem configuração, migra/limpa o cache legado para liberar a cota.
+  auraProdCarregarCache_().then(function(cache){if(cache&&cache.length)products=cache;refresh();}).catch(function(){products=auraProdLerManuais_();refresh();});
 }
 
 // ── ANTECIPAÇÃO DE ENCARTES ──────────────────────────────────────────────
