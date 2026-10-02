@@ -5160,12 +5160,21 @@ function toggleTheme() {
         </div>
         <div class="form-row">
           <label>Foto do produto</label>
+          <div style="font-size:10px;color:var(--tx2);line-height:1.4;margin:2px 0 7px">Banco compartilhado de imagens do <b>Arsenal + AURA + Coleta</b>. Toda imagem enviada ou adicionada por link fica vinculada ao código de barras e pode ser reutilizada nos outros sistemas.</div>
           <div style="display:flex;gap:6px;margin-bottom:6px">
-            <input type="text" id="eFotoBusca" placeholder="Buscar por nome..." style="flex:1;font-size:12px;padding:6px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none" onkeydown="if(event.key==='Enter')buscarFotoNome()">
-            <button class="btn btn-sm" onclick="buscarFotoNome()" style="white-space:nowrap"><i class="ti ti-search"></i> Buscar</button>
+            <input type="text" id="eFotoBusca" placeholder="Termo manual. Ex: café 500g embalagem" style="flex:1;font-size:12px;padding:6px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none" onkeydown="if(event.key==='Enter'){event.preventDefault();buscarFotoDoFormulario();}">
+            <button type="button" class="btn btn-sm btn-green" onclick="buscarFotoDoFormulario()" style="white-space:nowrap"><i class="ti ti-refresh"></i> Consultar</button>
           </div>
-          <div id="fotoStatus" style="font-size:11px;color:var(--tx2);margin-bottom:6px;min-height:16px"></div>
-          <input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)" style="font-size:12px">
+          <div style="display:flex;gap:6px;margin-bottom:6px">
+            <input type="url" id="eFotoUrl" placeholder="Cole a URL direta da imagem" autocomplete="off" style="flex:1;font-size:12px;padding:6px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none" onkeydown="if(event.key==='Enter'){event.preventDefault();usarFotoUrlManual();}">
+            <button type="button" class="btn btn-sm" onclick="usarFotoUrlManual()" style="white-space:nowrap"><i class="ti ti-link"></i> Usar link</button>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
+            <button type="button" class="btn btn-sm" onclick="abrirGoogleImagens()"><i class="ti ti-brand-google"></i> Abrir Google</button>
+            <label class="btn btn-sm" for="eFoto" style="cursor:pointer"><i class="ti ti-upload"></i> Enviar imagem</label>
+            <input type="file" id="eFoto" accept="image/*" onchange="loadFoto(this)" style="display:none">
+          </div>
+          <div id="fotoStatus" style="font-size:11px;color:var(--tx2);margin-bottom:2px;min-height:16px">Ao selecionar um produto, a AURA consulta automaticamente o mesmo banco central usado pelo Arsenal.</div>
         </div>
         <div class="form-row">
           <label>Cor do texto do produto</label>
@@ -7279,7 +7288,7 @@ async function buscarFotoCompleta(ean,nomeProduto){
   try{
     var url=await _resolverFotoTarefaChain(cod,nome);
     if(!url){
-      setFotoStatus('Foto ainda não cadastrada no banco central para este produto.','var(--tx2)');
+      setFotoStatus('Foto não encontrada no banco central. Você pode abrir o Google, colar um link direto ou enviar a imagem.','var(--tx2)');
       return false;
     }
     var ok=await carregarImagemUrl(url);
@@ -7301,76 +7310,138 @@ async function buscarFotoCompleta(ean,nomeProduto){
 async function buscarFotoPorNome(nome){
   var cod=(document.getElementById('eCod')&&document.getElementById('eCod').value||'').trim();
   if(!cod){
-    setFotoStatus('Selecione um produto com código antes de consultar a foto.','var(--red)');
+    setFotoStatus('Selecione um produto com código de barras antes de consultar a foto.','var(--red)');
     return false;
   }
   return await buscarFotoCompleta(cod,nome||'');
 }
-async function buscarFotoNome(){
-  var q=document.getElementById('eFotoBusca').value.trim()||document.getElementById('eProduto').value.trim();
-  if(!q){setFotoStatus('Digite um nome para complementar a consulta.','var(--red)');return;}
-  await buscarFotoPorNome(q);
+
+// Mesmo fluxo operacional do Arsenal de Ofertas: consulta central pelo EAN,
+// pesquisa manual no Google, URL direta ou upload. Tudo termina no mesmo banco
+// central de imagens por código de barras (Drive / Code.gs compartilhado).
+async function buscarFotoDoFormulario(){
+  var cod=(document.getElementById('eCod')&&document.getElementById('eCod').value||'').trim();
+  var nome=(document.getElementById('eProduto')&&document.getElementById('eProduto').value||'').trim();
+  var termo=(document.getElementById('eFotoBusca')&&document.getElementById('eFotoBusca').value||'').trim();
+  if(!cod){
+    mostrarToast('Selecione um produto com código de barras para consultar a imagem.','warn');
+    return false;
+  }
+  return await buscarFotoCompleta(cod,termo||nome);
+}
+async function buscarFotoNome(){ return buscarFotoDoFormulario(); }
+
+function abrirGoogleImagens(){
+  var termo=((document.getElementById('eFotoBusca')&&document.getElementById('eFotoBusca').value)||
+             (document.getElementById('eProduto')&&document.getElementById('eProduto').value)||
+             (document.getElementById('eCod')&&document.getElementById('eCod').value)||'').trim();
+  if(!termo){
+    mostrarToast('Informe o produto ou um termo para abrir o Google Imagens.','warn');
+    var el=document.getElementById('eFotoBusca');if(el)el.focus();
+    return;
+  }
+  window.open('https://www.google.com/search?tbm=isch&q='+encodeURIComponent(termo),'_blank','noopener');
+  setFotoStatus('Google Imagens aberto. Copie o endereço direto da imagem e cole no campo de link.','var(--amber)');
 }
 
-function carregarImagemUrl(url){
-  return new Promise(function(resolve){
-    // Tenta direto primeiro (funciona para a maioria das imagens)
-    var img=new Image();
-    img.crossOrigin='anonymous';
-    img.onload=function(){fotoImg=img;drawEncarte();resolve(true);};
-    img.onerror=function(){
-      // Fallback: proxy CORS via images.weserv.nl (mesmo proxy do Arsenal
-      // de Ofertas — allorigins estava bloqueando/derrubando as imagens)
-      var proxyUrl='https://images.weserv.nl/?url='+encodeURIComponent(url.replace(/^https?:\/\//i,''))+'&output=png';
-      var img2=new Image();
-      img2.crossOrigin='anonymous';
-      img2.onload=function(){fotoImg=img2;drawEncarte();resolve(true);};
-      img2.onerror=function(){resolve(false);};
-      img2.src=proxyUrl;
-    };
-    img.src=url;
-  });
+function _fotoDataUrlCentral_(img){
+  try{
+    if(!img)return null;
+    var w=Number(img.naturalWidth||img.width)||0,h=Number(img.naturalHeight||img.height)||0;
+    if(!w||!h)return null;
+    var max=1600,esc=Math.min(1,max/Math.max(w,h));
+    var c=document.createElement('canvas');
+    c.width=Math.max(1,Math.round(w*esc));c.height=Math.max(1,Math.round(h*esc));
+    var ctx=c.getContext('2d');ctx.drawImage(img,0,0,c.width,c.height);
+    return c.toDataURL('image/png');
+  }catch(e){
+    console.warn('[AURA Encarte] Não foi possível preparar imagem para o banco central:',e);
+    return null;
+  }
+}
+
+async function usarFotoUrlManual(){
+  var url=(document.getElementById('eFotoUrl')&&document.getElementById('eFotoUrl').value||'').trim();
+  var cod=(document.getElementById('eCod')&&document.getElementById('eCod').value||'').trim();
+  if(!cod){mostrarToast('Selecione um produto com código de barras antes de usar um link.','warn');return false;}
+  if(!/^https?:\/\//i.test(url)&&!/^data:image\//i.test(url)){
+    mostrarToast('Cole uma URL válida começando com http ou https.','warn');
+    var el=document.getElementById('eFotoUrl');if(el)el.focus();
+    return false;
+  }
+  setFotoStatus('Carregando imagem pelo link…','var(--amber)');
+  var ok=await carregarImagemUrl(url);
+  if(ok===false||!fotoImg){
+    setFotoStatus('Não consegui carregar esse link. Use a URL direta da imagem ou faça upload do arquivo.','var(--red)');
+    return false;
+  }
+  drawEncarte();
+  setFotoStatus('Imagem carregada. Salvando no banco compartilhado Arsenal/AURA/Coleta…','var(--amber)');
+  var dataUrl=_fotoDataUrlCentral_(fotoImg);
+  if(!dataUrl){
+    setFotoStatus('Imagem carregada no encarte, mas o navegador não permitiu salvá-la no banco central. Faça upload do arquivo para compartilhá-la.','var(--amber)');
+    return true;
+  }
+  var res=await enviarImagemProdutoParaDrive(dataUrl,'image/png');
+  if(res&&res.ok){
+    setFotoStatus('✓ Imagem do link salva no banco compartilhado e aplicada ao encarte.','var(--green)');
+    return true;
+  }
+  return true;
 }
 
 function loadFoto(input){
-  if(!input.files[0])return;
-  var file=input.files[0];
+  var file=input&&input.files&&input.files[0];
+  if(!file)return;
   var r=new FileReader();
   r.onload=function(e){
     var img=new Image();
-    img.onload=function(){fotoImg=img;drawEncarte();};
+    img.onload=async function(){
+      fotoImg=img;drawEncarte();
+      setFotoStatus('Imagem carregada. Salvando no banco compartilhado Arsenal/AURA/Coleta…','var(--amber)');
+      var res=await enviarImagemProdutoParaDrive(e.target.result,file.type||'image/jpeg');
+      if(res&&res.ok)setFotoStatus('✓ Upload salvo no banco compartilhado e aplicado ao encarte.','var(--green)');
+    };
+    img.onerror=function(){setFotoStatus('Não foi possível abrir este arquivo de imagem.','var(--red)');};
     img.src=e.target.result;
-    // Upload automático pro banco de imagens (Drive), usando o código
-    // de barras do produto como nome do arquivo. Não bloqueia o preview.
-    enviarImagemProdutoParaDrive(e.target.result, file.type);
   };
   r.readAsDataURL(file);
 }
 
-function enviarImagemProdutoParaDrive(dataUrl, mimeType){
+async function enviarImagemProdutoParaDrive(dataUrl, mimeType){
   var cod=(document.getElementById('eCod').value||'').trim();
   var st=document.getElementById('fotoStatus');
   if(!cod){
     if(st) st.textContent='⚠️ Sem código de barras — imagem não foi salva no banco de produtos.';
-    return;
+    return {ok:false,erro:'sem_codigo'};
   }
-  var base64=String(dataUrl).split(',')[1]||'';
-  if(!base64) return;
+  var base64=String(dataUrl||'').split(',')[1]||'';
+  if(!base64)return {ok:false,erro:'imagem_vazia'};
   var cfg=loadCfg();
-  if(st) st.textContent='📤 Salvando imagem no banco de produtos...';
-  fetch(cfg.url,{
-    method:'POST',
-    headers:{'Content-Type':'text/plain;charset=UTF-8'},
-    body:JSON.stringify({action:'salvarImagemProduto',codigoBarras:cod,imagemBase64:base64,mimeType:mimeType||'image/jpeg',tipo:'produto'})
-  })
-  .then(function(r){return r.json();})
-  .then(function(res){
-    if(res&&res.ok){var codCentral=String(res.codigoCanonico||cod);_notificarFotoCentralAtualizada(codCentral);if(codCentral!==cod)_invalidarFotoCentralAura(cod);}
-    if(st) st.textContent = res && res.ok ? '✅ Imagem salva no banco central de produtos (' + cod + ')' : '❌ Erro ao salvar: '+(res&&res.erro||'desconhecido');
-  })
-  .catch(function(err){
-    if(st) st.textContent='❌ Erro de conexão ao salvar imagem: '+err.message;
-  });
+  if(!cfg||!cfg.url){
+    if(st)st.textContent='❌ Configure a URL do Apps Script para salvar a imagem no banco compartilhado.';
+    return {ok:false,erro:'sem_url'};
+  }
+  try{
+    var resp=await fetch(cfg.url,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=UTF-8'},
+      body:JSON.stringify({action:'salvarImagemProduto',codigoBarras:cod,imagemBase64:base64,mimeType:mimeType||'image/jpeg',tipo:'produto'})
+    });
+    var res=await resp.json();
+    if(res&&res.ok){
+      var codCentral=String(res.codigoCanonico||cod);
+      _notificarFotoCentralAtualizada(codCentral);
+      if(codCentral!==cod)_invalidarFotoCentralAura(cod);
+      // Retira também qualquer consulta negativa em cache feita antes do cadastro.
+      try{Object.keys(_fotoTarefaChainCache||{}).forEach(function(k){if(k===cod||k.indexOf(cod+'|')===0)delete _fotoTarefaChainCache[k];});}catch(e){}
+    }
+    if(st&&!res.ok)st.textContent='❌ Erro ao salvar imagem: '+((res&&res.erro)||'desconhecido');
+    return res||{ok:false,erro:'resposta_vazia'};
+  }catch(err){
+    if(st)st.textContent='❌ Erro de conexão ao salvar imagem: '+err.message;
+    return {ok:false,erro:err.message};
+  }
 }
 
 async function ensureFonts(){
@@ -7667,6 +7738,7 @@ function openEncarteModal(idx){
   // Armazena preço promo para uso no modal de Resolvido
   _encartePrecoPor=document.getElementById('ePor').value||null;
   document.getElementById('eFotoBusca').value='';
+  var _fotoUrlEl=document.getElementById('eFotoUrl');if(_fotoUrlEl)_fotoUrlEl.value='';
   document.getElementById('encarteModal').classList.add('open');
   setTimeout(function(){
     atualizarPainelCusto();
