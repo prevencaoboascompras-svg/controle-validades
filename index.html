@@ -2300,6 +2300,46 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 @media(max-width:1120px){.estoque-unico-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.estoque-unico-filtros{grid-template-columns:minmax(180px,1fr) 150px auto}}
 @media(max-width:820px){.estoque-unico-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.estoque-unico-filtros{grid-template-columns:1fr 135px}.estoque-unico-filtros .resolver-wrap{grid-column:1/2}.estoque-unico-filtros .limpar-btn{grid-column:2/3}}
 @media(max-width:520px){.estoque-unico-grid{grid-template-columns:1fr 1fr;gap:7px}.estoque-unico-filtros{grid-template-columns:1fr}.estoque-unico-filtros>*{grid-column:auto!important}.estoque-unico-card .urg-card-nome{font-size:8.5px}.estoque-unico-card .urg-card-cod{font-size:6.5px}.estoque-unico-card .urg-photobox,.estoque-unico-card .urg-photobox-imgwrap,.estoque-unico-card .urg-photobox-empty{width:45px;height:45px;min-width:45px}.estoque-unico-card .urg-card-right{width:48px}.estoque-unico-card .urg-card-right svg{width:48px;height:42px}.estoque-unico-fin b{font-size:7.5px}.estoque-unico-lote-data{font-size:7px}.estoque-unico-lote-status,.estoque-unico-lote-coleta{font-size:6px}.estoque-unico-actions .abtn{font-size:7px}.estoque-unico-meta-line{font-size:6.5px}}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   v7.02 — ENTRADAS OPERACIONAIS: CEASA dentro de Conferência NF-e
+   Boss Vision permanece exclusivamente gerencial / consulta.
+   ═══════════════════════════════════════════════════════════════ */
+.nfe-ceasa-entry{
+  margin-top:14px;border:1px solid var(--bd);border-radius:14px;background:var(--card);overflow:hidden;
+}
+.nfe-ceasa-entry-head{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px 18px;
+  border-bottom:1px solid var(--bd);background:linear-gradient(135deg,rgba(29,158,117,.10),rgba(29,158,117,.025));
+}
+.nfe-ceasa-entry-main{min-width:0;flex:1}
+.nfe-ceasa-entry-title{font-size:14px;font-weight:900;display:flex;align-items:center;gap:7px;color:var(--tx)}
+.nfe-ceasa-entry-title i{color:var(--green);font-size:18px}
+.nfe-ceasa-entry-sub{font-size:10px;line-height:1.5;color:var(--tx2);margin-top:5px;max-width:900px}
+.nfe-ceasa-entry-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.nfe-ceasa-entry-tag{font-size:8px;font-weight:850;text-transform:uppercase;letter-spacing:.04em;padding:3px 7px;border-radius:99px;border:1px solid var(--bd);color:var(--tx2);background:var(--bg2)}
+.nfe-ceasa-entry-tag.cash{color:var(--green);border-color:rgba(29,158,117,.35);background:rgba(29,158,117,.08)}
+.nfe-ceasa-entry-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;align-items:center;flex-shrink:0}
+.nfe-ceasa-history{padding:14px 18px 16px}
+.nfe-ceasa-history-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.nfe-ceasa-history-title{font-size:11px;font-weight:850;display:flex;align-items:center;gap:6px}
+.nfe-ceasa-history-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.nfe-ceasa-month{height:32px;border:1px solid var(--bds);border-radius:8px;background:var(--bg);color:var(--tx);padding:0 8px;font-size:10px}
+.nfe-ceasa-status{display:none;font-size:9px;color:var(--tx2);padding:8px 9px;border-radius:8px;background:var(--bg2);margin-bottom:8px}
+.nfe-ceasa-status.show{display:block}.nfe-ceasa-status.err{color:var(--red)}
+.nfe-ceasa-list{display:grid;gap:7px}
+.nfe-ceasa-item{display:grid;grid-template-columns:minmax(130px,.7fr) minmax(200px,1.5fr) minmax(170px,1.4fr) auto auto;gap:10px;align-items:center;padding:10px 11px;border:1px solid var(--bd);border-radius:10px;background:var(--bg2)}
+.nfe-ceasa-item-date small,.nfe-ceasa-item-total small{display:block;font-size:7px;color:var(--tx2);text-transform:uppercase;font-weight:800;letter-spacing:.04em;margin-bottom:2px}
+.nfe-ceasa-item-date b,.nfe-ceasa-item-total b{font-size:11px}
+.nfe-ceasa-item-forn{min-width:0;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nfe-ceasa-item-prod{min-width:0;font-size:8px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nfe-ceasa-empty{padding:18px;text-align:center;border:1px dashed var(--bds);border-radius:10px;color:var(--tx2);font-size:10px}
+@media(max-width:760px){
+  .nfe-ceasa-entry-head{align-items:flex-start;flex-direction:column}.nfe-ceasa-entry-actions{width:100%;justify-content:flex-start}
+  .nfe-ceasa-history-hd{align-items:flex-start;flex-direction:column}.nfe-ceasa-item{grid-template-columns:1fr auto}.nfe-ceasa-item-forn,.nfe-ceasa-item-prod{grid-column:1 / -1}.nfe-ceasa-item .btn{grid-column:2;grid-row:1 / span 2}
+}
+
 </style>
 
 <style>
@@ -3744,6 +3784,31 @@ function toggleTheme() {
         </div>
         <div id="nfeStatus" class="nfe-status"><i class="ti ti-info-circle"></i> Aguardando uma chave. Se o XML ainda não estiver no Drive, use “Importar XML”.</div>
       </div>
+
+      <div class="nfe-ceasa-entry" id="nfeCeasaEntradaBox">
+        <div class="nfe-ceasa-entry-head">
+          <div class="nfe-ceasa-entry-main">
+            <div class="nfe-ceasa-entry-title"><i class="ti ti-truck-delivery"></i> Entrada CEASA — compra sem NF</div>
+            <div class="nfe-ceasa-entry-sub">Compras de hortifruti realizadas em dinheiro, sem NF-e, continuam sendo <b>entradas de mercadoria</b>. Registre aqui a data, fornecedor/feirante, produtos, quantidades e valores. O Boss Vision usa estes lançamentos apenas para consolidação e análise gerencial.</div>
+            <div class="nfe-ceasa-entry-tags"><span class="nfe-ceasa-entry-tag cash"><i class="ti ti-cash"></i> dinheiro / sem NF</span><span class="nfe-ceasa-entry-tag">entrada de mercadoria</span><span class="nfe-ceasa-entry-tag">hortifruti</span></div>
+          </div>
+          <div class="nfe-ceasa-entry-actions">
+            <button class="btn btn-green" onclick="abrirEntradaCeasaModal()"><i class="ti ti-plus"></i> Nova entrada CEASA</button>
+          </div>
+        </div>
+        <div class="nfe-ceasa-history">
+          <div class="nfe-ceasa-history-hd">
+            <div class="nfe-ceasa-history-title"><i class="ti ti-history"></i> Entradas CEASA lançadas</div>
+            <div class="nfe-ceasa-history-controls">
+              <input type="month" class="nfe-ceasa-month" id="nfeCeasaMes" onchange="nfeCeasaCarregar_(true)">
+              <button class="btn btn-sm" id="nfeCeasaAtualizarBtn" onclick="nfeCeasaCarregar_(true)"><i class="ti ti-refresh"></i> Atualizar</button>
+            </div>
+          </div>
+          <div class="nfe-ceasa-status" id="nfeCeasaStatus"></div>
+          <div class="nfe-ceasa-list" id="nfeCeasaLista"><div class="nfe-ceasa-empty">Abra a aba para carregar as entradas CEASA do período.</div></div>
+        </div>
+      </div>
+
       <div id="nfeNotaBox" style="display:none"></div>
 
       <div class="nfe-hist-global" id="nfeHistoricoGlobalBox">
@@ -3781,7 +3846,7 @@ function toggleTheme() {
       <div class="boss-head">
         <div style="min-width:0;flex:1">
           <div class="boss-title"><i class="ti ti-eye"></i> BOSS VISION <span style="font-size:9px;font-weight:800;color:var(--green);border:1px solid color-mix(in srgb,var(--green) 45%,transparent);padding:2px 6px;border-radius:99px">AURA ÚNICA v8</span></div>
-          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre o <strong>último mês fechado</strong>. Você pode escolher qualquer mês, abrir o <strong>mês atual</strong> ou consultar um <strong>dia específico</strong>. O mês atual só terá análise completa quando os relatórios desse mês já tiverem sido gerados.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: BANCO DE DADOS/AAAA-MM · Entradas Horti, Entradas Padaria, Entradas Fiambreria, ABC Horti, ABC Padaria, ABC Fiambreria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: dados lançados na própria AURA.</div>
+          <div class="boss-sub">Visão executiva de <strong>perdas, quebras, consumo e desempenho por setor</strong>. Por padrão o Boss abre o <strong>último mês fechado</strong>. Você pode escolher qualquer mês, abrir o <strong>mês atual</strong> ou consultar um <strong>dia específico</strong>. O mês atual só terá análise completa quando os relatórios desse mês já tiverem sido gerados.</div><div style="font-size:10px;color:var(--tx2);margin-top:5px"><i class="ti ti-brand-google-drive"></i> Drive: BANCO DE DADOS/AAAA-MM · Entradas Horti, Entradas Padaria, Entradas Fiambreria, ABC Horti, ABC Padaria, ABC Fiambreria, Quebra Horti, Quebra Padaria, Produção Padaria e Uso/Consumo. <i class="ti ti-database" style="margin-left:8px"></i> CEASA manual: lançada em Conferência NF-e › Entrada CEASA; o Boss apenas consolida e analisa.</div>
           <div id="bossStatus" class="boss-status"><i class="ti ti-point-filled"></i> Aguardando atualização</div>
           <div class="boss-fontes-bar">
             <button type="button" class="btn btn-sm" onclick="bossToggleFontes_()"><i class="ti ti-folder-check"></i> Verificar fontes</button>
@@ -3805,7 +3870,6 @@ function toggleTheme() {
               <button type="button" class="btn btn-sm" onclick="bossUsarUltimoMesFechado()" title="Abre o mês anterior ao mês atual"><i class="ti ti-calendar-check"></i> Último fechado</button>
               <button type="button" class="btn btn-sm" onclick="bossUsarMesAtual()" title="Abre o mês corrente"><i class="ti ti-calendar"></i> Mês atual</button>
             </div>
-            <button class="btn" onclick="abrirEntradaCeasaModal()"><i class="ti ti-truck-delivery"></i> Entrada CEASA</button>
             <button class="btn btn-green" id="bossBtnAtualizar" onclick="bossCarregar(true)"><i class="ti ti-refresh"></i> Atualizar</button>
           </div>
         </div>
@@ -4471,7 +4535,7 @@ function toggleTheme() {
 
       <div class="boss-group boss-group-collapsible" id="bossGrupoEntrada" style="display:none">
         <div class="boss-group-title">
-          <span>Entradas Horti</span>
+          <span>Compras Horti — visão gerencial</span>
           <span class="boss-period-badge boss-period-mes" id="bossPeriodoEntradasHorti"></span>
           <span class="boss-line"></span>
         </div>
@@ -7902,6 +7966,74 @@ function bossFmtDataBR_(iso){
   var p=String(iso).split('-');
   return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):iso;
 }
+
+
+// ═══════════════════════════════════════════════════════════════
+// v7.02 — CEASA COMO ENTRADA OPERACIONAL NA ABA CONFERÊNCIA NF-e
+// O Boss Vision apenas consolida/analisa estes dados.
+// ═══════════════════════════════════════════════════════════════
+var _nfeCeasaEntradas_=[];
+var _nfeCeasaMesCarregado_='';
+var _nfeCeasaCarregando_=false;
+
+function nfeCeasaMesAtual_(){
+  var d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+}
+function nfeCeasaDataBR_(iso){
+  var p=String(iso||'').split('-');
+  return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):(iso||'—');
+}
+function nfeCeasaEsc_(v){
+  return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});
+}
+function nfeCeasaRender_(){
+  var list=document.getElementById('nfeCeasaLista');if(!list)return;
+  var arr=Array.isArray(_nfeCeasaEntradas_)?_nfeCeasaEntradas_.slice():[];
+  arr.sort(function(a,b){return String(b.data||'').localeCompare(String(a.data||''))||String(b.notaId||'').localeCompare(String(a.notaId||''));});
+  if(!arr.length){list.innerHTML='<div class="nfe-ceasa-empty"><i class="ti ti-inbox"></i> Nenhuma entrada CEASA lançada neste mês.</div>';return;}
+  list.innerHTML=arr.map(function(ent){
+    var itens=Array.isArray(ent.itens)?ent.itens:[];
+    var nomes=itens.slice(0,4).map(function(x){return x.nome||x.cod||'Produto';}).filter(Boolean).join(' · ');
+    if(itens.length>4)nomes+=' · +'+(itens.length-4);
+    return '<div class="nfe-ceasa-item">'
+      +'<div class="nfe-ceasa-item-date"><small>Data</small><b>'+nfeCeasaEsc_(nfeCeasaDataBR_(ent.data))+'</b></div>'
+      +'<div class="nfe-ceasa-item-forn" title="'+nfeCeasaEsc_(ent.fornecedor||'')+'">'+nfeCeasaEsc_(ent.fornecedor||'Fornecedor não informado')+'</div>'
+      +'<div class="nfe-ceasa-item-prod" title="'+nfeCeasaEsc_(nomes)+'">'+nfeCeasaEsc_(nomes||((itens.length||0)+' item(ns)'))+'</div>'
+      +'<div class="nfe-ceasa-item-total"><small>Total</small><b>'+bossFmtBRL(ent.totalValor||0)+'</b></div>'
+      +'<button type="button" class="btn btn-sm" data-nota-id="'+nfeCeasaEsc_(ent.notaId||'')+'" onclick="editarEntradaCeasaNota(this.getAttribute(\'data-nota-id\'))"><i class="ti ti-edit"></i> Editar</button>'
+      +'</div>';
+  }).join('');
+}
+function nfeCeasaCarregar_(force){
+  var mesEl=document.getElementById('nfeCeasaMes'),st=document.getElementById('nfeCeasaStatus'),btn=document.getElementById('nfeCeasaAtualizarBtn');
+  if(!mesEl)return Promise.resolve(null);
+  if(!mesEl.value)mesEl.value=nfeCeasaMesAtual_();
+  var mes=String(mesEl.value||'');
+  if(!force&&_nfeCeasaMesCarregado_===mes&&_nfeCeasaEntradas_.length){nfeCeasaRender_();return Promise.resolve(_nfeCeasaEntradas_);}
+  if(_nfeCeasaCarregando_)return Promise.resolve(null);
+  var url=bossApiUrl();
+  if(!url){if(st){st.className='nfe-ceasa-status show err';st.textContent='API principal da AURA não configurada.';}return Promise.resolve(null);}
+  _nfeCeasaCarregando_=true;
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando';}
+  if(st){st.className='nfe-ceasa-status show';st.innerHTML='<i class="ti ti-loader-2 spin"></i> Carregando entradas CEASA de '+nfeCeasaEsc_(mes)+'...';}
+  return bossFetch(url,mes+'-01','mes').then(function(res){
+    if(!res||!res.ok)throw new Error((res&&res.erro)||'A API não retornou as entradas CEASA.');
+    var dados=res.dados||res,ec=dados&&dados.grupos&&dados.grupos.entradaCeasa;
+    _nfeCeasaEntradas_=ec&&Array.isArray(ec.entradas)?ec.entradas:[];
+    _nfeCeasaMesCarregado_=mes;
+    nfeCeasaRender_();
+    if(st){st.className='nfe-ceasa-status';st.textContent='';}
+    return _nfeCeasaEntradas_;
+  }).catch(function(e){
+    if(st){st.className='nfe-ceasa-status show err';st.textContent='Falha ao carregar entradas CEASA: '+(e&&e.message?e.message:e);}
+    return null;
+  }).finally(function(){
+    _nfeCeasaCarregando_=false;
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
+  });
+}
+
 // ═══ ENTRADA CEASA (compras de hortifruti) ═══
 var _ecLinhaSeq=0;
 var _ecAcFoco={};
@@ -8072,8 +8204,10 @@ function abrirEntradaCeasaModal(){
 
 function editarEntradaCeasaNota(notaId){
   notaId=String(notaId||'').trim();
+  var entradas=[];
+  if(Array.isArray(_nfeCeasaEntradas_)&&_nfeCeasaEntradas_.length)entradas=entradas.concat(_nfeCeasaEntradas_);
   var ec=_bossDados&&_bossDados.grupos&&_bossDados.grupos.entradaCeasa;
-  var entradas=ec&&Array.isArray(ec.entradas)?ec.entradas:[];
+  if(ec&&Array.isArray(ec.entradas))entradas=entradas.concat(ec.entradas);
   var ent=null;
   for(var i=0;i<entradas.length;i++){
     if(String(entradas[i].notaId||'')===notaId){ent=entradas[i];break;}
@@ -8153,8 +8287,11 @@ function salvarEntradaCeasa(){
   }).then(function(){
     closeModal('entradaCeasaModal');
     _ecNotaEditando=null;
-    if(typeof mostrarToast==='function')mostrarToast(ehEdicao?'Nota CEASA atualizada. Recalculando custos...':'Entrada CEASA enviada. Atualizando Boss Vision...','ok');
-    setTimeout(function(){if(currentTabName==='bossvision')bossCarregar(true);},1200);
+    if(typeof mostrarToast==='function')mostrarToast(ehEdicao?'Entrada CEASA atualizada.':'Entrada CEASA registrada.','ok');
+    setTimeout(function(){
+      if(currentTabName==='nfe'&&typeof nfeCeasaCarregar_==='function')nfeCeasaCarregar_(true);
+      if(currentTabName==='bossvision')bossCarregar(true);
+    },700);
   }).catch(function(e){
     erro((e&&e.message)||'Erro de rede ao enviar a entrada. Tente novamente.');
   }).finally(function(){
@@ -8762,7 +8899,6 @@ function bossRenderEntradaCeasa_(dados){
           +'<div class="boss-ceasa-forn">'+forn+'</div>'
           +'<div class="boss-ceasa-nota-actions">'
           +'<div class="boss-ceasa-nota-total">'+bossFmtBRL(ent.totalValor||0)+'</div>'
-          +'<button type="button" class="boss-ceasa-edit" data-nota-id="'+bossEscapeHtml(ent.notaId||'')+'" onclick="editarEntradaCeasaNota(this.getAttribute(\'data-nota-id\'))"><i class="ti ti-edit"></i> Editar nota</button>'
           +'</div>'
           +'</div>';
 
@@ -11633,7 +11769,7 @@ function nfeAtualizarColetasAposGravacao_(){
   setTimeout(function(){try{renderUltimasColetas('silent');}catch(e){}},4500);
 }
 function nfeStatus_(tipo,msg){var el=document.getElementById('nfeStatus');if(!el)return;el.className='nfe-status '+(tipo||'');el.innerHTML='<i class="ti '+(tipo==='ok'?'ti-circle-check':tipo==='err'?'ti-alert-circle':tipo==='warn'?'ti-alert-triangle':'ti-info-circle')+'"></i> '+nfeEsc_(msg||'');}
-function nfeInit_(){try{if(typeof carregarColaboradoresUniversal_==='function')carregarColaboradoresUniversal_(false).then(function(){nfeRenderOperadores_();if(_nfeHistGeralCarregado_)nfeHistoricoGeralPopularFiltros_(),nfeHistoricoGeralRender_();});}catch(e){}if(!_nfeNota){var d=nfeLerRascunho_();if(d&&d.nota&&!d.nota.jaProcessada){nfeRestaurarRascunho_(true);nfeStatus_('ok','Rascunho salvo automaticamente restaurado. Continue de onde parou.');}}nfeHistoricoGeralCarregar_(false);setTimeout(function(){var i=document.getElementById('nfeChave');if(i&&!_nfeNota)i.focus();},80);}
+function nfeInit_(){try{if(typeof carregarColaboradoresUniversal_==='function')carregarColaboradoresUniversal_(false).then(function(){nfeRenderOperadores_();if(_nfeHistGeralCarregado_)nfeHistoricoGeralPopularFiltros_(),nfeHistoricoGeralRender_();});}catch(e){}if(!_nfeNota){var d=nfeLerRascunho_();if(d&&d.nota&&!d.nota.jaProcessada){nfeRestaurarRascunho_(true);nfeStatus_('ok','Rascunho salvo automaticamente restaurado. Continue de onde parou.');}}nfeHistoricoGeralCarregar_(false);try{nfeCeasaCarregar_(false);}catch(e){}setTimeout(function(){var i=document.getElementById('nfeChave');if(i&&!_nfeNota)i.focus();},80);}
 function nfeChaveInput_(){var i=document.getElementById('nfeChave');if(!i)return;var d=nfeDigitos_(i.value||'');if(d.length<=44)i.value=d;if(_nfeAutoTimer)clearTimeout(_nfeAutoTimer);if(d.length===44)_nfeAutoTimer=setTimeout(nfeBuscarChave_,250);}
 function nfeEhEmbalagemFront_(u){
   u=String(u||'').trim().toUpperCase().replace(/\./g,'');
@@ -13080,7 +13216,8 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v6.97-dossie-compacto-final';
+var AURA_CONTROLE_VALIDADE_BUILD='v7.02-ceasa-na-conferencia-nfe';
+console.info('[AURA] organização de entradas v7.02 — CEASA operacional na aba Conferência NF-e; Boss Vision somente gerencial');
 var currentTabName='dashboard';
 function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma visão de Estoque */ return 'unificado'; }
 function goTab(name){
