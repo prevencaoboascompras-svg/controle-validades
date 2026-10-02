@@ -7255,6 +7255,53 @@ async function buscarFotoOpenFoodFacts(ean, nomeProduto){
 }
 
 
+// Carregador único de imagens do encarte — mesma estratégia operacional do Arsenal.
+// Aceita data URL e links http/https. Para links externos, tenta primeiro a URL
+// direta com CORS e, se o servidor bloquear, refaz pelo proxy de imagens usado
+// pelo Arsenal. Em qualquer sucesso atualiza a foto global do encarte.
+function _auraEncarteProxyImagemUrl_(url){
+  url=String(url||'').trim();
+  if(!url||/^data:image\//i.test(url))return url;
+  if(/^https?:\/\/images\.weserv\.nl\//i.test(url))return url;
+  return 'https://images.weserv.nl/?url='+encodeURIComponent(url.replace(/^https?:\/\//i,''))+'&output=png';
+}
+
+function carregarImagemUrl(url){
+  url=String(url||'').trim();
+  if(!url)return Promise.resolve(false);
+  return new Promise(function(resolve){
+    var finalizado=false;
+    function concluir(ok,img){
+      if(finalizado)return;
+      finalizado=true;
+      if(ok&&img){
+        fotoImg=img;
+        try{drawEncarte();}catch(e){}
+        resolve(true);
+      }else resolve(false);
+    }
+    function tentar(src,jaProxy){
+      var img=new Image();
+      var timer=setTimeout(function(){
+        try{img.src='';}catch(e){}
+        if(!jaProxy&&/^https?:\/\//i.test(url)){
+          tentar(_auraEncarteProxyImagemUrl_(url),true);
+        }else concluir(false,null);
+      },10000);
+      try{img.crossOrigin='anonymous';}catch(e){}
+      try{img.referrerPolicy='no-referrer';}catch(e){}
+      img.onload=function(){clearTimeout(timer);concluir(true,img);};
+      img.onerror=function(){
+        clearTimeout(timer);
+        if(!jaProxy&&/^https?:\/\//i.test(url))tentar(_auraEncarteProxyImagemUrl_(url),true);
+        else concluir(false,null);
+      };
+      img.src=src;
+    }
+    tentar(url,false);
+  });
+}
+
 // Consulta central de imagem. O HTML não acessa pasta do Drive, Cosmos ou
 // qualquer catálogo diretamente: tudo passa pelo mesmo Code.gs compartilhado.
 async function buscarFotoDrive(codigoBarras, tipo, nomeProduto){
@@ -13290,6 +13337,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=docu
 
 var AURA_CONTROLE_VALIDADE_BUILD='v7.02-ceasa-na-conferencia-nfe';
 console.info('[AURA] organização de entradas v7.02 — CEASA operacional na aba Conferência NF-e; Boss Vision somente gerencial');
+console.info('[AURA] encarte imagens v7.04 — loader Arsenal restaurado + link/upload/consulta central');
 var currentTabName='dashboard';
 function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma visão de Estoque */ return 'unificado'; }
 function goTab(name){
