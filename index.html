@@ -2082,7 +2082,7 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .colab-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
 .colab-toolbar input{flex:1;min-width:220px;background:var(--bg);color:var(--tx);border:1px solid var(--bds);border-radius:8px;padding:8px 10px;font-size:12px}
 .colab-list{display:flex;flex-direction:column;gap:7px}
-.colab-row{display:grid;grid-template-columns:minmax(190px,1.35fr) minmax(220px,1.45fr) 115px 92px 90px 165px;gap:8px;align-items:center;background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:9px 10px}
+.colab-row{display:grid;grid-template-columns:minmax(160px,1.15fr) minmax(190px,1.25fr) 95px 75px 82px minmax(145px,1fr) minmax(155px,1.05fr) 145px;gap:8px;align-items:center;background:var(--bg2);border:1px solid var(--bd);border-radius:9px;padding:9px 10px}
 .colab-name{font-size:11px;font-weight:800;color:var(--tx)}
 .colab-id{font-size:8px;color:var(--tx2);margin-top:2px;font-family:monospace}
 .colab-email{font-size:10px;color:var(--tx2);word-break:break-all}
@@ -2091,10 +2091,11 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .colab-status.on{background:rgba(16,185,129,.13);color:#34d399}.colab-status.off{background:rgba(107,114,128,.15);color:#9ca3af}
 .colab-actions{display:flex;gap:5px;justify-content:flex-end}
 .colab-empty{text-align:center;padding:32px 12px;color:var(--tx2);border:1px dashed var(--bds);border-radius:10px}
-.colab-list-head{display:grid;grid-template-columns:minmax(190px,1.35fr) minmax(220px,1.45fr) 115px 92px 90px 165px;gap:8px;padding:0 10px 2px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.055em;color:var(--tx2)}
+.colab-list-head{display:grid;grid-template-columns:minmax(160px,1.15fr) minmax(190px,1.25fr) 95px 75px 82px minmax(145px,1fr) minmax(155px,1.05fr) 145px;gap:8px;padding:0 10px 2px;font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.055em;color:var(--tx2)}
 .colab-aniv{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--tx)}
 .colab-aniv i{color:var(--amber);font-size:14px}.colab-aniv b{font-size:11px}
 .colab-coletas{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05}.colab-coletas b{font-size:17px;color:var(--blue)}.colab-coletas span{font-size:8px;color:var(--tx2);text-transform:uppercase;font-weight:800;margin-top:2px}
+.colab-access{font-size:9px;line-height:1.35;color:var(--tx2)}.colab-access b{display:block;font-size:10.5px;color:var(--tx)}.colab-access .ok{color:var(--green);font-weight:800}.colab-access .warn{color:var(--amber);font-weight:800}.colab-access .muted{color:var(--tx2)}
 @media(max-width:900px){.colab-list-head{display:none}}
 
 /* Lembrete gerencial de aniversários */
@@ -4758,7 +4759,7 @@ function toggleTheme() {
         <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-clipboard-check" style="color:var(--amber)"></i> Tarefas atribuídas</div>
         <p style="font-size:12px;color:var(--tx2)">Atribua tarefas de conferência de estoque para os colaboradores</p>
       </div>
-      <button class="btn btn-green" onclick="openTarefaModal()"><i class="ti ti-plus"></i> Nova tarefa</button>
+      <div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn" onclick="auraGerarTarefasAutoAgora_()"><i class="ti ti-sparkles"></i> Atualizar automáticas</button><button class="btn btn-green" onclick="openTarefaModal()"><i class="ti ti-plus"></i> Nova tarefa</button></div>
     </div>
     <div class="tarefas-mobile-toggle" id="tarefasMobileToggle">
       <button type="button" class="active" id="tmt_tarefas" onclick="trocarColunaTarefasMobile('tarefas')"><i class="ti ti-clipboard-list"></i> Tarefas</button>
@@ -15947,10 +15948,28 @@ function colabAdminAtualizarKpis_(){
   var c=document.getElementById('colabKpiColetas');if(c)c.textContent=coletas.toLocaleString('pt-BR');
 }
 
+var AURA_ACESSOS_ULTIMOS_={},AURA_ACESSOS_RECENTES_=[];
+async function auraCarregarAuditoriaAcessos_(){
+  var cfg=typeof loadCfg==='function'?loadCfg():{};if(!cfg.url)return {};
+  try{var r=await fetch(cfg.url+'?action=auditoriaAcessosColaboradores&limite=500&_='+Date.now(),{cache:'no-store'}),j=await r.json();if(j&&j.ok){AURA_ACESSOS_ULTIMOS_=j.ultimos||{};AURA_ACESSOS_RECENTES_=Array.isArray(j.recentes)?j.recentes:[];return AURA_ACESSOS_ULTIMOS_;}}catch(e){console.warn('[AURA acessos] auditoria indisponível:',e);}return AURA_ACESSOS_ULTIMOS_;
+}
+function auraFmtDataHoraAcesso_(iso){if(!iso)return '—';var d=new Date(iso);if(isNaN(d.getTime()))return String(iso||'—');return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+function auraAbrirHistoricoAcessos_(email,nome){
+  email=_colabNormEmail_(email);var arr=(AURA_ACESSOS_RECENTES_||[]).filter(function(a){return _colabNormEmail_(a.email)===email;}).slice(0,40);
+  var m=document.createElement('div');m.className='colab-modal-back';m.id='auraAcessosModal';
+  var itens=arr.length?arr.map(function(a){var q=Number(a.pendentes)||0,v=!!a.avisoExibidoEm,acao=String(a.avisoAcao||'').replace(/_/g,' ');return '<div style="display:grid;grid-template-columns:145px minmax(110px,1fr) 90px minmax(150px,1.4fr);gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:10px"><b>'+escHtml(auraFmtDataHoraAcesso_(a.abertoEm))+'</b><span>'+escHtml(a.app||'AURA')+'</span><span>'+q+' tarefa'+(q===1?'':'s')+'</span><span style="color:'+(v?'var(--green)':'var(--tx2)')+'">'+(v?'Aviso exibido '+escHtml(auraFmtDataHoraAcesso_(a.avisoExibidoEm)):(q?'Aviso não exibido':'Sem pendências'))+(acao?' · '+escHtml(acao):'')+'</span></div>';}).join(''):'<div class="colab-empty">Ainda não há acessos registrados para este colaborador.</div>';
+  m.innerHTML='<div class="colab-modal" style="max-width:760px"><h3><i class="ti ti-history"></i> Histórico de acessos — '+escHtml(nome||email)+'</h3><div style="font-size:9px;color:var(--tx2);margin:-4px 0 10px">Registra quando o aplicativo foi aberto e se o aviso de tarefas foi exibido/acionado. Isso confirma a exibição na tela, não a leitura humana.</div><div style="max-height:430px;overflow:auto">'+itens+'</div><div class="colab-modal-foot"><button class="btn" onclick="document.getElementById(&quot;auraAcessosModal&quot;).remove()">Fechar</button></div></div>';
+  document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target===m)m.remove();});
+}
+async function auraGerarTarefasAutoAgora_(){
+  var cfg=loadCfg();if(!cfg.url){mostrarToast('Configure a URL da AURA.','warn');return;}
+  try{mostrarToast('Atualizando tarefas automáticas por validade...','warn');var r=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action:'gerarTarefasAutomaticasAgora'})}),j=await r.json();if(!j||!j.ok)throw new Error((j&&j.erro)||'Falha ao gerar tarefas.');mostrarToast('Tarefas automáticas atualizadas: '+Number(j.geradas||0)+' nova(s).','ok');sincronizarTarefasCompleto();}catch(e){mostrarToast('Falha nas tarefas automáticas: '+(e&&e.message?e.message:e),'err');}
+}
+
 async function colabAdminCarregar(forcar){
   var el=document.getElementById('colabLista');
-  if(el&&(!COLABORADORES_TODOS.length||forcar))el.innerHTML='<div class="colab-empty"><i class="ti ti-loader-2"></i><div style="margin-top:5px">Carregando colaboradores e contagem de coletas...</div></div>';
-  await carregarColaboradoresUniversal_(!!forcar);
+  if(el&&(!COLABORADORES_TODOS.length||forcar))el.innerHTML='<div class="colab-empty"><i class="ti ti-loader-2"></i><div style="margin-top:5px">Carregando colaboradores, coletas e acessos...</div></div>';
+  await Promise.all([carregarColaboradoresUniversal_(!!forcar),auraCarregarAuditoriaAcessos_()]);
   colabAdminRender();
 }
 
@@ -15959,27 +15978,28 @@ function colabAdminRender(){
   var q=String((document.getElementById('colabBusca')||{}).value||'').trim().toLowerCase();
   var lista=(COLABORADORES_TODOS||[]).slice().filter(function(c){
     if(!q)return true;
-    return [c.nome,c.email,(c.aliases||[]).join(' '),c.aniv,String(c.coletas||0)].join(' ').toLowerCase().indexOf(q)>=0;
+    var ac=AURA_ACESSOS_ULTIMOS_[_colabNormEmail_(c.email)]||{};
+    return [c.nome,c.email,(c.aliases||[]).join(' '),c.aniv,String(c.coletas||0),ac.app,ac.abertoEm,ac.avisoAcao].join(' ').toLowerCase().indexOf(q)>=0;
   });
-  lista.sort(function(a,b){
-    if((a.ativo!==false)!==(b.ativo!==false))return a.ativo===false?1:-1;
-    return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');
-  });
+  lista.sort(function(a,b){if((a.ativo!==false)!==(b.ativo!==false))return a.ativo===false?1:-1;return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');});
   if(!lista.length){el.innerHTML='<div class="colab-empty">Nenhum colaborador encontrado.</div>';colabAdminAtualizarKpis_();return;}
-  var cab='<div class="colab-list-head"><div>Colaborador</div><div>E-mail / anteriores</div><div>Aniversário</div><div>Coletas</div><div>Situação</div><div style="text-align:right">Ações</div></div>';
+  var cab='<div class="colab-list-head"><div>Colaborador</div><div>E-mail / anteriores</div><div>Aniversário</div><div>Coletas</div><div>Situação</div><div>Último acesso</div><div>Tarefas ao entrar</div><div style="text-align:right">Ações</div></div>';
   el.innerHTML=cab+lista.map(function(c){
-    var aliases=c.aliases||[],ref=c.id||c.linha||c.email||'',chave=c.id||c.linha||c.email||'';
-    var coletas=Number(c.coletas)||0;
+    var aliases=c.aliases||[],ref=c.id||c.linha||c.email||'',chave=c.id||c.linha||c.email||'',coletas=Number(c.coletas)||0;
+    var ac=AURA_ACESSOS_ULTIMOS_[_colabNormEmail_(c.email)]||null,acessoHtml='<div class="colab-access"><span class="muted">Sem registro</span></div>',tarefasHtml='<div class="colab-access"><span class="muted">—</span></div>';
+    if(ac){
+      acessoHtml='<div class="colab-access"><b>'+escHtml(auraFmtDataHoraAcesso_(ac.abertoEm))+'</b><span>'+escHtml(ac.app||'AURA')+'</span></div>';
+      var qpd=Number(ac.pendentes)||0,visto=!!ac.avisoExibidoEm,acao=String(ac.avisoAcao||'');
+      tarefasHtml='<div class="colab-access"><b>'+qpd+' pendente'+(qpd===1?'':'s')+'</b>'+(qpd?('<span class="'+(visto?'ok':'warn')+'">'+(visto?'Aviso visto '+auraFmtDataHoraAcesso_(ac.avisoExibidoEm):'Aviso não exibido')+'</span>'):'<span class="ok">Sem pendências</span>')+(acao?'<span> · '+escHtml(acao.replace(/_/g,' '))+'</span>':'')+'</div>';
+    }
     return '<div class="colab-row">'
       +'<div><div class="colab-name">'+escHtml(c.nome||'Sem nome')+(_colabNormEmail_(c.email)===COLAB_EMAIL_TESTE?'<span style="margin-left:6px;font-size:8px;padding:2px 6px;border-radius:99px;background:rgba(186,117,23,.14);color:var(--amber)">LOGIN DE TESTE</span>':'')+'</div><div class="colab-id">'+escHtml(ref)+'</div></div>'
       +'<div><div class="colab-email">'+escHtml(c.email||'Sem e-mail')+'</div>'+(aliases.length?'<div class="colab-alias">Anterior: '+escHtml(aliases.join(' · '))+'</div>':'')+'</div>'
       +'<div class="colab-aniv" title="Aniversário"><i class="ti ti-cake"></i><b>'+escHtml(c.aniv||'—')+'</b></div>'
-      +'<div class="colab-coletas" title="Total de coletas associadas ao e-mail atual e aos e-mails anteriores"><b>'+coletas.toLocaleString('pt-BR')+'</b><span>coletas</span></div>'
+      +'<div class="colab-coletas"><b>'+coletas.toLocaleString('pt-BR')+'</b><span>coletas</span></div>'
       +'<div><span class="colab-status '+(c.ativo===false?'off':'on')+'">'+(c.ativo===false?'Inativo':'Ativo')+'</span></div>'
-      +'<div class="colab-actions">'
-        +'<button class="btn btn-sm" onclick="colabAdminAbrirModal('+JSON.stringify(chave).replace(/"/g,'&quot;')+')"><i class="ti ti-pencil"></i> Editar</button>'
-        +'<button class="btn btn-sm" onclick="colabAdminAlternar('+JSON.stringify(chave).replace(/"/g,'&quot;')+','+(c.ativo===false?'true':'false')+')" title="'+(c.ativo===false?'Reativar':'Inativar')+'"><i class="ti '+(c.ativo===false?'ti-user-check':'ti-user-off')+'"></i></button>'
-      +'</div></div>';
+      +acessoHtml+tarefasHtml
+      +'<div class="colab-actions"><button class="btn btn-sm" onclick="auraAbrirHistoricoAcessos_('+JSON.stringify(c.email||'').replace(/"/g,'&quot;')+','+JSON.stringify(c.nome||'').replace(/"/g,'&quot;')+')"><i class="ti ti-history"></i> Acessos</button><button class="btn btn-sm" onclick="colabAdminAbrirModal('+JSON.stringify(chave).replace(/"/g,'&quot;')+')"><i class="ti ti-pencil"></i> Editar</button><button class="btn btn-sm" onclick="colabAdminAlternar('+JSON.stringify(chave).replace(/"/g,'&quot;')+','+(c.ativo===false?'true':'false')+')"><i class="ti '+(c.ativo===false?'ti-user-check':'ti-user-off')+'"></i></button></div></div>';
   }).join('');
   colabAdminAtualizarKpis_();
 }
@@ -16303,7 +16323,8 @@ function sincronizarTarefasCompleto(){
           carrinhoStatus:cellStr(c[12])||null,
           precoAcao:cellNum(c[14])||null,custoGerencial:cellNum(c[15])||null,precoNormal:cellNum(c[16])||null,
           margemAcaoPct:c[17]&&cellStr(c[17])!==''?cellNum(c[17]):null,descontoPct:c[18]&&cellStr(c[18])!==''?cellNum(c[18]):null,
-          materialAcao:cellStr(c[19])||'',qtdReferencia:c[20]&&cellStr(c[20])!==''?cellNum(c[20]):null,tipoTarefa:cellStr(c[21])||''
+          materialAcao:cellStr(c[19])||'',qtdReferencia:c[20]&&cellStr(c[20])!==''?cellNum(c[20]):null,tipoTarefa:cellStr(c[21])||'',
+          grupoId:cellStr(c[22])||'',automatica:/^(true|sim|1)$/i.test(cellStr(c[23])||''),diasParaVencer:c[24]&&cellStr(c[24])!==''?cellNum(c[24]):null,regraPreco:cellStr(c[25])||''
         });
       }
       // Sheets tem prioridade — mescla com local
@@ -16603,7 +16624,11 @@ function tarefaQtdReferencia_(){
 }
 function tarefaPrecoSugeridoProduto_(p){
   if(!p)return null;
-  // Promoção já cadastrada é respeitada exatamente como veio do banco.
+  // Se o lote está a até 15 dias, usa exatamente a mesma política da automação:
+  // 11–15 dias = markup normal reduzido gradualmente; <=10 dias = custo, sempre com acabamento ,99 seguro.
+  var d=typeof daysDiff==='function'?daysDiff(p.validade):null;
+  if(d!==null&&d>=0&&d<=15){var pol=auraPoliticaPrecoValidadeFront_(p,d);if(pol.aplica)return pol.precoSugerido;}
+  // Promoção já cadastrada é respeitada quando não há regra de validade ativa.
   var promo=Number(p.precoPromo)||0;if(promo>0)return promo;
   var custo=Number(p.custo)||0;
   if(custo>0){var base=custo*1.10;return auraPrecoCharm_(base,{modo:'seguro',custo:custo,margemMinPct:10});}
@@ -17506,6 +17531,35 @@ function _estoqueUnificadoBipCompact_(bip){
   var quando=bip.ts?(bip.ts.toLocaleDateString('pt-BR')+' '+bip.ts.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})):'';
   return (bip.viaNFe?'NF-e · ':'')+quem+(quando?' · '+quando:'');
 }
+function _auraCharmValidadeFront_(valor,piso,teto){
+  valor=Number(valor)||0;piso=Math.max(0,Number(piso)||0);teto=Number(teto)||0;if(!(valor>0))return 0;
+  var cent=Math.round(valor*100)/100,inteiro=Math.floor(cent),cand=[inteiro-0.01,inteiro+0.99,inteiro+1.99];
+  if(Math.abs((cent-Math.floor(cent))-0.99)<0.0001)cand.unshift(cent);
+  cand=cand.filter(function(x){return x>0&&x+0.0001>=piso&&(!(teto>0)||x<=teto+0.0001);});
+  if(!cand.length){
+    if(teto>0&&teto+0.0001>=piso)return Math.round(teto*100)/100;
+    var bi=Math.floor(piso),up=bi+0.99;if(up+0.0001<piso)up+=1;return Math.round(up*100)/100;
+  }
+  cand.sort(function(a,b){var da=Math.abs(a-valor),db=Math.abs(b-valor);return da===db?a-b:da-db;});
+  return Math.round(cand[0]*100)/100;
+}
+function auraPoliticaPrecoValidadeFront_(p,dias){
+  p=p||{};var custo=Number(p.custo)||0,normal=Number(p.precoNormal)||0;dias=Number(dias);
+  if(!(custo>0)||!isFinite(dias)||dias<0||dias>15)return {aplica:false};
+  var alvo,regra,fator=0;
+  if(dias<=10){alvo=custo;regra='ATE_10_DIAS_CUSTO_CHARM';}
+  else{var mk=(normal>custo)?(normal/custo-1):0.10;fator=Math.max(0,Math.min(1,(dias-10)/5));alvo=custo*(1+mk*fator);if(normal>0)alvo=Math.min(alvo,normal);regra='11_A_15_DIAS_MARKUP_GRADUAL';}
+  var preco=_auraCharmValidadeFront_(alvo,custo,normal>0?normal:0);
+  return {aplica:preco>0,precoSugerido:preco,precoNormal:normal,custo:custo,dias:dias,regra:regra,fatorMarkup:fator};
+}
+function _auraPrecoValidadeEstoqueHtml_(lote,dias){
+  var pol=auraPoliticaPrecoValidadeFront_(lote,dias);if(!pol.aplica)return '';
+  var forte=dias<=10;
+  return '<div style="margin-top:4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'
+    +'<span style="font-size:10px;font-weight:900;color:'+(forte?'#ef4444':'#f59e0b')+'">Preço validade R$ '+Number(pol.precoSugerido).toFixed(2).replace('.',',')+'</span>'
+    +(pol.precoNormal>0?'<span style="font-size:9px;color:var(--tx2)">normal R$ '+Number(pol.precoNormal).toFixed(2).replace('.',',')+'</span>':'')
+    +'</div>';
+}
 function _estoqueUnificadoLoteHtml_(lote,resolvidos,zeroIdx){
   var d=daysDiff(lote.validade),st=_estoqueUnificadoLoteStatus_(d),bip=buscarBipagem(lote.cod,lote.validade);
   var zeroInfo=_auraZeroInfoLote_(lote,zeroIdx),res=_auraLoteResolvido_(lote,resolvidos,zeroIdx);
@@ -17514,7 +17568,7 @@ function _estoqueUnificadoLoteHtml_(lote,resolvidos,zeroIdx){
   var coletaTxt=zeroInfo?_auraFmtZeroConfirmado_(zeroInfo):_estoqueUnificadoBipCompact_(bip);
   return '<div class="estoque-unico-lote" title="'+escHtml(coletaTxt)+'">'
     +'<span class="estoque-unico-lote-dot" style="background:'+statusCor+'"></span>'
-    +'<div class="estoque-unico-lote-main"><div class="estoque-unico-lote-top"><span class="estoque-unico-lote-data">'+(lote.validade?fmt(lote.validade):'—')+'</span><span class="estoque-unico-lote-status" style="color:'+statusCor+'">'+statusTxt+'</span></div><div class="estoque-unico-lote-coleta"><i class="ti '+(zeroInfo?'ti-circle-check':(bip&&bip.viaNFe?'ti-file-invoice':'ti-scan'))+'"></i> '+escHtml(coletaTxt)+'</div></div>'
+    +'<div class="estoque-unico-lote-main"><div class="estoque-unico-lote-top"><span class="estoque-unico-lote-data">'+(lote.validade?fmt(lote.validade):'—')+'</span><span class="estoque-unico-lote-status" style="color:'+statusCor+'">'+statusTxt+'</span></div><div class="estoque-unico-lote-coleta"><i class="ti '+(zeroInfo?'ti-circle-check':(bip&&bip.viaNFe?'ti-file-invoice':'ti-scan'))+'"></i> '+escHtml(coletaTxt)+'</div>'+_auraPrecoValidadeEstoqueHtml_(lote,d)+'</div>'
     +'<span class="estoque-unico-lote-qtd">'+(Number(lote.qtde)||0)+' un</span>'
     +'</div>';
 }
@@ -18351,6 +18405,11 @@ function _auraOnScanSuccess(code) {
     debounceInput('afBuscaAcoes',function(){afRenderLista_();},90);
   },0);
 })();
+</script>
+
+<script id="auraTaskAutomationBuildV709">
+console.info('[AURA] tarefas automáticas v7.09 — validade <=10 dias + auditoria de acesso + preço gradual 15→10 dias');
+console.info('[AURA] preço por validade v7.10 — bipe/Estoque mostra venda normal + sugestão 15→10 dias');
 </script>
 </body>
 </html>
