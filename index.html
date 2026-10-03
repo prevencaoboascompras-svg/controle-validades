@@ -5994,13 +5994,23 @@ async function syncAll(){
 }
 function setDot(t,m){var d=document.getElementById('dot'),tx=document.getElementById('stText');if(d)d.className='dot'+(t==='ok'?' ok':t==='err'?' err':t==='loading'?' loading':'');if(tx)tx.innerHTML=m;}
 
-function daysDiff(v){if(!v)return null;var p=v.split('-');if(p.length!==3)return null;var d=new Date(+p[0],+p[1]-1,+p[2]);return Math.floor((d-TODAY)/86400000);}
-function statusFromDays(d){if(d===null)return'sem-data';if(d<=0)return'vencido';if(d<=3)return'critico';if(d<=7)return'urgente';if(d<=15)return'atencao';return'ok';}
+// AURA v7.11 — REGRA CANÔNICA DE VALIDADE: válido até 21:00 do dia impresso.
+function _auraValidadePartes21h_(v){
+  if(!v)return null;var s=String(v).trim(),m=s.match(/^(\d{4})-(\d{2})-(\d{2})/),b=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m)return{y:+m[1],m:+m[2],d:+m[3]};if(b)return{y:+b[3],m:+b[2],d:+b[1]};return null;
+}
+function _auraValidadeFim21h_(v){var p=_auraValidadePartes21h_(v);return p?new Date(p.y,p.m-1,p.d,21,0,0,0):null;}
+function daysDiff(v){
+  var p=_auraValidadePartes21h_(v);if(!p)return null;var agora=new Date(),diff=Math.round((Date.UTC(p.y,p.m-1,p.d)-Date.UTC(agora.getFullYear(),agora.getMonth(),agora.getDate()))/86400000);
+  if(diff===0){var fim=_auraValidadeFim21h_(v);if(fim&&agora.getTime()>fim.getTime())return -1;}return diff;
+}
+function auraValidadeVencida21h_(v){var d=daysDiff(v);return d!==null&&d<0;}
+function statusFromDays(d){if(d===null)return'sem-data';if(d<0)return'vencido';if(d<=3)return'critico';if(d<=7)return'urgente';if(d<=15)return'atencao';return'ok';}
 function _loteDotColor(days){if(days===null)return'var(--tx2)';if(days<=3)return'#ef4444';if(days<=7)return'#f97316';if(days<=15)return'#fbbf24';return'#34d399';}
 function _loteMiniRowHtml(lote){
   var d=daysDiff(lote.validade);
   var cor=_loteDotColor(d);
-  var venceTxt=d===null?'Sem data':d<=0?'Vencido':d===1?'Vence amanhã':'Faltam '+d+'d';
+  var venceTxt=d===null?'Sem data':d<0?'Vencido':d===0?'Vence hoje':d===1?'Vence amanhã':'Faltam '+d+'d';
   return '<div class="urg-lote-row">'
     +   '<span class="urg-lote-dot" style="background:'+cor+'"></span>'
     +   '<div class="urg-lote-mid">'
@@ -6071,7 +6081,7 @@ function renderTable(){
   });
   var ativos=all.filter(function(p){var d=daysDiff(p.validade);return d===null||d>=0;})
     .sort(function(a,b){return(daysDiff(a.validade)||9999)-(daysDiff(b.validade)||9999);});
-  var vencidos=all.filter(function(p){var d=daysDiff(p.validade);return d!==null&&d<=0;})
+  var vencidos=all.filter(function(p){var d=daysDiff(p.validade);return d!==null&&d<0;})
     .sort(function(a,b){return(daysDiff(b.validade)||0)-(daysDiff(a.validade)||0);});
   var grid=document.getElementById('valGrid');
   if(!all.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><i class="ti ti-search-off"></i>Nenhum produto encontrado.</div>';return;}
@@ -6354,7 +6364,7 @@ function renderPromos(){
   // Filtro urgência
   ativos=ativos.filter(function(p){
     var d=daysDiff(p.validade);
-    if(promoFiltro==='hoje')return d!==null&&d<=0;
+    if(promoFiltro==='hoje')return d===0;
     if(promoFiltro==='semana')return d!==null&&d>=0&&d<=7;
     if(promoFiltro==='futuras')return d===null||d>7;
     return true;
@@ -7081,7 +7091,7 @@ function speedometerSVG(days, s, hideCenterLabel){
   var ny=cy+22*Math.sin(rad(needleAngle));
   var needleSVG='<line x1="'+cx+'" y1="'+cy+'" x2="'+nx+'" y2="'+ny+'" stroke="white" stroke-width="2" stroke-linecap="round"/>'
     +'<circle cx="'+cx+'" cy="'+cy+'" r="4" fill="white"/>';
-  var daysLabel=days===null?'?':days<=0?'<tspan fill="#ef4444">Venc.</tspan>':(days+'d');
+  var daysLabel=days===null?'?':days<0?'<tspan fill="#ef4444">Venc.</tspan>':days===0?'<tspan fill="#ef4444">Hoje</tspan>':(days+'d');
   var centerLabel=hideCenterLabel?'':'<text x="'+cx+'" y="'+(cy+14)+'" text-anchor="middle" font-size="9" fill="#aaa">'+daysLabel+'</text>';
   return '<svg width="88" height="70" viewBox="0 0 88 70" xmlns="http://www.w3.org/2000/svg">'+trackSVG+arcsSVG+needleSVG+centerLabel+'</svg>';
 }
@@ -12651,7 +12661,7 @@ function afFornecedorProduto_(p){var cod=String(p&&p.cod||'').replace(/\D/g,'');
 function afCustoProduto_(p){var cod=String(p&&p.cod||'').replace(/\D/g,'');return Number((p&&p.custo)||bancoCusto[cod]||0)||0;}
 function afQtdProduto_(p){var n=Number(p&&p.qtde);return isFinite(n)?n:qtdeEfetiva(p&&p.qtde);}
 function afKeyProduto_(p,i){return [String(p.cod||''),String(p.validade||''),String(p.lote||p.loteId||''),String(i==null?'':i)].join('|');}
-function afVencidos_(){return (products||[]).map(function(p,i){return {p:p,i:i,key:afKeyProduto_(p,i)};}).filter(function(x){var d=daysDiff(x.p.validade),q=afQtdProduto_(x.p);return d!==null&&d<=0&&q>0;});}
+function afVencidos_(){return (products||[]).map(function(p,i){return {p:p,i:i,key:afKeyProduto_(p,i)};}).filter(function(x){var d=daysDiff(x.p.validade),q=afQtdProduto_(x.p);return d!==null&&d<0&&q>0;});}
 function afGet_(action,extra){var cfg=loadCfg();if(!cfg.url)return Promise.resolve({ok:false,erro:'API AURA não configurada.'});var sep=cfg.url.indexOf('?')>=0?'&':'?';return fetch(cfg.url+sep+'action='+encodeURIComponent(action)+(extra||'')+'&_='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){try{return JSON.parse(t);}catch(e){return {ok:false,erro:'Resposta inválida do servidor.'};}}).catch(function(e){return {ok:false,erro:e.message};});}
 function afPost_(body){var cfg=loadCfg();if(!cfg.url)return Promise.resolve({ok:false,erro:'API AURA não configurada.'});return fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(body)}).then(function(r){return r.text();}).then(function(t){try{return JSON.parse(t);}catch(e){return {ok:false,erro:'Resposta inválida do servidor.'};}}).catch(function(e){return {ok:false,erro:e.message};});}
 function afStatusEfetivo_(a){var st=String(a.status||'RASCUNHO').toUpperCase();if(st!=='RESOLVIDA'&&a.prazoResposta&&a.prazoResposta<afHoje_()&&st!=='RASCUNHO')return 'VENCIDA';return st;}
@@ -18411,5 +18421,7 @@ function _auraOnScanSuccess(code) {
 console.info('[AURA] tarefas automáticas v7.09 — validade <=10 dias + auditoria de acesso + preço gradual 15→10 dias');
 console.info('[AURA] preço por validade v7.10 — bipe/Estoque mostra venda normal + sugestão 15→10 dias');
 </script>
+
+<script id="auraValidade21hBuild">console.info('[AURA] validade v7.11 — produto válido até 21:00 do dia da validade; vencido somente após 21h');</script>
 </body>
 </html>
