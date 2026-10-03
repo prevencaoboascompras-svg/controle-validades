@@ -18199,5 +18199,158 @@ function _auraOnScanSuccess(code) {
 })();
 </script>
 
+
+<script id="auraSearchCoreV702">
+// ═══════════════════════════════════════════════════════════════
+// AURA SEARCH CORE v7.02
+// Padrão do ecossistema:
+// • EAN/GTIN completo -> índice O(1), sem varrer catálogo
+// • aliases UPC-12 <-> EAN-13 iniciado por zero
+// • busca textual pré-normalizada + índice de prefixos
+// • entrada digitada usa debounce curto; código completo não espera debounce
+// ═══════════════════════════════════════════════════════════════
+(function(g){
+  'use strict';
+  if(g.AURASearchCore&&g.AURASearchCore.version==='7.02')return;
+  function digits(v){return String(v==null?'':v).replace(/\D/g,'');}
+  function text(v){return String(v==null?'':v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/(\d+)\s+(KG|G|GR|ML|L|LT|UN|UND|CX|PCT)\b/g,'$1$2').replace(/[^A-Z0-9]+/g,' ').replace(/\s+/g,' ').trim();}
+  function aliases(v){var d=digits(v),a=[];function add(x){if(x&&a.indexOf(x)<0)a.push(x);}add(d);if(d.length===12)add('0'+d);if(d.length===13&&d.charAt(0)==='0')add(d.substring(1));return a;}
+  function isFullCode(v){var d=digits(v),raw=String(v||'').replace(/\s/g,'');return /^\d{8,14}$/.test(d)&&d===raw;}
+  var C={version:'7.02',entries:[],byCode:Object.create(null),prefix:Object.create(null),codePrefix:Object.create(null),signature:'',ready:false};
+  function addList(map,k,i){if(!k)return;var a=map[k];if(!a)map[k]=[i];else if(a[a.length-1]!==i)a.push(i);}
+  function addAliases(entry,i){aliases(entry.ean).forEach(function(a){C.byCode[a]=entry;for(var n=2;n<=Math.min(a.length,14);n++)addList(C.codePrefix,a.slice(0,n),i);});}
+  C.build=function(records,signature){
+    records=Array.isArray(records)?records:[];
+    var sig=String(signature||records.length);
+    if(C.ready&&C.signature===sig)return C;
+    C.entries=[];C.byCode=Object.create(null);C.prefix=Object.create(null);C.codePrefix=Object.create(null);C.signature=sig;
+    var seen=Object.create(null);
+    records.forEach(function(r){
+      var ean='',descricao='',unidade='',preco='',custo='',fornecedor='',setor='';
+      if(Array.isArray(r)){ean=digits(r[0]);descricao=String(r[1]||'');unidade=String(r[2]||'');preco=r[3];custo=r[4];fornecedor=String(r[5]||'');setor=String(r[6]||'');}
+      else if(r){ean=digits(r.ean||r.cod||r.codigo||r.barras||'');descricao=String(r.descricao||r.nome||r.produto||'');unidade=String(r.unidade||r.un||'');preco=r.preco!=null?r.preco:r.precoNormal;custo=r.custo;fornecedor=String(r.fornecedor||'');setor=String(r.setor||'');}
+      if(!ean&&!descricao)return;
+      var key=ean||('N:'+text(descricao));if(seen[key])return;seen[key]=1;
+      var e={ean:ean,cod:ean,descricao:descricao,nome:descricao,unidade:unidade,preco:preco,custo:custo,fornecedor:fornecedor,setor:setor};
+      e._name=text(descricao);e._supplier=text(fornecedor);e._idx=C.entries.length;C.entries.push(e);addAliases(e,e._idx);
+      var toks=e._name.split(' ').filter(Boolean),tokSeen=Object.create(null);
+      toks.forEach(function(t){if(tokSeen[t])return;tokSeen[t]=1;for(var n=2;n<=Math.min(t.length,10);n++)addList(C.prefix,t.slice(0,n),e._idx);});
+    });
+    C.ready=true;return C;
+  };
+  C.lookup=function(v){var as=aliases(v);for(var i=0;i<as.length;i++){if(C.byCode[as[i]])return C.byCode[as[i]];}return null;};
+  C.search=function(q,limit){
+    q=String(q||'').trim();limit=Math.max(1,Number(limit)||20);if(!q)return[];
+    var d=digits(q),qn=text(q),codeOnly=/^[\d\s.\-\/]+$/.test(q);
+    if(codeOnly&&/^\d{8,14}$/.test(d)){var exact=C.lookup(d);if(exact)return[exact];}
+    var candidates=null;
+    if(codeOnly&&d.length>=2)candidates=C.codePrefix[d.slice(0,Math.min(d.length,14))]||[];
+    if(!codeOnly){
+      var qt=qn.split(' ').filter(Boolean),small=null;
+      qt.forEach(function(t){if(t.length<2)return;var a=C.prefix[t.slice(0,Math.min(t.length,10))]||[];if(small===null||a.length<small.length)small=a;});
+      candidates=small;
+    }
+    if(candidates===null)candidates=C.entries.map(function(_,i){return i;});
+    var qtoks=qn.split(' ').filter(Boolean),out=[];
+    for(var x=0;x<candidates.length;x++){
+      var e=C.entries[candidates[x]];if(!e)continue;var score=0;
+      if(codeOnly&&d){var ed=digits(e.ean);if(ed===d)score+=5000;else if(ed.indexOf(d)===0)score+=1800;else if(ed.indexOf(d)>0)score+=400;else continue;}
+      if(!codeOnly&&qn){var hay=e._name+' '+e._supplier;if(!qtoks.every(function(t){return hay.indexOf(t)>=0;}))continue;if(e._name===qn)score+=2400;else if(e._name.indexOf(qn)===0)score+=1700;else if(e._name.indexOf(qn)>=0)score+=1200;score+=qtoks.length*80;}
+      if(Number(e.preco)>0)score+=8;out.push({e:e,s:score});
+    }
+    out.sort(function(a,b){return b.s-a.s||String(a.e.descricao).localeCompare(String(b.e.descricao),'pt-BR');});
+    return out.slice(0,limit).map(function(x){return x.e;});
+  };
+  C.digits=digits;C.text=text;C.aliases=aliases;C.isFullCode=isFullCode;
+  g.AURASearchCore=C;
+  console.info('[AURA Search Core] v7.02 carregado');
+})(window);
+</script>
+
+<script id="auraSearchCoreIntegracaoV708">
+(function(){
+  'use strict';
+  console.info('[AURA] search core v7.08 — produto local O(1) + texto pré-indexado em NF-e, CEASA, Cobertura e filtros pesados');
+  var core=window.AURASearchCore;
+  var _buildTimer=null, _buildSeq=0;
+  function rebuild(){
+    if(!core||typeof banco==='undefined')return;
+    var ks=Object.keys(banco||{});if(!ks.length)return false;var sig=ks.length+'|'+Object.keys(bancoVenda||{}).length+'|'+Object.keys(bancoCusto||{}).length;
+    var rec=ks.map(function(c){return [c,banco[c]||'',bancoUnidade[c]||'',bancoVenda[c]||'',bancoCusto[c]||'',bancoFornecedor[c]||'',''];});
+    core.build(rec,sig+'|'+(++_buildSeq));return true;
+  }
+  window.auraSearchCoreRebuild_=rebuild;
+  var oldLoad=window.loadBanco;
+  if(typeof oldLoad==='function')window.loadBanco=async function(cfg){var r=await oldLoad(cfg);rebuild();return r;};
+  function ensure(){if(!core.ready)rebuild();return core.ready;}
+  setTimeout(rebuild,0);
+
+  // Registro manual: código completo resolve instantaneamente, inclusive UPC/EAN alias.
+  window.addModalBipar=function(){
+    var cod=(document.getElementById('fCod').value||'').trim().replace(/[^0-9]/g,''),nomeInp=document.getElementById('fNome'),info=document.getElementById('fBancoInfo'),infoTxt=document.getElementById('fBancoInfoTxt'),st=document.getElementById('fCodStatus');
+    if(!cod){info.style.display='none';st.style.display='none';nomeInp.style.borderColor='';return;}
+    ensure();var p=core.lookup(cod);
+    if(p){nomeInp.value=p.descricao;nomeInp.style.borderColor='var(--green)';var extra=[];if(p.fornecedor)extra.push('Fornecedor: '+p.fornecedor);if(Number(p.custo)>0)extra.push('Custo: '+fmtBRL(Number(p.custo)));infoTxt.textContent='Produto encontrado: '+p.descricao+(extra.length?' · '+extra.join(' · '):'');info.style.display='flex';st.style.display='inline';st.style.color='var(--green)';st.innerHTML='<i class="ti ti-check"></i>';}
+    else{nomeInp.style.borderColor='';info.style.display='none';st.style.display='inline';st.style.color='var(--amber)';st.innerHTML='<i class="ti ti-alert-triangle" title="Código não encontrado no banco"></i>';}
+  };
+
+  // CEASA: autocomplete usa o mesmo índice; EAN completo não espera debounce.
+  var ecTimers={};
+  window.entradaCeasaSugere=function(id){
+    var inp=document.getElementById('ecNome'+id),drop=document.getElementById('ecSug'+id);if(!inp||!drop)return;var termo=String(inp.value||'').trim();if(ecTimers[id])clearTimeout(ecTimers[id]);if(!termo){entradaCeasaFechaSugestoes(id);return;}ensure();
+    var ms=core.isFullCode(termo)?0:90;
+    ecTimers[id]=setTimeout(function(){var lista=core.search(termo,12);if(!lista.length){drop.innerHTML='<div class="ec-ac-empty">Nenhum produto encontrado no BANCO DE DADOS.</div>';drop.classList.add('open');_ecAcFoco[id]=-1;return;}drop.innerHTML=lista.map(function(p,idx){var un=_ecNormalizaUnidade_(p.unidade)||String(p.unidade||'').trim();return '<div class="ec-ac-item" data-idx="'+idx+'" onmousedown="event.preventDefault();entradaCeasaSelecionar('+id+',\''+p.ean+'\')"><div class="ec-ac-main"><div class="ec-ac-nome">'+_ecEsc_(p.descricao)+'</div><div class="ec-ac-cod">'+_ecEsc_(p.ean)+'</div></div>'+(un?'<span class="ec-ac-un">'+_ecEsc_(un)+'</span>':'')+'</div>';}).join('');drop.classList.add('open');_ecAcFoco[id]=-1;},ms);
+  };
+  window.entradaCeasaSelecionar=function(id,cod){ensure();var p=core.lookup(cod);if(!p)return;var nome=document.getElementById('ecNome'+id),codEl=document.getElementById('ecCod'+id),unEl=document.getElementById('ecUnid'+id);if(nome)nome.value=p.descricao;if(codEl)codEl.value=p.ean;var un=_ecNormalizaUnidade_(p.unidade);if(un&&unEl)unEl.value=un;entradaCeasaFechaSugestoes(id);entradaCeasaAtualizarTotal();var peso=document.getElementById('ecPeso'+id);if(peso)peso.focus();};
+  window.entradaCeasaAutoNome=function(id){var cod=((document.getElementById('ecCod'+id)||{}).value||'').replace(/\D/g,'');ensure();var p=core.lookup(cod),nomeInp=document.getElementById('ecNome'+id);if(p){if(nomeInp)nomeInp.value=p.descricao;var un=_ecNormalizaUnidade_(p.unidade),unEl=document.getElementById('ecUnid'+id);if(un&&unEl)unEl.value=un;entradaCeasaFechaSugestoes(id);}};
+
+  // Cobertura fornecedor: reaproveita Search Core em vez de percorrer catálogo a cada tecla.
+  window.cfBuscarPorCodigo_=function(cod){ensure();var p=core.lookup(cod);return p?{cod:p.ean,nome:p.descricao,preco:Number(p.preco)||0,custo:Number(p.custo)||0,unidade:p.unidade||'',fornecedor:p.fornecedor||''}:null;};
+  window.cfBuscarProdutosArsenal_=function(termo,limite){ensure();return core.search(termo,limite||40).map(function(p){return {cod:p.ean,nome:p.descricao,preco:Number(p.preco)||0,custo:Number(p.custo)||0,unidade:p.unidade||'',fornecedor:p.fornecedor||''};});};
+  window.cfBuscarProdutoArsenal_=function(termo){var a=cfBuscarProdutosArsenal_(termo,1);return a.length?a[0]:null;};
+  window.cfBuscarProdutos_=function(){clearTimeout(cfBuscaTimer_);var input=document.getElementById('cfBuscaProduto'),v=String(input&&input.value||'').trim();if(!v){cfFecharSugestoes_();return;}var ms=core.isFullCode(v)?0:90;cfBuscaTimer_=setTimeout(function(){ensure();var lista=cfBuscarProdutosArsenal_(v,40);cfSugestaoAtiva_=-1;cfRenderSugestoes_(lista,v);var ex=core.lookup(v);if(ex)cfSelecionarProduto_(ex.ean);},ms);};
+
+  // NF-e: sugestões locais; o servidor vira apenas enriquecimento/fallback.
+  window.nfeBuscaProdutoInput_=function(idx,el){
+    var q=String(el&&el.value||'').trim(),box=document.getElementById('nfeAuto_'+idx),it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];if(it){it._campoBusca=q;if(/^\d+$/.test(q)){it.eanAura=q;if(it.status==='encontrado')it.status='nao_encontrado';}nfeAgendarRascunho_();}if(_nfeBuscaProdutoTimer_[idx])clearTimeout(_nfeBuscaProdutoTimer_[idx]);if(!box)return;if(!q||(!/^\d+$/.test(q)&&q.length<2)){nfeFecharSugestoes_(idx);return;}var seq=(_nfeBuscaProdutoSeq_[idx]||0)+1;_nfeBuscaProdutoSeq_[idx]=seq;ensure();var ms=core.isFullCode(q)?0:90;
+    _nfeBuscaProdutoTimer_[idx]=setTimeout(function(){if(_nfeBuscaProdutoSeq_[idx]!==seq)return;var arr=core.search(q,8).map(function(p){return {ean:p.ean,descricao:p.descricao,unidade:p.unidade,fornecedor:p.fornecedor,custo:p.custo,preco:p.preco};});_nfeBuscaProdutoResultados_[idx]=arr;if(!arr.length){box.innerHTML='<div class="nfe-auto-empty">Nenhum produto encontrado no Banco AURA</div>';box.classList.add('open');return;}box.innerHTML=arr.map(function(p){return '<button type="button" class="nfe-auto-item" data-ean="'+nfeEsc_(p.ean||'')+'" onmousedown="event.preventDefault();nfeSelecionarSugestao_('+idx+',this.dataset.ean)"><div class="nfe-auto-name">'+nfeEsc_(p.descricao||'Produto')+'</div><div class="nfe-auto-meta">Código '+nfeEsc_(p.ean||'—')+(p.unidade?' · '+nfeEsc_(p.unidade):'')+(p.fornecedor?' · '+nfeEsc_(p.fornecedor):'')+'</div></button>';}).join('');box.classList.add('open');},ms);
+  };
+  var nfeValidarServidor_=window.nfeValidarEan_;
+  window.nfeValidarEan_=function(idx){
+    var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx],inp=document.getElementById('nfeEan_'+idx),ean=nfeDigitos_((inp&&inp.value)||(it&&it.eanAura)||'');if(!it||!ean){if(typeof nfeValidarServidor_==='function')return nfeValidarServidor_(idx);return;}
+    ensure();var p=core.lookup(ean);
+    if(p){it.eanAura=p.ean;it.nomeAura=p.descricao||'';it.unidadeAura=p.unidade||it.uCom||'';it.unidadeDestinoSugerida=p.unidade||it.unidadeDestinoSugerida||it.unidadeAura;it.status='encontrado';it.origemVinculo='manual_local';it.fotoDataUrl='';it.fotoCarregando=false;nfeStatus_('ok','Produto vinculado instantaneamente pelo índice local.');nfeSalvarRascunho_();nfeRenderNota_();
+      // Enriquecimento assíncrono (setor/cadastro mais recente), sem bloquear o operador.
+      try{_gasGetJsonp('buscarEANCompleto','&ean='+encodeURIComponent(p.ean),10000).then(function(r){if(!r||!r.ok||!_nfeNota||!_nfeNota.itens[idx])return;var cur=_nfeNota.itens[idx];cur.eanAura=nfeDigitos_(r.ean||p.ean);cur.nomeAura=r.descricao||cur.nomeAura;cur.unidadeAura=r.unidade||cur.unidadeAura;if(r.setor&&r.setor!=='Outros'){cur.setor=r.setor;cur.setorSugerido=r.setor;cur.setorOrigem=r.setorOrigem||'banco_dados';}nfeSalvarRascunho_();});}catch(e){}
+      return;
+    }
+    if(typeof nfeValidarServidor_==='function')return nfeValidarServidor_(idx);
+  };
+
+  // Antecipação: se a câmera/bipe entregou um EAN completo, reduz a fonte de
+  // dados aos lotes daquele código antes de executar o renderer original.
+  var _renderAntecipacaoOriginal=window.renderAntecipacao;
+  if(typeof _renderAntecipacaoOriginal==='function')window.renderAntecipacao=function(){
+    var q=String((document.getElementById('antFiltroBusca')||{}).value||'').trim();
+    if(core.isFullCode(q)&&typeof estoqueLotesPorCodigo_==='function'&&typeof products!=='undefined'){
+      var todos=products,sub=estoqueLotesPorCodigo_(q);
+      try{products=sub;return _renderAntecipacaoOriginal();}finally{products=todos;}
+    }
+    return _renderAntecipacaoOriginal();
+  };
+
+  function debounceInput(id,fn,ms){var el=document.getElementById(id);if(!el)return;el.removeAttribute('oninput');var t=null;el.oninput=function(){clearTimeout(t);var self=this,args=arguments,wait=(typeof ms==='function'?ms(this.value):ms);t=setTimeout(function(){fn.apply(self,args);},wait==null?90:wait);};}
+  // Filtros pesados que antes reconstruíam a tela em cada tecla.
+  setTimeout(function(){
+    debounceInput('antFiltroBusca',function(){renderAntecipacao();},function(v){return core.isFullCode(v)?0:90;});
+    debounceInput('antFiltroForn',function(){renderAntecipacao();},90);
+    debounceInput('antFiltroMinQtde',function(){renderAntecipacao();},90);
+    debounceInput('antFiltroPrecoMin',function(){renderAntecipacao();},90);
+    debounceInput('antFiltroPrecoMax',function(){renderAntecipacao();},90);
+    debounceInput('tarefasBusca',function(){renderTarefas();},90);
+    debounceInput('afBuscaAcoes',function(){afRenderLista_();},90);
+  },0);
+})();
+</script>
 </body>
 </html>
