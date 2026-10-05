@@ -15964,11 +15964,23 @@ async function auraCarregarAuditoriaAcessos_(){
   try{var r=await fetch(cfg.url+'?action=auditoriaAcessosColaboradores&limite=500&_='+Date.now(),{cache:'no-store'}),j=await r.json();if(j&&j.ok){AURA_ACESSOS_ULTIMOS_=j.ultimos||{};AURA_ACESSOS_RECENTES_=Array.isArray(j.recentes)?j.recentes:[];return AURA_ACESSOS_ULTIMOS_;}}catch(e){console.warn('[AURA acessos] auditoria indisponível:',e);}return AURA_ACESSOS_ULTIMOS_;
 }
 function auraFmtDataHoraAcesso_(iso){if(!iso)return '—';var d=new Date(iso);if(isNaN(d.getTime()))return String(iso||'—');return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+function auraResumoDecisaoAcesso_(a){
+  a=a||{};var acao=String(a.avisoAcao||''),exec=Math.max(0,Number(a.tarefasExecutadas)||0),txt='',classe='muted';
+  if(acao==='continuar'){txt='Decidiu continuar no app';classe='warn';}
+  else if(acao==='ver_tarefas'){txt=exec>0?'Visualizou tarefas e executou '+exec+' tarefa'+(exec===1?'':'s'):'Visualizou tarefas';classe='ok';}
+  else if(acao==='exibido'){txt='Aviso exibido · aguardando decisão';classe='warn';}
+  else if(acao==='sem_pendencias'){txt='Sem pendências';classe='ok';}
+  else if(acao==='gestor_sem_popup'){txt='Gestor · sem popup';classe='muted';}
+  else if(a.pendentes>0){txt=a.avisoExibidoEm?'Aviso exibido':'Aviso ainda não exibido';classe=a.avisoExibidoEm?'warn':'muted';}
+  else {txt='Sem pendências';classe='ok';}
+  if(exec>0&&acao!=='ver_tarefas')txt+=' · executou '+exec+' tarefa'+(exec===1?'':'s');
+  return {texto:txt,classe:classe};
+}
 function auraAbrirHistoricoAcessos_(email,nome){
   email=_colabNormEmail_(email);var arr=(AURA_ACESSOS_RECENTES_||[]).filter(function(a){return _colabNormEmail_(a.email)===email;}).slice(0,40);
   var m=document.createElement('div');m.className='colab-modal-back';m.id='auraAcessosModal';
-  var itens=arr.length?arr.map(function(a){var q=Number(a.pendentes)||0,v=!!a.avisoExibidoEm,acao=String(a.avisoAcao||'').replace(/_/g,' ');return '<div style="display:grid;grid-template-columns:145px minmax(110px,1fr) 90px minmax(150px,1.4fr);gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:10px"><b>'+escHtml(auraFmtDataHoraAcesso_(a.abertoEm))+'</b><span>'+escHtml(a.app||'AURA')+'</span><span>'+q+' tarefa'+(q===1?'':'s')+'</span><span style="color:'+(v?'var(--green)':'var(--tx2)')+'">'+(v?'Aviso exibido '+escHtml(auraFmtDataHoraAcesso_(a.avisoExibidoEm)):(q?'Aviso não exibido':'Sem pendências'))+(acao?' · '+escHtml(acao):'')+'</span></div>';}).join(''):'<div class="colab-empty">Ainda não há acessos registrados para este colaborador.</div>';
-  m.innerHTML='<div class="colab-modal" style="max-width:760px"><h3><i class="ti ti-history"></i> Histórico de acessos — '+escHtml(nome||email)+'</h3><div style="font-size:9px;color:var(--tx2);margin:-4px 0 10px">Registra quando o aplicativo foi aberto e se o aviso de tarefas foi exibido/acionado. Isso confirma a exibição na tela, não a leitura humana.</div><div style="max-height:430px;overflow:auto">'+itens+'</div><div class="colab-modal-foot"><button class="btn" onclick="document.getElementById(&quot;auraAcessosModal&quot;).remove()">Fechar</button></div></div>';
+  var itens=arr.length?arr.map(function(a){var q=Number(a.pendentes)||0,res=auraResumoDecisaoAcesso_(a),exec=Math.max(0,Number(a.tarefasExecutadas)||0),det=res.texto+(exec>0&&a.ultimaExecucaoEm?' · última '+auraFmtDataHoraAcesso_(a.ultimaExecucaoEm):'');return '<div style="display:grid;grid-template-columns:145px minmax(110px,1fr) 90px minmax(190px,1.5fr);gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:10px"><b>'+escHtml(auraFmtDataHoraAcesso_(a.abertoEm))+'</b><span>'+escHtml(a.app||'AURA')+'</span><span>'+q+' tarefa'+(q===1?'':'s')+'</span><span class="'+escHtml(res.classe)+'">'+escHtml(det)+'</span></div>';}).join(''):'<div class="colab-empty">Ainda não há acessos registrados para este colaborador.</div>';
+  m.innerHTML='<div class="colab-modal" style="max-width:760px"><h3><i class="ti ti-history"></i> Histórico de acessos — '+escHtml(nome||email)+'</h3><div style="font-size:9px;color:var(--tx2);margin:-4px 0 10px">Registra cada entrada no aplicativo, a decisão tomada no aviso de tarefas e quantas tarefas foram efetivamente concluídas naquela entrada.</div><div style="max-height:430px;overflow:auto">'+itens+'</div><div class="colab-modal-foot"><button class="btn" onclick="document.getElementById(&quot;auraAcessosModal&quot;).remove()">Fechar</button></div></div>';
   document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target===m)m.remove();});
 }
 async function auraGerarTarefasAutoAgora_(){
@@ -15989,18 +16001,18 @@ function colabAdminRender(){
   var lista=(COLABORADORES_TODOS||[]).slice().filter(function(c){
     if(!q)return true;
     var ac=AURA_ACESSOS_ULTIMOS_[_colabNormEmail_(c.email)]||{};
-    return [c.nome,c.email,(c.aliases||[]).join(' '),c.aniv,String(c.coletas||0),ac.app,ac.abertoEm,ac.avisoAcao].join(' ').toLowerCase().indexOf(q)>=0;
+    return [c.nome,c.email,(c.aliases||[]).join(' '),c.aniv,String(c.coletas||0),ac.app,ac.abertoEm,ac.avisoAcao,String(ac.tarefasExecutadas||0)].join(' ').toLowerCase().indexOf(q)>=0;
   });
   lista.sort(function(a,b){if((a.ativo!==false)!==(b.ativo!==false))return a.ativo===false?1:-1;return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');});
   if(!lista.length){el.innerHTML='<div class="colab-empty">Nenhum colaborador encontrado.</div>';colabAdminAtualizarKpis_();return;}
-  var cab='<div class="colab-list-head"><div>Colaborador</div><div>E-mail / anteriores</div><div>Aniversário</div><div>Coletas</div><div>Situação</div><div>Último acesso</div><div>Tarefas ao entrar</div><div style="text-align:right">Ações</div></div>';
+  var cab='<div class="colab-list-head"><div>Colaborador</div><div>E-mail / anteriores</div><div>Aniversário</div><div>Coletas</div><div>Situação</div><div>Último acesso</div><div>Decisão / execução</div><div style="text-align:right">Ações</div></div>';
   el.innerHTML=cab+lista.map(function(c){
     var aliases=c.aliases||[],ref=c.id||c.linha||c.email||'',chave=c.id||c.linha||c.email||'',coletas=Number(c.coletas)||0;
     var ac=AURA_ACESSOS_ULTIMOS_[_colabNormEmail_(c.email)]||null,acessoHtml='<div class="colab-access"><span class="muted">Sem registro</span></div>',tarefasHtml='<div class="colab-access"><span class="muted">—</span></div>';
     if(ac){
       acessoHtml='<div class="colab-access"><b>'+escHtml(auraFmtDataHoraAcesso_(ac.abertoEm))+'</b><span>'+escHtml(ac.app||'AURA')+'</span></div>';
-      var qpd=Number(ac.pendentes)||0,visto=!!ac.avisoExibidoEm,acao=String(ac.avisoAcao||'');
-      tarefasHtml='<div class="colab-access"><b>'+qpd+' pendente'+(qpd===1?'':'s')+'</b>'+(qpd?('<span class="'+(visto?'ok':'warn')+'">'+(visto?'Aviso visto '+auraFmtDataHoraAcesso_(ac.avisoExibidoEm):'Aviso não exibido')+'</span>'):'<span class="ok">Sem pendências</span>')+(acao?'<span> · '+escHtml(acao.replace(/_/g,' '))+'</span>':'')+'</div>';
+      var qpd=Number(ac.pendentes)||0,resA=auraResumoDecisaoAcesso_(ac);
+      tarefasHtml='<div class="colab-access"><b>'+qpd+' pendente'+(qpd===1?'':'s')+'</b><span class="'+escHtml(resA.classe)+'">'+escHtml(resA.texto)+'</span>'+(Number(ac.tarefasExecutadas)>0&&ac.ultimaExecucaoEm?'<span>Última execução '+escHtml(auraFmtDataHoraAcesso_(ac.ultimaExecucaoEm))+'</span>':'')+'</div>';
     }
     return '<div class="colab-row">'
       +'<div><div class="colab-name">'+escHtml(c.nome||'Sem nome')+(_colabNormEmail_(c.email)===COLAB_EMAIL_TESTE?'<span style="margin-left:6px;font-size:8px;padding:2px 6px;border-radius:99px;background:rgba(186,117,23,.14);color:var(--amber)">LOGIN DE TESTE</span>':'')+'</div><div class="colab-id">'+escHtml(ref)+'</div></div>'
@@ -16642,6 +16654,8 @@ function tarefaPrecoSugeridoProduto_(p){
   var promo=Number(p.precoPromo)||0;if(promo>0)return promo;
   var custo=Number(p.custo)||0;
   if(custo>0){var base=custo*1.10;return auraPrecoCharm_(base,{modo:'seguro',custo:custo,margemMinPct:10});}
+  var venda=Number(p.precoNormal)||0;
+  if(venda>0){return _auraCharmValidadeFront_(venda*0.70,0,venda);}
   return null;
 }
 function tarefaSelecionarMaterial_(tipo){
@@ -17555,12 +17569,24 @@ function _auraCharmValidadeFront_(valor,piso,teto){
 }
 function auraPoliticaPrecoValidadeFront_(p,dias){
   p=p||{};var custo=Number(p.custo)||0,normal=Number(p.precoNormal)||0;dias=Number(dias);
-  if(!(custo>0)||!isFinite(dias)||dias<0||dias>15)return {aplica:false};
+  if(!isFinite(dias)||dias<0||dias>15)return {aplica:false};
+
+  // Mesmo fallback do backend: sem custo + com venda => venda -30%, depois
+  // acabamento comercial XX,99. Assim Estoque/Tarefas no AURA e os coletores
+  // mostram exatamente a mesma sugestão.
+  if(!(custo>0)){
+    if(!(normal>0))return {aplica:false};
+    var alvoFallback=normal*0.70;
+    var precoFallback=_auraCharmValidadeFront_(alvoFallback,0,normal);
+    return {aplica:precoFallback>0,precoSugerido:precoFallback,precoNormal:normal,custo:0,dias:dias,
+      regra:'SEM_CUSTO_VENDA_MENOS_30_CHARM',fatorMarkup:null,origemPreco:'VENDA_MENOS_30'};
+  }
+
   var alvo,regra,fator=0;
   if(dias<=10){alvo=custo;regra='ATE_10_DIAS_CUSTO_CHARM';}
   else{var mk=(normal>custo)?(normal/custo-1):0.10;fator=Math.max(0,Math.min(1,(dias-10)/5));alvo=custo*(1+mk*fator);if(normal>0)alvo=Math.min(alvo,normal);regra='11_A_15_DIAS_MARKUP_GRADUAL';}
   var preco=_auraCharmValidadeFront_(alvo,custo,normal>0?normal:0);
-  return {aplica:preco>0,precoSugerido:preco,precoNormal:normal,custo:custo,dias:dias,regra:regra,fatorMarkup:fator};
+  return {aplica:preco>0,precoSugerido:preco,precoNormal:normal,custo:custo,dias:dias,regra:regra,fatorMarkup:fator,origemPreco:'CUSTO'};
 }
 function _auraPrecoValidadeEstoqueHtml_(lote,dias){
   var pol=auraPoliticaPrecoValidadeFront_(lote,dias);if(!pol.aplica)return '';
@@ -18423,5 +18449,8 @@ console.info('[AURA] preço por validade v7.10 — bipe/Estoque mostra venda nor
 </script>
 
 <script id="auraValidade21hBuild">console.info('[AURA] validade v7.11 — produto válido até 21:00 do dia da validade; vencido somente após 21h');</script>
+<script>console.info('[AURA] preço fallback v7.12 — sem custo: venda -30% + preço charmoso XX,99');</script>
+
+<script>console.info('[AURA] v7.13 — feedback por entrada: continuar / visualizar tarefas / executadas');</script>
 </body>
 </html>
