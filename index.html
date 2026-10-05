@@ -2458,126 +2458,105 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 }
 </style>
 
-<style id="aura-card-system-v714">
-/* AURA v7.14 — linguagem única de cards.
-   Referência visual: Coletas Recentes (min 270px, padding 16px, radius 10px, gap 10/12px). */
+<style id="aura-product-card-system-v715">
+/* AURA v7.15 — padronização SOMENTE dos cards que representam produtos.
+   Cards gerenciais, KPIs, setores, fornecedores, dossiês etc. mantêm o layout original.
+   No desktop, no máximo 3 produtos por linha para preservar legibilidade. */
 :root{
-  --aura-card-min:270px;
-  --aura-card-radius:10px;
-  --aura-card-pad:16px;
-  --aura-card-gap:12px;
-  --aura-card-photo:82px;
+  --aura-prod-card-radius:10px;
+  --aura-prod-card-pad:16px;
+  --aura-prod-card-gap:12px;
+  --aura-prod-card-photo:104px;
 }
 
-/* Grids de cards: largura previsível, sem cards gigantes em uma aba e minúsculos em outra. */
-#dashSetorGrid,.promo-grid,.mod-grid,.bib-grid,.enc-grid,.af-list,.cf-grid,.estoque-unico-grid,.rel-cards-row,
-#ucGrid,#dashUrgentGrid,#tarefasGrid,#tarefasZeradasBox,.ant-mes-grid{
-  grid-template-columns:repeat(auto-fill,minmax(min(100%,var(--aura-card-min)),1fr))!important;
-  gap:var(--aura-card-gap)!important;
+/* Grids que efetivamente exibem PRODUTOS. Não altera métricas, cards gerenciais ou setores. */
+.estoque-unico-grid,
+#estoqueGrid,
+#ucGrid,
+#dashUrgentGrid,
+.promo-grid,
+.ant-mes-grid,
+#tarefasGrid,
+#tarefasZeradasBox{
+  gap:14px!important;
   align-items:stretch;
 }
-
-/* Superfícies discretas seguem a mesma moldura das Coletas Recentes. */
-.dash-tile,.dash-mini,.dash-hero-card,.metric,.uc-card,.promo-card,.mod-card,.bib-card,.af-card,.cf-card,
-.rel-card,.boss-clean-card,.boss-health-card,.boss-horti-card,.boss-horti-origem-card,.boss-padaria-summary-card,
-.boss-insight-item,.boss-rx-kpi,.boss-rx-analysis-card,.nfe-item,.nfe-hist-item,.colab-row,.tarefa-row,.pronto-row,
-.ecard,.res-card,.ant-prod-card,.af-kpi,.cf-kpi,.nfe-kpi,.nfe-ceasa-item,.bday-item,.boss-chart-card,.boss-insights-card,.boss-rx-actions-card,.boss-rx-analysis-card,.boss-rx-buy-card,.boss-rx-chart-card,.boss-rx-errors-card,.boss-rx-perf-card,.aura-prod-card{
-  border-radius:var(--aura-card-radius)!important;
-  box-shadow:none!important;
+@media(min-width:1180px){
+  .estoque-unico-grid,#estoqueGrid,#ucGrid,#dashUrgentGrid,.promo-grid,.ant-mes-grid,#tarefasGrid,#tarefasZeradasBox{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
 }
-
-/* No mobile, qualquer lista de cards usa uma coluna: o mesmo tamanho confortável das coletas no iPhone. */
+@media(min-width:701px) and (max-width:1179px){
+  .estoque-unico-grid,#estoqueGrid,#ucGrid,#dashUrgentGrid,.promo-grid,.ant-mes-grid,#tarefasGrid,#tarefasZeradasBox{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
 @media(max-width:700px){
-  .metrics,.dash-tiles,.dash-mini-row,.dash-hero.dash-hero-4col,#dashSetorGrid,
-  .promo-grid,.mod-grid,.bib-grid,.enc-grid,.af-list,.cf-grid,.cf-kpis,.colab-kpis,
-  .boss-kpis,.boss-setores-kpis,.boss-sector-kpis,.boss-geral-kpis,.boss-clean-kpis,.boss-horti-kpis,.boss-horti-origens,
-  .nfe-kpis,.nfe-hist-kpis,.nfe-hist-meta-grid,.rel-cards-row,.estoque-unico-grid,#ucGrid,#dashUrgentGrid,.ant-mes-grid,
-  .boss-charts-row,.boss-rx-summary,.boss-rx-analysis,.boss-rx-performance,.boss-rx-decision-grid,
-  #tarefasGrid,#tarefasZeradasBox{
+  .estoque-unico-grid,#estoqueGrid,#ucGrid,#dashUrgentGrid,.promo-grid,.ant-mes-grid,#tarefasGrid,#tarefasZeradasBox{
     grid-template-columns:minmax(0,1fr)!important;
     gap:12px!important;
   }
-  .metric,.dash-tile,.dash-mini,.dash-hero-card,.uc-card,.promo-card,.mod-card,.bib-card,.af-card,.cf-card,
-  .rel-card,.boss-clean-card,.boss-health-card,.boss-horti-card,.boss-horti-origem-card,.boss-padaria-summary-card,
-  .boss-insight-item,.boss-rx-kpi,.boss-rx-analysis-card,.nfe-item,.nfe-hist-item,.colab-row,.tarefa-row,.pronto-row,
-  .ecard,.res-card,.ant-prod-card,.af-kpi,.cf-kpi,.nfe-kpi,.nfe-ceasa-item,.bday-item,.boss-chart-card,.boss-insights-card,.boss-rx-actions-card,.boss-rx-analysis-card,.boss-rx-buy-card,.boss-rx-chart-card,.boss-rx-errors-card,.boss-rx-perf-card,.aura-prod-card{
-    width:100%!important;max-width:none!important;min-width:0!important;
-  }
-  .dash-tile,.dash-mini,.dash-hero-card,.metric,.uc-card,.af-card,.cf-card,.rel-card,.boss-clean-card,.boss-health-card,
-  .boss-horti-card,.boss-horti-origem-card,.boss-padaria-summary-card,.boss-insight-item,.boss-rx-kpi,.boss-rx-analysis-card,
-  .boss-chart-card,.boss-insights-card,.boss-rx-actions-card,.boss-rx-buy-card,.boss-rx-chart-card,.boss-rx-errors-card,.boss-rx-perf-card,
-  .af-kpi,.cf-kpi,.nfe-kpi,.nfe-ceasa-item,.ant-prod-card,.bday-item{
-    padding:16px!important;
-  }
-  .dash-setor-card{min-height:138px;justify-content:center}
-  .dash-setor-card .dsc-icon{font-size:20px!important;margin-bottom:7px}
-  .dash-setor-card .dsc-nome{font-size:14px!important;margin-bottom:6px!important}
-  .dash-setor-card .dsc-total{font-size:24px!important}
-  .dash-setor-card .dsc-status{font-size:11px!important}
-
-  /* NF-e mantém os controles funcionais, mas com a mesma escala visual. */
-  .nfe-items{padding:12px!important;gap:12px!important}
-  .nfe-item-hd,.nfe-item-body{padding:14px!important}
-  .nfe-product-wrap{gap:12px!important}
-  .nfe-thumb{width:82px!important;height:82px!important;min-width:82px!important;border-radius:10px!important}
-  .nfe-item-name{font-size:15px!important;line-height:1.3!important}
-  .nfe-info-list{grid-template-columns:1fr!important;gap:7px!important}
-  .nfe-info-line{padding:8px 9px!important}
-
-  /* Cards de tarefas/colaboradores deixam de parecer tabelas largas. */
-  .colab-row{grid-template-columns:1fr!important;padding:16px!important;gap:10px!important}
-  .tarefa-row,.pronto-row{padding:16px!important;gap:10px!important}
-
-  /* Cabeçalhos/rodapés internos também ficam na mesma escala das coletas. */
-  .promo-card-header,.mod-card-hd,.cf-card-head,.af-card-top{padding-left:16px!important;padding-right:16px!important}
 }
 
-/* Produto por setor/Estoque — somente o essencial no card. Tudo o resto já existe no modal do produto. */
-.estoque-unico-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr))!important;gap:12px!important}
+/* Estoque / Setor — card minimalista de produto.
+   Visível: foto, descrição, validade, custo, venda e promoção/sugestão.
+   Demais dados permanecem no detalhe ao tocar no card. */
 .aura-prod-card{
-  position:relative;background:var(--bg);border:1px solid var(--bd);border-top:3px solid var(--bds);
-  padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0;cursor:pointer;
-  transition:border-color .14s,background .14s;content-visibility:auto;contain-intrinsic-size:190px;
+  position:relative;
+  background:var(--bg);
+  border:1px solid var(--bd);
+  border-top:3px solid var(--bds);
+  border-radius:var(--aura-prod-card-radius)!important;
+  padding:var(--aura-prod-card-pad);
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+  min-width:0;
+  min-height:198px;
+  cursor:pointer;
+  box-shadow:none!important;
+  transition:border-color .14s,background .14s;
+  content-visibility:auto;
+  contain-intrinsic-size:210px;
 }
 .aura-prod-card:hover{border-color:var(--bds);background:color-mix(in srgb,var(--bg2) 26%,var(--bg))}
 .aura-prod-card:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .aura-prod-card.status-vencido{border-top-color:#ef4444}.aura-prod-card.status-critico{border-top-color:#f97316}
 .aura-prod-card.status-urgente{border-top-color:#f59e0b}.aura-prod-card.status-atencao{border-top-color:#eab308}
 .aura-prod-card.status-ok{border-top-color:var(--green)}.aura-prod-card.resolvido{opacity:.72}
-.aura-prod-card-main{display:flex;align-items:flex-start;gap:12px;min-width:0}
-.aura-prod-photo{width:var(--aura-card-photo);height:var(--aura-card-photo);min-width:var(--aura-card-photo);border:1px dashed var(--bds);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--tx2)}
-.aura-prod-photo img{width:100%;height:100%;object-fit:contain;display:block;padding:3px}
-.aura-prod-photo-empty i{font-size:24px;opacity:.55}
+.aura-prod-card-main{display:flex;align-items:flex-start;gap:14px;min-width:0}
+.aura-prod-photo{width:var(--aura-prod-card-photo);height:var(--aura-prod-card-photo);min-width:var(--aura-prod-card-photo);border:1px dashed var(--bds);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--tx2)}
+.aura-prod-photo img{width:100%;height:100%;object-fit:contain;display:block;padding:4px}
+.aura-prod-photo-empty i{font-size:26px;opacity:.55}
 .aura-prod-copy{flex:1;min-width:0}
-.aura-prod-name{font-size:14px;font-weight:800;line-height:1.32;color:var(--tx);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.aura-prod-validade{display:flex;align-items:center;gap:5px;margin-top:7px;font-size:11px;line-height:1.25}
-.aura-prod-validade i{font-size:14px;flex-shrink:0}.aura-prod-validade b{font-weight:850}
-.aura-prod-price-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-top:10px}
-.aura-prod-price-grid>div{min-width:0;border:1px solid var(--bd);border-radius:7px;background:var(--bg2);padding:6px 7px}
-.aura-prod-price-grid span{display:block;font-size:7.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.aura-prod-price-grid b{display:block;font-size:10.5px;line-height:1.15;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aura-prod-name{font-size:15px;font-weight:850;line-height:1.32;color:var(--tx);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.aura-prod-validade{display:flex;align-items:center;gap:5px;margin-top:8px;font-size:12px;line-height:1.3}
+.aura-prod-validade i{font-size:15px;flex-shrink:0}.aura-prod-validade b{font-weight:850}
+.aura-prod-price-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:11px}
+.aura-prod-price-grid>div{min-width:0;border:1px solid var(--bd);border-radius:8px;background:var(--bg2);padding:8px 9px}
+.aura-prod-price-grid span{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.045em;color:var(--tx2);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aura-prod-price-grid b{display:block;font-size:12px;line-height:1.2;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .aura-prod-price-grid .promo b{color:var(--green)}
-.aura-prod-card-foot{padding-top:9px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--tx2);font-size:9px;font-weight:650}
+.aura-prod-card-foot{padding-top:10px;border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--tx2);font-size:10px;font-weight:650}
 .aura-prod-card-foot span:last-child{display:inline-flex;align-items:center;gap:3px;color:var(--blue);font-weight:800;white-space:nowrap}
 
 @media(max-width:700px){
-  .estoque-unico-grid{grid-template-columns:1fr!important}
-  .aura-prod-card{padding:16px!important;min-height:164px}
-  .aura-prod-photo{--aura-card-photo:88px}
-  .aura-prod-name{font-size:15px}
+  .aura-prod-card{padding:16px!important;min-height:178px;width:100%!important;max-width:none!important}
+  .aura-prod-photo{--aura-prod-card-photo:92px}
+  .aura-prod-name{font-size:15px;-webkit-line-clamp:3}
   .aura-prod-validade{font-size:12px}
   .aura-prod-price-grid b{font-size:11.5px}
   .aura-prod-card-foot{font-size:10px}
 }
 @media(max-width:360px){
-  .aura-prod-photo{--aura-card-photo:76px}
+  .aura-prod-photo{--aura-prod-card-photo:80px}
   .aura-prod-card-main{gap:10px}
-  .aura-prod-price-grid{gap:4px}
-  .aura-prod-price-grid>div{padding:5px}
-  .aura-prod-price-grid b{font-size:10px}
+  .aura-prod-price-grid{gap:5px}
+  .aura-prod-price-grid>div{padding:6px}
+  .aura-prod-price-grid b{font-size:10.5px}
 }
 
-/* Modal do produto: é onde ficam lote, estoque, setor, fornecedor/auditoria e ações. */
+/* O detalhe continua sendo o lugar das informações adicionais do produto. */
 @media(max-width:700px){
   #produtoModal .smodal{padding:16px!important}
   #produtoModal .pm-top{gap:12px!important}
@@ -18367,6 +18346,6 @@ console.info('[AURA] preço por validade v7.10 — bipe/Estoque mostra venda nor
 <script>console.info('[AURA] preço fallback v7.12 — sem custo: venda -30% + preço charmoso XX,99');</script>
 
 <script>console.info('[AURA] v7.13 — feedback por entrada: continuar / visualizar tarefas / executadas');</script>
-<script>console.info('[AURA] v7.14 — cards minimalistas padronizados pela escala de Coletas Recentes; Estoque/Setor mostra foto, validade, custo, venda e promoção');</script>
+<script>console.info('[AURA] v7.15 — padronização restrita aos cards de PRODUTOS; máximo 3 por linha no desktop; demais cards restaurados');</script>
 </body>
 </html>
