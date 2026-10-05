@@ -62,6 +62,7 @@ html,body{overflow-x:hidden;max-width:100%}
 .alert .alert-sync{font-size:11px;opacity:.7;white-space:nowrap;flex-shrink:0;margin-left:auto}
 .tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--bd)}
 .tarefas-split{display:grid;grid-template-columns:1fr 1fr;gap:0;align-items:start}
+.tarefas-mobile-toggle{display:none}
 .tarefas-col{padding:0 18px}
 .tarefas-col:first-child{padding-left:0;border-right:1px solid var(--bd)}
 .tarefas-col:last-child{padding-right:0}
@@ -2362,155 +2363,199 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 </style>
 
 
-<style id="aura-mobile-v715">
-/* iPhone 15 compact arrangement. Keep information dense while preventing clipping. */
-@media screen and (max-width:700px) {
- html { -webkit-text-size-adjust:100%; }
- .aura-shell { height:100vh; height:100dvh; }
- .aura-main { min-height:0; }
- .aura-header { padding:8px max(10px,env(safe-area-inset-right)) 8px max(10px,env(safe-area-inset-left)); padding-top:max(8px,env(safe-area-inset-top)); gap:5px; flex-shrink:0; }
- .aura-header-brand { min-width:0; width:100%; }
- .aura-header-brand .sb-tagline { flex-wrap:wrap; gap:4px; font-size:10px; }
- .aura-header-brand .sb-badge-label { font-size:8px; }
- .aura-header h1 { font-size:17px; line-height:1.15; }
- .aura-header p { font-size:10px; margin-top:3px; }
- .aura-header-actions { width:100%; gap:5px; flex-wrap:nowrap; }
- .aura-header-actions .aura-btn { min-width:36px; min-height:36px; padding:5px 7px; justify-content:center; }
- .aura-header-actions .aura-btn span { display:none; }
- .aura-header-actions .aura-date-input { width:112px; min-width:0; min-height:36px; font-size:14px; padding:4px; }
- .theme-toggle { min-height:36px; }
- .aura-nav { flex-shrink:0; min-width:0; padding:0 max(8px,env(safe-area-inset-left)); overflow-x:auto; }
- .aura-nav button { min-height:42px; padding:8px 10px; font-size:12px; gap:5px; }
- .aura-syncbar { padding:4px 9px; flex-shrink:0; font-size:10px; }
- .aura-content { min-height:0; padding:0 max(9px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(9px,env(safe-area-inset-left)); }
- .aura-content section { min-width:0; }
- button,.btn,.abtn { min-height:36px; touch-action:manipulation; }
- .btn-scan { width:40px; min-width:40px; height:40px; }
- input:not([type=checkbox]):not([type=radio]),select,textarea { font-size:16px!important; max-width:100%; min-width:0; min-height:38px; box-sizing:border-box; }
- input[type=checkbox],input[type=radio] { min-width:20px; min-height:20px; }
- .filters,.topbar-right { flex-wrap:wrap; gap:6px; }
- .filters input,.filters select { width:100%!important; min-width:0!important; }
+<style id="aura-mobile-v716">
+@media screen and (max-width:700px){
+ html{-webkit-text-size-adjust:100%}
+ .aura-shell{height:100vh;height:100dvh}
+ .aura-main{min-height:0}
+ .aura-header{padding:8px max(9px,env(safe-area-inset-right)) 7px max(9px,env(safe-area-inset-left));padding-top:max(8px,env(safe-area-inset-top));gap:4px;flex-shrink:0}
+ .aura-header-brand{min-width:0;width:100%}
+ .aura-header-brand .sb-tagline{flex-wrap:wrap;gap:4px;font-size:10px}
+ .aura-header-brand .sb-badge-label{font-size:8px}
+ .aura-header h1{font-size:17px;line-height:1.15}
+ .aura-header p{font-size:10px;margin-top:3px}
+ .aura-header-actions{width:100%;gap:5px;flex-wrap:nowrap}
+ .aura-header-actions .aura-btn{min-width:34px;min-height:36px;padding:4px 6px;justify-content:center}
+ .aura-header-actions .aura-btn span{display:none}
+ .aura-header-actions .aura-date-input{width:108px;min-width:0;min-height:36px;font-size:14px;padding:4px}
+ .theme-toggle{min-height:36px}
+ .aura-nav{flex-shrink:0;min-width:0;padding:0 max(7px,env(safe-area-inset-left));overflow-x:auto}
+ .aura-nav button{min-height:41px;padding:7px 9px;font-size:12px;gap:5px}
+ .aura-syncbar{padding:4px 9px;flex-shrink:0;font-size:10px}
+ .aura-content{min-height:0;padding:0 max(8px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+ .aura-content section{min-width:0}
+ button,.btn,.abtn{touch-action:manipulation}
+ input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important;max-width:100%;min-width:0;min-height:36px;box-sizing:border-box}
+ input[type=checkbox],input[type=radio]{min-width:18px;min-height:18px}
+ .filters,.topbar-right{flex-wrap:wrap;gap:6px}
+ .metrics{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important}
+ .metric{min-width:0;padding:7px 5px!important}
+ .metric-val{font-size:13px!important}.metric-lbl{font-size:7px!important;white-space:normal}
+ #dashSetorGrid{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px!important}
+ #dashSetorGrid .dash-setor-card{min-width:0;min-height:46px;padding:5px!important;display:flex!important;flex-direction:row;align-items:center;justify-content:center;gap:6px;border-radius:8px}
+ #dashSetorGrid .dsc-icon{font-size:16px!important;margin:0!important;line-height:1;flex-shrink:0}
+ #dashSetorGrid .dsc-total{font-size:13px!important;line-height:1}
+ #dashSetorGrid .dsc-nome,#dashSetorGrid .dsc-status,#dashSetorGrid .dsc-bar{display:none!important}
+ .dash-alert-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:12px}
+ .dash-alert-item{min-width:0;min-height:38px!important;padding:5px 7px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;gap:6px;color:var(--tx)}
+ .dash-alert-item svg{width:16px;height:16px;flex-shrink:0}
+ .dash-alert-count{font-size:11px;font-weight:850;white-space:nowrap}
+ .dash-mini-row{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:5px!important;margin-bottom:12px}
+ .dash-mini{min-width:0;padding:6px 5px!important;border-radius:8px!important}
+ .dash-mini-lbl{font-size:7px!important;line-height:1.2;white-space:normal}
+ .dash-mini-val{font-size:10px!important;line-height:1.15;overflow-wrap:anywhere}
+ .dash-mini-sub{display:none!important}
+ .dash-mini svg{display:none!important}
+ .dash-divider-label{font-size:10px;margin:9px 0 5px!important}
+ .dash-section-hd{margin-bottom:6px!important}
+ .dash-section-title{font-size:14px!important}
+ .dash-section-sub{font-size:10px!important}
+ .dash-view-all{font-size:9px!important;padding:4px 7px!important}
+ #ucFiltros{gap:5px!important;margin-bottom:8px!important}
+ #ucFiltros select{font-size:12px!important;min-height:34px;padding:4px 7px!important}
+ /* Preserve the former collection card density and image/details balance. */
+ #ucGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin-bottom:16px!important}
+ .ecard{margin-bottom:0!important;min-width:0}
+ .ecard-body{grid-template-columns:62px minmax(0,1fr)!important}
+ .ecard-imgcol{border-right:1px solid var(--bd)!important;border-bottom:none!important;padding:6px 4px!important;gap:4px!important}
+ .ecard-imgbox{width:50px!important;height:50px!important}
+ .ecard-imgbtn{font-size:8.5px!important;white-space:normal!important;text-align:center!important;line-height:1.2!important}
+ .ecard-title{font-size:8.5px!important;line-height:1.2!important}
+ .ecard-fields{padding:6px 7px!important;gap:5px!important}
+ .ef-row{display:grid!important;grid-template-columns:auto minmax(0,1fr)!important;align-items:center!important;gap:4px 6px!important}
+ .ef-label{font-size:9px!important;min-width:0!important}
+ .ef-input,.ef-select{font-size:12px!important;height:28px!important;min-height:28px!important;width:100%!important;padding:3px 5px!important}
+ .ef-pgroup{min-width:0!important;width:100%!important}
+ .ef-pct{grid-column:2}
+ .val-grid,.promo-grid,.enc-grid,.bib-grid,.mod-grid,#dashUrgentGrid,#ucGrid,.ant-mes-grid,.rel-cards-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+ .cfg-grid,.form-row-2,.ec-linha{grid-template-columns:minmax(0,1fr)}
+ .modal-ov{padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom))!important;overflow:auto}
+ .modal,.smodal,.colab-modal{width:100%!important;max-width:100%!important;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px)!important;overflow-y:auto}
+ .modal-body{display:block;overflow:visible;flex:none}
+ .modal-head,.modal-foot,.smodal-foot,.colab-modal-foot{flex-wrap:wrap;gap:5px}
+ .twrap{max-width:100%;overflow-x:auto}
 
- /* Summary tiles retain the 4-column dashboard density. Sector cards stay compact. */
- .metrics,.dash-tiles,.dash-mini-row,.dash-hero.dash-hero-4col { grid-template-columns:repeat(4,minmax(0,1fr))!important; gap:5px!important; }
- #dashSetorGrid { grid-template-columns:repeat(5,minmax(0,1fr))!important; gap:4px!important; }
- .metric,.dash-tile,.dash-mini,.dash-hero-card { min-width:0; padding:7px 5px!important; border-radius:8px!important; }
- .metric-val,.dash-tile-num,.dash-hero-num { font-size:13px!important; line-height:1.15!important; white-space:normal!important; overflow-wrap:anywhere; }
- .metric-lbl,.dash-tile-lbl,.dash-hero-label,.dash-mini-lbl { font-size:8px!important; line-height:1.15!important; white-space:normal!important; overflow-wrap:anywhere; }
- .dash-tile-sub,.dash-hero-sub,.dash-mini-sub { font-size:7px!important; display:block!important; white-space:normal!important; line-height:1.2; }
- .dash-mini { flex-direction:column; align-items:flex-start; gap:2px; }
- .dash-mini-val { font-size:10px!important; line-height:1.15!important; white-space:normal!important; overflow-wrap:anywhere; }
- .dash-mini svg,.dash-hero-icon { display:none!important; }
- .dash-setor-card .dsc-icon { font-size:10px!important; margin-bottom:2px!important; }
- .dash-setor-card .dsc-nome { font-size:7px!important; line-height:1.1; overflow-wrap:anywhere; }
- .dash-setor-card .dsc-total { font-size:12px!important; line-height:1.1; }
- .dash-setor-card .dsc-status { font-size:6.5px!important; }
- .dash-setor-card .dsc-bar { height:3px!important; }
- .dash-divider-label { font-size:10px; margin:9px 0 5px!important; }
- .dash-hero-attention .dha-count { font-size:11px!important; }
- .dash-hero-attention .dha-label,.dash-trend { font-size:7px!important; }
+ /* Stock: large product photo and only the requested quick facts on the card. */
+ .estoque-unico-head{margin-bottom:7px}
+ .estoque-unico-title{font-size:15px}
+ .estoque-unico-sub{display:none}
+ .estoque-unico-filtros{display:grid!important;grid-template-columns:minmax(0,1fr) 38px 112px!important;gap:5px!important;margin-bottom:8px}
+ .estoque-unico-filtros .busca-wrap{grid-column:1/3;gap:4px}
+ .estoque-unico-filtros input[type=text]{height:36px!important;min-height:36px!important;font-size:14px!important;padding:5px 8px!important}
+ .estoque-unico-filtros .busca-wrap .btn-scan{width:36px;min-width:36px;height:36px;min-height:36px}
+ .estoque-unico-filtros #fStatus{grid-column:3;grid-row:1;font-size:12px!important;height:36px!important;min-height:36px!important;padding:3px}
+ .estoque-unico-filtros .resolver-wrap{grid-column:1/3;grid-row:2;font-size:10px;padding-left:2px}
+ .estoque-unico-filtros .limpar-btn{grid-column:3;grid-row:2;min-height:32px!important;font-size:10px;padding:4px!important;justify-content:center}
+ .estoque-unico-grid{grid-template-columns:minmax(0,1fr)!important;gap:9px!important}
+ .estoque-unico-card{height:auto!important;cursor:pointer}
+ .estoque-unico-card .urg-card-header{min-height:0!important;padding:8px 10px 8px 42px!important}
+ .estoque-unico-card .urg-card-nome{font-size:12px!important;line-height:1.25!important;display:block;-webkit-line-clamp:unset;overflow-wrap:anywhere}
+ .estoque-unico-card .urg-card-cod{font-size:8px!important}
+ .estoque-unico-card .urg-card-body{display:grid!important;grid-template-columns:96px minmax(0,1fr);gap:8px!important;padding:9px!important}
+ .estoque-unico-card .urg-card-mid{display:contents!important}
+ .estoque-unico-card .urg-photobox,.estoque-unico-card .urg-photobox-imgwrap,.estoque-unico-card .urg-photobox-empty{grid-column:1;grid-row:1/3;width:90px!important;height:90px!important;min-width:90px!important;border-radius:9px}
+ .estoque-unico-card .urg-photobox img{max-width:90px!important;max-height:90px!important;object-fit:contain}
+ .estoque-unico-card .urg-card-info{grid-column:2;grid-row:1;gap:6px!important;align-self:center}
+ .estoque-unico-card .urg-info-lbl{font-size:8px!important}
+ .estoque-unico-card .urg-info-val{font-size:11px!important;line-height:1.25!important;white-space:normal!important;overflow-wrap:anywhere!important}
+ .estoque-unico-card .urg-card-right{display:none!important}
+ .estoque-unico-card .estoque-unico-fin{grid-column:1/-1;grid-row:3;gap:6px!important}
+ .estoque-unico-card .estoque-unico-fin>div{min-height:42px!important;padding:6px 8px!important}
+ .estoque-unico-card .estoque-unico-fin span{font-size:8px!important}
+ .estoque-unico-card .estoque-unico-fin b{font-size:11px!important;white-space:normal!important;overflow-wrap:anywhere}
+ .estoque-unico-card .estoque-unico-lotes,.estoque-unico-card .estoque-unico-meta{display:none!important}
+ .estoque-unico-actions{grid-column:1/-1;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:4px!important;padding:6px!important}
+ .estoque-unico-actions .abtn{min-height:34px!important;font-size:8px!important;padding:3px!important;white-space:normal}
+ .estoque-unico-actions .abtn i{font-size:11px}
 
- /* Two-column product cards; compact inner layout uses wrapping instead of clipping. */
- .val-grid,.promo-grid,.enc-grid,.bib-grid,.mod-grid,#dashUrgentGrid,#ucGrid,#estoqueGrid,#tarefasGrid,#tarefasZeradasBox,.estoque-unico-grid,.ant-mes-grid,.rel-cards-row { grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:7px!important; }
- .urg-card,.val-card,.uc-card,.mod-card,.tarefa-row { min-width:0!important; }
- .urg-card-header,.estoque-unico-card .urg-card-header { padding:8px 6px 8px 34px!important; min-height:0!important; gap:5px!important; flex-wrap:wrap; }
- .urg-card-nome,.val-card-hdr-nome,.estoque-unico-card .urg-card-nome { font-size:10px!important; line-height:1.2!important; display:block; -webkit-line-clamp:unset; overflow-wrap:anywhere; }
- .urg-card-cod,.val-card-hdr-cod,.estoque-unico-card .urg-card-cod { font-size:8px!important; white-space:normal; overflow-wrap:anywhere; }
- .urg-card-body,.estoque-unico-card .urg-card-body { padding:7px!important; gap:6px!important; }
- .estoque-unico-card .urg-card-mid { display:grid!important; grid-template-columns:42px minmax(0,1fr)!important; gap:6px!important; }
- .estoque-unico-card .urg-photobox,.estoque-unico-card .urg-photobox-imgwrap,.estoque-unico-card .urg-photobox-empty { width:42px!important; min-width:42px!important; height:42px!important; }
- .estoque-unico-card .urg-photobox img { max-width:42px!important; max-height:42px!important; }
- .estoque-unico-card .urg-card-info { gap:4px!important; }
- .estoque-unico-card .urg-card-right { grid-column:1/-1; width:auto!important; flex-direction:row; justify-content:space-between; gap:5px; }
- .estoque-unico-card .urg-card-right svg { display:none!important; }
- .estoque-unico-card .urg-card-right-stats { display:grid; grid-template-columns:1fr 1fr; width:auto; gap:5px; }
- .estoque-unico-card .urg-info-lbl,.estoque-unico-card .urg-stat-lbl { font-size:7px!important; line-height:1.1!important; }
- .estoque-unico-card .urg-info-val,.estoque-unico-card .urg-stat-val,.estoque-unico-card .urg-card-right-extenso { font-size:9px!important; line-height:1.2!important; white-space:normal; overflow-wrap:anywhere; }
- .estoque-unico-fin { display:grid!important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:3px!important; }
- .estoque-unico-fin>div { min-height:34px!important; padding:5px 3px!important; }
- .estoque-unico-fin span { font-size:7px!important; }
- .estoque-unico-fin b { font-size:9px!important; white-space:normal!important; overflow-wrap:anywhere; }
- .estoque-unico-lotes { gap:4px!important; }
- .estoque-unico-lote { grid-template-columns:6px minmax(0,1fr) auto!important; gap:5px!important; padding:6px!important; min-height:0!important; }
- .estoque-unico-lote-top { display:flex!important; flex-wrap:wrap; align-items:baseline; gap:3px!important; }
- .estoque-unico-lote-data,.estoque-unico-lote-qtd { font-size:8px!important; line-height:1.2!important; }
- .estoque-unico-lote-status,.estoque-unico-lote-coleta,.estoque-unico-meta-line,.estoque-unico-more { font-size:7px!important; line-height:1.25!important; white-space:normal!important; overflow-wrap:anywhere; }
- .estoque-unico-meta { gap:4px!important; padding-top:5px!important; }
- .estoque-unico-actions { display:grid!important; grid-template-columns:1fr 1fr; gap:4px!important; padding:6px!important; }
- .estoque-unico-actions .abtn { font-size:8px!important; min-height:34px!important; padding:4px!important; }
- .urg-lote-mid { flex-wrap:wrap; }
- .val-card-header { padding:7px 6px 7px 32px!important; gap:4px!important; }
- .val-card-hdr-data { font-size:12px!important; }
- .val-card-qtde-badge { min-width:20px!important; height:20px!important; font-size:10px!important; top:4px!important; left:4px!important; padding:0 5px!important; }
- .val-card-body { padding:7px!important; }
- .val-card-title { font-size:10px!important; overflow-wrap:anywhere; }
- .val-card-cod,.val-card-meta,.val-card-forn-row { font-size:8px!important; white-space:normal; overflow-wrap:anywhere; }
- .val-card-fields { gap:3px!important; padding:5px 0!important; margin-bottom:5px!important; }
- .val-card-field-lbl { font-size:7px!important; }
- .val-card-field-val { font-size:9px!important; white-space:normal!important; overflow-wrap:anywhere; }
- .val-card-price-promo { font-size:12px!important; }
- .val-card-foot { padding:5px!important; gap:4px!important; }
- .val-card-actions { gap:3px!important; }
- .val-card-actions .btn,.val-card-foot .btn { min-height:32px!important; font-size:8px!important; padding:4px!important; }
-
- /* Task cards remain two-up: thumbnail and product details share the top row;
-    lot data wraps underneath at full card width. */
- .tarefa-row,.pronto-row { display:grid!important; grid-template-columns:44px minmax(0,1fr)!important; align-items:start; gap:6px!important; padding:7px!important; }
- .tarefa-row .urg-photobox,.pronto-row .urg-photobox { width:42px!important; height:42px!important; }
- .tarefa-row>div:last-child,.pronto-row>div:last-child { width:auto; min-width:0; }
- .tarefa-card-top { margin-bottom:4px!important; flex-wrap:wrap!important; gap:4px!important; }
- .tarefa-card-actions { width:auto!important; justify-content:flex-start!important; flex-wrap:wrap; }
- .tarefa-card-actions .btn { min-height:30px!important; font-size:8px!important; padding:3px 5px!important; }
- .tarefa-status-badge { font-size:8px!important; padding:2px 5px!important; }
- .tarefaChk { width:16px!important; height:16px!important; }
- .tarefa-card-nome { font-size:10px!important; line-height:1.2!important; overflow-wrap:anywhere; }
- .tarefa-card-cod,.tarefa-card-desc,.tarefa-card-colab,.tarefa-validade-info { font-size:8px!important; overflow-wrap:anywhere; }
- .tarefa-card-foot { font-size:7px!important; }
- .tarefa-lotes-box,.tarefa-card-desc,.tarefa-card-colab,.tarefa-card-foot,.tarefa-validade-info,
- .tarefa-row>div:last-child>div:nth-child(4) { grid-column:1/-1; }
- .tarefa-lotes-title { font-size:8px!important; padding:5px!important; flex-wrap:wrap; }
- .tarefa-lote-row { grid-template-columns:minmax(0,1fr) auto!important; font-size:9px!important; gap:4px!important; padding:6px!important; }
- .tarefa-lote-data,.tarefa-lote-qtd { font-size:9px!important; }
- .tarefa-lote-tag { grid-column:1/-1; text-align:left!important; font-size:8px!important; white-space:normal!important; overflow-wrap:anywhere; }
- .tarefa-lotes-total { font-size:8px!important; text-align:left!important; }
- .tarefa-qtde-badge { right:0!important; }
- .uc-card { padding:7px!important; gap:5px!important; }
- .uc-card-nome,.mod-card-hdname { font-size:10px!important; }
- .uc-card-tag,.uc-card-badge,.uc-card-colab-name { font-size:8px!important; }
- .mod-card-body { padding:7px!important; }
- .mod-info-row,.mod-info-val { font-size:8px!important; }
- .mod-card-foot { padding:5px!important; gap:4px!important; }
- .mod-card-foot .btn { min-height:32px!important; font-size:8px!important; padding:4px!important; }
- .bday-gestor { padding:8px!important; }
- .bday-list { grid-template-columns:1fr; gap:5px!important; }
- .bday-item { gap:6px!important; padding:6px!important; }
- .bday-date { width:34px!important; height:32px!important; font-size:9px!important; }
- .bday-person b { font-size:9px!important; }
- .bday-person span { font-size:7px!important; white-space:normal; overflow-wrap:anywhere; }
- .bday-days { font-size:7px!important; padding:3px 5px!important; }
-
- .cfg-grid,.form-row-2,.ec-linha { grid-template-columns:minmax(0,1fr); }
- .modal-ov { padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom))!important; overflow:auto; }
- .modal,.smodal,.colab-modal { width:100%!important; max-width:100%!important; max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px)!important; overflow-y:auto; }
- .smodal { padding:10px!important; }
- .modal-body { display:block; overflow:visible; flex:none; }
- .modal-head,.modal-foot,.smodal-foot,.colab-modal-foot { flex-wrap:wrap; gap:5px; }
- .modal-foot .btn,.smodal-foot .btn { min-height:36px; }
- .twrap { max-width:100%; overflow-x:auto; }
- #scanModalTop { padding-top:max(8px,env(safe-area-inset-top)); }
- #scanModalClose { width:40px; height:40px; }
- #scanModalOv { padding-bottom:env(safe-area-inset-bottom); }
+ /* A card opens the full product modal; keep pending tasks as the default view. */
+ #tarefasMobileToggle{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+ .tarefas-mobile-toggle button{border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx2);font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px}
+ .tarefas-mobile-toggle button.active{background:var(--green);border-color:var(--green);color:#fff}
+ .tarefas-mobile-toggle button{min-height:34px!important;padding:5px 7px!important;font-size:10px!important}
+ .tarefas-split{display:block}
+ #tarefasColTarefas{padding:0;border:0;margin:0}
+ #tarefasColProntos{display:none;padding:0;border:0;margin-top:12px}
+ #tarefasColTarefas>.tarefas-col-title,#tarefasColProntos>.tarefas-col-title{font-size:12px;margin-bottom:7px}
+ #tarefasColTarefas>div[style*="display:flex"]{gap:5px!important;margin-bottom:7px!important}
+ #tarefasBusca{font-size:14px!important;min-width:0!important;height:36px!important;min-height:36px!important}
+ #tarefasGrid,#tarefasProntosGrid,#tarefasZeradasBox{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+ .tarefa-row,.pronto-row{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;padding:7px!important;min-width:0!important;overflow:hidden}
+ .tarefa-row .urg-photobox,.pronto-row .urg-photobox{width:100%!important;height:88px!important;min-width:0!important}
+ .tarefa-card-top{align-items:center!important;justify-content:space-between;gap:4px!important;margin-bottom:4px!important}
+ .tarefa-card-nome{font-size:10px!important;line-height:1.25!important;margin-bottom:3px!important;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+ .tarefa-card-cod{font-size:8px!important;overflow-wrap:anywhere}
+ .tarefa-validade-info{font-size:8px!important;padding:3px 5px!important;margin-bottom:3px!important;white-space:normal}
+ .tarefa-card-actions{width:auto!important;justify-content:flex-end!important;gap:3px!important}
+ .tarefa-card-actions .btn{font-size:8px!important;min-height:30px!important;padding:3px 5px!important}
+ .tarefa-status-badge{font-size:8px!important;padding:3px 5px!important}
+ .tarefaChk{width:17px!important;height:17px!important}
+ .task-more{font-size:9px;color:var(--tx2);border-top:1px solid var(--bd);padding-top:5px}
+ .task-more summary{cursor:pointer;min-height:28px;display:flex;align-items:center;gap:4px}
+ .task-more-body{font-size:8px;line-height:1.35;overflow-wrap:anywhere}
+ .task-more-body .tarefa-lotes-box{margin-top:4px}
+ .task-more-body .tarefa-lote-row{grid-template-columns:minmax(0,1fr) auto!important;font-size:8px!important;gap:4px!important;padding:5px!important}
+ .task-more-body .tarefa-lote-tag{grid-column:1/-1;text-align:left!important;font-size:7px!important;white-space:normal!important}
+ .task-more-body .tarefa-card-colab,.task-more-body .tarefa-card-foot{font-size:8px!important}
+ .pronto-row>div:nth-child(2){min-width:0!important;width:100%}
+ .pronto-row>div:last-child{width:100%!important;flex-direction:row!important;flex-wrap:wrap;gap:4px!important}
+ .pronto-row>div:last-child .btn{flex:1 1 40%;min-height:32px!important;font-size:8px!important;padding:4px!important}
 }
-@media screen and (max-width:360px) {
- .metrics,.dash-tiles,.dash-mini-row,.dash-hero.dash-hero-4col { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
- .estoque-unico-grid,#tarefasGrid,.val-grid,#dashUrgentGrid,#ucGrid { grid-template-columns:1fr!important; }
+@media screen and (max-width:360px){
+ #dashSetorGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ #ucGrid{grid-template-columns:1fr!important}
+ #tarefasGrid,#tarefasProntosGrid{grid-template-columns:1fr!important}
 }
-@media screen and (max-height:500px) and (orientation:landscape) {
- .aura-header { position:static; padding:5px 8px; }
- .aura-header-brand { width:auto; }
- .aura-header p,.aura-header-brand .sb-tagline { display:none; }
- .aura-header h1 { font-size:15px; }
- .aura-header-actions { width:auto; }
+@media screen and (max-height:500px) and (orientation:landscape){
+ .aura-header{position:static;padding:5px 8px}
+ .aura-header-brand{width:auto}
+ .aura-header p,.aura-header-brand .sb-tagline{display:none}
+ .aura-header h1{font-size:15px}
+ .aura-header-actions{width:auto}
+}
+
+.bday-compact{background:var(--bg);border:1px solid var(--bd);border-left:3px solid var(--amber);border-radius:8px;margin:0 0 9px;min-width:0}
+.bday-compact summary{list-style:none;display:flex;align-items:center;gap:7px;padding:7px 9px;cursor:pointer;color:var(--tx2);font-size:10px;line-height:1.35;min-width:0}
+.bday-compact summary::-webkit-details-marker{display:none}
+.bday-compact summary>.ti-cake{color:var(--amber);font-size:15px;flex-shrink:0}
+.bday-compact summary>span{flex:1;min-width:0}
+.bday-chevron{font-size:12px;transition:transform .15s}
+.bday-compact[open] .bday-chevron{transform:rotate(180deg)}
+.bday-compact .bday-list{padding:0 7px 6px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:5px}
+.bday-compact .bday-item{padding:5px 7px;gap:7px}
+.bday-compact .bday-date{width:36px;height:32px;font-size:9px}
+.bday-compact .bday-person b{font-size:10px}
+.bday-compact .bday-person span{font-size:8px;overflow-wrap:anywhere}
+.bday-compact .bday-days{font-size:8px;padding:3px 5px}
+.bday-foot{padding:0 10px 7px;font-size:8px;color:var(--tx2)}
+.dash-alert-item{cursor:pointer}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.estoque-unico-card .urg-card-body{align-items:stretch}
+.estoque-unico-card .urg-photobox{width:104px;height:104px;min-width:104px}
+.estoque-unico-card .urg-photobox-imgwrap,.estoque-unico-card .urg-photobox-empty{width:104px;height:104px}
+.estoque-unico-card .urg-photobox img{max-width:104px;max-height:104px}
+.stock-price-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.task-card-summary{display:grid;grid-template-columns:64px minmax(0,1fr);gap:7px;align-items:start;min-width:0}
+.task-card-summary .urg-photobox{width:62px;height:62px}
+.task-card-info{min-width:0}
+.task-assignee{font-size:9px;color:var(--tx2);margin-top:4px;overflow-wrap:anywhere}
+.task-more{font-size:10px;color:var(--tx2);border-top:1px solid var(--bd);padding-top:5px}
+.task-more summary{cursor:pointer;min-height:28px;display:flex;align-items:center}
+.task-more-body{font-size:9px;line-height:1.4;overflow-wrap:anywhere;padding:3px 1px 1px}
+.task-price,.task-confirmed{margin-top:4px;color:var(--green)}
+@media screen and (max-width:700px){
+ .bday-compact summary{padding:6px 7px;font-size:9px}
+ .bday-compact .bday-list{grid-template-columns:1fr;max-height:42vh;overflow:auto}
+ .bday-compact .bday-item{flex-wrap:nowrap;margin:0}
+ .bday-compact .bday-person b{white-space:normal}
+ .bday-compact .bday-person span{font-size:8px}
+ .bday-compact .bday-days{white-space:nowrap;margin-left:auto}
+ .estoque-unico-card .urg-photobox,.estoque-unico-card .urg-photobox-imgwrap,.estoque-unico-card .urg-photobox-empty{width:96px!important;height:96px!important;min-width:96px!important}
+ .estoque-unico-card .urg-photobox img{max-width:96px!important;max-height:96px!important}
+ .task-card-summary{grid-template-columns:56px minmax(0,1fr);gap:5px}
+ .task-card-summary .urg-photobox{width:54px!important;height:60px!important}
+ .task-more{font-size:8px}
+ .task-more-body{font-size:8px}
 }
 </style>
 </head>
@@ -4608,8 +4653,8 @@ function toggleTheme() {
         <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
           <input type="text" id="tarefasBusca" placeholder="Buscar por produto, código ou colaborador..." oninput="renderTarefas()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:180px">
           <button type="button" class="btn-scan" onclick="abrirScannerAura('tarefasBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
-          <button class="promo-filter-btn active" id="tf_todas" onclick="filtrarTarefas('todas')">Todas</button>
-          <button class="promo-filter-btn" id="tf_pendentes" onclick="filtrarTarefas('pendentes')">Pendentes</button>
+          <button class="promo-filter-btn" id="tf_todas" onclick="filtrarTarefas('todas')">Todas</button>
+          <button class="promo-filter-btn active" id="tf_pendentes" onclick="filtrarTarefas('pendentes')">Pendentes</button>
           <button class="promo-filter-btn" id="tf_concluidas" onclick="filtrarTarefas('concluidas')">Concluídas</button>
         </div>
         <div id="tarefasBulkBar" style="display:none;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;flex-wrap:wrap">
@@ -6336,14 +6381,12 @@ function renderDashboard(){
       icon:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'},
   ];
 
-  document.getElementById('dashTiles').innerHTML=tiles.map(function(t){
+  document.getElementById('dashTiles').classList.add('dash-alert-grid');
+  document.getElementById('dashTiles').innerHTML=tiles.slice(0,6).map(function(t){
     var click=t.filt?'onclick="filtrarMetrica(\'' + t.filt + '\');auraNav(document.querySelector(\'#auraNav button:nth-child(2)\'),\'validades\')"':'';
-    var numCls='dash-tile-num'+(t.cur?' dash-tile-num-cur':'');
-    return '<div class="dash-tile '+t.cls+' dash-tile-ring" '+click+' title="'+(t.filt?'Filtrar: '+t.lbl:t.lbl)+'">'
-      +'<div class="dash-tile-hd"><div class="'+numCls+'">'+t.val+'</div>'+t.icon+'</div>'
-      +'<div class="dash-tile-lbl">'+t.lbl+'</div>'
-      +'<div class="dash-tile-sub">'+t.sub+'</div>'
-      +'</div>';
+    var color=t.cls==='dt-red'?'#ef5350':t.cls==='dt-orange'?'#fb923c':t.cls==='dt-amber'?'#fbbf24':t.cls==='dt-yellow'?'#facc15':t.cls==='dt-emr'?'#22c995':'#9ca3af';
+    return '<button type="button" class="dash-alert-item" '+click+' title="'+t.lbl+': '+t.val+' — '+t.sub+'" aria-label="'+t.lbl+': '+t.val+'. '+t.sub+'" style="color:'+color+'">'
+      +t.icon+'<span class="dash-alert-count">'+t.val+'</span><span class="sr-only">'+t.lbl+'</span></button>';
   }).join('');
 
   // ── Mini KPIs ──
@@ -6398,19 +6441,15 @@ function renderDashboard(){
   document.getElementById('dashSetorGrid').style.gridTemplateColumns='repeat('+setorKeys.length+', minmax(0,1fr))';
   document.getElementById('dashSetorGrid').innerHTML=setorKeys.map(function(s){
     var sm=setorMap[s];
-    var urgCnt=sm.vencido+sm.critico+sm.urgente;
-    var pct=sm.total>0?Math.round((sm.ok/sm.total)*100):0;
-    var barColor=pct>=80?'#34d399':pct>=50?'#fbbf24':'#f87171';
+    var statusKey=sm.vencido?'vencido':sm.critico?'critico':sm.urgente?'urgente':sm.atencao?'atencao':'ok';
+    var sectorColor={vencido:'#ef5350',critico:'#fb923c',urgente:'#fbbf24',atencao:'#facc15',ok:'#22c995'}[statusKey];
     var iconClass = SETOR_ICON[s] || 'ti-package';
-    return '<div class="dash-hero-card dash-setor-card" data-setor="'+escHtml(s)+'" onclick="filtrarSetor(\''+s+'\')" title="Filtrar por '+s+'">'
-      +'<div class="dsc-icon" style="color:'+barColor+'"><i class="ti '+iconClass+'"></i></div>'
-      +'<div class="dsc-nome" title="'+escHtml(s)+'">'+escHtml(s)+'</div>'
-      +'<div class="dsc-total">'+sm.total+'</div>'
-      +'<div class="dsc-status">'
-        +(urgCnt>0?'<span style="color:#f87171">'+urgCnt+' urg.</span>':'<span style="color:#34d399">Tudo ok</span>')
-      +'</div>'
-      +'<div class="dsc-bar"><div style="height:100%;width:'+pct+'%;background:'+barColor+';border-radius:2px"></div></div>'
-      +'</div>';
+    var totalSetor=sm.total;
+    return '<button type="button" class="dash-hero-card dash-setor-card" data-setor="'+escHtml(s)+'" onclick="filtrarSetor(\''+escHtml(s)+'\')" title="'+escHtml(s)+': '+totalSetor+' produtos; status '+statusKey+'" aria-label="'+escHtml(s)+': '+totalSetor+' produtos; status '+statusKey+'" style="border-color:'+sectorColor+'55">'
+      +'<span class="dsc-icon" style="color:'+sectorColor+'"><i class="ti '+iconClass+'"></i></span>'
+      +'<span class="dsc-nome">'+escHtml(s)+'</span>'
+      +'<span class="dsc-total" style="color:'+sectorColor+'">'+totalSetor+'</span>'
+      +'</button>';
   }).join('');
   atualizarSetorGridDestaque();
 
@@ -15894,14 +15933,16 @@ function renderLembreteAniversariosGestor_(){
     lista=ativos.map(function(c){return {c:c,p:_colabParseAnivFront_(c.aniv),dias:_colabDiasAteAniv_(c.aniv,hoje)};}).filter(function(x){return x.dias!==null;}).sort(function(a,b){return a.dias-b.dias;}).slice(0,4);
   }
   var nomeMes=_colabMesesPt_[hoje.getMonth()];
-  var sub=lista.length?(modoProximos?'Nenhum aniversário restante em '+nomeMes+'. Veja os próximos da equipe.':lista.length+' aniversário'+(lista.length===1?'':'s')+' restante'+(lista.length===1?'':'s')+' em '+nomeMes+'.'):'Nenhum aniversário cadastrado para colaboradores ativos.';
+  var sub=lista.length?(modoProximos?'Próximos aniversários':lista.length+' aniversário'+(lista.length===1?'':'s')+' este mês'):'Nenhum aniversário cadastrado para colaboradores ativos.';
   var itens=lista.map(function(x){
     var dias=x.dias,txt=dias===0?'Hoje!':(dias===1?'Amanhã':'Faltam '+dias+' dias');
     var dt=(x.p.d<10?'0':'')+x.p.d+'/'+(x.p.m<10?'0':'')+x.p.m;
     return '<div class="bday-item"><div class="bday-date">'+dt+'</div><div class="bday-person"><b>'+escHtml(x.c.nome)+'</b><span>'+escHtml(x.c.email||'')+'</span></div><div class="bday-days '+(dias===0?'today':'')+'">'+txt+'</div></div>';
   }).join('');
+  var primeiro=lista[0];
+  var proximo=primeiro?(((primeiro.p.d<10?'0':'')+primeiro.p.d+'/'+(primeiro.p.m<10?'0':'')+primeiro.p.m)+' · '+String(primeiro.c.nome||'')+' · '+(primeiro.dias===0?'hoje':primeiro.dias===1?'amanhã':'em '+primeiro.dias+' dias')):'';
   el.style.display='';
-  el.innerHTML='<div class="bday-gestor-hd"><div><div class="bday-gestor-title"><i class="ti ti-cake"></i> Aniversários da equipe — '+nomeMes.charAt(0).toUpperCase()+nomeMes.slice(1)+'</div><div class="bday-gestor-sub">'+sub+'</div></div><div style="font-size:9px;color:var(--tx2)">Somente colaboradores ativos</div></div>'+(itens?'<div class="bday-list">'+itens+'</div>':'');
+  el.innerHTML='<details class="bday-compact"><summary><i class="ti ti-cake"></i><span><b>'+nomeMes.charAt(0).toUpperCase()+nomeMes.slice(1)+'</b> · '+sub+(proximo?' · Próximo: '+escHtml(proximo):'')+'</span><i class="ti ti-chevron-down bday-chevron"></i></summary>'+(itens?'<div class="bday-list">'+itens+'</div>':'')+'<div class="bday-foot">Somente colaboradores ativos · toque para ver datas, nomes e e-mails</div></details>';
 }
 
 function colabAdminAbrirModal(chave){
@@ -16583,11 +16624,23 @@ function enviarTarefaParaSheets(tarefa) {
   var cfg=loadCfg();if(!cfg.url)return;fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action:'criarTarefa',tarefa:tarefa})}).catch(function(){var fila=getFilaTarefas();fila.push(tarefa);saveFilaTarefas(fila);mostrarToast('Sem conexão — tarefa salva para sincronizar depois','warn');});
 }
 
+function trocarColunaTarefasMobile(coluna){
+  var mostrarProntos=coluna==='prontos';
+  var tarefas=document.getElementById('tarefasColTarefas');
+  var prontos=document.getElementById('tarefasColProntos');
+  var btnTarefas=document.getElementById('tmt_tarefas');
+  var btnProntos=document.getElementById('tmt_prontos');
+  if(tarefas)tarefas.style.display=mostrarProntos?'none':'';
+  if(prontos)prontos.style.display=mostrarProntos?'block':'none';
+  if(btnTarefas)btnTarefas.classList.toggle('active',!mostrarProntos);
+  if(btnProntos)btnProntos.classList.toggle('active',mostrarProntos);
+}
+
 function renderTarefas() {
   var container = document.getElementById('tarefasGrid');
   if (!container) return;
   var tarefas = getTarefas();
-  var filtro = window._tarefasFiltro || 'todas';
+  var filtro = window._tarefasFiltro || 'pendentes';
   var selecionadas = window._tarefasSelecionadas || (window._tarefasSelecionadas = new Set());
   // remove da seleção tarefas que não existem mais ou que deixaram de ser pendentes
   Array.from(selecionadas).forEach(function(id) {
@@ -16650,61 +16703,26 @@ function renderTarefas() {
     var statusColor = isPend ? 'var(--amber)' : 'var(--green)';
     var statusIcon = isPend ? 'ti-clock' : 'ti-circle-check';
     var statusText = isPend ? 'Pendente' : 'Concluída';
-
     var thumbCod = (t.cod||'').replace(/[^0-9]/g,'');
     var tarefaFotoId = 'tarefaFoto_' + t.id.replace(/[^a-zA-Z0-9]/g,'_');
     var fotoHtml = thumbCod
-      ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + tarefaFotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + tarefaFotoId + '" data-cod="' + thumbCod + '" data-nome="' + escHtml(cleanNome(t.produto || '')) + '" src="" alt="" loading="lazy"></div></div>'
+      ? '<div class="urg-photobox" onclick="event.stopPropagation();abrirFotoGrande(document.getElementById(\'' + tarefaFotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + tarefaFotoId + '" data-cod="' + thumbCod + '" data-nome="' + escHtml(cleanNome(t.produto || '')) + '" src="" alt="Foto de '+escHtml(cleanNome(t.produto||''))+'" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
-    
-    var qtdeInfo = '';
-    if (t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
-      qtdeInfo = '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:600"><i class="ti ti-package"></i> Quantidade confirmada: <b>' + t.quantidadeConfirmada + ' un.</b></div>';
-    }
-
-    var qtdeBadge = '';
-    if (t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
-      qtdeBadge = '<span class="tarefa-qtde-badge" style="position:absolute;top:-8px;right:-8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);border:2px solid var(--surface)">' + t.quantidadeConfirmada + '</span>';
-    }
-
-    var validadeInfo = '';
-    if (t.validade) {
-      var dv = daysDiff(t.validade);
-      var corVal = (dv !== null && dv <= 3) ? 'var(--red)' : (dv !== null && dv <= 7 ? 'var(--amber)' : 'var(--tx2)');
-      validadeInfo = '<div class="tarefa-validade-info" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,.1);color:' + corVal + ';margin-bottom:6px"><i class="ti ti-calendar-exclamation"></i> Validade: ' + fmtDataExtenso(t.validade) + '</div>';
-    }
-    
-    return '<div class="tarefa-row" style="position:relative">'
-      + qtdeBadge
-      + fotoHtml
-      + '<div style="flex:1;min-width:0">'
-      + '<div class="tarefa-card-top" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px">'
-      +   '<div style="display:flex;align-items:center;gap:8px">'
-      +     (isPend ? '<input type="checkbox" class="tarefaChk" data-id="' + t.id + '" ' + (selecionadas.has(t.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + t.id + '\',this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)" title="Selecionar tarefa">' : '')
-      +     '<span class="tarefa-status-badge" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + (isPend ? 'rgba(245,158,11,.15)' : 'rgba(16,185,129,.15)') + ';color:' + statusColor + '"><i class="ti ' + statusIcon + '"></i> ' + statusText + '</span>'
-      +   '</div>'
-      +   (isPend ? '<div class="tarefa-card-actions" style="display:flex;gap:6px;flex-shrink:0">'
-      +     '<button class="btn btn-sm" style="color:var(--blue);border-color:var(--blue);font-size:11px;padding:3px 8px" onclick="abrirTransferirModal(\'' + t.id + '\')" title="Transferir para outro colaborador"><i class="ti ti-arrows-exchange"></i> Transferir</button>'
-      +     '<button class="btn btn-sm" style="color:var(--red);border-color:var(--red);font-size:11px;padding:3px 8px" onclick="cancelarTarefa(\'' + t.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button>'
-      +   '</div>' : '')
-      + '</div>'
-      + '<div class="tarefa-card-nome" style="font-size:14px;font-weight:600;margin-bottom:4px">' + escHtml(t.produto) + '</div>'
-      + (t.cod ? '<div class="tarefa-card-cod" style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:6px">' + t.cod + '</div>' : '')
-      + validadeInfo
-      + _tarefasLotesHtml_(t.cod,t.validade,t.quantidadeConfirmada)
-      + (t.descricao ? '<div class="tarefa-card-desc" style="font-size:12px;color:var(--tx2);margin-bottom:6px;line-height:1.4"><i class="ti ti-arrows-exchange" style="font-size:12px;opacity:.7"></i> ' + escHtml(t.descricao) + '</div>' : '')
-      + (t.precoAcao ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px"><span style="font-size:11px;font-weight:800;padding:4px 8px;border-radius:7px;background:rgba(29,158,117,.12);color:var(--green)">Preço ação: '+Number(t.precoAcao).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</span>'+(t.margemAcaoPct!==null&&t.margemAcaoPct!==undefined?'<span style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;background:var(--bg2);border:1px solid var(--bds)">Margem '+Number(t.margemAcaoPct).toFixed(1)+'%</span>':'')+(t.materialAcao?'<span style="font-size:11px;font-weight:800;padding:4px 8px;border-radius:7px;background:rgba(245,158,11,.12);color:var(--amber)">'+(t.materialAcao==='PLACA'?'Placa / Encarte':(t.materialAcao==='ETIQUETA'?'Etiqueta':'Decidir depois'))+'</span>':'')+'</div>' : '')
-      + '<div class="tarefa-card-colab" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)">'
-      +   '<i class="ti ti-user" style="font-size:14px"></i> '
-      +   '<span style="font-weight:600">' + escHtml(t.nomeColaborador) + '</span>'
-      + '</div>'
-      + qtdeInfo
-      + '<div class="tarefa-card-foot" style="font-size:10px;color:var(--muted);margin-top:6px;display:flex;flex-direction:column;gap:2px">'
-      +   '<span>Enviado em: ' + dataFmt + '</span>'
-      +   (t.confirmadoEm ? '<span>Concluído em: ' + new Date(t.confirmadoEm).toLocaleString('pt-BR') + '</span>' : '')
-      + '</div>'
-      + '</div>'
-      + '</div>';
+    var validadeInfo = t.validade ? '<div class="tarefa-validade-info"><i class="ti ti-calendar-exclamation"></i> '+fmtDataExtenso(t.validade)+'</div>' : '<div class="tarefa-validade-info"><i class="ti ti-calendar-off"></i> Sem validade cadastrada</div>';
+    var actions = isPend ? '<div class="tarefa-card-actions"><button class="btn btn-sm" style="color:var(--blue);border-color:var(--blue)" onclick="abrirTransferirModal(\''+t.id+'\')" title="Transferir"><i class="ti ti-arrows-exchange"></i></button><button class="btn btn-sm" style="color:var(--red);border-color:var(--red)" onclick="cancelarTarefa(\''+t.id+'\')" title="Cancelar"><i class="ti ti-x"></i></button></div>' : '';
+    var details='<details class="task-more"><summary>Mais informações · lotes e observações</summary><div class="task-more-body">'
+      +(t.cod?'<div>Código: '+escHtml(t.cod)+'</div>':'')
+      +_tarefasLotesHtml_(t.cod,t.validade,t.quantidadeConfirmada)
+      +(t.descricao?'<div class="tarefa-card-desc"><i class="ti ti-arrows-exchange"></i> '+escHtml(t.descricao)+'</div>':'')
+      +(t.precoAcao?'<div class="task-price">Preço ação: '+Number(t.precoAcao).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+(t.margemAcaoPct!=null?' · Margem '+Number(t.margemAcaoPct).toFixed(1)+'%':'')+(t.materialAcao?' · '+escHtml(t.materialAcao):'')+'</div>':'')
+      +'<div class="tarefa-card-colab"><i class="ti ti-user"></i> '+escHtml(t.nomeColaborador||'Colaborador não informado')+'</div>'
+      +(t.quantidadeConfirmada!=null?'<div class="task-confirmed">Quantidade confirmada: <b>'+escHtml(t.quantidadeConfirmada)+' un.</b></div>':'')
+      +'<div class="tarefa-card-foot">Enviado em: '+dataFmt+(t.confirmadoEm?' · Concluído em: '+new Date(t.confirmadoEm).toLocaleString('pt-BR'):'')+'</div>'
+      +'</div></details>';
+    return '<article class="tarefa-row" style="position:relative">'
+      +'<div class="tarefa-card-top">'+(isPend?'<input type="checkbox" class="tarefaChk" data-id="'+escHtml(t.id)+'" '+(selecionadas.has(t.id)?'checked':'')+' onchange="toggleSelecaoTarefa(\''+t.id+'\',this.checked)" title="Selecionar tarefa">':'')+'<span class="tarefa-status-badge" style="background:'+(isPend?'rgba(245,158,11,.15)':'rgba(16,185,129,.15)')+';color:'+statusColor+'"><i class="ti '+statusIcon+'"></i> '+statusText+'</span>'+actions+'</div>'
+      +'<div class="task-card-summary">'+fotoHtml+'<div class="task-card-info"><div class="tarefa-card-nome">'+escHtml(t.produto||'Produto sem descrição')+'</div>'+validadeInfo+'<div class="task-assignee">'+escHtml(t.nomeColaborador||'Colaborador não informado')+'</div></div></div>'
+      +details+'</article>';
   };
 
   var html = filtered.map(renderCard).join('');
@@ -17506,19 +17524,23 @@ function renderEstoque(){
     var jaResolvido=grupoResolvido;
     var thumb=barras?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+barras+'"><img data-cod="'+barras+'" data-nome="'+escHtml(cleanNome(p.nome||''))+'" alt="" loading="lazy"></div></div>':'<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
     var needsPromo=lotes.some(function(x){return ['vencido','critico','urgente','atencao'].includes(statusFromDays(daysDiff(x.validade)));});
-    return '<div class="urg-card estoque-unico-card'+(jaResolvido?' resolvido':'')+'" onclick="abrirProdutoModal(\''+escHtml(grupo.cod||'')+'\')" style="cursor:pointer">'
-      +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px;--qb-pad-m:'+qb.headerPadLeftMobile+'px">'+qb.html+'<div style="min-width:0;flex:1"><div class="urg-card-nome">'+escHtml(cleanNome(p.nome||'—'))+'</div><div class="urg-card-cod">'+escHtml(p.cod||'—')+' · '+lotes.length+' lote(s)</div></div>'+badge(days===null?'sem-data':s)+'</div>'
+    var statusLabel=days===null?'Sem validade':days<0?'Vencido há '+Math.abs(days)+' dias':days===0?'Vence hoje':days===1?'Vence amanhã':'Faltam '+days+' dias';
+    var stockImg=barras?'<div class="urg-photobox"><div class="urg-photobox-imgwrap" id="urgPhotobox_'+barras+'"><img data-cod="'+barras+'" data-nome="'+escHtml(cleanNome(p.nome||''))+'" alt="Foto de '+escHtml(cleanNome(p.nome||''))+'" loading="lazy"></div></div>':'<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
+    return '<div class="urg-card estoque-unico-card'+(jaResolvido?' resolvido':'')+'" onclick="abrirProdutoModal(\''+escHtml(grupo.cod||'')+'\')" style="cursor:pointer" title="Toque para ver todos os lotes e informações">'
+      +'<div class="'+hdrCls+'" style="padding-left:'+qb.headerPadLeft+'px;--qb-pad-m:'+qb.headerPadLeftMobile+'px">'+qb.html+'<div style="min-width:0;flex:1"><div class="urg-card-nome">'+escHtml(cleanNome(p.nome||'—'))+'</div><div class="urg-card-cod">'+lotes.length+' lote(s) · '+total+' un. no total</div></div>'+badge(days===null?'sem-data':s)+'</div>'
       +'<div class="urg-card-body">'
-        +'<div class="urg-card-mid">'+thumb+'<div class="urg-card-info"><div class="urg-info-field"><span class="urg-info-lbl">Lote mais próximo</span><span class="urg-info-val" style="color:'+venceCor+'">'+venceTxt+'</span></div><div class="urg-info-field"><span class="urg-info-lbl">Setor</span><span class="urg-info-val">'+escHtml(p.setor||'—')+'</span></div></div><div class="urg-card-right">'+speedometerSVG(days,s)+'<div class="urg-card-right-extenso" style="color:'+venceCor+'">'+venceExt+'</div><div class="urg-card-right-stats"><div><span class="urg-stat-lbl">Data</span><div class="urg-stat-val" style="color:'+venceCor+'">'+(p.validade?fmtDataExtenso(p.validade):'—')+'</div></div><div><span class="urg-stat-lbl">Total</span><div class="urg-stat-val">'+total+'</div></div></div></div></div>'
-        +'<div class="estoque-unico-fin"><div><span>Custo</span><b>'+(custo?fmtR(custo):'—')+'</b></div><div><span>Venda</span><b>'+(precoNormal?fmtR(precoNormal):'—')+'</b></div><div class="promo"><span>Promoção</span><b>'+(precoPromo?fmtR(precoPromo)+(pct?' · '+fmtPct(pct):''):(promoAtiva?'Ativa':'—'))+'</b></div></div>'
-        +'<div class="estoque-unico-lotes">'+lotes.slice(0,3).map(function(x){return _estoqueUnificadoLoteHtml_(x,resolvidos,zeroIdx);}).join('')+(lotes.length>3?'<div class="estoque-unico-more">+'+(lotes.length-3)+' lote(s) adicional(is) · clique no card para ver todos</div>':'')+'</div>'
-        +'<div class="estoque-unico-meta"><div class="estoque-unico-meta-line" title="'+escHtml(forn)+'"><i class="ti ti-truck-delivery"></i> <b>Fornecedor:</b> '+escHtml(forn)+'</div><div class="estoque-unico-meta-line"><i class="ti ti-scan"></i> <b>Última coleta do lote próximo:</b> '+escHtml(_estoqueUnificadoBipCompact_(buscarBipagem(p.cod,p.validade)))+'</div></div>'
+      +'<div class="urg-card-mid">'+stockImg
+      +'<div class="urg-card-info">'
+      +'<div class="urg-info-field"><span class="urg-info-lbl">Quantidade em estoque</span><span class="urg-info-val">'+total+' unidades · '+lotes.length+' lote(s)</span></div>'
+      +'<div class="urg-info-field"><span class="urg-info-lbl">Vencimento mais próximo</span><span class="urg-info-val" style="color:'+venceCor+'">'+(p.validade?fmtDataExtenso(p.validade):'Sem data')+' · '+statusLabel+'</span></div>'
+      +'</div><div class="urg-card-right"></div></div>'
+      +'<div class="estoque-unico-fin stock-price-grid"><div><span>Custo</span><b>'+(custo?fmtR(custo):'—')+'</b></div><div><span>Valor de venda</span><b>'+(precoNormal?fmtR(precoNormal):'—')+'</b></div><div class="promo"><span>Promoção</span><b>'+(precoPromo?fmtR(precoPromo)+(pct?' · '+fmtPct(pct):''):(promoAtiva?'Ativa':'—'))+'</b></div></div>'
       +'</div>'
       +'<div class="estoque-unico-actions">'
-        +'<button class="abtn" style="border-color:var(--blue);color:var(--blue)" onclick="event.stopPropagation();openTarefaModal('+idx+',\'inventario\')"><i class="ti ti-clipboard-check"></i> Conferir</button>'
-        +'<button class="abtn" style="border-color:'+(needsPromo?'var(--amber)':'var(--bds)')+';color:'+(needsPromo?'var(--amber)':'var(--tx2)')+'" onclick="event.stopPropagation();openTarefaModal('+idx+',\'venda_rapida\')"><i class="ti ti-tag"></i> Promoção</button>'
-        +'<button class="abtn encarte" onclick="event.stopPropagation();abrirEncarteDoProduto(\''+escHtml(grupo.cod||'')+'\')"><i class="ti ti-photo"></i> Encarte</button>'
-        +'<button class="abtn" style="border-color:'+(jaResolvido?'var(--tx2)':'var(--green)')+';color:'+(jaResolvido?'var(--tx2)':'var(--green)')+'" onclick="event.stopPropagation();openResolvidoModal('+idx+')"><i class="ti ti-circle-check"></i> '+(jaResolvido?'OK':'Resolvido')+'</button>'
+      +'<button class="abtn" style="border-color:var(--blue);color:var(--blue)" onclick="event.stopPropagation();openTarefaModal('+idx+',\'inventario\')"><i class="ti ti-clipboard-check"></i> Conferir</button>'
+      +'<button class="abtn" style="border-color:'+(needsPromo?'var(--amber)':'var(--bds)')+';color:'+(needsPromo?'var(--amber)':'var(--tx2)')+'" onclick="event.stopPropagation();openTarefaModal('+idx+',\'venda_rapida\')"><i class="ti ti-tag"></i> Promoção</button>'
+      +'<button class="abtn encarte" onclick="event.stopPropagation();abrirEncarteDoProduto(\''+escHtml(grupo.cod||'')+'\')"><i class="ti ti-photo"></i> Encarte</button>'
+      +'<button class="abtn" style="border-color:'+(jaResolvido?'var(--tx2)':'var(--green)')+';color:'+(jaResolvido?'var(--tx2)':'var(--green)')+'" onclick="event.stopPropagation();openResolvidoModal('+idx+')"><i class="ti ti-circle-check"></i> '+(jaResolvido?'OK':'Resolvido')+'</button>'
       +'</div></div>';
   }
   var ativos=[],resolvidosHtml=[];
