@@ -8206,6 +8206,7 @@ function bossFmtDataBR_(iso){
 var _nfeCeasaEntradas_=[];
 var _nfeCeasaMesCarregado_='';
 var _nfeCeasaCarregando_=false;
+var _nfeCeasaPromise_=null;
 
 function nfeCeasaMesAtual_(){
   var d=new Date();
@@ -8239,30 +8240,25 @@ function nfeCeasaRender_(){
 function nfeCeasaCarregar_(force){
   var mesEl=document.getElementById('nfeCeasaMes'),st=document.getElementById('nfeCeasaStatus'),btn=document.getElementById('nfeCeasaAtualizarBtn');
   if(!mesEl)return Promise.resolve(null);
-  if(!mesEl.value)mesEl.value=nfeCeasaMesAtual_();
-  var mes=String(mesEl.value||'');
+  if(!mesEl.value)mesEl.value=nfeCeasaMesAtual_();var mes=String(mesEl.value||'');
   if(!force&&_nfeCeasaMesCarregado_===mes&&_nfeCeasaEntradas_.length){nfeCeasaRender_();return Promise.resolve(_nfeCeasaEntradas_);}
-  if(_nfeCeasaCarregando_)return Promise.resolve(null);
+  if(_nfeCeasaCarregando_)return _nfeCeasaPromise_||Promise.resolve(null);
+  var ticket=force&&window.AuraLoader?window.AuraLoader.start({message:'Carregando entradas CEASA de '+mes+'…',complete:'Entradas CEASA do período atualizadas'}):0;
   var url=bossApiUrl();
-  if(!url){if(st){st.className='nfe-ceasa-status show err';st.textContent='API principal da AURA não configurada.';}return Promise.resolve(null);}
-  _nfeCeasaCarregando_=true;
-  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando';}
+  if(!url){var err='API principal da AURA não configurada.';if(st){st.className='nfe-ceasa-status show err';st.textContent=err;}if(ticket&&window.AuraLoader)window.AuraLoader.fail(err);return Promise.resolve(null);}
+  _nfeCeasaCarregando_=true;if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando';}
   if(st){st.className='nfe-ceasa-status show';st.innerHTML='<i class="ti ti-loader-2 spin"></i> Carregando entradas CEASA de '+nfeCeasaEsc_(mes)+'...';}
-  return bossFetch(url,mes+'-01','mes').then(function(res){
+  var erro='';
+  _nfeCeasaPromise_=bossFetch(url,mes+'-01','mes').then(function(res){
     if(!res||!res.ok)throw new Error((res&&res.erro)||'A API não retornou as entradas CEASA.');
-    var dados=res.dados||res,ec=dados&&dados.grupos&&dados.grupos.entradaCeasa;
-    _nfeCeasaEntradas_=ec&&Array.isArray(ec.entradas)?ec.entradas:[];
-    _nfeCeasaMesCarregado_=mes;
-    nfeCeasaRender_();
-    if(st){st.className='nfe-ceasa-status';st.textContent='';}
-    return _nfeCeasaEntradas_;
+    var dados=res.dados||res,ec=dados&&dados.grupos&&dados.grupos.entradaCeasa;_nfeCeasaEntradas_=ec&&Array.isArray(ec.entradas)?ec.entradas:[];_nfeCeasaMesCarregado_=mes;nfeCeasaRender_();if(st){st.className='nfe-ceasa-status';st.textContent='';}return _nfeCeasaEntradas_;
   }).catch(function(e){
-    if(st){st.className='nfe-ceasa-status show err';st.textContent='Falha ao carregar entradas CEASA: '+(e&&e.message?e.message:e);}
-    return null;
+    erro=String(e&&e.message||e||'Falha ao carregar as entradas CEASA.');if(st){st.className='nfe-ceasa-status show err';st.textContent='Falha ao carregar entradas CEASA: '+erro;}return null;
   }).finally(function(){
-    _nfeCeasaCarregando_=false;
-    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
+    _nfeCeasaCarregando_=false;_nfeCeasaPromise_=null;if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
+    if(ticket&&window.AuraLoader){if(erro)window.AuraLoader.fail(erro);else window.AuraLoader.done();}
   });
+  return _nfeCeasaPromise_;
 }
 
 // ═══ ENTRADA CEASA (compras de hortifruti) ═══
@@ -10962,61 +10958,30 @@ function bossFetch(url,data,periodo){
   });
 }
 function bossCarregar(force){
-  var inp=document.getElementById('bossData');if(!inp)return;
+  var inp=document.getElementById('bossData');if(!inp)return Promise.resolve({ok:false,error:'Painel Boss Vision não disponível.'});
   if(!inp.value)bossConfigurarCampoPeriodo_(bossPeriodoAtual,bossPeriodoAtual==='dia'?bossHoje():bossMesAtualValor_());
-  var data=bossDataApiSelecionada_();
-  var periodo=bossPeriodoAtual;
-  var compPrev=String(data||'').slice(0,7);
-  var compEl=document.getElementById('bossCompetenciaDrive');
+  var data=bossDataApiSelecionada_(),periodo=bossPeriodoAtual,compPrev=String(data||'').slice(0,7),compEl=document.getElementById('bossCompetenciaDrive');
   if(compEl&&compPrev)compEl.textContent='Competência '+compPrev+' · BANCO DE DADOS/'+compPrev;
-  var url=bossApiUrl();
-  var btn=document.getElementById('bossBtnAtualizar');
+  var url=bossApiUrl(),btn=document.getElementById('bossBtnAtualizar');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
-  bossSetStatus('',periodo==='mes'
-    ?('Atualizando '+bossMesLabelValor_(data.slice(0,7))+'... A primeira leitura de um XLS grande pode levar mais tempo.')
-    :('Atualizando eventos de '+data.split('-').reverse().join('/')+'...'));
-  if(!url){
-    bossRender(_bossDados||{}); // mesmo sem Drive, Vencidos continua vindo da AURA
-    bossSetStatus('warn','Dados locais atualizados. A API principal da AURA ainda não está disponível para carregar Entradas NF, Quebras e Consumo Interno.');
-    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
-    return;
-  }
-  var _bossT0=performance.now();
-  console.time('[Boss Vision] tempo total (fetch+render)');
-  bossFetch(url,data,periodo).then(function(res){
-    var _bossTFetch=performance.now();
-    console.log('[Boss Vision] fetch (rede+backend):',(_bossTFetch-_bossT0).toFixed(0)+'ms');
-    if(!res||!res.ok)throw new Error((res&&res.erro)||'A API não retornou dados do Boss Vision.');
-    var dados=res.dados||res;
-    bossRender(dados);
-    var _bossTRender=performance.now();
-    console.log('[Boss Vision] render:',(_bossTRender-_bossTFetch).toFixed(0)+'ms');
-    console.timeEnd('[Boss Vision] tempo total (fetch+render)');
-    try{
-      localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({
-        data:data,
-        periodo:periodo,
-        valorFiltro:(periodo==='mes'?data.slice(0,7):data),
-        dados:dados,
-        salvoEm:new Date().toISOString()
-      }));
-    }catch(e){}
-    var avisos=(res.avisos||dados.avisos||[]);
-    if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);
-    else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Entradas NF + CEASA + Vendas + Quebras');
+  bossSetStatus('',periodo==='mes'?('Atualizando '+bossMesLabelValor_(data.slice(0,7))+'... A primeira leitura de um XLS grande pode levar mais tempo.'):('Atualizando eventos de '+data.split('-').reverse().join('/')+'...'));
+  if(!url){bossRender(_bossDados||{});var semApi='Dados locais apresentados, mas a API principal da AURA não está disponível para carregar Entradas NF, Quebras e Consumo Interno.';bossSetStatus('warn',semApi);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}return Promise.resolve({ok:false,error:semApi});}
+  var t0=performance.now();console.time('[Boss Vision] tempo total (fetch+render)');
+  return bossFetch(url,data,periodo).then(function(res){
+    var tf=performance.now();console.log('[Boss Vision] fetch (rede+backend):',(tf-t0).toFixed(0)+'ms');if(!res||!res.ok)throw new Error((res&&res.erro)||'A API não retornou dados do Boss Vision.');
+    var dados=res.dados||res;bossRender(dados);var tr=performance.now();console.log('[Boss Vision] render:',(tr-tf).toFixed(0)+'ms');console.timeEnd('[Boss Vision] tempo total (fetch+render)');
+    try{localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({data:data,periodo:periodo,valorFiltro:(periodo==='mes'?data.slice(0,7):data),dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
+    var avisos=res.avisos||dados.avisos||[];if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Entradas NF + CEASA + Vendas + Quebras');
+    return {ok:true};
   }).catch(function(err){
-    console.timeEnd('[Boss Vision] tempo total (fetch+render)');
-    console.warn('[Boss Vision] falhou após',(performance.now()-_bossT0).toFixed(0)+'ms:',err.message);
+    console.timeEnd('[Boss Vision] tempo total (fetch+render)');console.warn('[Boss Vision] falhou após',(performance.now()-t0).toFixed(0)+'ms:',err.message);
     var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
-    if(cache&&cache.data===data&&cache.periodo===periodo&&cache.dados){
-      bossRender(cache.dados);
-      bossSetStatus('warn','A atualização pela API falhou ('+err.message+'). Exibindo o último snapshot salvo deste período.');
-    }else{
-      bossRender({});
-      bossSetStatus('warn','A atualização pela API falhou. '+err.message);
-    }
+    if(cache&&cache.data===data&&cache.periodo===periodo&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','A atualização pela API falhou ('+err.message+'). Exibindo o último snapshot salvo deste período.');}
+    else{bossRender({});bossSetStatus('warn','A atualização pela API falhou. '+err.message);}
+    return {ok:false,error:'Não foi possível atualizar o Boss Vision: '+err.message};
   }).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}});
 }
+
 function bossInit(){
   var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
 
@@ -12001,7 +11966,24 @@ function nfeAtualizarColetasAposGravacao_(){
   setTimeout(function(){try{renderUltimasColetas('silent');}catch(e){}},4500);
 }
 function nfeStatus_(tipo,msg){var el=document.getElementById('nfeStatus');if(!el)return;el.className='nfe-status '+(tipo||'');el.innerHTML='<i class="ti '+(tipo==='ok'?'ti-circle-check':tipo==='err'?'ti-alert-circle':tipo==='warn'?'ti-alert-triangle':'ti-info-circle')+'"></i> '+nfeEsc_(msg||'');}
-function nfeInit_(){try{if(typeof carregarColaboradoresUniversal_==='function')carregarColaboradoresUniversal_(false).then(function(){nfeRenderOperadores_();if(_nfeHistGeralCarregado_)nfeHistoricoGeralPopularFiltros_(),nfeHistoricoGeralRender_();});}catch(e){}if(!_nfeNota){var d=nfeLerRascunho_();if(d&&d.nota&&!d.nota.jaProcessada){nfeRestaurarRascunho_(true);nfeStatus_('ok','Rascunho salvo automaticamente restaurado. Continue de onde parou.');}}nfeHistoricoGeralCarregar_(false);try{nfeCeasaCarregar_(false);}catch(e){}setTimeout(function(){var i=document.getElementById('nfeChave');if(i&&!_nfeNota)i.focus();},80);}
+var _nfeInitLoadPromise_=null;
+function nfeInit_(){
+  if(_nfeInitLoadPromise_)return _nfeInitLoadPromise_;
+  var ticket=window.AuraLoader?window.AuraLoader.start({message:'Carregando entradas CEASA e histórico de NF-e…',complete:'Conferência NF-e, CEASA e histórico carregados'}):0;
+  if(!_nfeNota){var d=nfeLerRascunho_();if(d&&d.nota&&!d.nota.jaProcessada){nfeRestaurarRascunho_(true);nfeStatus_('ok','Rascunho salvo automaticamente restaurado. Continue de onde parou.');}}
+  var colab=Promise.resolve();
+  try{if(typeof carregarColaboradoresUniversal_==='function')colab=Promise.resolve(carregarColaboradoresUniversal_(false)).then(function(){nfeRenderOperadores_();if(_nfeHistGeralCarregado_){nfeHistoricoGeralPopularFiltros_();nfeHistoricoGeralRender_();}});}catch(e){colab=Promise.reject(e);}
+  var hist=nfeHistoricoGeralCarregar_(false),ceasa;
+  try{ceasa=nfeCeasaCarregar_(false);}catch(e){ceasa=Promise.reject(e);}
+  _nfeInitLoadPromise_=Promise.all([colab,hist,ceasa]).then(function(results){
+    var hr=results[1],cr=results[2];
+    if(hr&&hr.ok===false)throw new Error(hr.error||'Não foi possível carregar o histórico de NF-e.');
+    if(cr===null)throw new Error('Não foi possível carregar as entradas CEASA.');
+    if(ticket&&window.AuraLoader)window.AuraLoader.done();
+    return results;
+  }).catch(function(e){var msg=String(e&&e.message||e||'Falha ao abrir a Conferência NF-e');if(ticket&&window.AuraLoader)window.AuraLoader.fail(msg);throw e;}).finally(function(){_nfeInitLoadPromise_=null;setTimeout(function(){var i=document.getElementById('nfeChave');if(i&&!_nfeNota)i.focus();},80);});
+  return _nfeInitLoadPromise_;
+}
 function nfeChaveInput_(){var i=document.getElementById('nfeChave');if(!i)return;var d=nfeDigitos_(i.value||'');if(d.length<=44)i.value=d;if(_nfeAutoTimer)clearTimeout(_nfeAutoTimer);if(d.length===44)_nfeAutoTimer=setTimeout(nfeBuscarChave_,250);}
 function nfeEhEmbalagemFront_(u){
   u=String(u||'').trim().toUpperCase().replace(/\./g,'');
@@ -12269,7 +12251,7 @@ function nfeLimpar_(){nfeAutosaveAgora_();_nfeNota=null;var box=document.getElem
 // v6.72 — HISTÓRICO GERAL DE CONFERÊNCIA NF-e (AURA ADMIN)
 // Lista todas as NF-e de todos os usuários. Consulta de detalhe é somente leitura.
 // ═══════════════════════════════════════════════════════════════
-var _nfeHistGeralDados_=[],_nfeHistGeralCarregado_=false,_nfeHistGeralCarregando_=false,_nfeHistGeralFontes_=null;
+var _nfeHistGeralDados_=[],_nfeHistGeralCarregado_=false,_nfeHistGeralCarregando_=false,_nfeHistGeralFontes_=null,_nfeHistGeralPromise_=null;
 function nfeHistNorm_(v){return String(v==null?'':v).trim().toLowerCase();}
 function nfeHistNomeOperador_(email){
   var e=nfeHistNorm_(email),lista=(typeof COLABORADORES!=='undefined'&&Array.isArray(COLABORADORES))?COLABORADORES:[];
@@ -12314,39 +12296,33 @@ function nfeHistoricoGeralApi_(action,extra,postBody,timeoutMs){
   });
 }
 function nfeHistoricoGeralCarregar_(forcar){
-  if(_nfeHistGeralCarregando_)return;
-  if(_nfeHistGeralCarregado_&&!forcar){nfeHistoricoGeralRender_();return;}
+  if(_nfeHistGeralCarregando_)return _nfeHistGeralPromise_||Promise.resolve({ok:false,error:'O histórico já está sendo consultado.'});
+  if(_nfeHistGeralCarregado_&&!forcar){nfeHistoricoGeralRender_();return Promise.resolve({ok:true,cached:true});}
+  var ticket=forcar&&window.AuraLoader?window.AuraLoader.start({message:'Consultando e atualizando o histórico de NF-e…',complete:'Histórico de NF-e atualizado'}):0;
   var body=document.getElementById('nfeHistBody'),btn=document.getElementById('nfeHistAtualizarBtn');
   if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty"><i class="ti ti-loader-2 spin"></i> '+(forcar?'Reconciliando cadastros e atualizando NF-e...':'Carregando todas as NF-e...')+'</div></td></tr>';
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> '+(forcar?'Reconciliando...':'Atualizando...');}
   _nfeHistGeralCarregando_=true;
-
-  var prep=forcar
-    ?nfeHistoricoGeralApi_('nfeReconciliarCadastrosAgora','',{forcar:true},180000).catch(function(e){console.warn('[AURA NF-e] Falha ao reconciliar cadastros:',e);return null;})
-    :Promise.resolve(null);
-
-  prep.then(function(rec){
-    if(rec&&rec.ok&&Number(rec.completas)>0){
-      mostrarToast(Number(rec.completas)+' NF-e(s) atualizada(s) após localizar os produtos no Banco de Dados.','ok');
-    }
+  var erro='';
+  var prep=forcar?nfeHistoricoGeralApi_('nfeReconciliarCadastrosAgora','',{forcar:true},180000).catch(function(e){console.warn('[AURA NF-e] Falha ao reconciliar cadastros:',e);return null;}):Promise.resolve(null);
+  _nfeHistGeralPromise_=prep.then(function(rec){
+    if(rec&&rec.ok&&Number(rec.completas)>0)mostrarToast(Number(rec.completas)+' NF-e(s) atualizada(s) após localizar os produtos no Banco de Dados.','ok');
     return nfeHistoricoGeralApi_('nfeHistoricoTodos','&limite=1000',{limite:1000},90000);
   }).then(function(r){
-    _nfeHistGeralCarregando_=false;
-    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
-    if(!r||!r.ok){
-      if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Não foi possível carregar o histórico: '+nfeEsc_((r&&r.erro)||'verifique a implantação atual do Code.gs')+'</div></td></tr>';
-      return;
-    }
-    _nfeHistGeralDados_=Array.isArray(r.notas)?r.notas:[];
-    _nfeHistGeralFontes_=r.fontes||null;
-    _nfeHistGeralCarregado_=true;
-    nfeHistoricoGeralPopularFiltros_();
-    nfeHistoricoGeralRender_();
+    if(!r||!r.ok)throw new Error((r&&r.erro)||'Não foi possível consultar o histórico de NF-e.');
+    _nfeHistGeralDados_=Array.isArray(r.notas)?r.notas:[];_nfeHistGeralFontes_=r.fontes||null;_nfeHistGeralCarregado_=true;
+    nfeHistoricoGeralPopularFiltros_();nfeHistoricoGeralRender_();return {ok:true,total:_nfeHistGeralDados_.length};
   }).catch(function(e){
-    _nfeHistGeralCarregando_=false;
-    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
-    if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Falha ao consultar o histórico. '+nfeEsc_(String(e&&e.message||''))+'</div></td></tr>';
+    erro=String(e&&e.message||e||'Falha ao consultar o histórico de NF-e.');
+    if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Falha ao consultar o histórico. '+nfeEsc_(erro)+'</div></td></tr>';
+    return {ok:false,error:erro};
+  }).finally(function(){
+    _nfeHistGeralCarregando_=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
+    nfeHistoricoGeralRender_();
+    if(ticket&&window.AuraLoader){if(erro)window.AuraLoader.fail(erro);else window.AuraLoader.done();}
+    _nfeHistGeralPromise_=null;
   });
+  return _nfeHistGeralPromise_;
 }
 
 function nfeHistoricoGeralPopularFiltros_(){
@@ -18476,7 +18452,7 @@ console.info('[AURA] preço por validade v7.10 — bipe/Estoque mostra venda nor
  draw(0);
 })(window,document);</script>
 <script id="aura-process-loader-hooks">
-(function(){if(!window.AuraLoader)return;var ops=[["syncAll", "Sincronizando os dados da AURA…", "Sincronização concluída"], ["cfCarregar", "Carregando os casos…", "Casos carregados"], ["cfCompletarNegociacaoViaApi_", "Concluindo a negociação…", "Negociação concluída"], ["cfSalvarAcao_", "Salvando a ação…", "Ação salva"], ["afCarregar", "Carregando as ações de fornecedores…", "Ações carregadas"], ["afTeleconArquivoSelecionado_", "Importando o relatório Telecon…", "Relatório disponível para conferência"], ["afTeleconConfirmar_", "Confirmando o relatório Telecon…", "Relatório confirmado"], ["afAbrirRelatorioTelecon_", "Abrindo o relatório Telecon…", "Relatório aberto"], ["afBaixarRelatorioTelecon_", "Baixando o relatório…", "Relatório baixado"], ["afAtualizarRelatorioTelecon_", "Atualizando o relatório Telecon…", "Relatório atualizado"], ["afRemoverRelatorioTelecon_", "Removendo o relatório…", "Relatório removido"], ["afTeleconArquivoAtualizacaoSelecionado_", "Importando a atualização Telecon…", "Relatório disponível para atualização"], ["afRegistrarBonificacao_", "Registrando a bonificação…", "Bonificação registrada"], ["afEvidenciasSelecionadas_", "Enviando as evidências…", "Evidências enviadas"], ["afGerarDocumentoAtual_", "Gerando o documento…", "Documento gerado"], ["afExcluirDossieAtual_", "Excluindo o dossiê…", "Dossiê excluído"], ["afMarcarEnviadaAtual_", "Registrando o envio…", "Envio registrado"], ["afSalvarAcao_", "Salvando a ação…", "Ação salva"], ["nfeBuscarChave_", "Consultando a NF-e pela chave…", "NF-e pronta para conferência", "key44"], ["auraGerarTarefasAutoAgora_", "Gerando as tarefas automáticas…", "Tarefas atualizadas"], ["colabAdminCarregar", "Carregando colaboradores…", "Colaboradores carregados"], ["buscarFotoDoFormulario", "Buscando a foto do produto…", "Foto carregada"], ["usarFotoUrlManual", "Carregando a imagem informada…", "Imagem carregada"], ["downloadEncarte", "Baixando o encarte…", "Encarte baixado"], ["cfExcluir_", "Excluindo o caso…", "Caso excluído"], ["afExcluirBonificacao_", "Excluindo a bonificação…", "Bonificação excluída"], ["afGerarDocumentoId_", "Gerando o documento…", "Documento gerado"], ["afMarcarEnviadaId_", "Registrando o envio…", "Envio registrado"], ["afExcluirDossie_", "Excluindo o dossiê…", "Dossiê excluído"], ["afEditarLegendaEvidencia_", "Salvando a legenda…", "Legenda salva"], ["afExcluirEvidencia_", "Excluindo a evidência…", "Evidência excluída"], ["colabAdminAlternar", "Atualizando o colaborador…", "Colaborador atualizado"], ["colabAdminSalvar", "Salvando o colaborador…", "Colaborador salvo"], ["colabEfetivarTesteConfirmar", "Efetivando o colaborador…", "Colaborador efetivado"], ["colabUnificarConfirmar", "Unificando os históricos…", "Históricos unificados"], ["renderUltimasColetas", "Recarregando as últimas coletas…", "Últimas coletas carregadas", "manualBool"]];ops.forEach(function(x){window.AuraLoader.wrapAction(x[0],x[1],x[2],x[3])});})();
+(function(){if(!window.AuraLoader)return;var ops=[["syncAll", "Sincronizando os dados da AURA…", "Sincronização concluída"], ["cfCarregar", "Carregando os casos…", "Casos carregados"], ["cfCompletarNegociacaoViaApi_", "Concluindo a negociação…", "Negociação concluída"], ["cfSalvarAcao_", "Salvando a ação…", "Ação salva"], ["afCarregar", "Carregando as ações de fornecedores…", "Ações carregadas"], ["afTeleconArquivoSelecionado_", "Importando o relatório Telecon…", "Relatório disponível para conferência"], ["afTeleconConfirmar_", "Confirmando o relatório Telecon…", "Relatório confirmado"], ["afAbrirRelatorioTelecon_", "Abrindo o relatório Telecon…", "Relatório aberto"], ["afBaixarRelatorioTelecon_", "Baixando o relatório…", "Relatório baixado"], ["afAtualizarRelatorioTelecon_", "Atualizando o relatório Telecon…", "Relatório atualizado"], ["afRemoverRelatorioTelecon_", "Removendo o relatório…", "Relatório removido"], ["afTeleconArquivoAtualizacaoSelecionado_", "Importando a atualização Telecon…", "Relatório disponível para atualização"], ["afRegistrarBonificacao_", "Registrando a bonificação…", "Bonificação registrada"], ["afEvidenciasSelecionadas_", "Enviando as evidências…", "Evidências enviadas"], ["afGerarDocumentoAtual_", "Gerando o documento…", "Documento gerado"], ["afExcluirDossieAtual_", "Excluindo o dossiê…", "Dossiê excluído"], ["afMarcarEnviadaAtual_", "Registrando o envio…", "Envio registrado"], ["afSalvarAcao_", "Salvando a ação…", "Ação salva"], ["nfeBuscarChave_", "Consultando a NF-e pela chave…", "NF-e pronta para conferência", "key44"], ["auraGerarTarefasAutoAgora_", "Gerando as tarefas automáticas…", "Tarefas atualizadas"], ["colabAdminCarregar", "Carregando colaboradores…", "Colaboradores carregados"], ["buscarFotoDoFormulario", "Buscando a foto do produto…", "Foto carregada"], ["usarFotoUrlManual", "Carregando a imagem informada…", "Imagem carregada"], ["downloadEncarte", "Baixando o encarte…", "Encarte baixado"], ["cfExcluir_", "Excluindo o caso…", "Caso excluído"], ["afExcluirBonificacao_", "Excluindo a bonificação…", "Bonificação excluída"], ["afGerarDocumentoId_", "Gerando o documento…", "Documento gerado"], ["afMarcarEnviadaId_", "Registrando o envio…", "Envio registrado"], ["afExcluirDossie_", "Excluindo o dossiê…", "Dossiê excluído"], ["afEditarLegendaEvidencia_", "Salvando a legenda…", "Legenda salva"], ["afExcluirEvidencia_", "Excluindo a evidência…", "Evidência excluída"], ["colabAdminAlternar", "Atualizando o colaborador…", "Colaborador atualizado"], ["colabAdminSalvar", "Salvando o colaborador…", "Colaborador salvo"], ["colabEfetivarTesteConfirmar", "Efetivando o colaborador…", "Colaborador efetivado"], ["colabUnificarConfirmar", "Unificando os históricos…", "Históricos unificados"], ["renderUltimasColetas", "Recarregando as últimas coletas…", "Últimas coletas carregadas", "manualBool"], ["bossCarregar", "Carregando os relatórios do Boss Vision…", "Painel Boss Vision atualizado"]];ops.forEach(function(x){window.AuraLoader.wrapAction(x[0],x[1],x[2],x[3])});})();
 </script>
 </body>
 </html>
