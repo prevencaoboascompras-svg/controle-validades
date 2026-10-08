@@ -5852,7 +5852,7 @@ async function loadBanco(cfg){
 
 async function syncAll(){
   var cfg=loadCfg();
-  if(!cfg.id){setDot('err','Configure o Google Sheets primeiro');toggleCfg();if(window.AuraLoader)window.AuraLoader.markFailure('Configure o Google Sheets antes de sincronizar.');return;}
+  if(!cfg.id){setDot('err','Configure o Google Sheets primeiro');toggleCfg();return;}
   var btn=document.getElementById('btnSync');
   btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Sincronizando...';
   setDot('loading','Sincronizando...');
@@ -5989,7 +5989,7 @@ async function syncAll(){
         }
       });
     }
-  }catch(e){setDot('err','Erro: '+e.message);if(window.AuraLoader)window.AuraLoader.markFailure('Erro ao sincronizar os dados: '+e.message);console.error(e);}
+  }catch(e){setDot('err','Erro: '+e.message);console.error(e);}
   finally{btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Sincronizar';}
 }
 function setDot(t,m){var d=document.getElementById('dot'),tx=document.getElementById('stText');if(d)d.className='dot'+(t==='ok'?' ok':t==='err'?' err':t==='loading'?' loading':'');if(tx)tx.innerHTML=m;}
@@ -7560,11 +7560,21 @@ async function usarFotoUrlManual(){
 }
 
 function loadFoto(input){
-  var file=input&&input.files&&input.files[0];if(!file)return;
-  var ticket=window.AuraLoader?window.AuraLoader.start({message:'Lendo e salvando a imagem do produto…',complete:'Imagem salva e aplicada ao encarte'}):0;
+  var file=input&&input.files&&input.files[0];
+  if(!file)return;
   var r=new FileReader();
-  r.onload=function(e){var img=new Image();img.onload=async function(){try{fotoImg=img;await drawEncarte();setFotoStatus('Imagem carregada. Salvando no banco compartilhado Arsenal/AURA/Coleta…','var(--amber)');var res=await enviarImagemProdutoParaDrive(e.target.result,file.type||'image/jpeg');if(!res||!res.ok)throw new Error((res&&res.erro)||'Não foi possível salvar a imagem no banco compartilhado.');setFotoStatus('✓ Upload salvo no banco compartilhado e aplicado ao encarte.','var(--green)');if(ticket&&window.AuraLoader)window.AuraLoader.done();}catch(err){var msg=String(err&&err.message||err||'Falha ao salvar a imagem');if(ticket&&window.AuraLoader)window.AuraLoader.fail(msg);}};img.onerror=function(){var msg='Não foi possível abrir este arquivo de imagem.';setFotoStatus(msg,'var(--red)');if(ticket&&window.AuraLoader)window.AuraLoader.fail(msg);};img.src=e.target.result;};
-  r.onerror=function(){var msg='Não foi possível ler este arquivo de imagem.';setFotoStatus(msg,'var(--red)');if(ticket&&window.AuraLoader)window.AuraLoader.fail(msg);};r.readAsDataURL(file);
+  r.onload=function(e){
+    var img=new Image();
+    img.onload=async function(){
+      fotoImg=img;drawEncarte();
+      setFotoStatus('Imagem carregada. Salvando no banco compartilhado Arsenal/AURA/Coleta…','var(--amber)');
+      var res=await enviarImagemProdutoParaDrive(e.target.result,file.type||'image/jpeg');
+      if(res&&res.ok)setFotoStatus('✓ Upload salvo no banco compartilhado e aplicado ao encarte.','var(--green)');
+    };
+    img.onerror=function(){setFotoStatus('Não foi possível abrir este arquivo de imagem.','var(--red)');};
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(file);
 }
 
 async function enviarImagemProdutoParaDrive(dataUrl, mimeType){
@@ -8206,7 +8216,6 @@ function bossFmtDataBR_(iso){
 var _nfeCeasaEntradas_=[];
 var _nfeCeasaMesCarregado_='';
 var _nfeCeasaCarregando_=false;
-var _nfeCeasaPromise_=null;
 
 function nfeCeasaMesAtual_(){
   var d=new Date();
@@ -8240,25 +8249,30 @@ function nfeCeasaRender_(){
 function nfeCeasaCarregar_(force){
   var mesEl=document.getElementById('nfeCeasaMes'),st=document.getElementById('nfeCeasaStatus'),btn=document.getElementById('nfeCeasaAtualizarBtn');
   if(!mesEl)return Promise.resolve(null);
-  if(!mesEl.value)mesEl.value=nfeCeasaMesAtual_();var mes=String(mesEl.value||'');
+  if(!mesEl.value)mesEl.value=nfeCeasaMesAtual_();
+  var mes=String(mesEl.value||'');
   if(!force&&_nfeCeasaMesCarregado_===mes&&_nfeCeasaEntradas_.length){nfeCeasaRender_();return Promise.resolve(_nfeCeasaEntradas_);}
-  if(_nfeCeasaCarregando_)return _nfeCeasaPromise_||Promise.resolve(null);
-  var ticket=force&&window.AuraLoader?window.AuraLoader.start({message:'Carregando entradas CEASA de '+mes+'…',complete:'Entradas CEASA do período atualizadas'}):0;
+  if(_nfeCeasaCarregando_)return Promise.resolve(null);
   var url=bossApiUrl();
-  if(!url){var err='API principal da AURA não configurada.';if(st){st.className='nfe-ceasa-status show err';st.textContent=err;}if(ticket&&window.AuraLoader)window.AuraLoader.fail(err);return Promise.resolve(null);}
-  _nfeCeasaCarregando_=true;if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando';}
+  if(!url){if(st){st.className='nfe-ceasa-status show err';st.textContent='API principal da AURA não configurada.';}return Promise.resolve(null);}
+  _nfeCeasaCarregando_=true;
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando';}
   if(st){st.className='nfe-ceasa-status show';st.innerHTML='<i class="ti ti-loader-2 spin"></i> Carregando entradas CEASA de '+nfeCeasaEsc_(mes)+'...';}
-  var erro='';
-  _nfeCeasaPromise_=bossFetch(url,mes+'-01','mes').then(function(res){
+  return bossFetch(url,mes+'-01','mes').then(function(res){
     if(!res||!res.ok)throw new Error((res&&res.erro)||'A API não retornou as entradas CEASA.');
-    var dados=res.dados||res,ec=dados&&dados.grupos&&dados.grupos.entradaCeasa;_nfeCeasaEntradas_=ec&&Array.isArray(ec.entradas)?ec.entradas:[];_nfeCeasaMesCarregado_=mes;nfeCeasaRender_();if(st){st.className='nfe-ceasa-status';st.textContent='';}return _nfeCeasaEntradas_;
+    var dados=res.dados||res,ec=dados&&dados.grupos&&dados.grupos.entradaCeasa;
+    _nfeCeasaEntradas_=ec&&Array.isArray(ec.entradas)?ec.entradas:[];
+    _nfeCeasaMesCarregado_=mes;
+    nfeCeasaRender_();
+    if(st){st.className='nfe-ceasa-status';st.textContent='';}
+    return _nfeCeasaEntradas_;
   }).catch(function(e){
-    erro=String(e&&e.message||e||'Falha ao carregar as entradas CEASA.');if(st){st.className='nfe-ceasa-status show err';st.textContent='Falha ao carregar entradas CEASA: '+erro;}return null;
+    if(st){st.className='nfe-ceasa-status show err';st.textContent='Falha ao carregar entradas CEASA: '+(e&&e.message?e.message:e);}
+    return null;
   }).finally(function(){
-    _nfeCeasaCarregando_=false;_nfeCeasaPromise_=null;if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
-    if(ticket&&window.AuraLoader){if(erro)window.AuraLoader.fail(erro);else window.AuraLoader.done();}
+    _nfeCeasaCarregando_=false;
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
   });
-  return _nfeCeasaPromise_;
 }
 
 // ═══ ENTRADA CEASA (compras de hortifruti) ═══
@@ -10958,30 +10972,61 @@ function bossFetch(url,data,periodo){
   });
 }
 function bossCarregar(force){
-  var inp=document.getElementById('bossData');if(!inp)return Promise.resolve({ok:false,error:'Painel Boss Vision não disponível.'});
+  var inp=document.getElementById('bossData');if(!inp)return;
   if(!inp.value)bossConfigurarCampoPeriodo_(bossPeriodoAtual,bossPeriodoAtual==='dia'?bossHoje():bossMesAtualValor_());
-  var data=bossDataApiSelecionada_(),periodo=bossPeriodoAtual,compPrev=String(data||'').slice(0,7),compEl=document.getElementById('bossCompetenciaDrive');
+  var data=bossDataApiSelecionada_();
+  var periodo=bossPeriodoAtual;
+  var compPrev=String(data||'').slice(0,7);
+  var compEl=document.getElementById('bossCompetenciaDrive');
   if(compEl&&compPrev)compEl.textContent='Competência '+compPrev+' · BANCO DE DADOS/'+compPrev;
-  var url=bossApiUrl(),btn=document.getElementById('bossBtnAtualizar');
+  var url=bossApiUrl();
+  var btn=document.getElementById('bossBtnAtualizar');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-refresh spin"></i> Atualizando...';}
-  bossSetStatus('',periodo==='mes'?('Atualizando '+bossMesLabelValor_(data.slice(0,7))+'... A primeira leitura de um XLS grande pode levar mais tempo.'):('Atualizando eventos de '+data.split('-').reverse().join('/')+'...'));
-  if(!url){bossRender(_bossDados||{});var semApi='Dados locais apresentados, mas a API principal da AURA não está disponível para carregar Entradas NF, Quebras e Consumo Interno.';bossSetStatus('warn',semApi);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}return Promise.resolve({ok:false,error:semApi});}
-  var t0=performance.now();console.time('[Boss Vision] tempo total (fetch+render)');
-  return bossFetch(url,data,periodo).then(function(res){
-    var tf=performance.now();console.log('[Boss Vision] fetch (rede+backend):',(tf-t0).toFixed(0)+'ms');if(!res||!res.ok)throw new Error((res&&res.erro)||'A API não retornou dados do Boss Vision.');
-    var dados=res.dados||res;bossRender(dados);var tr=performance.now();console.log('[Boss Vision] render:',(tr-tf).toFixed(0)+'ms');console.timeEnd('[Boss Vision] tempo total (fetch+render)');
-    try{localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({data:data,periodo:periodo,valorFiltro:(periodo==='mes'?data.slice(0,7):data),dados:dados,salvoEm:new Date().toISOString()}));}catch(e){}
-    var avisos=res.avisos||dados.avisos||[];if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Entradas NF + CEASA + Vendas + Quebras');
-    return {ok:true};
+  bossSetStatus('',periodo==='mes'
+    ?('Atualizando '+bossMesLabelValor_(data.slice(0,7))+'... A primeira leitura de um XLS grande pode levar mais tempo.')
+    :('Atualizando eventos de '+data.split('-').reverse().join('/')+'...'));
+  if(!url){
+    bossRender(_bossDados||{}); // mesmo sem Drive, Vencidos continua vindo da AURA
+    bossSetStatus('warn','Dados locais atualizados. A API principal da AURA ainda não está disponível para carregar Entradas NF, Quebras e Consumo Interno.');
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}
+    return;
+  }
+  var _bossT0=performance.now();
+  console.time('[Boss Vision] tempo total (fetch+render)');
+  bossFetch(url,data,periodo).then(function(res){
+    var _bossTFetch=performance.now();
+    console.log('[Boss Vision] fetch (rede+backend):',(_bossTFetch-_bossT0).toFixed(0)+'ms');
+    if(!res||!res.ok)throw new Error((res&&res.erro)||'A API não retornou dados do Boss Vision.');
+    var dados=res.dados||res;
+    bossRender(dados);
+    var _bossTRender=performance.now();
+    console.log('[Boss Vision] render:',(_bossTRender-_bossTFetch).toFixed(0)+'ms');
+    console.timeEnd('[Boss Vision] tempo total (fetch+render)');
+    try{
+      localStorage.setItem(BOSS_CACHE_KEY,JSON.stringify({
+        data:data,
+        periodo:periodo,
+        valorFiltro:(periodo==='mes'?data.slice(0,7):data),
+        dados:dados,
+        salvoEm:new Date().toISOString()
+      }));
+    }catch(e){}
+    var avisos=(res.avisos||dados.avisos||[]);
+    if(avisos.length)bossSetStatus('warn','Atualizado com avisos: '+avisos[0]);
+    else bossSetStatus('ok','Boss Vision atualizado · '+(dados.arquivosLidos!=null?dados.arquivosLidos+' relatório(s) do Drive':'Drive atualizado')+' + Entradas NF + CEASA + Vendas + Quebras');
   }).catch(function(err){
-    console.timeEnd('[Boss Vision] tempo total (fetch+render)');console.warn('[Boss Vision] falhou após',(performance.now()-t0).toFixed(0)+'ms:',err.message);
+    console.timeEnd('[Boss Vision] tempo total (fetch+render)');
+    console.warn('[Boss Vision] falhou após',(performance.now()-_bossT0).toFixed(0)+'ms:',err.message);
     var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
-    if(cache&&cache.data===data&&cache.periodo===periodo&&cache.dados){bossRender(cache.dados);bossSetStatus('warn','A atualização pela API falhou ('+err.message+'). Exibindo o último snapshot salvo deste período.');}
-    else{bossRender({});bossSetStatus('warn','A atualização pela API falhou. '+err.message);}
-    return {ok:false,error:'Não foi possível atualizar o Boss Vision: '+err.message};
+    if(cache&&cache.data===data&&cache.periodo===periodo&&cache.dados){
+      bossRender(cache.dados);
+      bossSetStatus('warn','A atualização pela API falhou ('+err.message+'). Exibindo o último snapshot salvo deste período.');
+    }else{
+      bossRender({});
+      bossSetStatus('warn','A atualização pela API falhou. '+err.message);
+    }
   }).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar';}});
 }
-
 function bossInit(){
   var cache=null;try{cache=JSON.parse(localStorage.getItem(BOSS_CACHE_KEY)||'null');}catch(e){}
 
@@ -11215,7 +11260,6 @@ async function cfCarregar(forcar){
   var r=await cfGet_('buscarCoberturasFornecedor');
   if(!r||!r.ok){
     if(lista)lista.innerHTML='<div class="cf-empty"><i class="ti ti-alert-circle"></i><div style="margin-top:6px">Falha ao carregar: '+cfEsc_((r&&r.erro)||'erro')+'</div></div>';
-    if(window.AuraLoader)window.AuraLoader.markFailure((r&&r.erro)||'Não foi possível carregar as negociações.');
     return;
   }
   cfAcoes=Array.isArray(r.dados)?r.dados:[];
@@ -11966,24 +12010,7 @@ function nfeAtualizarColetasAposGravacao_(){
   setTimeout(function(){try{renderUltimasColetas('silent');}catch(e){}},4500);
 }
 function nfeStatus_(tipo,msg){var el=document.getElementById('nfeStatus');if(!el)return;el.className='nfe-status '+(tipo||'');el.innerHTML='<i class="ti '+(tipo==='ok'?'ti-circle-check':tipo==='err'?'ti-alert-circle':tipo==='warn'?'ti-alert-triangle':'ti-info-circle')+'"></i> '+nfeEsc_(msg||'');}
-var _nfeInitLoadPromise_=null;
-function nfeInit_(){
-  if(_nfeInitLoadPromise_)return _nfeInitLoadPromise_;
-  var ticket=window.AuraLoader?window.AuraLoader.start({message:'Carregando entradas CEASA e histórico de NF-e…',complete:'Conferência NF-e, CEASA e histórico carregados'}):0;
-  if(!_nfeNota){var d=nfeLerRascunho_();if(d&&d.nota&&!d.nota.jaProcessada){nfeRestaurarRascunho_(true);nfeStatus_('ok','Rascunho salvo automaticamente restaurado. Continue de onde parou.');}}
-  var colab=Promise.resolve();
-  try{if(typeof carregarColaboradoresUniversal_==='function')colab=Promise.resolve(carregarColaboradoresUniversal_(false)).then(function(){nfeRenderOperadores_();if(_nfeHistGeralCarregado_){nfeHistoricoGeralPopularFiltros_();nfeHistoricoGeralRender_();}});}catch(e){colab=Promise.reject(e);}
-  var hist=nfeHistoricoGeralCarregar_(false),ceasa;
-  try{ceasa=nfeCeasaCarregar_(false);}catch(e){ceasa=Promise.reject(e);}
-  _nfeInitLoadPromise_=Promise.all([colab,hist,ceasa]).then(function(results){
-    var hr=results[1],cr=results[2];
-    if(hr&&hr.ok===false)throw new Error(hr.error||'Não foi possível carregar o histórico de NF-e.');
-    if(cr===null)throw new Error('Não foi possível carregar as entradas CEASA.');
-    if(ticket&&window.AuraLoader)window.AuraLoader.done();
-    return results;
-  }).catch(function(e){var msg=String(e&&e.message||e||'Falha ao abrir a Conferência NF-e');if(ticket&&window.AuraLoader)window.AuraLoader.fail(msg);throw e;}).finally(function(){_nfeInitLoadPromise_=null;setTimeout(function(){var i=document.getElementById('nfeChave');if(i&&!_nfeNota)i.focus();},80);});
-  return _nfeInitLoadPromise_;
-}
+function nfeInit_(){try{if(typeof carregarColaboradoresUniversal_==='function')carregarColaboradoresUniversal_(false).then(function(){nfeRenderOperadores_();if(_nfeHistGeralCarregado_)nfeHistoricoGeralPopularFiltros_(),nfeHistoricoGeralRender_();});}catch(e){}if(!_nfeNota){var d=nfeLerRascunho_();if(d&&d.nota&&!d.nota.jaProcessada){nfeRestaurarRascunho_(true);nfeStatus_('ok','Rascunho salvo automaticamente restaurado. Continue de onde parou.');}}nfeHistoricoGeralCarregar_(false);try{nfeCeasaCarregar_(false);}catch(e){}setTimeout(function(){var i=document.getElementById('nfeChave');if(i&&!_nfeNota)i.focus();},80);}
 function nfeChaveInput_(){var i=document.getElementById('nfeChave');if(!i)return;var d=nfeDigitos_(i.value||'');if(d.length<=44)i.value=d;if(_nfeAutoTimer)clearTimeout(_nfeAutoTimer);if(d.length===44)_nfeAutoTimer=setTimeout(nfeBuscarChave_,250);}
 function nfeEhEmbalagemFront_(u){
   u=String(u||'').trim().toUpperCase().replace(/\./g,'');
@@ -12035,9 +12062,9 @@ async function nfeBuscarChave_(){
     if(!mesma||Number(srv.versao||0)>Number(local.serverVersion||0)){nfeAdotarRascunhoServidorAura_(srv);if(i)i.value=ch;if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}nfeStatus_('ok','Conferência em andamento recuperada do servidor. Você pode continuar no PC de onde o tablet parou.');return;}
   }
   if(mesma){_nfeNota=local.nota;nfePrepararItens_(_nfeNota);nfeRenderNota_();if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}nfeStatus_('ok','Rascunho local restaurado.');return;}
-  nfeStatus_('','Nenhum rascunho encontrado. Localizando XML e confrontando os itens com o Banco AURA...');var r=await nfePost_({action:'nfeBuscarChave',chave:ch});if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}if(!r||!r.ok){var msg=(r&&r.codigo==='XML_NAO_LOCALIZADO')?'XML não localizado. Importe o XML desta nota ou configure a fonte fiscal automática.':((r&&r.erro)||'Não foi possível ler a NF-e.');if(r&&r.codigo==='XML_NAO_LOCALIZADO')nfeStatus_('warn',msg);else nfeStatus_('err',msg);if(window.AuraLoader)window.AuraLoader.markFailure(msg);return;}nfeReceberNota_(r.nota);
+  nfeStatus_('','Nenhum rascunho encontrado. Localizando XML e confrontando os itens com o Banco AURA...');var r=await nfePost_({action:'nfeBuscarChave',chave:ch});if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}if(!r||!r.ok){if(r&&r.codigo==='XML_NAO_LOCALIZADO')nfeStatus_('warn','XML não localizado. Importe o XML desta nota ou configure a fonte fiscal automática.');else nfeStatus_('err',(r&&r.erro)||'Não foi possível ler a NF-e.');return;}nfeReceberNota_(r.nota);
 }
-function nfeImportarXml_(inp){var f=inp&&inp.files&&inp.files[0];if(!f)return;var ticket=window.AuraLoader?window.AuraLoader.start({message:'Lendo o XML da NF-e e salvando a nota…',complete:'NF-e pronta para conferência'}):0;nfeStatus_('','Lendo XML '+f.name+'...');var rd=new FileReader();rd.onload=async function(){try{var r=await nfePost_({action:'nfeLerXml',xml:String(rd.result||''),salvarDrive:true});inp.value='';if(!r||!r.ok)throw new Error((r&&r.erro)||'XML inválido.');var ch=document.getElementById('nfeChave');if(ch)ch.value=r.nota.chave||'';await nfeReceberNota_(r.nota);if(ticket&&window.AuraLoader)window.AuraLoader.done();}catch(e){var msg=String(e&&e.message||e||'Falha ao importar XML');nfeStatus_('err',msg);if(ticket&&window.AuraLoader)window.AuraLoader.fail(msg);}};rd.onerror=function(){var msg='Não foi possível ler o arquivo XML.';nfeStatus_('err',msg);if(ticket&&window.AuraLoader)window.AuraLoader.fail(msg);};rd.readAsText(f);}
+function nfeImportarXml_(inp){var f=inp&&inp.files&&inp.files[0];if(!f)return;nfeStatus_('','Lendo XML '+f.name+'...');var rd=new FileReader();rd.onload=function(){nfePost_({action:'nfeLerXml',xml:String(rd.result||''),salvarDrive:true}).then(function(r){inp.value='';if(!r||!r.ok){nfeStatus_('err',(r&&r.erro)||'XML inválido.');return;}var ch=document.getElementById('nfeChave');if(ch)ch.value=r.nota.chave||'';nfeReceberNota_(r.nota);});};rd.onerror=function(){nfeStatus_('err','Não foi possível ler o arquivo XML.');};rd.readAsText(f);}
 function nfeReceberNota_(nota){_nfeNota=nota||null;if(!_nfeNota)return;nfePrepararItens_(_nfeNota);nfeSalvarRascunho_();nfeStatus_('ok','NF-e '+(_nfeNota.numero||'')+' carregada: '+(_nfeNota.totalEncontrados||0)+' de '+(_nfeNota.totalItens||0)+' itens reconhecidos.');nfeRenderNota_();setTimeout(function(){nfeRenderOperadores_();nfeCarregarFotosPendentes_();},0);}
 function nfeSetorOptions_(sel){return NFE_SETORES.map(function(s){return '<option value="'+nfeEsc_(s)+'" '+(s===sel?'selected':'')+'>'+nfeEsc_(s)+'</option>';}).join('');}
 function nfeSetorOrigemTexto_(o){var m={aprendido_fornecedor:'aprendido pela AURA',historico_aura:'histórico de coletas',banco_dados:'Banco de Dados',regra_nome:'nomenclatura do produto',manual:'ajuste manual',nao_identificado:'não identificado'};return m[String(o||'')]||'automático';}
@@ -12251,7 +12278,7 @@ function nfeLimpar_(){nfeAutosaveAgora_();_nfeNota=null;var box=document.getElem
 // v6.72 — HISTÓRICO GERAL DE CONFERÊNCIA NF-e (AURA ADMIN)
 // Lista todas as NF-e de todos os usuários. Consulta de detalhe é somente leitura.
 // ═══════════════════════════════════════════════════════════════
-var _nfeHistGeralDados_=[],_nfeHistGeralCarregado_=false,_nfeHistGeralCarregando_=false,_nfeHistGeralFontes_=null,_nfeHistGeralPromise_=null;
+var _nfeHistGeralDados_=[],_nfeHistGeralCarregado_=false,_nfeHistGeralCarregando_=false,_nfeHistGeralFontes_=null;
 function nfeHistNorm_(v){return String(v==null?'':v).trim().toLowerCase();}
 function nfeHistNomeOperador_(email){
   var e=nfeHistNorm_(email),lista=(typeof COLABORADORES!=='undefined'&&Array.isArray(COLABORADORES))?COLABORADORES:[];
@@ -12296,33 +12323,39 @@ function nfeHistoricoGeralApi_(action,extra,postBody,timeoutMs){
   });
 }
 function nfeHistoricoGeralCarregar_(forcar){
-  if(_nfeHistGeralCarregando_)return _nfeHistGeralPromise_||Promise.resolve({ok:false,error:'O histórico já está sendo consultado.'});
-  if(_nfeHistGeralCarregado_&&!forcar){nfeHistoricoGeralRender_();return Promise.resolve({ok:true,cached:true});}
-  var ticket=forcar&&window.AuraLoader?window.AuraLoader.start({message:'Consultando e atualizando o histórico de NF-e…',complete:'Histórico de NF-e atualizado'}):0;
+  if(_nfeHistGeralCarregando_)return;
+  if(_nfeHistGeralCarregado_&&!forcar){nfeHistoricoGeralRender_();return;}
   var body=document.getElementById('nfeHistBody'),btn=document.getElementById('nfeHistAtualizarBtn');
   if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty"><i class="ti ti-loader-2 spin"></i> '+(forcar?'Reconciliando cadastros e atualizando NF-e...':'Carregando todas as NF-e...')+'</div></td></tr>';
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> '+(forcar?'Reconciliando...':'Atualizando...');}
   _nfeHistGeralCarregando_=true;
-  var erro='';
-  var prep=forcar?nfeHistoricoGeralApi_('nfeReconciliarCadastrosAgora','',{forcar:true},180000).catch(function(e){console.warn('[AURA NF-e] Falha ao reconciliar cadastros:',e);return null;}):Promise.resolve(null);
-  _nfeHistGeralPromise_=prep.then(function(rec){
-    if(rec&&rec.ok&&Number(rec.completas)>0)mostrarToast(Number(rec.completas)+' NF-e(s) atualizada(s) após localizar os produtos no Banco de Dados.','ok');
+
+  var prep=forcar
+    ?nfeHistoricoGeralApi_('nfeReconciliarCadastrosAgora','',{forcar:true},180000).catch(function(e){console.warn('[AURA NF-e] Falha ao reconciliar cadastros:',e);return null;})
+    :Promise.resolve(null);
+
+  prep.then(function(rec){
+    if(rec&&rec.ok&&Number(rec.completas)>0){
+      mostrarToast(Number(rec.completas)+' NF-e(s) atualizada(s) após localizar os produtos no Banco de Dados.','ok');
+    }
     return nfeHistoricoGeralApi_('nfeHistoricoTodos','&limite=1000',{limite:1000},90000);
   }).then(function(r){
-    if(!r||!r.ok)throw new Error((r&&r.erro)||'Não foi possível consultar o histórico de NF-e.');
-    _nfeHistGeralDados_=Array.isArray(r.notas)?r.notas:[];_nfeHistGeralFontes_=r.fontes||null;_nfeHistGeralCarregado_=true;
-    nfeHistoricoGeralPopularFiltros_();nfeHistoricoGeralRender_();return {ok:true,total:_nfeHistGeralDados_.length};
-  }).catch(function(e){
-    erro=String(e&&e.message||e||'Falha ao consultar o histórico de NF-e.');
-    if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Falha ao consultar o histórico. '+nfeEsc_(erro)+'</div></td></tr>';
-    return {ok:false,error:erro};
-  }).finally(function(){
-    _nfeHistGeralCarregando_=false;if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
+    _nfeHistGeralCarregando_=false;
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
+    if(!r||!r.ok){
+      if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Não foi possível carregar o histórico: '+nfeEsc_((r&&r.erro)||'verifique a implantação atual do Code.gs')+'</div></td></tr>';
+      return;
+    }
+    _nfeHistGeralDados_=Array.isArray(r.notas)?r.notas:[];
+    _nfeHistGeralFontes_=r.fontes||null;
+    _nfeHistGeralCarregado_=true;
+    nfeHistoricoGeralPopularFiltros_();
     nfeHistoricoGeralRender_();
-    if(ticket&&window.AuraLoader){if(erro)window.AuraLoader.fail(erro);else window.AuraLoader.done();}
-    _nfeHistGeralPromise_=null;
+  }).catch(function(e){
+    _nfeHistGeralCarregando_=false;
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Atualizar histórico';}
+    if(body)body.innerHTML='<tr><td colspan="11"><div class="nfe-hist-empty">Falha ao consultar o histórico. '+nfeEsc_(String(e&&e.message||''))+'</div></td></tr>';
   });
-  return _nfeHistGeralPromise_;
 }
 
 function nfeHistoricoGeralPopularFiltros_(){
@@ -12775,7 +12808,7 @@ function afTemBonificacaoPendente_(a){
 }
 function afAtualizarKpis_(){var agu=0,venc=0,ab=0,res=0;(afAcoes_||[]).forEach(function(a){var st=afStatusEfetivo_(a),vr=afTotalRecuperadoDossie_(a);if(st==='VENCIDA')venc++;if(['AGUARDANDO_RETORNO','RETIRADA_AGENDADA','PARCIAL','VENCIDA'].indexOf(st)>=0){agu++;ab+=afSaldoOperacional_(a);}if(st==='RESOLVIDA'||vr>0)res+=vr;});
   var el=document.getElementById('afKpiAguardando');if(el)el.textContent=agu;el=document.getElementById('afKpiVencidas');if(el)el.textContent=venc;el=document.getElementById('afKpiAberto');if(el)el.textContent=afMoney_(ab);el=document.getElementById('afKpiResolvido');if(el)el.textContent=afMoney_(res);var b=document.getElementById('afNavBadge');if(b){var c=agu+venc;if(c){b.textContent=c;b.style.display='inline-flex';}else b.style.display='none';}}
-async function afCarregar(force){if(afCarregado_&&!force){afRenderTudo_();return;}var r=await afGet_('buscarAcoesFornecedorVencidos');if(r&&r.ok){afAcoes_=r.dados||[];afCarregado_=true;}else {if(window.AuraLoader)window.AuraLoader.markFailure((r&&r.erro)||'Não foi possível carregar as ações de fornecedores.');if(force)mostrarToast('Falha ao carregar ações: '+((r&&r.erro)||'erro'),'err');}afRenderTudo_();}
+async function afCarregar(force){if(afCarregado_&&!force){afRenderTudo_();return;}var r=await afGet_('buscarAcoesFornecedorVencidos');if(r&&r.ok){afAcoes_=r.dados||[];afCarregado_=true;}else if(force)mostrarToast('Falha ao carregar ações: '+((r&&r.erro)||'erro'),'err');afRenderTudo_();}
 function afRenderTudo_(){afAtualizarKpis_();afRenderLista_();}
 function afRenderVencidos_(){var body=document.getElementById('afVencidosBody');if(!body)return;var lista=afVencidos_(),forns={};lista.forEach(function(x){var f=afFornecedorProduto_(x.p)||'SEM FORNECEDOR';forns[f]=true;});var sel=document.getElementById('afFiltroFornecedor'),atual=sel?sel.value:'';if(sel){sel.innerHTML='<option value="">Todos os fornecedores</option>'+Object.keys(forns).sort().map(function(f){return '<option value="'+afEsc_(f)+'">'+afEsc_(f)+'</option>';}).join('');sel.value=atual;}
   var filtro=String((sel&&sel.value)||''),q=String((document.getElementById('afBuscaVencido')||{}).value||'').toLowerCase().trim();lista=lista.filter(function(x){var p=x.p,f=afFornecedorProduto_(p)||'SEM FORNECEDOR';if(filtro&&f!==filtro)return false;if(q&&([p.nome,p.cod,f,p.lote].join(' ').toLowerCase().indexOf(q)<0))return false;return true;});
@@ -15925,17 +15958,30 @@ function colabAdminAtualizarKpis_(){
   var c=document.getElementById('colabKpiColetas');if(c)c.textContent=coletas.toLocaleString('pt-BR');
 }
 
-var AURA_ACESSOS_ULTIMOS_={},AURA_ACESSOS_RECENTES_=[];
+var AURA_ACESSOS_ULTIMOS_={},AURA_ACESSOS_RECENTES_=[],AURA_ACOES_RECENTES_=[];
 async function auraCarregarAuditoriaAcessos_(){
   var cfg=typeof loadCfg==='function'?loadCfg():{};if(!cfg.url)return {};
-  try{var r=await fetch(cfg.url+'?action=auditoriaAcessosColaboradores&limite=500&_='+Date.now(),{cache:'no-store'}),j=await r.json();if(j&&j.ok){AURA_ACESSOS_ULTIMOS_=j.ultimos||{};AURA_ACESSOS_RECENTES_=Array.isArray(j.recentes)?j.recentes:[];return AURA_ACESSOS_ULTIMOS_;}}catch(e){console.warn('[AURA acessos] auditoria indisponível:',e);}return AURA_ACESSOS_ULTIMOS_;
+  try{var r=await fetch(cfg.url+'?action=auditoriaAcessosColaboradores&limite=500&_='+Date.now(),{cache:'no-store'}),j=await r.json();if(j&&j.ok){AURA_ACESSOS_ULTIMOS_=j.ultimos||{};AURA_ACESSOS_RECENTES_=Array.isArray(j.recentes)?j.recentes:[];AURA_ACOES_RECENTES_=Array.isArray(j.acoesRecentes)?j.acoesRecentes:[];return AURA_ACESSOS_ULTIMOS_;}}catch(e){console.warn('[AURA acessos] auditoria indisponível:',e);}return AURA_ACESSOS_ULTIMOS_;
 }
 function auraFmtDataHoraAcesso_(iso){if(!iso)return '—';var d=new Date(iso);if(isNaN(d.getTime()))return String(iso||'—');return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+function auraResumoDecisaoAcesso_(a){
+  a=a||{};var acao=String(a.avisoAcao||''),exec=Math.max(0,Number(a.tarefasExecutadas)||0),txt='',classe='muted';
+  if(acao==='continuar'){txt='Decidiu continuar no app';classe='warn';}
+  else if(acao==='ver_tarefas'){txt=exec>0?'Visualizou tarefas e executou '+exec+' tarefa'+(exec===1?'':'s'):'Visualizou tarefas';classe='ok';}
+  else if(acao==='exibido'){txt='Aviso exibido · aguardando decisão';classe='warn';}
+  else if(acao==='sem_pendencias'){txt='Sem pendências';classe='ok';}
+  else if(acao==='gestor_sem_popup'){txt='Gestor · sem popup';classe='muted';}
+  else if(a.pendentes>0){txt=a.avisoExibidoEm?'Aviso exibido':'Aviso ainda não exibido';classe=a.avisoExibidoEm?'warn':'muted';}
+  else {txt='Sem pendências';classe='ok';}
+  if(exec>0&&acao!=='ver_tarefas')txt+=' · executou '+exec+' tarefa'+(exec===1?'':'s');
+  return {texto:txt,classe:classe};
+}
 function auraAbrirHistoricoAcessos_(email,nome){
-  email=_colabNormEmail_(email);var arr=(AURA_ACESSOS_RECENTES_||[]).filter(function(a){return _colabNormEmail_(a.email)===email;}).slice(0,40);
+  email=_colabNormEmail_(email);var arr=(AURA_ACESSOS_RECENTES_||[]).filter(function(a){return _colabNormEmail_(a.email)===email;}).map(function(a){return {tipo:'acesso',data:a.abertoEm,app:a.app,modulo:'Acesso',dispositivo:[a.dispositivo,a.navegador].filter(Boolean).join(' · '),acao:'Entrou no aplicativo'+(Number(a.tarefasExecutadas)>0?' · executou '+Number(a.tarefasExecutadas)+' tarefa(s)':'')}}),acoes=(AURA_ACOES_RECENTES_||[]).filter(function(a){return _colabNormEmail_(a.email)===email;}).map(function(a){return {tipo:'acao',data:a.dataHora,app:a.app,modulo:a.modulo,dispositivo:a.dispositivo,acao:a.acao+(a.resultado&&a.resultado!=='executada'?' · '+a.resultado:'')}});
+  arr=arr.concat(acoes).sort(function(a,b){return new Date(b.data||0)-new Date(a.data||0);}).slice(0,100);
   var m=document.createElement('div');m.className='colab-modal-back';m.id='auraAcessosModal';
-  var itens=arr.length?arr.map(function(a){var q=Number(a.pendentes)||0,v=!!a.avisoExibidoEm,acao=String(a.avisoAcao||'').replace(/_/g,' ');return '<div style="display:grid;grid-template-columns:145px minmax(110px,1fr) 90px minmax(150px,1.4fr);gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:10px"><b>'+escHtml(auraFmtDataHoraAcesso_(a.abertoEm))+'</b><span>'+escHtml(a.app||'AURA')+'</span><span>'+q+' tarefa'+(q===1?'':'s')+'</span><span style="color:'+(v?'var(--green)':'var(--tx2)')+'">'+(v?'Aviso exibido '+escHtml(auraFmtDataHoraAcesso_(a.avisoExibidoEm)):(q?'Aviso não exibido':'Sem pendências'))+(acao?' · '+escHtml(acao):'')+'</span></div>';}).join(''):'<div class="colab-empty">Ainda não há acessos registrados para este colaborador.</div>';
-  m.innerHTML='<div class="colab-modal" style="max-width:760px"><h3><i class="ti ti-history"></i> Histórico de acessos — '+escHtml(nome||email)+'</h3><div style="font-size:9px;color:var(--tx2);margin:-4px 0 10px">Registra quando o aplicativo foi aberto e se o aviso de tarefas foi exibido/acionado. Isso confirma a exibição na tela, não a leitura humana.</div><div style="max-height:430px;overflow:auto">'+itens+'</div><div class="colab-modal-foot"><button class="btn" onclick="document.getElementById(&quot;auraAcessosModal&quot;).remove()">Fechar</button></div></div>';
+  var itens=arr.length?arr.map(function(a){return '<div style="display:grid;grid-template-columns:125px minmax(100px,.8fr) minmax(100px,.7fr) minmax(180px,1.5fr);gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd);font-size:10px"><b>'+escHtml(auraFmtDataHoraAcesso_(a.data))+'</b><span>'+escHtml(a.app||'AURA')+(a.dispositivo?'<br><small>'+escHtml(a.dispositivo)+'</small>':'')+'</span><span>'+escHtml(a.modulo||'')+'</span><span>'+escHtml(a.acao||'')+'</span></div>';}).join(''):'<div class="colab-empty">Ainda não há acessos ou ações registrados para este colaborador.</div>';
+  m.innerHTML='<div class="colab-modal" style="max-width:860px"><h3><i class="ti ti-history"></i> Acessos e ações — '+escHtml(nome||email)+'</h3><div style="font-size:9px;color:var(--tx2);margin:-4px 0 10px">Mostra data e hora, aplicativo, dispositivo e ações registradas nesta conta.</div><div style="display:grid;grid-template-columns:125px minmax(100px,.8fr) minmax(100px,.7fr) minmax(180px,1.5fr);gap:8px;padding:7px 0;color:var(--tx2);font-size:8px;font-weight:800;text-transform:uppercase"><span>Data e hora</span><span>App / dispositivo</span><span>Módulo</span><span>Ação</span></div><div style="max-height:430px;overflow:auto">'+itens+'</div><div class="colab-modal-foot"><button class="btn" onclick="document.getElementById(&quot;auraAcessosModal&quot;).remove()">Fechar</button></div></div>';
   document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target===m)m.remove();});
 }
 async function auraGerarTarefasAutoAgora_(){
@@ -15956,18 +16002,18 @@ function colabAdminRender(){
   var lista=(COLABORADORES_TODOS||[]).slice().filter(function(c){
     if(!q)return true;
     var ac=AURA_ACESSOS_ULTIMOS_[_colabNormEmail_(c.email)]||{};
-    return [c.nome,c.email,(c.aliases||[]).join(' '),c.aniv,String(c.coletas||0),ac.app,ac.abertoEm,ac.avisoAcao].join(' ').toLowerCase().indexOf(q)>=0;
+    return [c.nome,c.email,(c.aliases||[]).join(' '),c.aniv,String(c.coletas||0),ac.app,ac.abertoEm,ac.avisoAcao,String(ac.tarefasExecutadas||0)].join(' ').toLowerCase().indexOf(q)>=0;
   });
   lista.sort(function(a,b){if((a.ativo!==false)!==(b.ativo!==false))return a.ativo===false?1:-1;return String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR');});
   if(!lista.length){el.innerHTML='<div class="colab-empty">Nenhum colaborador encontrado.</div>';colabAdminAtualizarKpis_();return;}
-  var cab='<div class="colab-list-head"><div>Colaborador</div><div>E-mail / anteriores</div><div>Aniversário</div><div>Coletas</div><div>Situação</div><div>Último acesso</div><div>Tarefas ao entrar</div><div style="text-align:right">Ações</div></div>';
+  var cab='<div class="colab-list-head"><div>Colaborador</div><div>E-mail / anteriores</div><div>Aniversário</div><div>Coletas</div><div>Situação</div><div>Último acesso</div><div>Decisão / execução</div><div style="text-align:right">Ações</div></div>';
   el.innerHTML=cab+lista.map(function(c){
     var aliases=c.aliases||[],ref=c.id||c.linha||c.email||'',chave=c.id||c.linha||c.email||'',coletas=Number(c.coletas)||0;
     var ac=AURA_ACESSOS_ULTIMOS_[_colabNormEmail_(c.email)]||null,acessoHtml='<div class="colab-access"><span class="muted">Sem registro</span></div>',tarefasHtml='<div class="colab-access"><span class="muted">—</span></div>';
     if(ac){
-      acessoHtml='<div class="colab-access"><b>'+escHtml(auraFmtDataHoraAcesso_(ac.abertoEm))+'</b><span>'+escHtml(ac.app||'AURA')+'</span></div>';
-      var qpd=Number(ac.pendentes)||0,visto=!!ac.avisoExibidoEm,acao=String(ac.avisoAcao||'');
-      tarefasHtml='<div class="colab-access"><b>'+qpd+' pendente'+(qpd===1?'':'s')+'</b>'+(qpd?('<span class="'+(visto?'ok':'warn')+'">'+(visto?'Aviso visto '+auraFmtDataHoraAcesso_(ac.avisoExibidoEm):'Aviso não exibido')+'</span>'):'<span class="ok">Sem pendências</span>')+(acao?'<span> · '+escHtml(acao.replace(/_/g,' '))+'</span>':'')+'</div>';
+      acessoHtml='<div class="colab-access"><b>'+escHtml(auraFmtDataHoraAcesso_(ac.abertoEm))+'</b><span>'+escHtml(ac.app||'AURA')+'</span>'+(ac.dispositivo?'<span>'+escHtml(ac.dispositivo)+(ac.navegador?' · '+escHtml(ac.navegador):'')+'</span>':'')+'</div>';
+      var qpd=Number(ac.pendentes)||0,resA=auraResumoDecisaoAcesso_(ac);
+      tarefasHtml='<div class="colab-access"><b>'+qpd+' pendente'+(qpd===1?'':'s')+'</b><span class="'+escHtml(resA.classe)+'">'+escHtml(resA.texto)+'</span>'+(Number(ac.tarefasExecutadas)>0&&ac.ultimaExecucaoEm?'<span>Última execução '+escHtml(auraFmtDataHoraAcesso_(ac.ultimaExecucaoEm))+'</span>':'')+'</div>';
     }
     return '<div class="colab-row">'
       +'<div><div class="colab-name">'+escHtml(c.nome||'Sem nome')+(_colabNormEmail_(c.email)===COLAB_EMAIL_TESTE?'<span style="margin-left:6px;font-size:8px;padding:2px 6px;border-radius:99px;background:rgba(186,117,23,.14);color:var(--amber)">LOGIN DE TESTE</span>':'')+'</div><div class="colab-id">'+escHtml(ref)+'</div></div>'
@@ -18405,54 +18451,33 @@ console.info('[AURA] preço por validade v7.10 — bipe/Estoque mostra venda nor
 
 <script id="auraValidade21hBuild">console.info('[AURA] validade v7.11 — produto válido até 21:00 do dia da validade; vencido somente após 21h');</script>
 <script>console.info('[AURA] preço fallback v7.12 — sem custo: venda -30% + preço charmoso XX,99');</script>
-<style id="aura-loading-gauge-css">
-#aura-loading-gauge{--ag:#4A8CE8;--abg:#F6F4F1;--acard:#fff;--aink:#1B1B1F;--amute:#6B6B73;--aline:#E4E1DC;--atrack:#E9E6E1;--aok:#4CE660;--aslow:#E8C400;--astuck:#FF8C00;--aerr:#D4001A;position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(20,20,26,.25);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s,visibility 0s .22s;font-family:Arial,Helvetica,sans-serif;color:var(--aink)}
-@media(prefers-color-scheme:dark){#aura-loading-gauge{--abg:#15151A;--acard:#1F1F26;--aink:#F4F2EE;--amute:#9C9CA6;--aline:#32323C;--atrack:#2D2D36}}
-#aura-loading-gauge[data-theme="light"]{--abg:#F6F4F1;--acard:#fff;--aink:#1B1B1F;--amute:#6B6B73;--aline:#E4E1DC;--atrack:#E9E6E1}
-#aura-loading-gauge.on{opacity:1;visibility:visible;pointer-events:auto;transition:opacity .22s}
-#aura-loading-gauge *{box-sizing:border-box}
-#aura-loading-gauge .ag-panel{--c:var(--ag);width:min(350px,100%);background:var(--acard);border:1px solid var(--aline);border-top:4px solid var(--c);border-radius:16px;padding:12px 16px 15px;box-shadow:0 18px 48px rgba(0,0,0,.28);transform:scale(.96);transition:transform .24s,border-color .2s}
-#aura-loading-gauge.on .ag-panel{transform:none}
-#aura-loading-gauge[data-s="slow"] .ag-panel{--c:var(--aslow)}#aura-loading-gauge[data-s="stuck"] .ag-panel{--c:var(--astuck)}#aura-loading-gauge[data-s="err"] .ag-panel{--c:var(--aerr)}#aura-loading-gauge[data-s="ok"] .ag-panel{--c:var(--aok)}
-#aura-loading-gauge .ag-brand{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--amute)}#aura-loading-gauge .ag-brand b{color:var(--aink)}
-#aura-loading-gauge .ag-gauge{display:block;width:100%;height:auto;max-height:146px;margin:1px auto 0}
-#aura-loading-gauge .ag-arc{fill:none;stroke-linecap:round;stroke-width:16}#aura-loading-gauge .ag-track{stroke:var(--atrack)}#aura-loading-gauge .ag-fill{stroke:var(--c);transition:stroke .2s}
-#aura-loading-gauge .ag-tick{stroke:var(--amute);stroke-width:2;opacity:.5}#aura-loading-gauge .ag-needle{transform-origin:150px 150px;transition:transform .16s linear}#aura-loading-gauge .ag-needle line{stroke:var(--aink);stroke-width:5;stroke-linecap:round}#aura-loading-gauge .ag-hub{fill:var(--aink)}#aura-loading-gauge .ag-hubi{fill:var(--c)}
-#aura-loading-gauge[data-s="stuck"] .ag-needle{animation:ag-tremor .5s infinite}#aura-loading-gauge[data-s="stuck"] .ag-pct,#aura-loading-gauge[data-s="err"] .ag-pct{animation:ag-pulse 1.1s infinite}@keyframes ag-tremor{0%,100%{transform:rotate(var(--a))}50%{transform:rotate(calc(var(--a) + 2.5deg))}}@keyframes ag-pulse{50%{opacity:.5}}
-#aura-loading-gauge .ag-pct{font-size:31px;font-weight:900;text-align:center;font-variant-numeric:tabular-nums;margin-top:0}#aura-loading-gauge .ag-msg{text-align:center;font-size:14px;font-weight:750;margin-top:1px;line-height:1.35}#aura-loading-gauge .ag-meta{text-align:center;color:var(--amute);font-size:12px;margin-top:3px;min-height:16px;line-height:1.35}
-#aura-loading-gauge .ag-actions{display:flex;justify-content:center;gap:8px;margin-top:10px}#aura-loading-gauge .ag-actions:empty{display:none}#aura-loading-gauge .ag-actions button{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--aline);border-radius:9px;background:var(--abg);color:var(--aink);padding:7px 12px;cursor:pointer}#aura-loading-gauge .ag-actions button:focus-visible{outline:3px solid var(--ag);outline-offset:2px}
-@media(prefers-reduced-motion:reduce){#aura-loading-gauge,#aura-loading-gauge *{transition:none!important;animation:none!important}}
-</style>
-<div id="aura-loading-gauge" role="status" aria-live="polite" aria-atomic="true" data-s="run">
- <div class="ag-panel"><div class="ag-brand"><b>AURA System</b><span>Processando</span></div>
-  <svg class="ag-gauge" viewBox="0 0 300 166" aria-hidden="true"><g class="ag-ticks"></g><path class="ag-arc ag-track" d="M30 150 A120 120 0 0 1 270 150" pathLength="100"/><path class="ag-arc ag-fill" d="M30 150 A120 120 0 0 1 270 150" pathLength="100" stroke-dasharray="0 100"/><g class="ag-needle" style="--a:-90deg;transform:rotate(-90deg)"><polygon points="146,150 154,150 150,40" fill="currentColor"/><line x1="150" y1="150" x2="150" y2="164"/></g><circle class="ag-hub" cx="150" cy="150" r="11"/><circle class="ag-hubi" cx="150" cy="150" r="5"/></svg>
-  <div class="ag-pct">0%</div><div class="ag-msg">Aguardando…</div><div class="ag-meta">Percentual estimado</div><div class="ag-actions"></div>
- </div>
-</div>
-<script id="aura-loading-gauge-js">
-(function(w,d){
- 'use strict'; if(w.AuraLoader&&w.AuraLoader.__gauge)return;
- var root=d.getElementById('aura-loading-gauge'),panel=root.querySelector('.ag-panel'),fill=root.querySelector('.ag-fill'),needle=root.querySelector('.ag-needle'),pct=root.querySelector('.ag-pct'),msg=root.querySelector('.ag-msg'),meta=root.querySelector('.ag-meta'),actions=root.querySelector('.ag-actions'),ticks=root.querySelector('.ag-ticks');
- for(var i=0;i<=10;i++){var a=(-90+i*18)*Math.PI/180,x1=150+Math.sin(a)*130,y1=150-Math.cos(a)*130,x2=150+Math.sin(a)*(i%5?136:142),y2=150-Math.cos(a)*(i%5?136:142),line=d.createElementNS('http://www.w3.org/2000/svg','line');line.setAttribute('class','ag-tick');line.setAttribute('x1',x1.toFixed(1));line.setAttribute('y1',y1.toFixed(1));line.setAttribute('x2',x2.toFixed(1));line.setAttribute('y2',y2.toFixed(1));ticks.appendChild(line)}
- var active=0,started=0,timer=0,visibleTimer=0,interval=0,state='run',currentLabel='Carregando conteúdo…',real=false,realPct=0,seq=0,hideAfter=0,groupError='',currentComplete='Processo concluído';
- function loginBlocksLoader(){var login=d.getElementById('loginScreen');return !!(login&&!login.classList.contains('hidden'))}
- function draw(p){p=Math.max(0,Math.min(100,p));fill.setAttribute('stroke-dasharray',p+' 100');var deg=-90+p*1.8;needle.style.setProperty('--a',deg+'deg');needle.style.transform='rotate('+deg+'deg)';pct.textContent=Math.round(p)+'%'}
- function setState(s,title,detail){state=s;root.dataset.s=s;msg.textContent=title||'';meta.textContent=detail||''}
- function clearTimers(){clearTimeout(timer);clearTimeout(visibleTimer);clearTimeout(hideAfter);clearInterval(interval);timer=visibleTimer=interval=hideAfter=0}
- function button(label,fn){var b=d.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',fn);actions.appendChild(b)}
- function dismiss(){root.classList.remove('on');actions.textContent='';clearTimers();if(active>0){state='hidden';return}state='idle';real=false;draw(0)}
- function labelFor(text){text=(text||'').replace(/\s+/g,' ').trim();return text?text.slice(0,90):'Processando sua solicitação…'}
- function gestureLabel(el){var node=el&&el.closest?el.closest('button,[role="button"],input[type="submit"],input[type="button"],a,[aria-label]'):null;if(!node)return '';return labelFor(node.getAttribute('aria-label')||node.innerText||node.value||node.title||'')}
- function begin(label,mode){if(active===0){clearTimers();groupError='';started=Date.now();real=false;realPct=0;draw(0);actions.textContent='';setState('run',label||'Carregando conteúdo…','Percentual estimado');root.classList.remove('on');visibleTimer=setTimeout(function(){if(active>0&&state!=='hidden')root.classList.add('on')},220);interval=setInterval(tick,100)}else if(label&&currentLabel==='Carregando conteúdo…'){currentLabel=label;msg.textContent=label}active++;seq++;return seq}
- function finish(err,immediate){if(err)groupError=groupError||err;active=Math.max(0,active-1);if(active>0)return;if(state==='hidden'){state='idle';clearTimers();return}clearInterval(interval);interval=0;if(groupError){clearTimeout(visibleTimer);root.classList.add('on');actions.textContent='';setState('err','Falha ao concluir o processo',groupError);button('Fechar',dismiss);groupError='';return}real=false;draw(100);if(immediate){setState('ok',currentComplete||'Processo concluído','Tela atualizada');clearTimeout(visibleTimer);root.classList.remove('on');actions.textContent='';clearTimers();state='idle';return}setState('ok',currentComplete||'Processo concluído','Etapa finalizada');clearTimeout(visibleTimer);root.classList.add('on');hideAfter=setTimeout(function(){if(active===0)dismiss()},850)}
- function tick(){if(!active||state==='hidden')return;var elapsed=Date.now()-started,sec=(elapsed/1000).toFixed(1).replace('.',',');if(!real){var p=elapsed<2000?70*elapsed/2000:70+22*(1-Math.exp(-(elapsed-2000)/4300));draw(Math.min(92,p));meta.textContent='Percentual estimado · '+sec+' s'}else{draw(realPct);meta.textContent=Math.round(realPct)+'% confirmado · '+sec+' s'}if(elapsed>=20000){setState('stuck','Ainda processando',sec+' s · a operação não respondeu no tempo esperado');if(!actions.firstChild)button('Ocultar',dismiss)}else if(elapsed>=8000){setState('slow','Demorando mais que o normal',sec+' s · aguardando resposta');}else if(state==='run'){setState('run',currentLabel,real?'Progresso confirmado':'Percentual estimado · '+sec+' s')}}
- w.AuraLoader={__gauge:true,start:function(options){options=typeof options==='string'?{message:options}:options||{};if(typeof loginBlocksLoader==='function'&&loginBlocksLoader())return 0;if(active===0){currentLabel=labelFor(options.message||'Processando a ação…');currentComplete=labelFor(options.complete||'Processo concluído')}return begin(currentLabel,'manual')},progress:function(current,total,message){if(active===0)begin(message||'Processando a ação…','manual');real=true;realPct=total>0?Math.max(0,Math.min(100,100*current/total)):0;draw(realPct);if(message)currentLabel=labelFor(message);setState('run',currentLabel,Math.round(realPct)+'% confirmado · '+current+' de '+total)},done:function(message,immediate){if(message)currentComplete=labelFor(message);if(active===0)begin('Finalizando a ação…','manual');finish(null,!!immediate)},fail:function(message){finish(message||'A ação não foi concluída')},markFailure:function(message){if(active>0)groupError=groupError||String(message||'A ação não foi concluída')},wrapAction:function(name,message,complete,condition){var original=w[name];if(typeof original!=='function'||original.__auraProcessWrapped)return false;var wrapped=function(){var self=this,args=arguments;if(condition==='manualBool'&&args[0]!==true)return original.apply(self,args);if(condition==='manualTag'&&args[0]!=='manual')return original.apply(self,args);if(condition==='ean44'&&String(args[0]||'').replace(/\D/g,'').length!==44)return original.apply(self,args);if(condition==='key44'&&String((d.getElementById('nfeChave')||{}).value||'').replace(/\D/g,'').length!==44)return original.apply(self,args);var ticket=w.AuraLoader.start({message:message,complete:complete});var out;try{out=original.apply(self,args)}catch(e){if(ticket)w.AuraLoader.fail(e&&e.message||complete);throw e}if(!ticket)return out;function settle(v){if(v===false||(v&&(v.ok===false||v.success===false))){w.AuraLoader.fail(v.erro||v.error||('Não foi possível concluir: '+complete))}else w.AuraLoader.done()}if(out&&typeof out.then==='function')return Promise.resolve(out).then(function(v){settle(v);return v},function(e){w.AuraLoader.fail(e&&e.message||complete);throw e});settle(out);return out};wrapped.__auraProcessWrapped=true;w[name]=wrapped;return true},__version:'2.0.0'};
 
- var _auraToastOriginal=w.mostrarToast;if(typeof _auraToastOriginal==='function'&&!_auraToastOriginal.__auraToastObserved){var _auraToastObserved=function(msg,type){if(active>0&&/^(err|error)$/i.test(String(type||'')))groupError=groupError||String(msg||'Falha informada pela aplicação');return _auraToastOriginal.apply(this,arguments)};_auraToastObserved.__auraToastObserved=true;w.mostrarToast=_auraToastObserved}
- draw(0);
-})(window,document);</script>
-<script id="aura-process-loader-hooks">
-(function(){if(!window.AuraLoader)return;var ops=[["syncAll", "Sincronizando os dados da AURA…", "Sincronização concluída"], ["cfCarregar", "Carregando os casos…", "Casos carregados"], ["cfCompletarNegociacaoViaApi_", "Concluindo a negociação…", "Negociação concluída"], ["cfSalvarAcao_", "Salvando a ação…", "Ação salva"], ["afCarregar", "Carregando as ações de fornecedores…", "Ações carregadas"], ["afTeleconArquivoSelecionado_", "Importando o relatório Telecon…", "Relatório disponível para conferência"], ["afTeleconConfirmar_", "Confirmando o relatório Telecon…", "Relatório confirmado"], ["afAbrirRelatorioTelecon_", "Abrindo o relatório Telecon…", "Relatório aberto"], ["afBaixarRelatorioTelecon_", "Baixando o relatório…", "Relatório baixado"], ["afAtualizarRelatorioTelecon_", "Atualizando o relatório Telecon…", "Relatório atualizado"], ["afRemoverRelatorioTelecon_", "Removendo o relatório…", "Relatório removido"], ["afTeleconArquivoAtualizacaoSelecionado_", "Importando a atualização Telecon…", "Relatório disponível para atualização"], ["afRegistrarBonificacao_", "Registrando a bonificação…", "Bonificação registrada"], ["afEvidenciasSelecionadas_", "Enviando as evidências…", "Evidências enviadas"], ["afGerarDocumentoAtual_", "Gerando o documento…", "Documento gerado"], ["afExcluirDossieAtual_", "Excluindo o dossiê…", "Dossiê excluído"], ["afMarcarEnviadaAtual_", "Registrando o envio…", "Envio registrado"], ["afSalvarAcao_", "Salvando a ação…", "Ação salva"], ["nfeBuscarChave_", "Consultando a NF-e pela chave…", "NF-e pronta para conferência", "key44"], ["auraGerarTarefasAutoAgora_", "Gerando as tarefas automáticas…", "Tarefas atualizadas"], ["colabAdminCarregar", "Carregando colaboradores…", "Colaboradores carregados"], ["buscarFotoDoFormulario", "Buscando a foto do produto…", "Foto carregada"], ["usarFotoUrlManual", "Carregando a imagem informada…", "Imagem carregada"], ["downloadEncarte", "Baixando o encarte…", "Encarte baixado"], ["cfExcluir_", "Excluindo o caso…", "Caso excluído"], ["afExcluirBonificacao_", "Excluindo a bonificação…", "Bonificação excluída"], ["afGerarDocumentoId_", "Gerando o documento…", "Documento gerado"], ["afMarcarEnviadaId_", "Registrando o envio…", "Envio registrado"], ["afExcluirDossie_", "Excluindo o dossiê…", "Dossiê excluído"], ["afEditarLegendaEvidencia_", "Salvando a legenda…", "Legenda salva"], ["afExcluirEvidencia_", "Excluindo a evidência…", "Evidência excluída"], ["colabAdminAlternar", "Atualizando o colaborador…", "Colaborador atualizado"], ["colabAdminSalvar", "Salvando o colaborador…", "Colaborador salvo"], ["colabEfetivarTesteConfirmar", "Efetivando o colaborador…", "Colaborador efetivado"], ["colabUnificarConfirmar", "Unificando os históricos…", "Históricos unificados"], ["renderUltimasColetas", "Recarregando as últimas coletas…", "Últimas coletas carregadas", "manualBool"], ["bossCarregar", "Carregando os relatórios do Boss Vision…", "Painel Boss Vision atualizado"]];ops.forEach(function(x){window.AuraLoader.wrapAction(x[0],x[1],x[2],x[3])});})();
+<script>console.info('[AURA] v7.13 — feedback por entrada: continuar / visualizar tarefas / executadas');</script>
+<script id="aura-access-audit-client">
+(function(){
+  'use strict';
+  var APP='AURA System',SESSION_KEY='aura_audit_session_v1';
+  function device_(){
+    var ua=String(navigator.userAgent||''),platform=String(navigator.platform||''),device='Computador';
+    if(/iPad|Tablet/i.test(ua)||(/MacIntel/.test(platform)&&Number(navigator.maxTouchPoints)>1))device='Tablet';
+    else if(/iPhone|iPod|Android/i.test(ua))device='Celular';
+    var os=/iPhone|iPad|iPod/i.test(ua)?'iOS':(/Android/i.test(ua)?'Android':(/Windows/i.test(ua)?'Windows':(/Mac OS|Macintosh/i.test(ua)?'macOS':platform||'Dispositivo')));
+    var browser=/Edg\//i.test(ua)?'Edge':(/CriOS\//i.test(ua)?'Chrome iOS':(/Chrome\//i.test(ua)?'Chrome':(/FxiOS|Firefox\//i.test(ua)?'Firefox':(/Safari\//i.test(ua)?'Safari':'Navegador'))));
+    return {dispositivo:device+' · '+os,navegador:browser,userAgent:ua.slice(0,300)};
+  }
+  function session_(){try{var id=sessionStorage.getItem(SESSION_KEY);if(!id){id='aura-'+Date.now()+'-'+Math.random().toString(36).slice(2,10);sessionStorage.setItem(SESSION_KEY,id);}return id;}catch(e){return 'aura-'+Date.now()+'-'+Math.random().toString(36).slice(2,10);}}
+  function userName_(v){v=String(v||'').toLowerCase();return v==='wagner'?'Wagner':(v==='leonardo'?'Leonardo':v||'Usuário AURA');}
+  function post_(body){try{var c=typeof loadCfg==='function'?loadCfg():{};if(!c||!c.url)return;return fetch(c.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(body)}).then(function(r){return r.json();}).catch(function(){});}catch(e){}}
+  function abrirSessao_(usuario){var d=device_(),s=session_();window._auraAuditUser_=userName_(usuario);window._auraAuditSession_=s;post_({action:'registrarAcessoApp',sessao:s,nome:window._auraAuditUser_,email:'',app:APP,dispositivo:d.dispositivo,navegador:d.navegador,userAgent:d.userAgent,abertoEmCliente:new Date().toISOString()});}
+  window.auraAuditarAcao_=function(modulo,acao,resultado){var d=device_(),s=window._auraAuditSession_||session_(),nome=window._auraAuditUser_||userName_(_usuarioSelecionado),id='evt-'+Date.now()+'-'+Math.random().toString(36).slice(2,9);post_({action:'registrarAcaoApp',id:id,sessao:s,nome:nome,email:'',app:APP,modulo:String(modulo||'Geral'),acao:String(acao||'Ação'),resultado:String(resultado||'executada'),dispositivo:d.dispositivo});};
+  var login=window.tentarLogin;
+  if(typeof login==='function')window.tentarLogin=function(){var r=login.apply(this,arguments),screen=document.getElementById('loginScreen');if(screen&&screen.classList.contains('hidden')){try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}abrirSessao_(_usuarioSelecionado);}return r;};
+  try{var saved=JSON.parse(sessionStorage.getItem('aura_auth_v1')||'null');if(saved&&saved.ts&&Date.now()-saved.ts<8*3600000)abrirSessao_(saved.usuario);}catch(e){}
+  var nav=window.auraNav,navNames={dashboard:'Dashboard',nfe:'Conferência NF-e',estoque:'Estoque',antecipacao:'Antecipação de encarte',cobertura:'Cobertura de fornecedor',acoesfornecedores:'Dossiês de fornecedor',relatorio:'Relatórios',bossvision:'Boss Vision',modalidades:'Modalidades',tarefas:'Tarefas',colaboradores:'Colaboradores',ajuda:'Ajuda'};
+  if(typeof nav==='function')window.auraNav=function(el,tab){var r=nav.apply(this,arguments);if(navNames[tab]&&window.auraAuditarAcao_)window.auraAuditarAcao_(navNames[tab],'Abriu a tela','concluída');return r;};
+  function wrap_(name,module,label){var original=window[name];if(typeof original!=='function'||original.__auraAuditWrapped)return;var wrapped=function(){var out;try{out=original.apply(this,arguments);}catch(e){window.auraAuditarAcao_(module,label,'falhou');throw e;}if(out&&typeof out.then==='function')return out.then(function(v){window.auraAuditarAcao_(module,label,(v===false||(v&&(v.ok===false||v.success===false)))?'falhou':'concluída');return v;},function(e){window.auraAuditarAcao_(module,label,'falhou');throw e;});window.auraAuditarAcao_(module,label,'iniciada');return out;};wrapped.__auraAuditWrapped=true;window[name]=wrapped;}
+  [['nfeImportarXml_','Conferência NF-e','Importou XML da NF-e'],['nfeSalvar_','Conferência NF-e','Solicitou gravação das validades da NF-e'],['salvarEntradaCeasa','Entrada CEASA','Salvou entrada CEASA'],['afSalvarAcao_','Dossiê de fornecedor','Salvou ou atualizou dossiê'],['cfSalvarAcao_','Negociação com fornecedor','Salvou negociação'],['salvarEstoqueLote','Estoque','Atualizou estoque do lote'],['criarTarefa','Tarefas','Criou tarefa'],['encerrarPromo','Antecipação de encarte','Encerrou promoção'],['reativarPromo','Antecipação de encarte','Reativou promoção'],['salvarModModal','Modalidades','Salvou modalidade']].forEach(function(x){wrap_(x[0],x[1],x[2]);});
+})();
 </script>
 </body>
 </html>
