@@ -303,6 +303,14 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 .pm-photobox{width:180px;height:180px;flex-shrink:0;border-radius:var(--rl);border:1px solid var(--bd);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .pm-photobox img{width:100%;height:100%;object-fit:contain}
 .pm-photobox-empty{color:var(--tx2);font-size:40px;opacity:.4}
+.pm-photo-manager{margin:-2px 0 14px;padding:10px 12px;border:1px solid var(--bd);border-radius:var(--r);background:color-mix(in srgb,var(--bg2) 55%,transparent)}
+.pm-photo-manager-title{font-size:11px;font-weight:800;color:var(--tx);margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.pm-photo-manager-help{font-size:10px;line-height:1.4;color:var(--tx2);margin-bottom:8px}
+.pm-photo-manager-row{display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.pm-photo-manager-row input{height:32px;min-width:0;flex:1;padding:0 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);font-size:12px;outline:none}
+.pm-photo-manager-row input:focus{border-color:var(--blue);box-shadow:0 0 0 2px rgba(55,138,221,.12)}
+.pm-photo-manager-row .btn{white-space:nowrap}
+.pm-photo-manager-status{font-size:10.5px;line-height:1.4;color:var(--tx2);min-height:15px;margin-top:7px}
 .pm-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:10px}
 .pm-nome{font-size:16px;font-weight:700;line-height:1.3}
 .pm-cod{font-family:monospace;font-size:12px;color:var(--tx2);display:flex;align-items:center;gap:6px}
@@ -310,6 +318,8 @@ tr:last-child td{border-bottom:none}tr:hover td{background:var(--bg2)}
 @media(max-width:560px){
   .pm-top{flex-direction:column}
   .pm-photobox{width:100%;height:150px}
+  .pm-photo-manager-row{align-items:stretch}
+  .pm-photo-manager-row input{flex-basis:100%}
 }
 
 .uc-card{background:var(--surface2);border:1px solid var(--border);border-top:3px solid #666;border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:box-shadow .2s;min-width:0}
@@ -5432,6 +5442,23 @@ function toggleTheme() {
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="pm-photo-manager">
+      <div class="pm-photo-manager-title"><i class="ti ti-photo-edit"></i> Vincular foto ao banco compartilhado</div>
+      <div class="pm-photo-manager-help">A foto fica associada ao código do produto e pode ser reutilizada no Arsenal de Ofertas, no AURA e na Coleta.</div>
+      <div class="pm-photo-manager-row">
+        <input id="pmFotoBusca" type="text" placeholder="Pesquisar foto pelo produto ou código" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();pmBuscarFotoCentral();}">
+        <button type="button" class="btn btn-sm btn-green" onclick="pmBuscarFotoCentral()"><i class="ti ti-search"></i> Buscar foto</button>
+        <label class="btn btn-sm" for="pmFotoArquivo" style="cursor:pointer"><i class="ti ti-upload"></i> Enviar imagem</label>
+        <input id="pmFotoArquivo" type="file" accept="image/*" onchange="pmFotoArquivoSelecionado(this)" style="display:none">
+      </div>
+      <div class="pm-photo-manager-row">
+        <input id="pmFotoUrl" type="url" placeholder="Ou cole a URL direta da imagem" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();pmVincularFotoUrl();}">
+        <button type="button" class="btn btn-sm" onclick="pmVincularFotoUrl()"><i class="ti ti-link"></i> Vincular URL</button>
+        <button type="button" class="btn btn-sm" onclick="pmAbrirGoogleImagens()"><i class="ti ti-brand-google"></i> Google Imagens</button>
+      </div>
+      <div id="pmFotoStatus" class="pm-photo-manager-status" aria-live="polite">As fotos vinculadas aqui alimentam o banco central compartilhado.</div>
     </div>
 
     <div style="margin-bottom:14px">
@@ -16523,6 +16550,7 @@ function abrirProdutoModal(cod){
   if(!lotes.length)return;
   window._pmCodAtual=cod;
   var principal=lotes[0];
+  var pmFotoAbrirToken=++_pmFotoBuscaToken;
 
   document.getElementById('pmNome').innerHTML='<i class="ti ti-package"></i> '+escHtml(cleanNome(principal.nome||'Produto'));
   document.getElementById('pmCod').innerHTML='<i class="ti ti-barcode"></i> '+escHtml(cod);
@@ -16535,13 +16563,14 @@ function abrirProdutoModal(cod){
   pmImg=document.getElementById('pmFoto');
   if(pmBarras){
     _resolverFotoTarefaChain(pmBarras, principal.nome || '').then(function(url){
+      if(pmFotoAbrirToken!==_pmFotoBuscaToken||cod!==String(window._pmCodAtual||'').trim())return;
       if(url){
         pmImg.src=url;
-        pmImg.onerror=function(){pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';};
+        pmImg.onerror=function(){if(pmFotoAbrirToken!==_pmFotoBuscaToken||cod!==String(window._pmCodAtual||'').trim())return;pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';};
       }else{
         pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';
       }
-    }).catch(function(){pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';});
+    }).catch(function(){if(pmFotoAbrirToken!==_pmFotoBuscaToken||cod!==String(window._pmCodAtual||'').trim())return;pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';});
   } else {
     pmBox.innerHTML='<div class="pm-photobox-empty"><i class="ti ti-photo-off"></i></div>';
   }
@@ -16581,7 +16610,127 @@ function abrirProdutoModal(cod){
   }).join('');
 
   document.getElementById('produtoModal').classList.add('open');
+  var pmBusca=document.getElementById('pmFotoBusca');if(pmBusca)pmBusca.value=principal.nome||'';
+  var pmUrl=document.getElementById('pmFotoUrl');if(pmUrl)pmUrl.value='';
+  var pmStatus=document.getElementById('pmFotoStatus');if(pmStatus)pmStatus.textContent='As fotos vinculadas aqui alimentam o banco central compartilhado.';
   pmAtualizarAuditoriaLotes_(cod);
+}
+
+// Vincula a foto diretamente ao código do produto no banco central compartilhado.
+// Usa o mesmo Code.gs/Drive que Arsenal, AURA e Coleta já consultam.
+var _pmFotoBuscaToken=0;
+function pmFotoStatus_(texto,cor){
+  var el=document.getElementById('pmFotoStatus');if(!el)return;
+  el.textContent=texto||'';el.style.color=cor||'var(--tx2)';
+}
+function pmAplicarFotoPreview_(dataUrl){
+  var box=document.getElementById('pmPhotoBox');if(!box||!dataUrl)return;
+  box.classList.remove('pm-photobox-empty-wrap');
+  box.innerHTML='<img id="pmFoto" alt="Foto do produto" loading="lazy">';
+  var img=document.getElementById('pmFoto');if(img)img.src=dataUrl;
+}
+async function pmBuscarFotoCentral(){
+  var cod=String(window._pmCodAtual||'').trim(),nome=String(document.getElementById('pmNome')?.textContent||'').trim();
+  var termo=String(document.getElementById('pmFotoBusca')?.value||'').trim();
+  if(!cod){pmFotoStatus_('Abra um produto com código para vincular a foto.','var(--red)');return false;}
+  var token=++_pmFotoBuscaToken;
+  pmFotoStatus_('Consultando o banco central e as fontes disponíveis para este produto…','var(--amber)');
+  try{
+    var url=await _resolverFotoTarefaChain(cod,termo||nome,true);
+    if(token!==_pmFotoBuscaToken||cod!==String(window._pmCodAtual||'').trim())return false;
+    if(!url){pmFotoStatus_('Nenhuma foto encontrada. Envie um arquivo ou vincule uma URL direta.','var(--tx2)');return false;}
+    pmAplicarFotoPreview_(url);
+    pmFotoStatus_('Foto localizada e vinculada ao banco compartilhado.','var(--green)');
+    return true;
+  }catch(err){
+    console.warn('[AURA] Erro ao buscar foto do produto:',err);
+    if(token===_pmFotoBuscaToken)pmFotoStatus_('Não foi possível buscar a foto agora. Tente enviar um arquivo ou usar uma URL.','var(--red)');
+    return false;
+  }
+}
+async function pmSalvarFotoCentral_(dataUrl,mimeType,codDestino){
+  var cod=String(codDestino||window._pmCodAtual||'').trim(),base64=String(dataUrl||'').split(',')[1]||'';
+  if(!cod){pmFotoStatus_('Abra um produto antes de salvar a foto.','var(--red)');return false;}
+  ++_pmFotoBuscaToken;
+  if(!base64){pmFotoStatus_('A imagem está vazia ou em formato inválido.','var(--red)');return false;}
+  var cfg=loadCfg();
+  if(!cfg||!cfg.url){pmFotoStatus_('Configure a conexão do Apps Script para gravar no banco compartilhado.','var(--red)');return false;}
+  pmFotoStatus_('Salvando a foto no banco compartilhado…','var(--amber)');
+  try{
+    var resp=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({action:'salvarImagemProduto',codigoBarras:cod,imagemBase64:base64,mimeType:mimeType||'image/png',tipo:'produto'})});
+    var res=await resp.json();
+    if(!res||!res.ok)throw new Error((res&&res.erro)||'Não foi possível salvar a imagem.');
+    var canon=String(res.codigoCanonico||cod);
+    _notificarFotoCentralAtualizada(canon);
+    if(canon!==cod)_invalidarFotoCentralAura(cod);
+    if(cod===String(window._pmCodAtual||'').trim()){
+      pmAplicarFotoPreview_(dataUrl);
+      pmFotoStatus_('Foto vinculada ao código '+canon+' e salva no banco compartilhado.','var(--green)');
+    }
+    return true;
+  }catch(err){
+    console.warn('[AURA] Erro ao salvar foto do produto:',err);
+    pmFotoStatus_('Não foi possível salvar a foto: '+String(err&&err.message||err),'var(--red)');
+    return false;
+  }
+}
+function pmFotoArquivoSelecionado(input){
+  var file=input&&input.files&&input.files[0];if(!file)return;
+  var codSelecionado=String(window._pmCodAtual||'').trim();
+  if(!/^image\//i.test(file.type||'')){pmFotoStatus_('Selecione um arquivo de imagem válido.','var(--red)');input.value='';return;}
+  pmFotoStatus_('Preparando a imagem para o banco compartilhado…','var(--amber)');
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var img=new Image();
+    img.onload=function(){
+      if(codSelecionado!==String(window._pmCodAtual||'').trim()){pmFotoStatus_('O produto mudou durante a seleção. Selecione a imagem novamente no produto correto.','var(--amber)');return;}
+      var dataUrl=_fotoDataUrlCentral_(img);
+      if(!dataUrl){pmFotoStatus_('Não consegui preparar esta imagem. Tente outro arquivo.','var(--red)');return;}
+      pmSalvarFotoCentral_(dataUrl,'image/png',codSelecionado);
+    };
+    img.onerror=function(){pmFotoStatus_('Não foi possível abrir este arquivo de imagem.','var(--red)');};
+    img.src=ev.target.result;
+  };
+  reader.onerror=function(){pmFotoStatus_('Falha ao ler o arquivo de imagem.','var(--red)');};
+  reader.readAsDataURL(file);input.value='';
+}
+function pmCarregarImagemUrl_(url){
+  url=String(url||'').trim();if(!url)return Promise.resolve(null);
+  return new Promise(function(resolve){
+    var terminou=false;
+    function tentar(src,proxy){
+      var img=new Image(),timer=setTimeout(function(){
+        img.src='';
+        if(!proxy&&/^https?:\/\//i.test(url))tentar(_auraEncarteProxyImagemUrl_(url),true);else finalizar(null);
+      },10000);
+      function finalizar(valor){if(terminou)return;terminou=true;clearTimeout(timer);resolve(valor);}
+      try{img.crossOrigin='anonymous';img.referrerPolicy='no-referrer';}catch(e){}
+      img.onload=function(){finalizar(img);};
+      img.onerror=function(){clearTimeout(timer);if(!proxy&&/^https?:\/\//i.test(url))tentar(_auraEncarteProxyImagemUrl_(url),true);else finalizar(null);};
+      img.src=src;
+    }
+    tentar(url,false);
+  });
+}
+async function pmVincularFotoUrl(){
+  var codVinculo=String(window._pmCodAtual||'').trim();
+  var url=String(document.getElementById('pmFotoUrl')?.value||'').trim();
+  if(!/^https?:\/\//i.test(url)){pmFotoStatus_('Cole uma URL de imagem iniciada por http:// ou https://.','var(--red)');return false;}
+  pmFotoStatus_('Carregando a imagem do link…','var(--amber)');
+  try{
+    var img=await pmCarregarImagemUrl_(url);
+    if(codVinculo!==String(window._pmCodAtual||'').trim()){pmFotoStatus_('O produto mudou durante a leitura do link. Tente novamente no produto correto.','var(--amber)');return false;}
+    if(!img){pmFotoStatus_('O link não entregou uma imagem carregável. Use a URL direta ou envie o arquivo.','var(--red)');return false;}
+    var dataUrl=_fotoDataUrlCentral_(img);
+    if(!dataUrl){pmFotoStatus_('O navegador bloqueou a leitura desta imagem. Envie o arquivo para vinculá-la.','var(--amber)');return false;}
+    return await pmSalvarFotoCentral_(dataUrl,'image/png',codVinculo);
+  }catch(err){pmFotoStatus_('Falha ao carregar a imagem do link.','var(--red)');return false;}
+}
+function pmAbrirGoogleImagens(){
+  var termo=String(document.getElementById('pmFotoBusca')?.value||'').trim()||String(document.getElementById('pmNome')?.textContent||'').trim()||String(window._pmCodAtual||'');
+  if(!termo){pmFotoStatus_('Produto sem descrição para pesquisar.','var(--red)');return;}
+  window.open('https://www.google.com/search?tbm=isch&q='+encodeURIComponent(termo),'_blank','noopener');
+  pmFotoStatus_('Google Imagens aberto. Copie o link direto da foto e cole no campo acima, ou baixe e envie o arquivo.','var(--amber)');
 }
 
 // Chamado pelo botão "Gerar Encarte" dentro do modal de produto.
@@ -18452,7 +18601,7 @@ console.info('[AURA] preço por validade v7.10 — bipe/Estoque mostra venda nor
 <script id="auraValidade21hBuild">console.info('[AURA] validade v7.11 — produto válido até 21:00 do dia da validade; vencido somente após 21h');</script>
 <script>console.info('[AURA] preço fallback v7.12 — sem custo: venda -30% + preço charmoso XX,99');</script>
 
-<script>console.info('[AURA] v7.13 — feedback por entrada: continuar / visualizar tarefas / executadas');</script>
+<script>console.info('[AURA] v7.14 — vínculo de fotos do produto ao banco central; feedback por entrada');</script>
 <script id="aura-access-audit-client">
 (function(){
   'use strict';
