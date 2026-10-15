@@ -12366,18 +12366,10 @@ async function nfeLimpar_(){
 // ═══════════════════════════════════════════════════════════════
 var _nfeHistGeralDados_=[],_nfeHistGeralCarregado_=false,_nfeHistGeralCarregando_=false,_nfeHistGeralFontes_=null,_nfeHistGeralDetalheAtual_=null;
 function nfeHistNorm_(v){return String(v==null?'':v).trim().toLowerCase();}
-function nfeHistSessaoEmail_(){
-  try{
-    var s=JSON.parse(sessionStorage.getItem('aura_auth_v1')||'{}'),u=nfeHistNorm_(s&&s.usuario),lista=(typeof COLABORADORES_TODOS!=='undefined'&&COLABORADORES_TODOS.length?COLABORADORES_TODOS:(typeof COLABORADORES!=='undefined'?COLABORADORES:[]))||[];
-    if(!u)return '';
-    for(var i=0;i<lista.length;i++){
-      var c=lista[i]||{},nome=nfeHistNorm_(c.nome).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-      if(nome===u||nome.split(' ')[0]===u||nfeHistNorm_(c.id)===u)return nfeHistNorm_(c.email||'');
-    }
-  }catch(e){}
-  return '';
+function nfeHistSessaoUsuario_(){
+  try{var s=JSON.parse(sessionStorage.getItem('aura_auth_v1')||'{}'),u=nfeHistNorm_(s&&s.usuario);return ['leonardo','wagner'].indexOf(u)>=0?u:'';}catch(e){return '';}
 }
-function nfeHistPodeEditarNota_(nota){var sessao=nfeHistSessaoEmail_();return !!sessao&&sessao===nfeHistNorm_(nota&&nota.operador);}
+function nfeHistPodeEditarNota_(nota){return !!nfeHistSessaoUsuario_()&&!!nfeHistNorm_(nota&&nota.operador);}
 function nfeHistSetoresOptions_(sel){var a=['Açougue','Bazar','Bebidas','Congelados','Frios','Horti','Laticínios','Limpeza','Outros','Padaria','Perfumaria','Pet','Pilhas/Baterias','Seca','Seca doce'];return a.map(function(x){return '<option value="'+nfeEsc_(x)+'" '+(x===sel?'selected':'')+'>'+nfeEsc_(x)+'</option>';}).join('');}
 function nfeHistNomeOperador_(email){
   var e=nfeHistNorm_(email),lista=(typeof COLABORADORES!=='undefined'&&Array.isArray(COLABORADORES))?COLABORADORES:[];
@@ -12501,7 +12493,7 @@ function nfeHistoricoGeralRenderDetalhe_(r){
     +'<div class="nfe-hist-meta"><span>Emissão</span><b>'+nfeEsc_(nfeHistDataExibir_(n.emissao))+'</b></div><div class="nfe-hist-meta"><span>Conferida em</span><b>'+nfeEsc_(nfeHistDataExibir_(n.processadaEm))+'</b></div>'
     +'<div class="nfe-hist-meta"><span>Recebido por</span><b>'+nfeEsc_(nomeOp)+'</b></div><div class="nfe-hist-meta"><span>E-mail registrado</span><b>'+nfeEsc_(n.operador||'—')+'</b></div>'
     +'<div class="nfe-hist-meta"><span>Itens</span><b>'+Number(n.itens||itens.length||0)+'</b></div><div class="nfe-hist-meta"><span>Lotes</span><b>'+Number(n.lotes||0)+'</b></div></div>'
-    +'<div class="nfe-hist-readonly"><b>Histórico administrativo da AURA.</b> '+(podeEditarNota?'Você pode corrigir vínculos desta nota. Cada alteração fica registrada em auditoria e a autoria original da conferência é preservada.':'Esta nota foi lançada por outro usuário e fica somente para consulta nesta sessão.')+'</div>'
+    +'<div class="nfe-hist-readonly"><b>Histórico administrativo da AURA.</b> '+(podeEditarNota?'Acesso mestre AURA: você pode corrigir vínculos desta NF-e. O editor e a autoria original ficam registrados na auditoria.':'Entre com Leonardo ou Wagner para corrigir vínculos. A autoria original da conferência permanece preservada.')+'</div>'
     +'<div class="nfe-hist-items">'+(rows||'<div class="nfe-hist-empty">Nenhum item encontrado para esta NF-e.</div>')+'</div>';
 }
 
@@ -12509,9 +12501,9 @@ function nfeHistoricoGeralRenderDetalhe_(r){
 function nfeHistGeralAbrirEdicao_(idx){var e=document.getElementById('nfeHistGeralEdit'+idx);if(e)e.classList.add('open');var i=document.getElementById('nfeHistGeralEan'+idx);if(i){i.focus();i.select();}}
 function nfeHistGeralFecharEdicao_(idx){var e=document.getElementById('nfeHistGeralEdit'+idx);if(e)e.classList.remove('open');}
 async function nfeHistGeralSalvarEdicao_(idx){
-  var r=_nfeHistGeralDetalheAtual_||{},n=r.nota||{},it=(r.itens||[])[idx],email=nfeHistSessaoEmail_();if(!it||!nfeHistPodeEditarNota_(n)||!email){mostrarToast('Entre com o usuário que lançou esta NF-e para corrigir o vínculo.','warn');return;}
+  var r=_nfeHistGeralDetalheAtual_||{},n=r.nota||{},it=(r.itens||[])[idx],editor=nfeHistSessaoUsuario_();if(!it||!nfeHistPodeEditarNota_(n)||!editor){mostrarToast('Entre com Leonardo ou Wagner para usar o acesso mestre da AURA.','warn');return;}
   var ean=nfeDigitos_((document.getElementById('nfeHistGeralEan'+idx)||{}).value||''),setor=String((document.getElementById('nfeHistGeralSetor'+idx)||{}).value||it.setor||'Outros');if(!ean){mostrarToast('Informe o código de barras correto.','warn');return;}
-  try{mostrarToast('Validando o produto no banco Telecon…','warn');var res=await nfePost_({action:'nfeEditarItemHistorico',chave:n.chave,operador:email,itemId:it.itemId,nItem:it.nItem,cProd:it.cProd,eanNovo:ean,setor:setor});if(!res||!res.ok)throw new Error((res&&res.erro)||'Falha ao atualizar vínculo.');mostrarToast('Vínculo corrigido: '+(res.descricao||res.ean)+'. A alteração foi registrada.','ok');nfeHistoricoGeralAbrir_(n.chave);}catch(e){mostrarToast(String(e&&e.message||'Não foi possível corrigir o vínculo.'),'err');}
+  try{mostrarToast('Validando o produto no banco Telecon…','warn');var res=await nfePost_({action:'nfeEditarItemHistorico',chave:n.chave,operador:n.operador,editor:editor,itemId:it.itemId,nItem:it.nItem,cProd:it.cProd,eanNovo:ean,setor:setor});if(!res||!res.ok)throw new Error((res&&res.erro)||'Falha ao atualizar vínculo.');mostrarToast('Vínculo corrigido: '+(res.descricao||res.ean)+'. A alteração foi registrada.','ok');nfeHistoricoGeralAbrir_(n.chave);}catch(e){mostrarToast(String(e&&e.message||'Não foi possível corrigir o vínculo.'),'err');}
 }
 
 
