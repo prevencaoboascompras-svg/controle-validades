@@ -11969,14 +11969,14 @@ function cfAbrirRelatorio_(a,tipo){
 // ═══════════════════════════════════════════════════════════════
 // RECEBIMENTO POR NF-e — front v1
 // ═══════════════════════════════════════════════════════════════
-var _nfeNota=null,_nfeAutoTimer=null;
+var _nfeNota=null,_nfeAutoTimer=null,_nfeDiscarding_=false;
 var NFE_DRAFT_KEY='aura_nfe_draft_v650',_nfeDraftTimer_=null;
 var _nfeServerSyncTimer_=null,_nfeServerSyncAtivo_=false,_nfeServerSyncPendente_=false;
 function nfeOperadorAtualAura_(){var el=document.getElementById('nfeOperador'),v=el&&el.value?el.value:'';if(!v)try{v=localStorage.getItem('aura_nfe_operador')||'';}catch(e){}return String(v||'').trim().toLowerCase();}
 function nfeNotaLimpaSyncAura_(nota){try{return JSON.parse(JSON.stringify(nota,function(k,v){if(k==='fotoDataUrl'||k==='fotoCarregando')return undefined;return v;}));}catch(e){return nota;}}
 function nfeSalvarRascunho_(){
   try{
-    if(!_nfeNota||!_nfeNota.chave)return;
+    if(_nfeDiscarding_||!_nfeNota||!_nfeNota.chave)return;
     var copia=nfeNotaLimpaSyncAura_(_nfeNota),agora=new Date().toISOString(),ant=nfeLerRascunho_(),mesma=!!(ant&&ant.nota&&nfeDigitos_(ant.nota.chave)===nfeDigitos_(copia.chave));
     localStorage.setItem(NFE_DRAFT_KEY,JSON.stringify({salvoEm:agora,operadorEmail:nfeOperadorAtualAura_(),nota:copia,serverVersion:mesma?(Number(ant.serverVersion)||0):0,serverSalvoEm:mesma?(ant.serverSalvoEm||''):'',dirty:true}));
     nfeAgendarSyncServidorAura_(false);
@@ -11984,9 +11984,9 @@ function nfeSalvarRascunho_(){
 }
 function nfeLerRascunho_(){try{var s=localStorage.getItem(NFE_DRAFT_KEY);if(!s)return null;var d=JSON.parse(s);return d&&d.nota&&d.nota.chave?d:null;}catch(e){return null;}}
 function nfeEscreverRascunhoAura_(d){try{localStorage.setItem(NFE_DRAFT_KEY,JSON.stringify(d));return true;}catch(e){return false;}}
-function nfeAgendarSyncServidorAura_(imediato){if(_nfeServerSyncTimer_)clearTimeout(_nfeServerSyncTimer_);if(typeof navigator!=='undefined'&&navigator.onLine===false)return;_nfeServerSyncTimer_=setTimeout(function(){_nfeServerSyncTimer_=null;nfeSincronizarRascunhoServidorAura_();},imediato?20:1200);}
+function nfeAgendarSyncServidorAura_(imediato){if(_nfeDiscarding_)return;if(_nfeServerSyncTimer_)clearTimeout(_nfeServerSyncTimer_);if(typeof navigator!=='undefined'&&navigator.onLine===false)return;_nfeServerSyncTimer_=setTimeout(function(){_nfeServerSyncTimer_=null;nfeSincronizarRascunhoServidorAura_();},imediato?20:1200);}
 async function nfeSincronizarRascunhoServidorAura_(){
-  if(_nfeServerSyncAtivo_){_nfeServerSyncPendente_=true;return null;}var d=nfeLerRascunho_();if(!d||!d.nota||!d.dirty)return null;if(typeof navigator!=='undefined'&&navigator.onLine===false)return null;
+  if(_nfeDiscarding_)return null;if(_nfeServerSyncAtivo_){_nfeServerSyncPendente_=true;return null;}var d=nfeLerRascunho_();if(!d||!d.nota||!d.dirty)return null;if(typeof navigator!=='undefined'&&navigator.onLine===false)return null;
   _nfeServerSyncAtivo_=true;var salvoLocal=String(d.salvoEm||''),ch=nfeDigitos_(d.nota.chave||'');
   try{var j=await nfePost_({action:'nfeSalvarRascunhoAtivo',nota:nfeNotaLimpaSyncAura_(d.nota),chave:ch,operador:d.operadorEmail||nfeOperadorAtualAura_(),origemCliente:'aura_pc',baseVersion:Number(d.serverVersion)||0,clientSalvoEm:salvoLocal});var atual=nfeLerRascunho_();
     if(j&&j.finalizada&&atual&&atual.nota&&nfeDigitos_(atual.nota.chave)===ch){var stFinal=await nfeConsultarStatus_(ch);var ckFinal=(stFinal&&typeof nfeConfirmacaoCompletaAura_==='function')?nfeConfirmacaoCompletaAura_(stFinal,atual.nota):null;if(ckFinal&&ckFinal.ok){nfeLimparRascunho_();if(_nfeNota&&nfeDigitos_(_nfeNota.chave)===ch)_nfeNota=null;mostrarToast('NF-e já estava 100% confirmada na planilha. Rascunho local encerrado com segurança.','ok');}}
@@ -11995,7 +11995,7 @@ async function nfeSincronizarRascunhoServidorAura_(){
 }
 async function nfeObterRascunhoServidorAura_(chave){try{var j=await nfePost_({action:'nfeRascunhoAtivo',chave:nfeDigitos_(chave)});return j&&j.ok?j:null;}catch(e){return null;}}
 function nfeAdotarRascunhoServidorAura_(r){if(!r||!r.nota)return false;var obj={salvoEm:r.salvoEm||new Date().toISOString(),operadorEmail:String(r.operador||'').toLowerCase(),nota:nfeNotaLimpaSyncAura_(r.nota),serverVersion:Number(r.versao)||0,serverSalvoEm:r.salvoEm||'',syncEm:new Date().toISOString(),dirty:false,serverConflict:false};nfeEscreverRascunhoAura_(obj);_nfeNota=obj.nota;nfePrepararItens_(_nfeNota);nfeRenderNota_();nfeRenderOperadores_();return true;}
-function nfeExcluirRascunhoServidorAura_(chave){try{if(typeof navigator!=='undefined'&&navigator.onLine===false)return;nfePost_({action:'nfeExcluirRascunhoAtivo',chave:nfeDigitos_(chave)}).catch(function(){});}catch(e){}}
+async function nfeExcluirRascunhoServidorAura_(chave){if(typeof navigator!=='undefined'&&navigator.onLine===false)return {ok:false,erro:'Sem conexão com a internet.'};return await nfePost_({action:'nfeExcluirRascunhoAtivo',chave:nfeDigitos_(chave)});}
 function nfeLimparRascunho_(){try{localStorage.removeItem(NFE_DRAFT_KEY);}catch(e){}}
 function nfeRestaurarRascunho_(silencioso){var d=nfeLerRascunho_();if(!d||!d.nota)return false;_nfeNota=d.nota;nfePrepararItens_(_nfeNota);nfeRenderNota_();if(!silencioso)nfeStatus_('ok','Rascunho da NF-e restaurado.');return true;}
 // v7.01 — funções que existiam no Tablet/Individual e faltavam no AURA PC.
@@ -12003,11 +12003,13 @@ function nfeRestaurarRascunho_(silencioso){var d=nfeLerRascunho_();if(!d||!d.not
 // persistidas localmente + enviadas ao rascunho compartilhado.
 function nfeAutosaveAgora_(){
   if(_nfeDraftTimer_){clearTimeout(_nfeDraftTimer_);_nfeDraftTimer_=null;}
+  if(_nfeDiscarding_)return;
   if(!_nfeNota||!_nfeNota.chave)return;
   nfeSalvarRascunho_();
   nfeAgendarSyncServidorAura_(true);
 }
 function nfeAgendarRascunho_(){
+  if(_nfeDiscarding_)return;
   if(_nfeDraftTimer_)clearTimeout(_nfeDraftTimer_);
   _nfeDraftTimer_=setTimeout(function(){_nfeDraftTimer_=null;nfeSalvarRascunho_();},180);
 }
@@ -12096,6 +12098,9 @@ function nfeReceberNota_(nota){_nfeNota=nota||null;if(!_nfeNota)return;nfePrepar
 var _nfeEscudoCatalogoAura_=[];
 var _nfeEscudoCatalogoKeyAura_='';
 var _nfeEscudoCatalogoBusyAura_='';
+function nfeEscudoFatorPadrao_(it){var d=String(it&&it.nome||'').toUpperCase().replace(/,/g,'.'),m=d.match(/(?:^|[^0-9])(\d+(?:\.\d+)?)\s*KG(?:\b|$)/);if(m&&Number(m[1])>0)return Number(m[1]);var u=String(it&&(it.uCom||it.unidadeNFe)||'').trim().toUpperCase();return /^(KG|KGM|QUILO|QUILOGRAMA)$/.test(u)?1:'';}
+function nfeEscudoFatorValor_(it){return it&&it.escudoFatorKg!==undefined&&it.escudoFatorKg!==null&&it.escudoFatorKg!==''?it.escudoFatorKg:nfeEscudoFatorPadrao_(it);}
+function nfeEscudoFatorAlterar_(i,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[i];if(!it)return;var raw=String(v||'').replace(',','.');it.escudoFatorKg=raw===''?'':Math.max(0,Number(raw)||0);nfeSalvarRascunho_();}
 function nfeEscudoOptionsAura_(it){
   var atual=String(it&&it.escudoCodigo||'').trim(),html='<option value="">Não vincular ao Escudo</option>';
   if(!_nfeEscudoCatalogoAura_.length&&atual)html+='<option value="'+nfeEsc_(atual)+'" selected>'+nfeEsc_(atual+(it.escudoNome?' · '+it.escudoNome:''))+'</option>';
@@ -12108,13 +12113,13 @@ function nfeEscudoGarantirCatalogoAura_(){
   nfePost_({action:'nfeEscudoCatalogo',cnpjFornecedor:n.cnpjFornecedor||'',itens:(n.itens||[]).map(function(it){return {nItem:it.nItem,cProd:it.cProd};})}).then(function(j){
     if(_nfeEscudoCatalogoBusyAura_===key)_nfeEscudoCatalogoBusyAura_='';if(!j||!j.ok){console.warn('[AURA NF-e] Catálogo Escudo indisponível:',j&&j.erro);return;}
     _nfeEscudoCatalogoAura_=Array.isArray(j.produtos)?j.produtos:[];_nfeEscudoCatalogoKeyAura_=key;
-    (n.itens||[]).forEach(function(it){var v=(j.vinculos||{})[String(it.nItem||it.cProd||'')];if(v&&!it.escudoCodigo){it.escudoCodigo=String(v.codigo||'');it.escudoNome=String(v.nome||'');it.escudoUnidade=String(v.unidade||'kg');}});
+    (n.itens||[]).forEach(function(it){var v=(j.vinculos||{})[String(it.nItem||it.cProd||'')];if(v){if(!it.escudoCodigo){it.escudoCodigo=String(v.codigo||'');it.escudoNome=String(v.nome||'');it.escudoUnidade=String(v.unidade||'kg');}if(it.escudoFatorKg===undefined||it.escudoFatorKg==='')it.escudoFatorKg=Number(v.fatorKg)||nfeEscudoFatorPadrao_(it);}});
     if(_nfeNota===n){nfeSalvarRascunho_();nfeRenderNota_();}
   }).catch(function(e){if(_nfeEscudoCatalogoBusyAura_===key)_nfeEscudoCatalogoBusyAura_='';console.warn('[AURA NF-e] Falha ao consultar o Escudo:',e);});
 }
 function nfeEscudoSelecionarProdutoAura_(idx,codigo){
   var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];if(!it)return;codigo=String(codigo||'').trim();
-  var p=_nfeEscudoCatalogoAura_.filter(function(x){return String(x.codigo||'').trim()===codigo;})[0],tinhaVinculo=!!String(it.escudoCodigo||'');it.escudoCodigo=codigo;it.escudoRemoverVinculo=!codigo&&tinhaVinculo;it.escudoNome=p?String(p.nome||''):'';it.escudoUnidade=p?String(p.unidade||'kg'):'kg';
+  var p=_nfeEscudoCatalogoAura_.filter(function(x){return String(x.codigo||'').trim()===codigo;})[0],tinhaVinculo=!!String(it.escudoCodigo||'');it.escudoCodigo=codigo;it.escudoRemoverVinculo=!codigo&&tinhaVinculo;it.escudoNome=p?String(p.nome||''):'';it.escudoUnidade=p?String(p.unidade||'kg'):'kg';it.escudoFatorKg=nfeEscudoFatorPadrao_(it);
   var hint=document.getElementById('nfeEscudoHint_'+idx);if(hint)hint.textContent=codigo?'Vinculado a '+it.escudoNome+' ('+codigo+'). Os lotes conferidos serão enviados como peso em kg. Vínculo lembrado para as próximas notas deste fornecedor.':'Opcional. Selecione o item próprio do Escudo. Os lotes conferidos serão enviados como peso em kg.';
   nfeSalvarRascunho_();
 }
@@ -12153,9 +12158,9 @@ function nfeItemHtml_(it,idx){
     +'<div class="nfe-product-wrap">'+nfeThumbHtml_(it,idx)+'<div class="nfe-item-main"><div class="nfe-item-name">'+nfeEsc_(nomeExibir)+'</div>'
     +(nomeAURA?'<div class="nfe-bank-tag"><i class="ti ti-database"></i> Banco AURA / Telecon</div>':(aguardando?'<div class="nfe-bank-tag" style="color:#B76E00"><i class="ti ti-hourglass"></i> Produto novo · será gravado agora e vinculado depois</div>':''))
     +'<div class="nfe-info-list">'+infoNF+'<div class="nfe-info-line"><span class="lbl">Código do fornecedor</span>'+nfeEsc_(it.cProd||'—')+'</div><div class="nfe-info-line"><span class="lbl">Recebido na NF</span><b>'+nfeFmtQtd_(it.qCom)+' '+nfeEsc_(it.uCom||'')+'</b></div><div class="nfe-info-line"><span class="lbl">Quantidade que será gravada</span><b>'+nfeFmtQtd_(qtd)+' '+nfeEsc_(it.unidadeAura||unDestino||'')+'</b></div><div class="nfe-info-line"><span class="lbl">EAN</span>'+(it.eanAura?'<b>'+nfeEsc_(it.eanAura)+'</b>':'Informe o código de barras')+'</div></div></div></div></div>'
-    +'<div class="nfe-item-body">'+convHtml+'<div class="nfe-grid2"><div class="nfe-field"><label>EAN / código de barras</label><div class="nfe-ean-row"><div class="nfe-ean-search-wrap"><input id="nfeEan_'+idx+'" type="text" inputmode="numeric" autocomplete="off" value="'+nfeEsc_(it._campoBusca!==undefined?it._campoBusca:(it.eanAura||''))+'" placeholder="Código interno/EAN ou nome" oninput="nfeBuscaProdutoInput_('+idx+',this)" onkeydown="nfeCampoCodigoKey_(event,'+idx+',this)" onblur="nfeCampoCodigoBlur_('+idx+',this)"><button type="button" class="nfe-kbd-toggle" onclick="nfeTrocarTeclado_('+idx+',this)" title="Buscar também por nome">ABC</button><div class="nfe-autocomplete" id="nfeAuto_'+idx+'"></div></div><button class="nfe-mini-btn nfe-camera-btn" onclick="nfeEscanearEanAura_('+idx+')"><i class="ti ti-camera"></i> Câmera</button></div></div><div class="nfe-field"><label>Setor</label><select id="nfeSetor_'+idx+'" onchange="nfeSetSetor_('+idx+',this.value)">'+nfeSetorOptions_(it.setor||it.setorSugerido||'Outros')+'</select>'+nfeSetorNotaHtml_(it)+'</div><div class="nfe-field" style="grid-column:1/-1"><label>Vínculo com o estoque do Escudo Padaria</label><select id="nfeEscudo_'+idx+'" onchange="nfeEscudoSelecionarProdutoAura_('+idx+',this.value)">'+nfeEscudoOptionsAura_(it)+'</select><small id="nfeEscudoHint_'+idx+'" style="display:block;margin-top:5px;color:var(--tx2);font-size:10px">Opcional. Selecione o item próprio do Escudo. Os lotes conferidos serão enviados como peso em kg.</small></div></div><div class="nfe-lotes-title"><span>Validades / lotes · total a gravar '+nfeFmtQtd_(qtd)+'</span><button class="nfe-add-lote" onclick="nfeAdicionarLote_('+idx+')"><i class="ti ti-plus"></i> Outra validade</button></div><div id="nfeLotesRows_'+idx+'">'+lotes+'</div></div></div>';
+    +'<div class="nfe-item-body">'+convHtml+'<div class="nfe-grid2" style="margin-bottom:9px"><div class="nfe-field"><label>Recebimento</label><select id="nfeRecebimento_'+idx+'" onchange="nfeSetRecebimento_('+idx+',this.value)"><option value="RECEBIDO" '+((it.recebimentoStatus||'RECEBIDO')==='RECEBIDO'?'selected':'')+'>Recebido integral</option><option value="PARCIAL" '+(it.recebimentoStatus==='PARCIAL'?'selected':'')+'>Recebimento parcial</option><option value="NAO_RECEBIDO" '+(it.recebimentoStatus==='NAO_RECEBIDO'?'selected':'')+'>Item faltante / não recebido</option></select></div><div class="nfe-field"><label>Quantidade recebida ('+nfeEsc_(it.uCom||'un')+')</label><input id="nfeQtdRecebida_'+idx+'" type="number" min="0" step="any" value="'+(it.qtdRecebida!==undefined?it.qtdRecebida:it.qCom)+'" oninput="nfeQtdRecebidaAlterar_('+idx+',this.value)"></div></div>'+((it.recebimentoStatus==='PARCIAL'||it.recebimentoStatus==='NAO_RECEBIDO')?'<div class="nfe-field" style="margin-bottom:9px"><label>Motivo / observação</label><input id="nfeMotivoRecebimento_'+idx+'" value="'+nfeEsc_(it.motivoDivergencia||'')+'" placeholder="Ex.: entrega incompleta" oninput="_nfeNota.itens['+idx+'].motivoDivergencia=this.value;nfeAgendarRascunho_()"></div>':'')+'<div class="nfe-grid2"><div class="nfe-field"><label>EAN / código de barras</label><div class="nfe-ean-row"><div class="nfe-ean-search-wrap"><input id="nfeEan_'+idx+'" type="text" inputmode="numeric" autocomplete="off" value="'+nfeEsc_(it._campoBusca!==undefined?it._campoBusca:(it.eanAura||''))+'" placeholder="Código interno/EAN ou nome" oninput="nfeBuscaProdutoInput_('+idx+',this)" onkeydown="nfeCampoCodigoKey_(event,'+idx+',this)" onblur="nfeCampoCodigoBlur_('+idx+',this)"><button type="button" class="nfe-kbd-toggle" onclick="nfeTrocarTeclado_('+idx+',this)" title="Buscar também por nome">ABC</button><div class="nfe-autocomplete" id="nfeAuto_'+idx+'"></div></div><button class="nfe-mini-btn nfe-camera-btn" onclick="nfeEscanearEanAura_('+idx+')"><i class="ti ti-camera"></i> Câmera</button></div></div><div class="nfe-field"><label>Setor</label><select id="nfeSetor_'+idx+'" onchange="nfeSetSetor_('+idx+',this.value)">'+nfeSetorOptions_(it.setor||it.setorSugerido||'Outros')+'</select>'+nfeSetorNotaHtml_(it)+'</div><div class="nfe-field" style="grid-column:1/-1"><label>Vínculo com o estoque do Escudo Padaria</label><select id="nfeEscudo_'+idx+'" onchange="nfeEscudoSelecionarProdutoAura_('+idx+',this.value)">'+nfeEscudoOptionsAura_(it)+'</select><small id="nfeEscudoHint_'+idx+'" style="display:block;margin-top:5px;color:var(--tx2);font-size:10px">Opcional. Selecione o item próprio do Escudo. Os lotes conferidos serão enviados em kg.</small><div class="nfe-field" style="margin-top:8px"><label>Kg por unidade da NF-e</label><input id="nfeEscudoFator_'+idx+'" type="number" min="0.001" step="any" inputmode="decimal" value="'+nfeEscudoFatorValor_(it)+'" placeholder="Ex.: 2,8" oninput="nfeEscudoFatorAlterar_('+idx+',this.value)"><small style="display:block;margin-top:4px;color:var(--tx2);font-size:10px">Informe o peso de cada pacote/unidade. Ex.: 50 pacotes × 2,8 kg = 140 kg. O fator fica salvo para as próximas notas deste fornecedor.</small></div></div><div class="nfe-lotes-title"><span>Validades / lotes · total a gravar '+nfeFmtQtd_(qtd)+'</span><button class="nfe-add-lote" onclick="nfeAdicionarLote_('+idx+')"><i class="ti ti-plus"></i> Outra validade</button></div><div id="nfeLotesRows_'+idx+'">'+lotes+'</div></div></div>';
 }
-function nfeRenderNota_(){var box=document.getElementById('nfeNotaBox'),n=_nfeNota;if(!box||!n)return;box.style.display='block';var itens=(n.itens||[]).map(function(it,idx){return nfeItemHtml_(it,idx);}).join('');box.innerHTML='<div class="nfe-note">'+(n.jaProcessada?'<div class="nfe-processed"><i class="ti ti-alert-triangle"></i> Esta NF-e já consta como concluída'+(n.processadaEm?' em '+nfeEsc_(n.processadaEm):'')+'. Uma nova gravação é bloqueada por segurança.</div>':'')+'<div class="nfe-note-head"><div><div class="nfe-note-name">'+nfeEsc_(n.fornecedor||'Fornecedor')+'</div><div class="nfe-note-meta">CNPJ '+nfeEsc_(n.cnpjFornecedor||'—')+' · NF '+nfeEsc_(n.numero||'—')+' série '+nfeEsc_(n.serie||'—')+' · emissão '+nfeEsc_(n.emissao||'—')+'<br>Chave '+nfeEsc_(n.chave||'')+' · fonte '+nfeEsc_(n.fonte||'XML')+'</div></div><div class="nfe-note-total">'+nfeFmtBRL_(n.valorTotal)+'</div></div><div class="nfe-kpis"><div class="nfe-kpi"><span>Itens da NF-e</span><b>'+Number(n.totalItens||0)+'</b></div><div class="nfe-kpi ok"><span>Reconhecidos</span><b>'+Number(n.totalEncontrados||0)+'</b></div><div class="nfe-kpi warn"><span>Para vincular</span><b>'+Number(n.totalNaoEncontrados||0)+'</b></div><div class="nfe-kpi"><span>Valor da nota</span><b>'+nfeFmtBRL_(n.valorTotal)+'</b></div></div><div class="nfe-toolbar"><div class="nfe-field"><label>Aplicar setor a todos</label><select id="nfeSetorTodos" onchange="nfeAplicarSetorTodos_()"><option value="">Selecione...</option>'+nfeSetorOptions_('')+'</select></div><div class="nfe-field"><label>Recebido por</label><select id="nfeOperador"><option value="">Não informado</option></select></div><div class="nfe-toolbar-help">Produtos reconhecidos já mostram o nome do Banco AURA e a foto do item. Confira a quantidade e distribua integralmente as validades/lotes.<br><b style="color:#1D9E75"><i class="ti ti-device-floppy"></i> Rascunho salvo automaticamente enquanto você preenche.</b></div></div><div class="nfe-items">'+itens+'</div><div class="nfe-foot"><div style="min-width:280px;flex:1"><div id="nfeDiagnostico" class="nfe-diag"></div><div id="nfeErros" class="nfe-errors"></div></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn" onclick="nfeLimpar_()">Cancelar</button><button class="btn btn-green" id="nfeBtnSalvar" '+(n.jaProcessada?'disabled':'')+' onclick="nfeSalvar_()"><i class="ti ti-device-floppy"></i> Gravar validades da NF-e</button></div></div></div>';nfeRenderOperadores_();setTimeout(nfeCarregarFotosPendentes_,0);setTimeout(nfeEscudoGarantirCatalogoAura_,0);}
+function nfeRenderNota_(){var box=document.getElementById('nfeNotaBox'),n=_nfeNota;if(!box||!n)return;box.style.display='block';if(typeof n.canhotoRetido==='undefined')n.canhotoRetido=false;(n.itens||[]).forEach(function(it){if(typeof it.recebimentoStatus==='undefined')it.recebimentoStatus='RECEBIDO';if(typeof it.qtdRecebida==='undefined')it.qtdRecebida=Number(it.qCom)||0;});var itens=(n.itens||[]).map(function(it,idx){return nfeItemHtml_(it,idx);}).join('');box.innerHTML='<div class="nfe-note">'+(n.jaProcessada?'<div class="nfe-processed"><i class="ti ti-alert-triangle"></i> Esta NF-e já consta como concluída'+(n.processadaEm?' em '+nfeEsc_(n.processadaEm):'')+'. Uma nova gravação é bloqueada por segurança.</div>':'')+'<div class="nfe-note-head"><div><div class="nfe-note-name">'+nfeEsc_(n.fornecedor||'Fornecedor')+'</div><div class="nfe-note-meta">CNPJ '+nfeEsc_(n.cnpjFornecedor||'—')+' · NF '+nfeEsc_(n.numero||'—')+' série '+nfeEsc_(n.serie||'—')+' · emissão '+nfeEsc_(n.emissao||'—')+'<br>Chave '+nfeEsc_(n.chave||'')+' · fonte '+nfeEsc_(n.fonte||'XML')+'</div></div><div class="nfe-note-total">'+nfeFmtBRL_(n.valorTotal)+'</div></div><div class="nfe-kpis"><div class="nfe-kpi"><span>Itens da NF-e</span><b>'+Number(n.totalItens||0)+'</b></div><div class="nfe-kpi ok"><span>Reconhecidos</span><b>'+Number(n.totalEncontrados||0)+'</b></div><div class="nfe-kpi warn"><span>Para vincular</span><b>'+Number(n.totalNaoEncontrados||0)+'</b></div><div class="nfe-kpi"><span>Valor da nota</span><b>'+nfeFmtBRL_(n.valorTotal)+'</b></div></div><div class="nfe-toolbar"><div class="nfe-field"><label>Aplicar setor a todos</label><select id="nfeSetorTodos" onchange="nfeAplicarSetorTodos_()"><option value="">Selecione...</option>'+nfeSetorOptions_('')+'</select></div><div class="nfe-field"><label>Recebido por</label><select id="nfeOperador"><option value="">Não informado</option></select></div><div class="nfe-field" style="min-width:180px"><label>Canhoto da entrega</label><label style="display:flex;align-items:center;gap:8px;height:38px;text-transform:none"><input id="nfeCanhotoRetido" type="checkbox" '+(n.canhotoRetido?'checked':'')+' onchange="_nfeNota.canhotoRetido=this.checked;nfeSalvarRascunho_()"> Canhoto retido</label></div><div class="nfe-toolbar-help">Produtos reconhecidos já mostram o nome do Banco AURA e a foto do item. Confira a quantidade e distribua integralmente as validades/lotes.<br><b style="color:#1D9E75"><i class="ti ti-device-floppy"></i> Rascunho salvo automaticamente enquanto você preenche.</b></div></div><div class="nfe-items">'+itens+'</div><div class="nfe-foot"><div style="min-width:280px;flex:1"><div id="nfeDiagnostico" class="nfe-diag"></div><div id="nfeErros" class="nfe-errors"></div></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn" onclick="nfeLimpar_()"><i class="ti ti-trash"></i> Descartar NF-e</button><button class="btn btn-green" id="nfeBtnSalvar" '+(n.jaProcessada?'disabled':'')+' onclick="nfeSalvar_()"><i class="ti ti-device-floppy"></i> Gravar validades da NF-e</button></div></div></div>';nfeRenderOperadores_();setTimeout(nfeCarregarFotosPendentes_,0);setTimeout(nfeEscudoGarantirCatalogoAura_,0);}
 function nfeAtualizarThumb_(idx){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];var el=document.getElementById('nfeThumb_'+idx);if(!it||!el)return;if(it.fotoDataUrl){el.innerHTML='<img src="'+nfeEsc_(it.fotoDataUrl)+'" alt="Produto">';el.className='nfe-thumb';return;}if(it.fotoCarregando){el.innerHTML='<i class="ti ti-loader-2 spin"></i>';el.className='nfe-thumb loading';return;}el.innerHTML='<i class="ti ti-photo"></i>';el.className='nfe-thumb';}
 async function nfeCarregarFotoItem_(idx){var n=_nfeNota,it=n&&n.itens?n.itens[idx]:null;if(!it)return;var ean=nfeDigitos_(it.eanAura);if(!ean||it.fotoDataUrl||it.fotoCarregando)return;it.fotoCarregando=true;nfeAtualizarThumb_(idx);try{var u=await _resolverFotoTarefaChain(ean,it.nomeAura||it.nome||'',false);if(u)it.fotoDataUrl=u;}catch(e){}it.fotoCarregando=false;nfeAtualizarThumb_(idx);}
 function nfeCarregarFotosPendentes_(){var n=_nfeNota;if(!n||!Array.isArray(n.itens))return;n.itens.forEach(function(it,idx){if(it&&it.eanAura)nfeCarregarFotoItem_(idx);});}
@@ -12241,18 +12246,24 @@ function nfeValidarEan_(idx){
   });
 }
 function nfeRenderOperadores_(){var sel=document.getElementById('nfeOperador');if(!sel)return;var atual=localStorage.getItem('aura_nfe_operador')||sel.value||'';var lista=(typeof COLABORADORES!=='undefined'?COLABORADORES:[])||[];sel.innerHTML='<option value="">Não informado</option>'+lista.map(function(c){return '<option value="'+nfeEsc_(c.email||'')+'">'+nfeEsc_(c.nome||c.email||'')+'</option>';}).join('');sel.value=atual;sel.onchange=function(){try{localStorage.setItem('aura_nfe_operador',sel.value||'');}catch(e){}nfeSalvarRascunho_();};}
+function nfeSetRecebimento_(i,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[i];if(!it)return;it.recebimentoStatus=String(v||'RECEBIDO').toUpperCase();if(it.recebimentoStatus==='NAO_RECEBIDO')it.qtdRecebida=0;else if(it.recebimentoStatus==='RECEBIDO')it.qtdRecebida=Number(it.qCom)||0;else if(!(Number(it.qtdRecebida)>0))it.qtdRecebida=Number(it.qCom)||0;it.motivoDivergencia=it.motivoDivergencia||'';nfeSalvarRascunho_();nfeRenderNota_();}
+function nfeQtdRecebidaAlterar_(i,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[i];if(!it)return;it.qtdRecebida=Math.max(0,Number(v)||0);if(it.recebimentoStatus==='RECEBIDO'&&it.qtdRecebida<(Number(it.qCom)||0))it.recebimentoStatus='PARCIAL';var d=String(it.conversaoDecisao||'').toLowerCase(),f=Number(it.fatorConversaoSugerido||it.fatorConversao||1)||1;it.qtdEstoque=d==='converter'?it.qtdRecebida*f:it.qtdRecebida;var ls=document.querySelectorAll('#nfeLotesRows_'+i+' .nfe-lote');if(ls.length===1){var q=ls[0].querySelector('.nfe-lot-qtd');if(q)q.value=it.qtdEstoque;}nfeSalvarRascunho_();}
 function nfeColetarPayload_(){
   var n=_nfeNota,errs=[],diag={controlados:0,comCodigo:0,comValidade:0,quantidadesOk:0,novos:0,reconhecidos:0,conversoesPendentes:0,lotes:0},itens=(n.itens||[]).map(function(it,idx){
-    var control=document.getElementById('nfeControlar_'+idx),controlar=!!(control&&control.checked);
+    var control=document.getElementById('nfeControlar_'+idx),controlar=!!(control&&control.checked),recebimento=String(it.recebimentoStatus||'RECEBIDO').toUpperCase(),qtdRecebida=Number(it.qtdRecebida!==undefined?it.qtdRecebida:it.qCom)||0;
     var ean=it.eanAura||nfeDigitos_((document.getElementById('nfeEan_'+idx)||{}).value||'');
     var decFinal=String(it.conversaoDecisao||'').toLowerCase();
     var qComFinal=Number(it.qCom)||0,fatorAplicado=Number(it.fatorConversao)||0,fatorSugerido=Number(it.fatorConversaoSugerido)||0,fatorFinal=(decFinal==='converter'?(Math.abs(fatorAplicado-1)>0.000001&&fatorAplicado>0?fatorAplicado:(Math.abs(fatorSugerido-1)>0.000001&&fatorSugerido>0?fatorSugerido:(fatorSugerido>0?fatorSugerido:(fatorAplicado>0?fatorAplicado:1)))):(fatorSugerido>0?fatorSugerido:(fatorAplicado>0?fatorAplicado:1)));
     var qtd=Number(it.qtdEstoque||it.qCom||0)||0;
-    if(decFinal==='converter'&&qComFinal>0&&fatorFinal>0)qtd=qComFinal*fatorFinal;
-    else if(decFinal==='nao_converter'&&qComFinal>0)qtd=qComFinal;
+    if(recebimento==='NAO_RECEBIDO')qtdRecebida=0;
+    if(decFinal==='converter'&&qtdRecebida>0&&fatorFinal>0)qtd=qtdRecebida*fatorFinal;
+    else if(decFinal==='nao_converter'&&qtdRecebida>0)qtd=qtdRecebida;
+    else if(recebimento==='PARCIAL')qtd=qtdRecebida;
     it.qtdEstoque=qtd;
     var setor=String((document.getElementById('nfeSetor_'+idx)||{}).value||it.setor||'Outros'),lotes=[];
-    if(controlar){
+    if(recebimento==='PARCIAL'&&qComFinal>0&&qtdRecebida>=qComFinal)errs.push((it.nomeAura||it.nome||'Item')+': em recebimento parcial, a quantidade recebida precisa ser menor que a quantidade da NF-e.');
+    if(controlar&&qtdRecebida>0&&String(it.escudoCodigo||'').trim()&&String(it.escudoUnidade||'kg').toLowerCase()==='kg'&&!/^(KG|KGM|QUILO|QUILOGRAMA)$/.test(String(it.uCom||'').trim().toUpperCase())&&!(Number(it.escudoFatorKg)>0))errs.push((it.nomeAura||it.nome||'Item')+': informe quantos kg há em cada pacote/unidade para lançar no Escudo Padaria.');
+    if(controlar&&recebimento!=='NAO_RECEBIDO'&&qtdRecebida>0){
       diag.controlados++;
       if(ean)diag.comCodigo++;else errs.push((it.nomeAura||it.nome||'Item')+': informe o código de barras. O produto pode ser novo e ainda não existir na Telecon.');
       var ehNovo=String(it.status||'').toLowerCase()==='aguardando_cadastro'||String(it.origemVinculo||'')==='manual_novo';
@@ -12265,9 +12276,9 @@ function nfeColetarPayload_(){
       if(rows.length&&todasQtd&&Math.abs(soma-qtd)<=0.001)diag.quantidadesOk++;
       if(Math.abs(soma-qtd)>0.001)errs.push((it.nomeAura||it.nome||ean)+': lotes somam '+nfeFmtQtd_(soma)+' e a quantidade definida para a AURA é '+nfeFmtQtd_(qtd)+'.');
     }
-    return {nItem:it.nItem,cProd:it.cProd,nome:it.nome,qCom:it.qCom,ean:ean,qtdEstoque:qtd,fatorConversao:it.fatorConversao||1,fatorConversaoSugerido:it.fatorConversaoSugerido||it.fatorConversao||1,conversaoExigirDecisao:!!it.conversaoExigirDecisao,conversaoDecisao:it.conversaoDecisao||'',unidadeNFe:it.uCom||'',unidadeAura:it.unidadeAura||it.unidadeDestinoSugerida||it.uCom||'',setor:setor,controlar:controlar,lotes:lotes,origemVinculo:it.origemVinculo||'',escudoCodigo:String(it.escudoCodigo||''),escudoNome:String(it.escudoNome||''),escudoUnidade:String(it.escudoUnidade||'kg'),escudoRemoverVinculo:!!it.escudoRemoverVinculo};
+    return {nItem:it.nItem,cProd:it.cProd,nome:it.nome,qCom:it.qCom,qtdRecebida:qtdRecebida,recebimentoStatus:recebimento,motivoDivergencia:it.motivoDivergencia||'',ean:ean,qtdEstoque:qtd,fatorConversao:it.fatorConversao||1,fatorConversaoSugerido:it.fatorConversaoSugerido||it.fatorConversao||1,conversaoExigirDecisao:!!it.conversaoExigirDecisao,conversaoDecisao:it.conversaoDecisao||'',unidadeNFe:it.uCom||'',unidadeAura:it.unidadeAura||it.unidadeDestinoSugerida||it.uCom||'',setor:setor,controlar:controlar,lotes:lotes,origemVinculo:it.origemVinculo||'',escudoCodigo:String(it.escudoCodigo||''),escudoNome:String(it.escudoNome||''),escudoUnidade:String(it.escudoUnidade||'kg'),escudoFatorKg:Number(it.escudoFatorKg)||0,escudoRemoverVinculo:!!it.escudoRemoverVinculo};
   });
-  return {erros:errs,diagnostico:diag,payload:{action:'nfeRegistrarValidades',chave:n.chave,fornecedor:n.fornecedor,cnpjFornecedor:n.cnpjFornecedor,numero:n.numero,serie:n.serie,emissao:n.emissao,fonte:n.fonte,operador:String((document.getElementById('nfeOperador')||{}).value||''),itens:itens,aceitarProdutoNovo:true,exigirDecisaoConversao:true}};
+  return {erros:errs,diagnostico:diag,payload:{action:'nfeRegistrarValidades',chave:n.chave,fornecedor:n.fornecedor,cnpjFornecedor:n.cnpjFornecedor,numero:n.numero,serie:n.serie,emissao:n.emissao,fonte:n.fonte,operador:String((document.getElementById('nfeOperador')||{}).value||''),itens:itens,canhotoRetido:!!(document.getElementById('nfeCanhotoRetido')&&document.getElementById('nfeCanhotoRetido').checked),aceitarProdutoNovo:true,exigirDecisaoConversao:true}};
 }
 function nfeMostrarDiagnostico_(c,tipo,extra){
   var el=document.getElementById('nfeDiagnostico');if(!el)return;
@@ -12280,13 +12291,13 @@ function nfeMostrarDiagnostico_(c,tipo,extra){
   if(extra)linhas.push(extra);
   el.className='nfe-diag show '+(tipo||(ok?'ok':'err'));el.innerHTML=linhas.join('<br>');
 }
-function nfeLinhasEsperadasAura_(nota){var total=0;((nota&&Array.isArray(nota.itens))?nota.itens:[]).forEach(function(it){if(!it||it.controlar===false)return;(Array.isArray(it.lotes)?it.lotes:[]).forEach(function(l){if(String(l&&l.validade||'').trim()&&(Number(l&&l.quantidade)||0)>0)total++;});});return total;}
-function nfeConfirmacaoCompletaAura_(info,nota){info=info||{};var esperadas=nfeLinhasEsperadasAura_(nota),srv=Number(info.lotesEsperados)||0;if(srv>esperadas)esperadas=srv;var fis=Number(info.linhasRespostas)||0,st=String(info.status||'').toUpperCase(),final=['REGISTRADA','COMPLETA','AGUARDANDO_CADASTRO'].indexOf(st)>=0,parcial=info.parcial===true||['PARCIAL','PENDENTE_ITENS','PROCESSANDO'].indexOf(st)>=0,pend=Array.isArray(info.pendentes)?info.pendentes.length:0;return {ok:!!(info.confirmacaoRespostas===true&&esperadas>0&&fis>=esperadas&&final&&!parcial&&!pend),esperadas:esperadas,fisicas:fis,status:st,final:final,parcial:parcial,pendentes:pend};}
+function nfeLinhasEsperadasAura_(nota){var total=0;((nota&&Array.isArray(nota.itens))?nota.itens:[]).forEach(function(it){if(!it||it.controlar===false||String(it.recebimentoStatus||'RECEBIDO').toUpperCase()==='NAO_RECEBIDO')return;(Array.isArray(it.lotes)?it.lotes:[]).forEach(function(l){if(String(l&&l.validade||'').trim()&&(Number(l&&l.quantidade)||0)>0)total++;});});return total;}
+function nfeConfirmacaoCompletaAura_(info,nota){info=info||{};var esperadas=nfeLinhasEsperadasAura_(nota),srv=Number(info.lotesEsperados)||0;if(srv>esperadas)esperadas=srv;var fis=Number(info.linhasRespostas)||0,st=String(info.status||'').toUpperCase(),final=['REGISTRADA','REGISTRADA_COM_DIVERGENCIA','AGUARDANDO_CADASTRO_COM_DIVERGENCIA','COMPLETA','AGUARDANDO_CADASTRO'].indexOf(st)>=0,parcial=info.parcial===true||['PARCIAL','PENDENTE_ITENS','PROCESSANDO'].indexOf(st)>=0,pend=Array.isArray(info.pendentes)?info.pendentes.length:0,onlyDiscrepancies=info.divergenciasRegistradas===true&&esperadas===0,linesOk=onlyDiscrepancies||(esperadas>0&&fis>=esperadas);return {ok:!!(info.confirmacaoRespostas===true&&linesOk&&final&&!parcial&&!pend),esperadas:esperadas,fisicas:fis,status:st,final:final,parcial:parcial,pendentes:pend};}
 function nfeFinalizarGravacaoAura_(r,confirmado){
   r=r||{};var ck=nfeConfirmacaoCompletaAura_(r,_nfeNota);
   if(!ck.ok){var msg='A NF-e NÃO foi encerrada: ';var m=[];if(r.confirmacaoRespostas!==true)m.push('sem confirmação física em Respostas');if(ck.esperadas>0&&ck.fisicas<ck.esperadas)m.push(ck.fisicas+' de '+ck.esperadas+' lote(s) encontrados');if(ck.parcial||!ck.final)m.push('status '+(ck.status||'não concluído'));if(ck.pendentes)m.push(ck.pendentes+' pendência(s)');msg+=m.join(' · ')||'confirmação incompleta';nfeStatus_('err',msg+'. O rascunho local e o compartilhado foram preservados.');nfeSalvarRascunho_();return false;}
   var gravados=Number(r.gravados!=null?r.gravados:r.lotes)||0,linhas=ck.fisicas,novos=Array.isArray(r.aguardandoCadastro)?r.aguardandoCadastro.length:0;
-  var msg='NF-e confirmada em Respostas ao formulário 1: '+linhas+' de '+ck.esperadas+' lote(s) presentes';if(r.ignorados)msg+=' · '+r.ignorados+' já existentes';if(novos)msg+=' · '+novos+' produto(s) novo(s) aguardando cadastro';var integEsc=r.integracaoEscudo;if(integEsc&&integEsc.lotesEscudo>0)msg+=' Escudo Padaria: '+Number(integEsc.integradosAgora||0)+' lote(s) enviados, '+Number(integEsc.aguardando||0)+' aguardando cadastro e '+Number(integEsc.erro||0)+' falha(s) temporária(s).';msg+='.';nfeStatus_((integEsc&&((integEsc.aguardando||0)>0||(integEsc.erro||0)>0))?'warn':'ok',msg);
+  var msg='NF-e confirmada em Respostas ao formulário 1: '+linhas+' de '+ck.esperadas+' lote(s) presentes';if(r.ignorados)msg+=' · '+r.ignorados+' já existentes';if(novos)msg+=' · '+novos+' produto(s) novo(s) aguardando cadastro';var integEsc=r.integracaoEscudo;if(integEsc&&integEsc.lotesEscudo>0)msg+=' Escudo Padaria: '+Number(integEsc.integradosAgora||0)+' lote(s) enviados, '+Number(integEsc.aguardando||0)+' aguardando cadastro e '+Number(integEsc.erro||0)+' falha(s) temporária(s).';if(r.divergenciasRegistradas===true)msg+=' · Divergência registrada em NF-e Divergências'+(r.mensagem&&r.mensagem.indexOf('Canhoto retido sinalizado')>=0?' · canhoto retido':'');msg+='.';nfeStatus_((integEsc&&((integEsc.aguardando||0)>0||(integEsc.erro||0)>0))?'warn':'ok',msg);
   var diagEl=document.getElementById('nfeDiagnostico');if(diagEl){diagEl.className='nfe-diag show ok';diagEl.innerHTML='<span class="oktxt"><i class="ti ti-circle-check"></i> <strong>Gravação completa confirmada.</strong> '+linhas+' de '+ck.esperadas+' linha(s)/lote(s) esperados foram localizados em Respostas ao formulário 1.</span>'+(novos?'<br><span class="new">'+novos+' produto(s) novo(s) permanecem aguardando cadastro, sem perder a validade lançada.</span>':'')+(integEsc&&integEsc.lotesEscudo>0?'<br><span class="'+((integEsc.aguardando||integEsc.erro)?'new':'oktxt')+'"><b>Escudo Padaria:</b> '+Number(integEsc.integradosAgora||0)+' lote(s) enviados · '+Number(integEsc.aguardando||0)+' aguardando cadastro · '+Number(integEsc.erro||0)+' falha(s) temporária(s).</span>':'');}
   if(_nfeNota){_nfeNota.jaProcessada=true;_nfeNota.processadaEm=r.processadaEm||_nfeNota.processadaEm||'';}nfeRenderNota_();nfeLimparRascunho_();nfeAtualizarColetasAposGravacao_();if(typeof syncAll==='function')setTimeout(syncAll,300);setTimeout(function(){try{nfeHistoricoGeralCarregar_(true);}catch(e){}},700);return true;
 }
@@ -12320,7 +12331,29 @@ function nfeSalvar_(){
     });
   });
 }
-function nfeLimpar_(){nfeAutosaveAgora_();_nfeNota=null;var box=document.getElementById('nfeNotaBox');if(box){box.style.display='none';box.innerHTML='';}var i=document.getElementById('nfeChave');if(i){i.value='';i.focus();}nfeStatus_('','Aguardando uma chave. Se o XML ainda não estiver no Drive, use “Importar XML”.');}
+async function nfeLimpar_(){
+  var nota=_nfeNota;
+  if(!nota||!nota.chave){_nfeNota=null;nfeLimparRascunho_();var boxVazio=document.getElementById('nfeNotaBox');if(boxVazio){boxVazio.style.display='none';boxVazio.innerHTML='';}return;}
+  if(!confirm('Descartar esta NF-e? O rascunho será removido deste aparelho e do servidor compartilhado.'))return;
+  if(typeof navigator!=='undefined'&&navigator.onLine===false){nfeStatus_('err','Conecte à internet para descartar a NF-e em todos os dispositivos. O rascunho foi mantido.');return;}
+  _nfeDiscarding_=true;
+  if(_nfeDraftTimer_){clearTimeout(_nfeDraftTimer_);_nfeDraftTimer_=null;}
+  if(_nfeServerSyncTimer_){clearTimeout(_nfeServerSyncTimer_);_nfeServerSyncTimer_=null;}
+  _nfeServerSyncPendente_=false;
+  nfeStatus_('warn','Aguardando a sincronização terminar e removendo o rascunho compartilhado…');
+  try{
+    var espera=0;while(_nfeServerSyncAtivo_&&espera<65000){await new Promise(function(resolve){setTimeout(resolve,100);});espera+=100;}
+    if(_nfeServerSyncAtivo_)throw new Error('A sincronização ainda está ocupada. Tente descartar novamente em alguns segundos.');
+    var resposta=await nfeExcluirRascunhoServidorAura_(nota.chave);
+    if(!resposta||resposta.ok!==true)throw new Error(resposta&&resposta.erro||'O servidor não confirmou a remoção do rascunho.');
+    _nfeNota=null;nfeLimparRascunho_();
+    var box=document.getElementById('nfeNotaBox');if(box){box.style.display='none';box.innerHTML='';}
+    var i=document.getElementById('nfeChave');if(i){i.value='';i.focus();}
+    nfeStatus_('ok','Rascunho da NF-e descartado neste aparelho e removido do servidor compartilhado.');
+  }catch(e){
+    nfeStatus_('err','Não foi possível descartar a NF-e: '+String(e&&e.message||e)+' O rascunho foi mantido.');
+  }finally{_nfeDiscarding_=false;}
+}
 
 
 
@@ -13510,7 +13543,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v7.02-ceasa-na-conferencia-nfe';
+var AURA_CONTROLE_VALIDADE_BUILD='v7.15-descartar-rascunho-nfe';
 console.info('[AURA] organização de entradas v7.02 — CEASA operacional na aba Conferência NF-e; Boss Vision somente gerencial');
 console.info('[AURA] encarte imagens v7.04 — loader Arsenal restaurado + link/upload/consulta central');
 var currentTabName='dashboard';
@@ -18627,7 +18660,7 @@ console.info('[AURA] preço por validade v7.10 — bipe/Estoque mostra venda nor
 <script id="auraValidade21hBuild">console.info('[AURA] validade v7.11 — produto válido até 21:00 do dia da validade; vencido somente após 21h');</script>
 <script>console.info('[AURA] preço fallback v7.12 — sem custo: venda -30% + preço charmoso XX,99');</script>
 
-<script>console.info('[AURA] v7.14 — vínculo de fotos do produto ao banco central; feedback por entrada');</script>
+<script>console.info('[AURA] v7.15 — descarte persistente de rascunho de NF-e');</script>
 <script id="aura-access-audit-client">
 (function(){
   'use strict';
