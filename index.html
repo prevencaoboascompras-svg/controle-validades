@@ -12369,7 +12369,7 @@ function nfeHistNorm_(v){return String(v==null?'':v).trim().toLowerCase();}
 function nfeHistSessaoUsuario_(){
   try{var s=JSON.parse(sessionStorage.getItem('aura_auth_v1')||'{}'),u=nfeHistNorm_(s&&s.usuario);return ['leonardo','wagner'].indexOf(u)>=0?u:'';}catch(e){return '';}
 }
-function nfeHistPodeEditarNota_(nota){return !!nfeHistSessaoUsuario_()&&!!nfeHistNorm_(nota&&nota.operador);}
+function nfeHistPodeEditarNota_(nota){return !!nfeHistSessaoUsuario_()&&!!nota;}
 function nfeHistSetoresOptions_(sel){var a=['Açougue','Bazar','Bebidas','Congelados','Frios','Horti','Laticínios','Limpeza','Outros','Padaria','Perfumaria','Pet','Pilhas/Baterias','Seca','Seca doce'];return a.map(function(x){return '<option value="'+nfeEsc_(x)+'" '+(x===sel?'selected':'')+'>'+nfeEsc_(x)+'</option>';}).join('');}
 function nfeHistNomeOperador_(email){
   var e=nfeHistNorm_(email),lista=(typeof COLABORADORES!=='undefined'&&Array.isArray(COLABORADORES))?COLABORADORES:[];
@@ -12493,7 +12493,7 @@ function nfeHistoricoGeralRenderDetalhe_(r){
     +'<div class="nfe-hist-meta"><span>Emissão</span><b>'+nfeEsc_(nfeHistDataExibir_(n.emissao))+'</b></div><div class="nfe-hist-meta"><span>Conferida em</span><b>'+nfeEsc_(nfeHistDataExibir_(n.processadaEm))+'</b></div>'
     +'<div class="nfe-hist-meta"><span>Recebido por</span><b>'+nfeEsc_(nomeOp)+'</b></div><div class="nfe-hist-meta"><span>E-mail registrado</span><b>'+nfeEsc_(n.operador||'—')+'</b></div>'
     +'<div class="nfe-hist-meta"><span>Itens</span><b>'+Number(n.itens||itens.length||0)+'</b></div><div class="nfe-hist-meta"><span>Lotes</span><b>'+Number(n.lotes||0)+'</b></div></div>'
-    +'<div class="nfe-hist-readonly"><b>Histórico administrativo da AURA.</b> '+(podeEditarNota?'Acesso mestre AURA: você pode corrigir vínculos desta NF-e. O editor e a autoria original ficam registrados na auditoria.':'Entre com Leonardo ou Wagner para corrigir vínculos. A autoria original da conferência permanece preservada.')+'</div>'
+    +'<div class="nfe-hist-readonly"><b>Histórico administrativo da AURA.</b> '+(podeEditarNota?'Acesso mestre AURA: você pode corrigir vínculos desta NF-e. O editor e a autoria original ficam registrados na auditoria.':'O acesso mestre AURA permite corrigir vínculos mesmo quando o conferente original não foi registrado. Cada alteração fica auditada.')+'</div>'
     +'<div class="nfe-hist-items">'+(rows||'<div class="nfe-hist-empty">Nenhum item encontrado para esta NF-e.</div>')+'</div>';
 }
 
