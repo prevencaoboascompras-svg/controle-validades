@@ -16404,10 +16404,46 @@ async function colabUnificarConfirmar(){
   mostrarToast('Cadastros unificados: '+_colabResumoMigracao_(res)+'.','ok');
 }
 
-function getTarefas(){try{return JSON.parse(localStorage.getItem(TAREFAS_KEY)||'[]');}catch(e){return[];}}
-function saveTarefas(arr){try{localStorage.setItem(TAREFAS_KEY,JSON.stringify(arr));}catch(e){console.warn('localStorage cheio, pulando cache de tarefas:',e);}}
+// O Sheets é a fonte oficial das tarefas. Mantém o conjunto completo em memória
+// durante a sessão e persiste somente pendentes + histórico recente no navegador,
+// evitando que o histórico acumulado consuma a cota do localStorage.
+var _tarefasMemoriaAura=null;
+function getTarefas(){
+  if(Array.isArray(_tarefasMemoriaAura))return _tarefasMemoriaAura;
+  try{var dados=JSON.parse(localStorage.getItem(TAREFAS_KEY)||'[]');_tarefasMemoriaAura=Array.isArray(dados)?dados:[];return _tarefasMemoriaAura;}
+  catch(e){_tarefasMemoriaAura=[];return _tarefasMemoriaAura;}
+}
+function _tarefasCacheCompacto_(arr){
+  var agora=Date.now(),limite=agora-60*24*60*60*1000;
+  var pendentes=[],concluidas=[];
+  (Array.isArray(arr)?arr:[]).forEach(function(t){
+    if(!t)return;
+    if(String(t.status||'').toLowerCase()!=='concluida'){pendentes.push(t);return;}
+    var ts=new Date(t.confirmadoEm||t.criadoEm||0).getTime()||0;
+    if(ts>=limite)concluidas.push({t:t,ts:ts});
+  });
+  concluidas.sort(function(a,b){return b.ts-a.ts;});
+  return pendentes.concat(concluidas.slice(0,300).map(function(x){return x.t;}));
+}
+function saveTarefas(arr){
+  _tarefasMemoriaAura=Array.isArray(arr)?arr:[];
+  var compacto=_tarefasCacheCompacto_(_tarefasMemoriaAura);
+  try{localStorage.setItem(TAREFAS_KEY,JSON.stringify(compacto));return true;}
+  catch(e){
+    // Libera apenas caches reconstruíveis. As tarefas continuam em memória e
+    // serão recarregadas do Sheets na próxima sincronização.
+    try{localStorage.removeItem(THUMB_CACHE_KEY);}catch(e1){}
+    try{localStorage.removeItem('boascompras_thumb_cache_v1');}catch(e2){}
+    try{localStorage.removeItem('boascompras_thumb_cache_v3_drive_cosmos');}catch(e3){}
+    try{localStorage.setItem(TAREFAS_KEY,JSON.stringify(compacto));return true;}
+    catch(e4){console.warn('Cota local cheia; tarefas mantidas em memória e sincronizadas pelo Sheets:',e4);return false;}
+  }
+}
 function getFilaTarefas(){try{return JSON.parse(localStorage.getItem(TAREFAS_FILA_KEY)||'[]');}catch(e){return[];}}
-function saveFilaTarefas(arr){localStorage.setItem(TAREFAS_FILA_KEY,JSON.stringify(arr));}
+function saveFilaTarefas(arr){
+  try{localStorage.setItem(TAREFAS_FILA_KEY,JSON.stringify(arr||[]));}
+  catch(e){try{localStorage.removeItem(THUMB_CACHE_KEY);localStorage.setItem(TAREFAS_FILA_KEY,JSON.stringify(arr||[]));}catch(e2){console.warn('Cota local cheia; fila offline não foi persistida:',e2);}}
+}
 
 // Reenvia tarefas criadas offline quando a conexão voltar
 function reenviarFilaTarefas(){
