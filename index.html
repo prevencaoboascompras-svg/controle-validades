@@ -3655,22 +3655,23 @@ function toggleTheme() {
       <div class="af-box" id="afBonificacoesBox" style="margin-top:12px;margin-bottom:10px">
         <div class="af-box-hd">
           <div>
-            <div class="af-box-title"><i class="ti ti-receipt-refund"></i> Bonificações / compensações recebidas</div>
-            <div class="af-box-sub">Informe somente o número da NF de bonificação e o valor recebido. As baixas item a item permanecem registradas na Telecon e não precisam ser digitadas novamente na AURA.</div>
+            <div class="af-box-title"><i class="ti ti-receipt-refund"></i> Conciliação de baixas e bonificações</div>
+            <div class="af-box-sub">As baixas do relatório Telecon são identificadas automaticamente na atualização. Não lance novamente aqui uma baixa já refletida no relatório; use o registro manual apenas para uma compensação que ainda não aparece na Telecon.</div>
           </div>
           <span id="afBonifStatus" style="font-size:9px;color:var(--tx2)"></span>
         </div>
 
+        <div id="afTeleconBaixasResumo" style="display:none;margin:8px 0 10px;padding:10px 12px;border:1px solid var(--bd);border-left:4px solid var(--green);border-radius:9px;background:var(--bg2);font-size:10px;line-height:1.55"></div>
         <div style="display:grid;grid-template-columns:minmax(180px,.8fr) minmax(160px,.7fr) auto;gap:8px;align-items:end">
           <div class="af-field" style="min-width:0">
-            <label>Nº NF de bonificação</label>
+            <label>NF de compensação fora do relatório (opcional)</label>
             <input id="afBonifNF" placeholder="Ex.: 123456" autocomplete="off">
           </div>
           <div class="af-field" style="min-width:0">
-            <label>Valor da bonificação (R$)</label>
+            <label>Valor da compensação externa (R$)</label>
             <input id="afBonifValor" type="number" min="0.01" step="0.01" placeholder="0,00">
           </div>
-          <button class="btn btn-green" id="afBonifRegistrarBtn" onclick="afRegistrarBonificacao_()"><i class="ti ti-plus"></i> Registrar bonificação</button>
+          <button class="btn btn-green" id="afBonifRegistrarBtn" onclick="afRegistrarBonificacao_()"><i class="ti ti-plus"></i> Registrar compensação externa</button>
         </div>
 
         <div id="afBonifResumo" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:10px"></div>
@@ -3683,7 +3684,7 @@ function toggleTheme() {
         </div>
 
         <div style="font-size:9px;color:var(--tx2);line-height:1.45;margin-top:7px">
-          <b>Como funciona:</b> enquanto a bonificação ainda não estiver refletida em um relatório Telecon mais novo, a AURA mostra um <b>saldo estimado</b>. Ao substituir o relatório pelo saldo atualizado, a bonificação passa automaticamente a constar como refletida e o relatório Telecon volta a ser a referência do saldo exato.
+          <b>Como funciona:</b> a cada atualização, a AURA compara as quantidades e os valores do relatório anterior com o novo, mostra as reduções e os acréscimos identificados e usa o total atual da Telecon como saldo de referência. Compensações lançadas manualmente só devem ser usadas quando ainda não constarem no relatório.
         </div>
       </div>
 
@@ -12716,7 +12717,21 @@ function afTeleconEditar_(i,campo,val){if(!afTeleconImport_||!afTeleconImport_.d
 function afTeleconRemover_(i){if(!afTeleconImport_)return;afTeleconImport_.dados.itens.splice(i,1);afTeleconRenderItens_();afTeleconAtualizarConferencia_();}
 function afTeleconAdicionarLinha_(){if(!afTeleconImport_)return;var d=afTeleconImport_.dados;d.itens.push({key:'tele_manual_'+Date.now(),codigoInterno:'',codigoBarras:'',codigo:'',nome:'',nfOrigem:'',dataCadastro:'',operadorTelecon:'',quantidadeOriginal:0,quantidade:0,unidade:'UN',custoUnit:0,valorTelecon:0,valorTotal:0,lojaTelecon:'',origem:'TELECON'});afTeleconRenderItens_();afTeleconAtualizarConferencia_();}
 function afTeleconConferenciaInfo_(){var d=(afTeleconImport_&&afTeleconImport_.dados)||{},it=d.itens||[],sum=it.reduce(function(s,x){return s+(Number(x.valorTelecon)||0);},0),countOk=!d.registrosInformados||it.length===Number(d.registrosInformados),totalOk=!d.totalInformado||Math.abs(sum-Number(d.totalInformado))<=Math.max(.05,Number(d.totalInformado)*.001);return {sum:sum,countOk:countOk,totalOk:totalOk,completa:countOk&&totalOk&&it.length>0};}
-function afTeleconAtualizarConferencia_(){if(!afTeleconImport_)return;var d=afTeleconImport_.dados,info=afTeleconConferenciaInfo_(),e=document.getElementById('afTeleconConferencia');document.getElementById('afTeleconReconhecidos').value=(d.itens||[]).length;var partes=[];if(d.registrosInformados)partes.push('Relatório informa <b>'+d.registrosInformados+' registro(s)</b>; leitura reconheceu <b>'+(d.itens||[]).length+'</b>.');if(d.totalInformado)partes.push('Total do relatório: <b>'+afMoney_(d.totalInformado)+'</b>; soma reconhecida: <b>'+afMoney_(info.sum)+'</b>.');if(info.completa){e.style.borderLeftColor='var(--green)';e.innerHTML='<b style="color:var(--green)">Conferência automática fechou.</b> '+partes.join(' ')+' Mesmo assim, o PDF original continuará arquivado como evidência.';}else{e.style.borderLeftColor='var(--amber)';e.innerHTML='<b style="color:var(--amber)">Atenção: a leitura automática não fechou 100%.</b> '+(partes.join(' ')||'Confira o cabeçalho do relatório.')+' Por segurança, a notificação usará o <b>PDF original Telecon como Anexo I oficial</b>, e não tratará a leitura parcial como prova completa.';}}
+function afTeleconChaveComparacao_(it){
+  var cod=afTeleconCompact_(it&&it.codigoInterno||''),ean=afTeleconCompact_(it&&(it.codigoBarras||it.codigo)||''),nf=afTeleconCompact_(it&&it.nfOrigem||''),nome=afTeleconCompact_(it&&it.nome||'');
+  var produto=ean||cod||nome||'SEM_CODIGO';
+  return produto+'|'+(nf||('SEM_NF|'+afTeleconCompact_(String(it&&it.dataCadastro||'').slice(0,10))));
+}
+function afTeleconAgregarComparacao_(itens){var m={};(itens||[]).forEach(function(it){if(it&&it.origem&&String(it.origem).toUpperCase()!=='TELECON')return;var k=afTeleconChaveComparacao_(it),x=m[k]||(m[k]={key:k,nome:String(it.nome||'Produto sem descrição'),codigo:String(it.codigoInterno||it.codigoBarras||it.codigo||''),nf:String(it.nfOrigem||''),quantidade:0,valor:0});x.quantidade+=Number(it.quantidade)||0;x.valor+=Number(it.valorTelecon!=null?it.valorTelecon:it.valorTotal)||0;});return m;}
+function afTeleconCompararRelatorios_(acao,dados,metaNova){
+  var oldMeta=acao&&acao.relatorioTelecon||{},oldItems=(acao&&acao.itens||[]).filter(function(it){return !it.origem||String(it.origem).toUpperCase()==='TELECON';}),newItems=(dados&&dados.itens)||[],a=afTeleconAgregarComparacao_(oldItems),b=afTeleconAgregarComparacao_(newItems),keys={};Object.keys(a).concat(Object.keys(b)).forEach(function(k){keys[k]=true;});
+  var reducoes=[],acrescimos=[],qBaixada=0,vBaixado=0,qNova=0,vNovo=0;
+  Object.keys(keys).forEach(function(k){var x=a[k]||{nome:(b[k]||{}).nome,codigo:(b[k]||{}).codigo,nf:(b[k]||{}).nf,quantidade:0,valor:0},y=b[k]||{nome:x.nome,codigo:x.codigo,nf:x.nf,quantidade:0,valor:0},dq=x.quantidade-y.quantidade,dv=x.valor-y.valor;if(dq>0.0005||dv>0.005){qBaixada+=Math.max(0,dq);vBaixado+=Math.max(0,dv);reducoes.push({nome:x.nome,codigo:x.codigo,nf:x.nf,quantidadeAnterior:x.quantidade,quantidadeAtual:y.quantidade,quantidadeBaixada:Math.max(0,dq),valorAnterior:x.valor,valorAtual:y.valor,valorBaixado:Math.max(0,dv)});}if(dq<-.0005||dv<-.005){qNova+=Math.max(0,-dq);vNovo+=Math.max(0,-dv);acrescimos.push({nome:y.nome,codigo:y.codigo,nf:y.nf,quantidadeAnterior:x.quantidade,quantidadeAtual:y.quantidade,quantidadeAcrescida:Math.max(0,-dq),valorAnterior:x.valor,valorAtual:y.valor,valorAcrescido:Math.max(0,-dv)});}});
+  var oldTotal=Number(oldMeta.totalInformado)||Number(acao&&acao.valorTotal)||0,newTotal=Number((metaNova||{}).totalInformado)||Number((dados||{}).totalInformado)||0,info=afTeleconConferenciaInfo_();
+  return {tipo:'COMPARACAO_RELATORIOS_TELECON',confiavel:!!(oldMeta.extracaoCompleta&&info.completa&&oldItems.length),comparacaoAnteriorCompleta:!!oldMeta.extracaoCompleta,comparacaoAtualCompleta:!!info.completa,comparadoEm:new Date().toISOString(),saldoAnterior:oldTotal,saldoAtual:newTotal,variacaoLiquida:newTotal-oldTotal,quantidadeBaixada:qBaixada,valorBaixado:vBaixado,quantidadeAcrescida:qNova,valorAcrescido:vNovo,linhasReduzidas:reducoes.length,linhasAcrescidas:acrescimos.length,itensReduzidos:reducoes.slice(0,250),itensAcrescidos:acrescimos.slice(0,250),demaisReducoes:Math.max(0,reducoes.length-250),demaisAcrescimos:Math.max(0,acrescimos.length-250)};
+}
+function afTeleconConciliacaoResumoHtml_(c){if(!c)return '';var aviso=c.confiavel?'Comparação automática por item concluída.':'Comparação parcial: confira a leitura dos dois relatórios antes de tratar as diferenças como baixas confirmadas.',lista='';function linhas(titulo,arr,campoQtd,campoValor){if(!arr||!arr.length)return '';return '<details style="margin-top:5px"><summary style="cursor:pointer;font-weight:800">'+titulo+' ('+arr.length+(titulo.indexOf('redução')>=0?Number(c.demaisReducoes||0):Number(c.demaisAcrescimos||0))+' linha(s))</summary><div style="max-height:180px;overflow:auto;padding:5px 8px">'+arr.slice(0,12).map(function(x){return '<div style="padding:3px 0;border-bottom:1px solid var(--bd)"><b>'+afEsc_(x.nome||'Produto')+'</b> · cód. '+afEsc_(x.codigo||'—')+' · '+afQtd_(x.quantidadeAnterior)+' → '+afQtd_(x.quantidadeAtual)+' un · '+afMoney_(x.valorAnterior)+' → '+afMoney_(x.valorAtual)+'</div>';}).join('')+(arr.length>12?'<small>Exibindo 12 de '+arr.length+' linhas; o resumo completo permanece salvo no dossiê.</small>':'')+'</div></details>';}lista=linhas('Ver itens com redução',c.itensReduzidos,'quantidadeBaixada','valorBaixado')+linhas('Ver itens com acréscimo',c.itensAcrescidos,'quantidadeAcrescida','valorAcrescido');return '<div><b>'+aviso+'</b></div><div>Baixas/reduções identificadas: <b>'+afQtd_(c.quantidadeBaixada)+' unidade(s)</b> · <b>'+afMoney_(c.valorBaixado)+'</b> em linhas reduzidas. Acréscimos/novas pendências: <b>'+afQtd_(c.quantidadeAcrescida)+' unidade(s)</b> · <b>'+afMoney_(c.valorAcrescido)+'</b>. Variação líquida do saldo: <b>'+afMoney_(c.variacaoLiquida)+'</b>.</div><div>Saldo Telecon anterior: '+afMoney_(c.saldoAnterior)+' · Saldo atual informado: <b>'+afMoney_(c.saldoAtual)+'</b>. O saldo oficial passa a ser o total do relatório novo; as baixas não são lançadas novamente na AURA.</div>'+lista;}
+function afTeleconAtualizarConferencia_(){if(!afTeleconImport_)return;var d=afTeleconImport_.dados,info=afTeleconConferenciaInfo_(),e=document.getElementById('afTeleconConferencia');document.getElementById('afTeleconReconhecidos').value=(d.itens||[]).length;var partes=[];if(d.registrosInformados)partes.push('Relatório informa <b>'+d.registrosInformados+' registro(s)</b>; leitura reconheceu <b>'+(d.itens||[]).length+'</b>.');if(d.totalInformado)partes.push('Total do relatório: <b>'+afMoney_(d.totalInformado)+'</b>; soma reconhecida: <b>'+afMoney_(info.sum)+'</b>.');var conciliacao=null;if(afTeleconModo_==='atualizar'&&afEdit_&&afEdit_.relatorioTelecon){conciliacao=afTeleconCompararRelatorios_(afEdit_,d,{totalInformado:Number(document.getElementById('afTeleconTotal').value)||d.totalInformado||0});partes.push(afTeleconConciliacaoResumoHtml_(conciliacao));}if(info.completa){e.style.borderLeftColor='var(--green)';e.innerHTML='<b style="color:var(--green)">Conferência automática fechou.</b> '+partes.join(' ')+' O PDF original será arquivado como evidência.';}else{e.style.borderLeftColor='var(--amber)';e.innerHTML='<b style="color:var(--amber)">Atenção: a leitura automática não fechou 100%.</b> '+(partes.join(' ')||'Confira o cabeçalho do relatório.')+' Confira e corrija as linhas antes de confirmar a atualização.';}}
 function afTeleconCancelar_(){afTeleconImport_=null;afTeleconModo_='novo';afTeleconAcaoAtualizar_=null;document.getElementById('afTeleconReview').classList.remove('open');document.getElementById('afTeleconFileName').textContent='Nenhum relatório selecionado.';afTeleconStatus_('A importação foi cancelada. Nenhum dado foi gravado.','');}
 function afTeleconAcaoBase_(){var d=afTeleconImport_.dados||{},forn=String(document.getElementById('afTeleconFornecedor').value||d.fornecedor||'').trim(),reg=Number(document.getElementById('afTeleconRegistros').value)||d.registrosInformados||0,total=Number(document.getElementById('afTeleconTotal').value)||d.totalInformado||0,info=afTeleconConferenciaInfo_(),ant=afPerfilAnterior_(forn)||{},mod=afTeleconModalidade_(forn)||{},fone=ant.telefone||afTeleconExtrairFone_(mod.contato||mod.obs||'');var itens=(d.itens||[]).map(function(x,i){x.key=x.key||('tele_'+i);x.codigo=x.codigoBarras||x.codigo||'';x.valorTotal=Number(x.valorTelecon)||0;x.origem='TELECON';return x;});return {id:'',numero:'',status:'RASCUNHO',dataEmissao:afHoje_(),prazoDiasUteis:10,prazoResposta:'',loja:'Supermercado Boas Compras',operador:afUsuarioAtual_(),assinanteId:afAssinantePadraoId_({operador:afUsuarioAtual_()}),fornecedor:forn,cnpj:ant.cnpj||'',codigoFornecedor:ant.codigoFornecedor||'',contato:ant.contato||mod.contato||'',telefone:fone,email:ant.email||'',situacoes:{vencidos:true},destinoProdutos:'',destinoObservacao:'',providencias:{troca:false,recolhimento:true,credito:true,ressarcimento:false,notaDevolucao:false,boleto:false},itens:itens,evidencias:[],observacoes:'',dataRetorno:'',retorno:'',valorRecuperado:0,compensacoes:[],origemDados:'TELECON',relatorioTelecon:{nome:afTeleconImport_.nomeArquivo,fornecedorRelatorio:forn,registrosInformados:reg,totalInformado:total,registrosExtraidos:itens.length,totalExtraido:info.sum,extracaoCompleta:!!info.completa,usarPdfComoAnexoI:true,importadoEm:new Date().toISOString()}};}
 async function afTeleconConfirmar_(){
@@ -12737,38 +12752,24 @@ async function afTeleconConfirmar_(){
     }
 
     var motivo=String((document.getElementById('afTeleconMotivoAtualizacao')||{}).value||'Relatório atualizado / novo saldo');
-    b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Atualizando dossiê...';
+    var infoAtual=afTeleconConferenciaInfo_();
+    if(!infoAtual.completa){mostrarToast('A leitura do relatório ainda não fecha com a quantidade de linhas e o total informado. Corrija a conferência antes de atualizar.','warn');return;}
+    var conciliacao=afTeleconCompararRelatorios_(afEdit_,baseNova,baseNova.relatorioTelecon);
+    b.disabled=true;b.innerHTML='<i class="ti ti-loader-2 spin"></i> Conciliando baixa e salvando relatório...';
 
-    // Preserva o dossiê e substitui apenas a fonte Telecon, itens e valor.
+    // Um único envio troca os itens e o PDF: falha no upload não deixa saldo novo com documento antigo.
     var ac=JSON.parse(JSON.stringify(afEdit_));
     ac.itens=baseNova.itens;
     ac.origemDados='TELECON';
     ac.relatorioPendenteAtualizacao=false;
     ac.relatorioTelecon=baseNova.relatorioTelecon;
     ac.relatorioTelecon.motivoAtualizacao=motivo;
+    ac.relatorioTelecon.conciliacaoBaixas=conciliacao;
 
-    var s=await afPost_({action:'salvarAcaoFornecedorVencidos',acao:ac});
-    if(!s||!s.ok){
-      b.disabled=false;b.innerHTML='<i class="ti ti-refresh"></i> Atualizar este dossiê';
-      mostrarToast('Falha ao atualizar os dados do dossiê: '+((s&&s.erro)||'erro'),'err');return;
-    }
-
-    ac=s.acao;
-    afTeleconStatus_('<i class="ti ti-upload"></i> Substituindo o PDF Telecon no Drive...','warn');
-    var up=await afPost_({
-      action:'salvarRelatorioTeleconAcaoFornecedor',
-      acaoId:ac.id,
-      pdfBase64:afTeleconImport_.pdfBase64,
-      nomeArquivo:afTeleconImport_.nomeArquivo,
-      meta:ac.relatorioTelecon,
-      motivoAtualizacao:motivo
-    });
-
+    afTeleconStatus_('<i class="ti ti-upload"></i> Salvando a nova versão, conciliando as diferenças e substituindo o PDF...','warn');
+    var up=await afPost_({action:'salvarRelatorioTeleconAcaoFornecedor',acaoId:ac.id,acao:ac,pdfBase64:afTeleconImport_.pdfBase64,nomeArquivo:afTeleconImport_.nomeArquivo,meta:ac.relatorioTelecon,motivoAtualizacao:motivo});
     b.disabled=false;b.innerHTML='<i class="ti ti-refresh"></i> Atualizar este dossiê';
-    if(!up||!up.ok){
-      mostrarToast('Os dados foram atualizados, mas o novo PDF não foi salvo. O relatório anterior foi preservado. '+((up&&up.erro)||''),'err');
-      return;
-    }
+    if(!up||!up.ok){mostrarToast('A atualização não foi aplicada; o relatório e os dados anteriores foram mantidos. '+((up&&up.erro)||''),'err');return;}
 
     ac=up.acao||ac;
     afEdit_=JSON.parse(JSON.stringify(ac));
@@ -12780,7 +12781,7 @@ async function afTeleconConfirmar_(){
     afTeleconImport_=null;afTeleconModo_='novo';afTeleconAcaoAtualizar_=null;
     document.getElementById('afTeleconReview').classList.remove('open');
     afRenderTudo_();afAbrirEditor_();
-    afTeleconStatus_('<i class="ti ti-check"></i> Relatório Telecon atualizado no mesmo dossiê. Valor, itens e bonificações foram conciliados com a nova versão.','ok');
+    afTeleconStatus_('<i class="ti ti-check"></i> Relatório Telecon atualizado no mesmo dossiê. Baixas, acréscimos e saldo foram comparados automaticamente com a nova versão.','ok');
     mostrarToast('Relatório atualizado no dossiê '+(ac.numero||'')+'.','ok');
     return;
   }
@@ -12907,7 +12908,8 @@ function afTentarVincularBonificacaoAoRelatorioAtual_(a,valor){
 function afRenderBonificacoes_(){
   var body=document.getElementById('afBonifBody'),res=document.getElementById('afBonifResumo'),st=document.getElementById('afBonifStatus');
   if(!body||!res||!afEdit_)return;
-  var cs=afBonificacoes_(afEdit_),rb=afResumoBonificacoes_(afEdit_),saldo=afSaldoRelatorioAtual_(afEdit_),oper=afSaldoOperacional_(afEdit_);
+  var cs=afBonificacoes_(afEdit_),rb=afResumoBonificacoes_(afEdit_),saldo=afSaldoRelatorioAtual_(afEdit_),oper=afSaldoOperacional_(afEdit_),baixas=afEdit_.relatorioTelecon&&afEdit_.relatorioTelecon.conciliacaoBaixas;
+  var bx=document.getElementById('afTeleconBaixasResumo');if(bx){bx.style.display=baixas?'block':'none';bx.innerHTML=baixas?('<b>Conciliação automática da Telecon</b><br>'+afTeleconConciliacaoResumoHtml_(baixas)) :'';}
   var tele=String(afEdit_.origemDados||'').toUpperCase()==='TELECON'&&afEdit_.relatorioTelecon;
   var vers=tele?afRelatorioVersaoAtual_(afEdit_):0;
 
@@ -12916,7 +12918,7 @@ function afRenderBonificacoes_(){
   }
   res.innerHTML=
     card('Saldo do relatório',afMoney_(saldo),tele?'Telecon v'+vers:'Valor atual do dossiê')+
-    card('Bonificações registradas',afMoney_(rb.total),rb.quantidade+' NF(s)')+
+    card('Compensações manuais',afMoney_(rb.total),rb.quantidade+' registro(s)')+
     card('Ainda não refletidas',afMoney_(rb.pendente),rb.pendente>0?'Aguardando relatório atualizado':'Tudo conciliado')+
     card(rb.pendente>0?'Saldo estimado':'Saldo atual',afMoney_(oper),rb.pendente>0?'Até atualizar a Telecon':'Conforme relatório vigente');
 
