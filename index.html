@@ -17328,7 +17328,7 @@ function renderTarefas() {
 
   atualizarTarefasBulkBar();
   
-  var pendCount = tarefas.filter(function(t) { return t.status === 'pendente'; }).length;
+  var pendCount = tarefas.filter(function(t) { return t.status === 'pendente' && !ehVencida(t); }).length;
   var badge = document.getElementById('asBadgeTarefas');
   if (badge) {
     badge.textContent = pendCount;
