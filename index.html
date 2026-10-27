@@ -5665,6 +5665,10 @@ function matchBusca(nome, cod, busca){
 }
 function cleanNome(n){return String(n).replace(/\s*\(\d+[^)]*\)\s*/g,' ').replace(/\s*\{\d+\}\s*/g,' ').replace(/\s+/g,' ').trim();}
 
+var _auraBancoCarregado_=false;
+var _auraBancoPromise_=null;
+var _auraDashboardCarregado_=false;
+var _auraBaseCompletaCarregada_=false;
 async function loadBanco(cfg){
   if(!cfg.idBanco)cfg.idBanco=cfg.id;
   if(!cfg.idBanco)return;
@@ -5779,21 +5783,26 @@ async function loadBanco(cfg){
       ' | ciCusto='+ciCusto+' | ciVenda='+ciVenda+' | ciForn='+ciForn
     );
     if(ciForn<0)console.warn('BANCO: coluna FORNECEDOR nao detectada — cabeçalhos encontrados: '+(hIdx>=0?(rawRows(table)[hIdx]&&rawRows(table)[hIdx].c||[]).map(function(c){return String((c&&c.f)||(c&&c.v)||'');}).filter(Boolean).join(', '):'nenhum'));
-  }catch(e){console.warn('Banco:',e.message);}
+    _auraBancoCarregado_=true;
+    return true;
+  }catch(e){console.warn('Banco:',e.message);return false;}
 }
 
 var _auraSyncInFlight_=null;
 var _auraSyncQueued_=false;
-function syncAll(){
-  if(_auraSyncInFlight_){_auraSyncQueued_=true;return _auraSyncInFlight_;}
+var _auraSyncQueuedMode_=null;
+function syncAll(modo){
+  modo=modo==='dashboard'?'dashboard':'completo';
+  if(_auraSyncInFlight_){_auraSyncQueued_=true;if(modo==='completo')_auraSyncQueuedMode_='completo';return _auraSyncInFlight_;}
   _auraSyncInFlight_=(async function(){
-    var result;
-    do{_auraSyncQueued_=false;result=await _auraSyncRun_();}while(_auraSyncQueued_);
+    var result,modoAtual=modo;
+    do{_auraSyncQueued_=false;_auraSyncQueuedMode_=null;result=await _auraSyncRun_(modoAtual);if(_auraSyncQueuedMode_)modoAtual=_auraSyncQueuedMode_;}while(_auraSyncQueued_);
     return result;
   })().finally(function(){_auraSyncInFlight_=null;});
   return _auraSyncInFlight_;
 }
-async function _auraSyncRun_(){
+async function _auraSyncRun_(modo){
+  modo=modo==='dashboard'?'dashboard':'completo';
   var cfg=loadCfg();
   if(!cfg.id){setDot('err','Configure o Google Sheets primeiro');toggleCfg();return;}
   var btn=document.getElementById('btnSync');
@@ -5804,7 +5813,10 @@ async function _auraSyncRun_(){
     // são leituras independentes — antes rodavam em série (await ... await
     // ...), pagando a soma dos dois tempos. Em paralelo, o tempo total
     // passa a ser o da mais lenta das duas.
-    var _syncResultados=await Promise.all([loadBanco(cfg),fetchSheet(cfg.id,cfg.aba)]);
+    // A abertura carrega só a aba anual necessária ao Dashboard. O banco de
+    // 13 mil produtos é consultado quando uma tela que depende dele é aberta
+    // ou quando o usuário solicita Sincronizar.
+    var _syncResultados=await Promise.all([modo==='dashboard'?Promise.resolve(true):loadBanco(cfg),fetchSheet(cfg.id,cfg.aba)]);
     var table=_syncResultados[1];
     var rows=rawRows(table);
     if(!rows.length)throw new Error('Nenhuma linha');
@@ -5924,7 +5936,8 @@ async function _auraSyncRun_(){
     refresh();
     // v7.01: o navegador já está com o BANCO DE DADOS novo; agora força o
     // backend a descartar o cache EAN antigo e reprocessar AGUARDANDO_CADASTRO.
-    if(typeof nfeReconciliarCadastrosAura_==='function'){
+    if(modo==='completo')_auraBaseCompletaCarregada_=_auraBancoCarregado_;
+    if(modo==='completo'&&typeof nfeReconciliarCadastrosAura_==='function'){
       nfeReconciliarCadastrosAura_(true).then(function(rec){
         if(rec&&rec.ok&&Number(rec.completas)>0){
           mostrarToast(Number(rec.completas)+' NF-e(s) reconciliada(s) com o banco atualizado.','ok');
@@ -5932,7 +5945,9 @@ async function _auraSyncRun_(){
         }
       });
     }
-  }catch(e){setDot('err','Erro: '+e.message);console.error(e);}
+    if(modo==='dashboard')_auraDashboardCarregado_=true;
+    return true;
+  }catch(e){setDot('err','Erro: '+e.message);console.error(e);return false;}
   finally{btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Sincronizar';}
 }
 function setDot(t,m){var d=document.getElementById('dot'),tx=document.getElementById('stText');if(d)d.className='dot'+(t==='ok'?' ok':t==='err'?' err':t==='loading'?' loading':'');if(tx)tx.innerHTML=m;}
@@ -13649,7 +13664,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v7.48-shelf-life-confirmed-classification';
+var AURA_CONTROLE_VALIDADE_BUILD='v7.50-lazy-tab-loading';
 console.info('[AURA] organização de entradas v7.02 — CEASA operacional na aba Conferência NF-e; Boss Vision somente gerencial');
 console.info('[AURA] encarte imagens v7.04 — loader Arsenal restaurado + link/upload/consulta central');
 var currentTabName='dashboard';
@@ -15144,12 +15159,12 @@ function _setCache_(key, value) {
   }
 }
 var _cloudLoadHandlers={
-  encartes:function(d){_encartesAtivos=d;_setCache_(ENC_KEY,_semImagemParaCache(d));atualizarBadge();renderEncartesAtivos&&renderEncartesAtivos();},
-  negociacoes:function(d){_negociacoes=d;_setCache_(NEG_KEY,d);atualizarNegBadge&&atualizarNegBadge();typeof renderNegociacoes==='function'&&renderNegociacoes();},
+  encartes:function(d){_encartesAtivos=d;_setCache_(ENC_KEY,_semImagemParaCache(d));atualizarBadge();if(typeof currentTabName==='undefined'||currentTabName==='promocoes')renderEncartesAtivos&&renderEncartesAtivos();},
+  negociacoes:function(d){_negociacoes=d;_setCache_(NEG_KEY,d);atualizarNegBadge&&atualizarNegBadge();if(typeof currentTabName==='undefined'||currentTabName==='relatorio')typeof renderNegociacoes==='function'&&renderNegociacoes();},
   resolvidos:function(d){_resolvidos=d;_setCache_(RESOLVIDOS_KEY,d);},
-  encerradas:function(d){_encerradas=d;_setCache_(PROMO_ENC_KEY,d);renderPromos&&renderPromos();},
+  encerradas:function(d){_encerradas=d;_setCache_(PROMO_ENC_KEY,d);if(typeof currentTabName==='undefined'||currentTabName==='promocoes')renderPromos&&renderPromos();if(typeof currentTabName!=='undefined'&&currentTabName==='dashboard')renderDashboard&&renderDashboard();},
   biblioteca:function(d){_biblioteca=d;_setCache_(BIB_KEY,_semImagemParaCache(d));atualizarBibBadge&&atualizarBibBadge();},
-  modalidades:function(d){if(d&&d.length){_modalidades=d;_setCache_(MODALIDADES_KEY,d);renderModalidades&&renderModalidades();}},
+  modalidades:function(d){if(d&&d.length){_modalidades=d;_setCache_(MODALIDADES_KEY,d);if(typeof currentTabName==='undefined'||currentTabName==='modalidades')renderModalidades&&renderModalidades();}},
   promoAtivas:function(d){_promoAtivas=d;_setCache_('boascompras_promo_ativas',d);},
   setorCorrigido:function(d){
     _setorCorrigido={};
@@ -15189,6 +15204,26 @@ function cloudLoad(){
       if(res[chave]!==undefined) _cloudLoadHandlers[chave](res[chave]);
     });
   }).catch(function(){ _cloudLoadLegacy(); });
+}
+
+// Carrega só os conjuntos de nuvem da aba que acabou de ser aberta.
+var _auraCloudLoaded_={};
+var _auraCloudPending_={};
+var _auraCloudActionMap_={buscarEncartes:'encartes',buscarNegociacoes:'negociacoes',buscarResolvidos:'resolvidos',buscarEncerradas:'encerradas',buscarBiblioteca:'biblioteca',buscarModalidades:'modalidades',buscarPromoAtivas:'promoAtivas',buscarSetorCorrigido:'setorCorrigido'};
+function auraCarregarDadosCloudDaAba_(grupo,acoes,forcar){
+  if(_auraCloudPending_[grupo])return _auraCloudPending_[grupo];
+  if(_auraCloudLoaded_[grupo]&&!forcar)return Promise.resolve(true);
+  var lista=(acoes||[]).filter(function(a){return !!_auraCloudActionMap_[a];});
+  if(!lista.length){_auraCloudLoaded_[grupo]=true;return Promise.resolve(true);}
+  _auraCloudPending_[grupo]=Promise.all(lista.map(function(action){
+    return _gasGet(action).then(function(res){
+      if(!res||!res.ok||res.dados===undefined)throw new Error((res&&res.erro)||'Falha ao buscar '+action);
+      _cloudLoadHandlers[_auraCloudActionMap_[action]](res.dados);return true;
+    });
+  })).then(function(){_auraCloudLoaded_[grupo]=true;return true;}).catch(function(e){
+    console.warn('[AURA] Dados da aba '+grupo+' não carregados:',e&&e.message||e);return false;
+  }).finally(function(){_auraCloudPending_[grupo]=null;});
+  return _auraCloudPending_[grupo];
 }
 
 // Migração única: sobe dados locais que ainda não estão na nuvem
@@ -15236,18 +15271,7 @@ function migarDadosLocaisParaNuvem(){
 
 _popularRetiradaDiaSel();
 
-// v6.31.1 PAINEL — abertura otimizada:
-// 1) mostra imediatamente o último snapshot local;
-// 2) dá prioridade de rede/CPU ao sync principal (ano + banco);
-// 3) tarefas e dados auxiliares entram logo depois, ou no máximo em 3,5s.
-function _iniciarDadosSecundariosAposCarga_(){
-  if(window._auraDadosSecundariosIniciados)return;
-  window._auraDadosSecundariosIniciados=true;
-  carregarColaboradoresUniversal_(false);
-  setTimeout(function(){try{auraAtualizarAcessoTarefas_();}catch(e){}},0);
-  sincronizarTarefasCompleto();
-  cloudLoad();
-}
+// Abas secundárias são carregadas sob demanda, na primeira entrada.
 async function auraIniciarDadosPrincipais_(){
   setDot('loading','Abrindo cache seguro…');
   try{
@@ -15265,16 +15289,9 @@ async function auraIniciarDadosPrincipais_(){
     products=auraProdLerManuais_();
   }
 
-  var _syncInicial=syncAll();
-  Promise.resolve(_syncInicial).then(function(){
-    setTimeout(_iniciarDadosSecundariosAposCarga_,80);
-  }).catch(function(){
-    setTimeout(_iniciarDadosSecundariosAposCarga_,80);
-  });
-
-  // Fallback: se a leitura principal demorar demais, não segura tarefas/nuvem indefinidamente.
-  setTimeout(_iniciarDadosSecundariosAposCarga_,3500);
-  setTimeout(migarDadosLocaisParaNuvem,4500);
+  // Busca somente os dados necessários ao Dashboard inicial. O Banco de Dados,
+  // tarefas, colaboradores e coleções de outras telas aguardam a primeira visita.
+  syncAll('dashboard').then(function(){auraCarregarDadosCloudDaAba_('dashboard',['buscarEncerradas']);});
 }
 if(_cfg.id){
   auraIniciarDadosPrincipais_();
@@ -15845,9 +15862,11 @@ function _colabDiasAteAniv_(aniv,hoje){
 function renderLembreteAniversariosGestor_(){
   var el=document.getElementById('dashAniversariosGestor');if(!el)return;
   if(!_colabUniversalCarregado){
-    el.style.display='';el.innerHTML='<div class="bday-gestor-title"><i class="ti ti-cake"></i> Aniversários da equipe</div><div class="bday-gestor-sub">Carregando calendário dos colaboradores...</div>';
-    carregarColaboradoresUniversal_(false).then(function(){renderLembreteAniversariosGestor_();});return;
+    // O Dashboard não inicia busca de colaboradores em segundo plano.
+    // O calendário aparece quando o gestor abre a aba Colaboradores.
+    el.style.display='none';return;
   }
+  el.style.display='';
   var hoje=new Date(),mesAtual=hoje.getMonth()+1;
   var ativos=(COLABORADORES_TODOS||[]).filter(function(c){return c.ativo!==false&&c.nome&&_colabParseAnivFront_(c.aniv);});
   var mes=ativos.map(function(c){var p=_colabParseAnivFront_(c.aniv);return {c:c,p:p,dias:_colabDiasAteAniv_(c.aniv,hoje)};})
@@ -18281,8 +18300,59 @@ function _auraOnScanSuccess(code) {
   };
   window.refresh=window.auraRefreshRapido_;
 
+  function auraGarantirBanco_(){
+    if(_auraBancoCarregado_)return Promise.resolve(true);
+    if(_auraBancoPromise_)return _auraBancoPromise_;
+    _auraBancoPromise_=loadBanco(loadCfg()).then(function(ok){return ok!==false&&!!_auraBancoCarregado_;}).catch(function(e){console.warn('[AURA] Banco adiado falhou:',e);return false;}).finally(function(){_auraBancoPromise_=null;});
+    return _auraBancoPromise_;
+  }
+  function auraGarantirBaseCompleta_(){
+    if(_auraBaseCompletaCarregada_&&_auraBancoCarregado_)return Promise.resolve(true);
+    return syncAll('completo').then(function(){return !!(_auraBaseCompletaCarregada_&&_auraBancoCarregado_);});
+  }
+  function auraPrepararAba_(name){
+    if(name==='dashboard'){
+      if(!_auraDashboardCarregado_)syncAll('dashboard');
+      auraCarregarDadosCloudDaAba_('dashboard',['buscarEncerradas']);
+    }else if(name==='estoque'){
+      renderEstoqueFast_(false); // exibe o snapshot local enquanto atualiza
+      auraGarantirBaseCompleta_().then(function(ok){if(ok&&currentTabName==='estoque')renderEstoqueFast_(false);else if(!ok)mostrarToast('Não foi possível atualizar estoque agora. Tente Sincronizar.','err');});
+      auraCarregarDadosCloudDaAba_('estoque',['buscarPromoAtivas','buscarEncerradas']).then(function(){if(currentTabName==='estoque')renderEstoqueFast_(false);});
+    }else if(name==='nfe'){
+      auraGarantirBanco_().then(function(ok){if(currentTabName!=='nfe')return;if(!ok)mostrarToast('Banco de produtos indisponível; confira a conexão e tente novamente.','err');nfeInit_();});
+    }else if(name==='cobertura'){
+      auraGarantirBanco_().then(function(){if(currentTabName==='cobertura')cfCarregar(false);});
+    }else if(name==='antecipacao'){
+      if(typeof renderAntecipacao==='function')renderAntecipacao();
+    }else if(name==='acoesfornecedores'){
+      if(typeof afCarregar==='function')afCarregar(false);
+    }else if(name==='bossvision'){
+      if(window._bossDados&&typeof bossReanimarGraficosBoss_==='function')bossReanimarGraficosBoss_();
+      if(typeof bossCarregar==='function')bossCarregar(false);
+    }else if(name==='tarefas'){
+      if(typeof renderTarefas==='function')renderTarefas();
+      setTimeout(function(){if(currentTabName==='tarefas'&&typeof sincronizarTarefasCompleto==='function')sincronizarTarefasCompleto();},0);
+    }else if(name==='colaboradores'){
+      if(typeof colabAdminCarregar==='function')colabAdminCarregar(false);
+    }else if(name==='modalidades'){
+      auraCarregarDadosCloudDaAba_('modalidades',['buscarModalidades']).then(function(){if(currentTabName==='modalidades')renderModalidades();});
+    }else if(name==='promocoes'){
+      auraCarregarDadosCloudDaAba_('promocoes',['buscarEncerradas','buscarBiblioteca','buscarPromoAtivas','buscarEncartes']).then(function(){if(currentTabName==='promocoes')renderPromos();});
+    }else if(name==='relatorio'){
+      auraCarregarDadosCloudDaAba_('relatorio',['buscarNegociacoes','buscarResolvidos','buscarEncerradas']).then(function(){if(currentTabName==='relatorio')renderRelatorio();});
+    }else if(name==='ajuda'){
+      // Conteúdo local: nenhuma consulta remota.
+    }
+  }
+
   window.goTab=function(name){
     if(name==='validades')name='estoque';
+    if((name==='tarefas'||name==='colaboradores')&&!_colabUniversalCarregado){
+      carregarColaboradoresUniversal_(false).then(function(){window.goTab(null,name);});
+      return;
+    }
+    if(name==='tarefas'&&!auraAtualizarAcessoTarefas_())return;
+    if(name==='colaboradores'&&!auraSessaoEhMaster_()){mostrarToast('Seu perfil não pode gerenciar colaboradores.','warn');return;}
     currentTabName=name;
     document.querySelectorAll('.tab').forEach(function(t){var oc=t.getAttribute('onclick')||'';t.classList.toggle('active',oc.indexOf("goTab('"+name+"')")!==-1);});
     document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
@@ -18293,18 +18363,10 @@ function _auraOnScanSuccess(code) {
     var nav=++perf.navToken;
     requestAnimationFrame(function(){
       if(nav!==perf.navToken||currentTabName!==name)return;
-      if(name==='bossvision'){if(window._bossDados&&typeof bossReanimarGraficosBoss_==='function')bossReanimarGraficosBoss_();if(typeof bossCarregar==='function')bossCarregar(false);}
-      else if(name==='nfe'&&typeof nfeInit_==='function')nfeInit_();
-      else if(name==='relatorio'){var selFiltro=document.getElementById('filtroNegTipo');if(selFiltro)selFiltro.value='sobras';setTimeout(function(){if(currentTabName==='relatorio'&&typeof renderRelatorio==='function')renderRelatorio();},60);}
-      else if(name==='promocoes'&&typeof renderPromos==='function')renderPromos();
-      else if(name==='modalidades'&&typeof renderModalidades==='function')renderModalidades();
-      else if(name==='antecipacao'&&typeof renderAntecipacao==='function')renderAntecipacao();
-      else if(name==='cobertura'&&typeof cfCarregar==='function')cfCarregar(false);
-      else if(name==='acoesfornecedores'&&typeof afCarregar==='function')afCarregar(false);
-      else if(name==='dashboard'&&typeof renderDashboard==='function')renderDashboard();
-      else if(name==='estoque')renderEstoqueFast_(false);
-      else if(name==='tarefas'){if(typeof renderTarefas==='function')renderTarefas();setTimeout(function(){if(currentTabName==='tarefas'&&typeof sincronizarTarefasCompleto==='function')sincronizarTarefasCompleto();},0);}
-      else if(name==='colaboradores'&&typeof colabAdminCarregar==='function')colabAdminCarregar(false);
+      if(name==='relatorio'){var selFiltro=document.getElementById('filtroNegTipo');if(selFiltro)selFiltro.value='sobras';}
+      if(name==='dashboard'&&typeof renderDashboard==='function')renderDashboard();
+      if(name==='estoque'&&_auraBaseCompletaCarregada_)renderEstoqueFast_(false);
+      auraPrepararAba_(name);
     });
   };
 })();
