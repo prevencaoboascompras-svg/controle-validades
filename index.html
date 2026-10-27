@@ -15321,7 +15321,7 @@ function antCarregarShelfLife_(forcar) {
   if(!forcar&&Math.max(_antShelfLifeAtualizado,_antShelfLifeTentativaEm)&&agora-Math.max(_antShelfLifeAtualizado,_antShelfLifeTentativaEm)<45000)return;
   _antShelfLifeTentativaEm=agora;
   _antShelfLifeCarregando=true;_antShelfLifeErro='';antShelfAtualizarBotao_();antShelfAtualizarAviso_(_antShelfLifeDados.length);
-  nfePost_({action:'nfeAntecipacaoShelfLife'}).then(function(r){
+  _gasGetJsonp('nfeAntecipacaoShelfLife','',180000).then(function(r){
     if(!r||!r.ok)throw new Error((r&&r.erro)||'Falha ao consultar os recebimentos.');
     if(!Array.isArray(r.itens))throw new Error('O servidor respondeu, mas não enviou a lista de lotes.');
     _antShelfLifeDados=r.itens;
