@@ -13646,7 +13646,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v7.44-colaboradores-admin-tarefas';
+var AURA_CONTROLE_VALIDADE_BUILD='v7.45-shelf-life-retroativo-xml';
 console.info('[AURA] organização de entradas v7.02 — CEASA operacional na aba Conferência NF-e; Boss Vision somente gerencial');
 console.info('[AURA] encarte imagens v7.04 — loader Arsenal restaurado + link/upload/consulta central');
 var currentTabName='dashboard';
@@ -15286,6 +15286,11 @@ var _antShelfLifeAtualizado = 0;
 var _antShelfLifeTentativaEm = 0;
 var _antShelfLifeCarregando = false;
 var _antShelfLifeErro = '';
+var _antShelfRetroAutoAtivo = false;
+var _antShelfRetroPendente = 0;
+var _antShelfRetroAtualizados = 0;
+var _antShelfRetroSemXml = 0;
+var _antShelfRetroSemFabricacao = 0;
 function antShelfAtualizarBotao_(){
   var b=document.getElementById('antShelfRefreshBtn');if(!b)return;
   b.disabled=!!_antShelfLifeCarregando;
@@ -15296,15 +15301,16 @@ function antShelfAtualizarBotao_(){
 function antShelfAtualizarAviso_(quantidade) {
   var el=document.getElementById('antShelfNotice');if(!el)return;
   if(_antShelfLifeErro){el.innerHTML='<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 13px;border:1px solid rgba(239,68,68,.45);border-radius:10px;background:rgba(239,68,68,.08);color:var(--fg);font-size:12px"><i class="ti ti-alert-circle" style="font-size:18px;color:#ef4444"></i><span><b>Não foi possível consultar o shelf life.</b> '+nfeEsc_(_antShelfLifeErro)+'<br><span style="color:var(--muted)">A última consulta concluída foi preservada; confira a conexão com o Code.gs e tente novamente.</span></span><button class="btn btn-sm" style="margin-left:auto" onclick="antCarregarShelfLife_(true)">Tentar novamente</button></div>';return;}
-  if(_antShelfLifeCarregando){var ultima=_antShelfLifeAtualizado?'Última consulta: '+new Date(_antShelfLifeAtualizado).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' · mantendo o resultado anterior visível.':'Aguardando resposta do Code.gs.';el.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid rgba(59,130,246,.42);border-radius:10px;background:rgba(59,130,246,.08);color:var(--fg);font-size:12px"><i class="ti ti-loader-2 spin" style="font-size:18px;color:#3b82f6"></i><span><b>Consultando recebimentos e saldos…</b><br><span style="color:var(--muted)">'+ultima+'</span></span><span style="margin-left:auto;color:#3b82f6;font-weight:800">EM ANDAMENTO</span></div>';return;}
+  if(_antShelfLifeCarregando){var ultima=_antShelfLifeAtualizado?'Última consulta: '+new Date(_antShelfLifeAtualizado).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' · mantendo o resultado anterior visível.':'Aguardando resposta do Code.gs.';var titulo=_antShelfRetroAutoAtivo?'Recuperando fabricação das NF-e antigas…':'Consultando recebimentos e saldos…';var detalhe=_antShelfRetroAutoAtivo?(_antShelfRetroAtualizados+' lote(s) atualizado(s) a partir dos XMLs; há mais notas na fila.'):ultima;el.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid rgba(59,130,246,.42);border-radius:10px;background:rgba(59,130,246,.08);color:var(--fg);font-size:12px"><i class="ti ti-loader-2 spin" style="font-size:18px;color:#3b82f6"></i><span><b>'+titulo+'</b><br><span style="color:var(--muted)">'+detalhe+'</span></span><span style="margin-left:auto;color:#3b82f6;font-weight:800">EM ANDAMENTO</span></div>';return;}
   if(!_antShelfLifeAtualizado){el.innerHTML='<div style="padding:10px 12px;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px">A consulta ainda não foi iniciada.</div>';return;}
   var total=Number(quantidade)||0;
   var hora=new Date(_antShelfLifeAtualizado).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  el.innerHTML=total?'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(239,68,68,.35);border-radius:10px;background:rgba(239,68,68,.07);color:var(--fg);font-size:12px"><span style="font-size:17px">⚠️</span><span><b>Consulta concluída às '+hora+' · '+total+' lote'+(total===1?'':'s')+' elegível(is)</b><br>Vida útil restante atual abaixo de 80%, com saldo. Planeje o encarte antes do vencimento.</span></div>':'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(22,163,74,.35);border-radius:10px;background:rgba(22,163,74,.07);color:var(--fg);font-size:12px"><i class="ti ti-circle-check" style="font-size:18px;color:#16a34a"></i><span><b>Consulta concluída às '+hora+' · 0 lotes elegíveis</b><br>O AURA respondeu. Não encontrou lotes de NF-e com saldo ativo abaixo de 80% da vida útil restante.</span></div>';
+  var recuperacao=_antShelfRetroAtualizados?'<br><b>'+_antShelfRetroAtualizados+' lote(s) antigo(s) tiveram a fabricação recuperada do XML.</b>':'';var semDados=(_antShelfRetroSemXml+_antShelfRetroSemFabricacao)>0?'<br>'+(_antShelfRetroSemXml+_antShelfRetroSemFabricacao)+' nota(s)/lote(s) não tinham XML acessível ou fabricação identificável.':'';el.innerHTML=total?'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(239,68,68,.35);border-radius:10px;background:rgba(239,68,68,.07);color:var(--fg);font-size:12px"><span style="font-size:17px">⚠️</span><span><b>Consulta concluída às '+hora+' · '+total+' lote'+(total===1?'':'s')+' elegível(is)</b><br>Vida útil restante atual abaixo de 80%, com saldo. Planeje o encarte antes do vencimento.'+recuperacao+semDados+'</span></div>':'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(22,163,74,.35);border-radius:10px;background:rgba(22,163,74,.07);color:var(--fg);font-size:12px"><i class="ti ti-circle-check" style="font-size:18px;color:#16a34a"></i><span><b>Consulta concluída às '+hora+' · 0 lotes elegíveis</b><br>O AURA respondeu. Não encontrou lotes de NF-e com saldo ativo abaixo de 80% da vida útil restante.'+recuperacao+semDados+'</span></div>';
 }
 function antCarregarShelfLife_(forcar) {
   var agora=Date.now();
   if(_antShelfLifeCarregando)return;
+  if(forcar&&!_antShelfRetroAutoAtivo){_antShelfRetroAtualizados=0;_antShelfRetroSemXml=0;_antShelfRetroSemFabricacao=0;_antShelfRetroPendente=0;}
   if(!forcar&&Math.max(_antShelfLifeAtualizado,_antShelfLifeTentativaEm)&&agora-Math.max(_antShelfLifeAtualizado,_antShelfLifeTentativaEm)<45000)return;
   _antShelfLifeTentativaEm=agora;
   _antShelfLifeCarregando=true;_antShelfLifeErro='';antShelfAtualizarBotao_();antShelfAtualizarAviso_(_antShelfLifeDados.length);
@@ -15312,12 +15318,17 @@ function antCarregarShelfLife_(forcar) {
     if(!r||!r.ok)throw new Error((r&&r.erro)||'Falha ao consultar os recebimentos.');
     if(!Array.isArray(r.itens))throw new Error('O servidor respondeu, mas não enviou a lista de lotes.');
     _antShelfLifeDados=r.itens;
+    var rt=r.retroativo||{};_antShelfRetroAtualizados+=Number(rt.atualizados)||0;_antShelfRetroSemXml+=Number(rt.semXml)||0;_antShelfRetroSemFabricacao+=Number(rt.semFabricacao)||0;_antShelfRetroPendente=Number(rt.pendente)||0;
+    if(_antShelfRetroPendente>0)_antShelfRetroAutoAtivo=true;
     _antShelfLifeAtualizado=Date.now();
   }).catch(function(e){_antShelfLifeErro=String(e&&e.message||e||'Erro de conexão.');}).finally(function(){
+    var continuar=_antShelfRetroPendente>0&&!_antShelfLifeErro;
     _antShelfLifeCarregando=false;
+    if(!continuar)_antShelfRetroAutoAtivo=false;
     antShelfAtualizarBotao_();
     var sec=document.getElementById('sec-antecipacao');
     if(sec&&getComputedStyle(sec).display!=='none')renderAntecipacao();
+    if(continuar)setTimeout(function(){antCarregarShelfLife_(true);},450);
   });
 }
 
