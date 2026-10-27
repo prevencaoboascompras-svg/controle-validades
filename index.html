@@ -3029,7 +3029,7 @@ function tentarLogin() {
     </button>
     <button onclick="auraNav(this,'antecipacao')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      <span>Antecipação Encarte</span>
+      <span>Shelf Life</span>
     </button>
     <button onclick="auraNav(this,'cobertura')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
@@ -13646,7 +13646,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v7.40-analise-financeira-nfe';
+var AURA_CONTROLE_VALIDADE_BUILD='v7.44-colaboradores-admin-tarefas';
 console.info('[AURA] organização de entradas v7.02 — CEASA operacional na aba Conferência NF-e; Boss Vision somente gerencial');
 console.info('[AURA] encarte imagens v7.04 — loader Arsenal restaurado + link/upload/consulta central');
 var currentTabName='dashboard';
@@ -13656,8 +13656,12 @@ function auraPerfilSessaoAtual_(){
   for(var i=0;i<lista.length;i++){var c=lista[i]||{};if(String(c.email||'').trim().toLowerCase()===chave||String(c.nome||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()===nome)return c;}
   return null;
 }
+function auraSessaoEhMaster_(){
+  var p=auraPerfilSessaoAtual_(),identidade=[_usuarioSelecionado,p&&p.nome,p&&p.email].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  return !!(p&&p.gerenciaUsuarios)||/(^|[^a-z])leonardo([^a-z]|$)/.test(identidade)||/(^|[^a-z])wagner([^a-z]|$)/.test(identidade);
+}
 function auraAtualizarAcessoTarefas_(){
-  var p=auraPerfilSessaoAtual_(),u=String(_usuarioSelecionado||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),bloqueado=p?p.veTarefas===false:(['leonardo','cesar','taiti','1960 nf'].indexOf(u)>=0),admin=!!(p&&p.gerenciaUsuarios)||u==='leonardo';
+  var p=auraPerfilSessaoAtual_(),u=String(_usuarioSelecionado||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),admin=auraSessaoEhMaster_(),bloqueado=!admin&&(p?p.veTarefas===false:(['leonardo','cesar','taiti','1960 nf'].indexOf(u)>=0));
   document.body.classList.toggle('aura-admin-sem-tarefas',bloqueado);
   var btns=document.querySelectorAll('#auraNav button');Array.prototype.forEach.call(btns,function(b){var oc=b.getAttribute('onclick')||'';if(oc.indexOf("'tarefas'")>=0)b.style.display=bloqueado?'none':'';if(oc.indexOf("'colaboradores'")>=0)b.style.display=admin?'':'none';});
   var badge=document.getElementById('asBadgeTarefas');if(badge&&bloqueado){badge.textContent='';badge.style.display='none';}
@@ -13668,7 +13672,7 @@ function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma vi
 function goTab(name){
   if(name==='validades')name='estoque'; // compatibilidade com atalhos antigos
   if(name==='tarefas'&&!auraAtualizarAcessoTarefas_())return;
-  if(name==='colaboradores'){var perfilAdmin=auraPerfilSessaoAtual_();if(!(perfilAdmin&&perfilAdmin.gerenciaUsuarios)&&String(_usuarioSelecionado||'').toLowerCase()!=='leonardo'){mostrarToast('Seu perfil não pode gerenciar colaboradores.','warn');return;}}
+  if(name==='colaboradores'&&!auraSessaoEhMaster_()){mostrarToast('Seu perfil não pode gerenciar colaboradores.','warn');return;}
   currentTabName=name;
   document.querySelectorAll('.tab').forEach(function(t){
     var oc=t.getAttribute('onclick')||'';
@@ -15787,7 +15791,7 @@ function colabAdminRender(){
   if(!lista.length){el.innerHTML='<div class="colab-empty">Nenhum colaborador encontrado.</div>';colabAdminAtualizarKpis_();return;}
   var cab='<div class="colab-list-head"><div>Colaborador</div><div>E-mail / anteriores</div><div>Aniversário</div><div>Coletas</div><div>Situação</div><div>Último acesso</div><div>Decisão / execução</div><div style="text-align:right">Ações</div></div>';
   el.innerHTML=cab+lista.map(function(c){
-    var aliases=c.aliases||[],ref=c.id||c.linha||c.email||'',chave=c.id||c.linha||c.email||'',coletas=Number(c.coletas)||0;
+    var aliases=c.aliases||[],ref=c.id||c.linha||c.email||'',chave=_colabChave_(c),coletas=Number(c.coletas)||0;
     var ac=AURA_ACESSOS_ULTIMOS_[_colabNormEmail_(c.email)]||null,acessoHtml='<div class="colab-access"><span class="muted">Sem registro</span></div>',tarefasHtml='<div class="colab-access"><span class="muted">—</span></div>';
     if(ac){
       acessoHtml='<div class="colab-access"><b>'+escHtml(auraFmtDataHoraAcesso_(ac.abertoEm))+'</b><span>'+escHtml(ac.app||'AURA')+'</span>'+(ac.dispositivo?'<span>'+escHtml(ac.dispositivo)+(ac.navegador?' · '+escHtml(ac.navegador):'')+'</span>':'')+'</div>';
@@ -15861,6 +15865,7 @@ function _colabPermissaoPadraoForm_(nome,email){
 }
 function colabAdminAbrirModal(chave){
   var c=chave?_colabPorChave_(chave):null;
+  if(chave&&!c){mostrarToast('Não localizei este colaborador. Atualize a lista e tente novamente.','err');return;}
   var aliases=c&&Array.isArray(c.aliases)?c.aliases:[];
   var permBase=c||_colabPermissaoPadraoForm_((document.getElementById('colabFormNome')||{}).value||'',(document.getElementById('colabFormEmail')||{}).value||'');
   if(!c)permBase=_colabPermissaoPadraoForm_('','');
@@ -18451,7 +18456,7 @@ console.info('[AURA] preço por validade v7.10 — bipe/Estoque mostra venda nor
   var login=window.tentarLogin;
   if(typeof login==='function')window.tentarLogin=function(){var r=login.apply(this,arguments),screen=document.getElementById('loginScreen');if(screen&&screen.classList.contains('hidden')){try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}abrirSessao_(_usuarioSelecionado);}return r;};
   try{var saved=JSON.parse(sessionStorage.getItem('aura_auth_v1')||'null');if(saved&&saved.ts&&Date.now()-saved.ts<8*3600000)abrirSessao_(saved.usuario);}catch(e){}
-  var nav=window.auraNav,navNames={dashboard:'Dashboard',nfe:'Conferência NF-e',estoque:'Estoque',antecipacao:'Antecipação de encarte',cobertura:'Cobertura de fornecedor',acoesfornecedores:'Dossiês de fornecedor',relatorio:'Relatórios',bossvision:'Boss Vision',modalidades:'Modalidades',tarefas:'Tarefas',colaboradores:'Colaboradores',ajuda:'Ajuda'};
+  var nav=window.auraNav,navNames={dashboard:'Dashboard',nfe:'Conferência NF-e',estoque:'Estoque',antecipacao:'Shelf Life',cobertura:'Cobertura de fornecedor',acoesfornecedores:'Dossiês de fornecedor',relatorio:'Relatórios',bossvision:'Boss Vision',modalidades:'Modalidades',tarefas:'Tarefas',colaboradores:'Colaboradores',ajuda:'Ajuda'};
   if(typeof nav==='function')window.auraNav=function(el,tab){var r=nav.apply(this,arguments);if(navNames[tab]&&window.auraAuditarAcao_)window.auraAuditarAcao_(navNames[tab],'Abriu a tela','concluída');return r;};
   function wrap_(name,module,label){var original=window[name];if(typeof original!=='function'||original.__auraAuditWrapped)return;var wrapped=function(){var out;try{out=original.apply(this,arguments);}catch(e){window.auraAuditarAcao_(module,label,'falhou');throw e;}if(out&&typeof out.then==='function')return out.then(function(v){window.auraAuditarAcao_(module,label,(v===false||(v&&(v.ok===false||v.success===false)))?'falhou':'concluída');return v;},function(e){window.auraAuditarAcao_(module,label,'falhou');throw e;});window.auraAuditarAcao_(module,label,'iniciada');return out;};wrapped.__auraAuditWrapped=true;window[name]=wrapped;}
   [['nfeImportarXml_','Conferência NF-e','Importou XML da NF-e'],['nfeSalvar_','Conferência NF-e','Solicitou gravação das validades da NF-e'],['salvarEntradaCeasa','Entrada CEASA','Salvou entrada CEASA'],['afSalvarAcao_','Dossiê de fornecedor','Salvou ou atualizou dossiê'],['cfSalvarAcao_','Negociação com fornecedor','Salvou negociação'],['salvarEstoqueLote','Estoque','Atualizou estoque do lote'],['criarTarefa','Tarefas','Criou tarefa'],['encerrarPromo','Antecipação de encarte','Encerrou promoção'],['reativarPromo','Antecipação de encarte','Reativou promoção'],['salvarModModal','Modalidades','Salvou modalidade']].forEach(function(x){wrap_(x[0],x[1],x[2]);});
