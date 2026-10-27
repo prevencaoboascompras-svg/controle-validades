@@ -3269,10 +3269,10 @@ function toggleTheme() {
         <div style="font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px"><i class="ti ti-calendar-event" style="color:#ef4444"></i> Planejamento de Encartes · Shelf Life</div>
         <div style="font-size:12px;color:var(--tx2);margin-top:4px;max-width:760px">Lotes de NF-e com saldo ativo cuja vida útil restante atual caiu abaixo de 80%. Organize a entrada por semana ou por mês antes que o vencimento se aproxime.</div>
       </div>
-      <button class="btn" onclick="antCarregarShelfLife_(true)"><i class="ti ti-refresh"></i> Atualizar recebimentos</button>
+      <button class="btn" id="antShelfRefreshBtn" onclick="antCarregarShelfLife_(true)"><i class="ti ti-refresh"></i> Atualizar recebimentos</button>
     </div>
 
-    <div id="antShelfNotice" style="margin:0 0 12px"></div>
+    <div id="antShelfNotice" role="status" aria-live="polite" style="margin:0 0 12px"></div>
     <div id="antShelfResumo" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:14px"></div>
 
     <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:0 0 12px">
@@ -15279,26 +15279,39 @@ if(_cfg.id){
 // ── PLANEJAMENTO DE ENCARTES POR SHELF LIFE ───────────────────────────────
 var _antShelfLifeDados = [];
 var _antShelfLifeAtualizado = 0;
+var _antShelfLifeTentativaEm = 0;
 var _antShelfLifeCarregando = false;
 var _antShelfLifeErro = '';
+function antShelfAtualizarBotao_(){
+  var b=document.getElementById('antShelfRefreshBtn');if(!b)return;
+  b.disabled=!!_antShelfLifeCarregando;
+  b.style.opacity=_antShelfLifeCarregando?'.75':'';
+  b.style.cursor=_antShelfLifeCarregando?'wait':'';
+  b.innerHTML=_antShelfLifeCarregando?'<i class="ti ti-loader-2 spin"></i> Consultando…':'<i class="ti ti-refresh"></i> Atualizar recebimentos';
+}
 function antShelfAtualizarAviso_(quantidade) {
   var el=document.getElementById('antShelfNotice');if(!el)return;
-  if(_antShelfLifeErro){el.innerHTML='<div style="padding:10px 12px;border:1px solid rgba(245,158,11,.45);border-radius:10px;background:rgba(245,158,11,.08);color:var(--fg);font-size:12px"><b>Alertas de shelf life indisponíveis.</b> '+nfeEsc_(_antShelfLifeErro)+' <button class="btn btn-sm" style="margin-left:8px" onclick="antCarregarShelfLife_(true)">Tentar novamente</button></div>';return;}
-  if(_antShelfLifeCarregando&&!_antShelfLifeAtualizado){el.innerHTML='<div style="padding:9px 12px;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px"><i class="ti ti-loader-2"></i> Conferindo recebimentos com vida útil curta…</div>';return;}
+  if(_antShelfLifeErro){el.innerHTML='<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 13px;border:1px solid rgba(239,68,68,.45);border-radius:10px;background:rgba(239,68,68,.08);color:var(--fg);font-size:12px"><i class="ti ti-alert-circle" style="font-size:18px;color:#ef4444"></i><span><b>Não foi possível consultar o shelf life.</b> '+nfeEsc_(_antShelfLifeErro)+'<br><span style="color:var(--muted)">A última consulta concluída foi preservada; confira a conexão com o Code.gs e tente novamente.</span></span><button class="btn btn-sm" style="margin-left:auto" onclick="antCarregarShelfLife_(true)">Tentar novamente</button></div>';return;}
+  if(_antShelfLifeCarregando){var ultima=_antShelfLifeAtualizado?'Última consulta: '+new Date(_antShelfLifeAtualizado).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+' · mantendo o resultado anterior visível.':'Aguardando resposta do Code.gs.';el.innerHTML='<div style="display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid rgba(59,130,246,.42);border-radius:10px;background:rgba(59,130,246,.08);color:var(--fg);font-size:12px"><i class="ti ti-loader-2 spin" style="font-size:18px;color:#3b82f6"></i><span><b>Consultando recebimentos e saldos…</b><br><span style="color:var(--muted)">'+ultima+'</span></span><span style="margin-left:auto;color:#3b82f6;font-weight:800">EM ANDAMENTO</span></div>';return;}
+  if(!_antShelfLifeAtualizado){el.innerHTML='<div style="padding:10px 12px;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px">A consulta ainda não foi iniciada.</div>';return;}
   var total=Number(quantidade)||0;
-  el.innerHTML=total?'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(239,68,68,.35);border-radius:10px;background:rgba(239,68,68,.07);color:var(--fg);font-size:12px"><span style="font-size:17px">⚠️</span><span><b>'+total+' lote'+(total===1?'':'s')+' com shelf life em potencial</b> — vida útil restante atual abaixo de 80%, com saldo. Planeje o encarte antes do vencimento.</span><button class="btn btn-sm" style="margin-left:auto" onclick="antCarregarShelfLife_(true)"><i class="ti ti-refresh"></i> Atualizar</button></div>':'<div style="padding:9px 12px;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px">Nenhum lote de shelf life em potencial com saldo atual.</div>';
+  var hora=new Date(_antShelfLifeAtualizado).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  el.innerHTML=total?'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(239,68,68,.35);border-radius:10px;background:rgba(239,68,68,.07);color:var(--fg);font-size:12px"><span style="font-size:17px">⚠️</span><span><b>Consulta concluída às '+hora+' · '+total+' lote'+(total===1?'':'s')+' elegível(is)</b><br>Vida útil restante atual abaixo de 80%, com saldo. Planeje o encarte antes do vencimento.</span></div>':'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(22,163,74,.35);border-radius:10px;background:rgba(22,163,74,.07);color:var(--fg);font-size:12px"><i class="ti ti-circle-check" style="font-size:18px;color:#16a34a"></i><span><b>Consulta concluída às '+hora+' · 0 lotes elegíveis</b><br>O AURA respondeu. Não encontrou lotes de NF-e com saldo ativo abaixo de 80% da vida útil restante.</span></div>';
 }
 function antCarregarShelfLife_(forcar) {
   var agora=Date.now();
   if(_antShelfLifeCarregando)return;
-  if(!forcar&&_antShelfLifeAtualizado&&agora-_antShelfLifeAtualizado<45000)return;
-  _antShelfLifeCarregando=true;_antShelfLifeErro='';antShelfAtualizarAviso_(0);
+  if(!forcar&&Math.max(_antShelfLifeAtualizado,_antShelfLifeTentativaEm)&&agora-Math.max(_antShelfLifeAtualizado,_antShelfLifeTentativaEm)<45000)return;
+  _antShelfLifeTentativaEm=agora;
+  _antShelfLifeCarregando=true;_antShelfLifeErro='';antShelfAtualizarBotao_();antShelfAtualizarAviso_(_antShelfLifeDados.length);
   nfePost_({action:'nfeAntecipacaoShelfLife'}).then(function(r){
     if(!r||!r.ok)throw new Error((r&&r.erro)||'Falha ao consultar os recebimentos.');
-    _antShelfLifeDados=Array.isArray(r.itens)?r.itens:[];
+    if(!Array.isArray(r.itens))throw new Error('O servidor respondeu, mas não enviou a lista de lotes.');
+    _antShelfLifeDados=r.itens;
     _antShelfLifeAtualizado=Date.now();
   }).catch(function(e){_antShelfLifeErro=String(e&&e.message||e||'Erro de conexão.');}).finally(function(){
     _antShelfLifeCarregando=false;
+    antShelfAtualizarBotao_();
     var sec=document.getElementById('sec-antecipacao');
     if(sec&&getComputedStyle(sec).display!=='none')renderAntecipacao();
   });
@@ -15382,7 +15395,7 @@ function renderAntecipacao() {
     return true;
   });
   var container=document.getElementById('antShelfCards');if(!container)return;
-  if(!filtrados.length){container.innerHTML='<div style="padding:34px 18px;text-align:center;border:1px dashed var(--bds);border-radius:14px;color:var(--muted);background:var(--surface)"><i class="ti ti-calendar-check" style="font-size:28px;color:var(--green)"></i><div style="font-size:14px;font-weight:800;color:var(--fg);margin:8px 0 4px">'+(todos.length?'Nenhum lote corresponde a este filtro.':'Nenhum lote de NF-e com saldo ativo abaixo de 80% da vida útil restante.')+'</div><div style="font-size:12px">'+(todos.length?'Troque o filtro ou ajuste a busca.':'O lote aparecerá automaticamente quando a vida útil restante calculada cair abaixo de 80%.')+'</div></div>';return;}
+  if(!filtrados.length){var carregandoInicial=_antShelfLifeCarregando&&!_antShelfLifeAtualizado,erroSemDados=!!_antShelfLifeErro&&!_antShelfLifeAtualizado;container.innerHTML='<div style="padding:34px 18px;text-align:center;border:1px dashed var(--bds);border-radius:14px;color:var(--muted);background:var(--surface)"><i class="ti '+(carregandoInicial?'ti-loader-2 spin':erroSemDados?'ti-wifi-off':'ti-calendar-check')+'" style="font-size:28px;color:'+(carregandoInicial?'#3b82f6':erroSemDados?'#ef4444':'var(--green)')+'"></i><div style="font-size:14px;font-weight:800;color:var(--fg);margin:8px 0 4px">'+(carregandoInicial?'Consultando os recebimentos e o saldo atual…':erroSemDados?'A consulta não foi concluída.':todos.length?'Nenhum lote corresponde a este filtro.':'Nenhum lote de NF-e com saldo ativo abaixo de 80% da vida útil restante.')+'</div><div style="font-size:12px">'+(carregandoInicial?'Aguarde a resposta do Code.gs.':erroSemDados?'Veja o motivo acima e tente novamente.':todos.length?'Troque o filtro ou ajuste a busca.':'O lote aparecerá automaticamente quando a vida útil restante calculada cair abaixo de 80%.')+'</div></div>';return;}
   var grupos={};
   filtrados.forEach(function(x){var f=antShelfFaixa_(x);if(!grupos[f.key])grupos[f.key]={faixa:f,itens:[]};grupos[f.key].itens.push(x);});
   var keys=Object.keys(grupos).sort(function(a,b){
