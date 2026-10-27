@@ -1275,40 +1275,10 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
   .dash-section-title { font-size: 11px !important; }
   .dash-section-sub { font-size: 9px !important; margin-top: 1px !important; }
 
-  /* Antecipação - Filtros mobile */
-  #sec-antecipacao > div:nth-child(2) { padding: 10px 12px !important; }
-  #sec-antecipacao > div:nth-child(2) > div:first-child { flex-direction: column; align-items: flex-start !important; gap: 6px !important; margin-bottom: 8px !important; }
-  #antFiltrosBody > div:nth-child(1),
-  #antFiltrosBody > div:nth-child(2) { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-  #antFiltrosBody > div:nth-child(2) > div:nth-child(5) { grid-column: 1 / -1 !important; }
-  #sec-antecipacao input[type="text"],
-  #sec-antecipacao input[type="number"],
-  #sec-antecipacao input[type="date"],
-  #sec-antecipacao select { font-size: 14px !important; padding: 10px !important; }
-  #sec-antecipacao label { font-size: 11px !important; margin-bottom: 6px !important; }
-  #sec-antecipacao .btn-sm { padding: 8px 12px !important; font-size: 12px !important; }
-  #sec-antecipacao [style*="padding:12px"] { padding: 10px !important; }
-  #sec-antecipacao [style*="gap:10px"] { gap: 8px !important; }
-
-  /* Antecipação - Grid de cards do mês: força 2 por linha (o auto-fill com
-     minmax(310px) não cabe 2 colunas em tela de iPhone, ficava 1 por linha) */
-  .ant-mes-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 6px !important; padding: 8px !important; }
-
-  /* Antecipação - Cards de produto mobile — mesmo padrão compacto do Vencidos & Críticos */
-  .ant-prod-card { padding: 6px !important; min-width: 0 !important; }
-  .ant-prod-body { padding-left: 20px !important; padding-right: 26px !important; }
-  .ant-prod-name { font-size: 8px !important; margin-bottom: 4px !important; }
-  .ant-prod-badges { gap: 3px !important; margin-bottom: 4px !important; }
-  .ant-prod-badges span { font-size: 6.5px !important; padding: 1px 4px !important; }
-  .ant-prod-fields { gap: 2px 4px !important; font-size: 6.5px !important; }
-  .ant-prod-fields span { font-size: 5.5px !important; }
-  .ant-prod-fields div div { font-size: 8px !important; }
-  .ant-prod-tags { gap: 2px !important; margin-top: 4px !important; }
-  .ant-prod-tags span { font-size: 5.5px !important; padding: 1px 3px !important; }
-  .ant-prod-forn { font-size: 6px !important; margin-top: 3px !important; }
-  .ant-prod-qtybadge { min-width: 18px !important; height: 18px !important; font-size: 8px !important; padding: 0 5px !important; top: 5px !important; right: 5px !important; }
-  .ant-prod-check { width: 14px !important; height: 14px !important; top: 5px !important; left: 5px !important; }
-  .ant-prod-check svg { width: 9px !important; height: 9px !important; }
+  /* Planejamento de encartes por shelf life */
+  #antShelfResumo { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  #sec-antecipacao input, #sec-antecipacao select { box-sizing:border-box; max-width:100%; }
+  #sec-antecipacao .ant-shelf-tab { padding:7px 9px !important; }
 
   /* Relatório — filtros e tabela */
   #sec-relatorio .filters, #sec-relatorio [style*="display:flex"][style*="gap:8px"] { flex-wrap: wrap !important; }
@@ -2134,9 +2104,12 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 .colab-form{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .colab-field.full{grid-column:1/-1}.colab-field label{display:block;font-size:8px;font-weight:800;text-transform:uppercase;color:var(--tx2);letter-spacing:.05em;margin-bottom:4px}
 .colab-field input{width:100%;box-sizing:border-box;background:var(--bg);color:var(--tx);border:1px solid var(--bds);border-radius:7px;padding:8px 9px;font-size:12px}
+.colab-perm-panel{display:grid;gap:9px;margin-top:5px}.colab-perm-panel section{padding:10px;border:1px solid var(--bd);border-radius:9px;background:var(--bg)}.colab-perm-title{display:block;font-size:10px;margin-bottom:7px;color:var(--tx)}.colab-perm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px}.colab-perm-check{display:flex!important;align-items:flex-start;gap:7px;padding:7px;border:1px solid var(--bd);border-radius:7px;background:var(--surf);cursor:pointer;text-transform:none!important;letter-spacing:0!important;margin:0!important}.colab-perm-check input,.colab-perm-sector input{width:15px!important;height:15px;flex:0 0 auto;margin:1px 0 0;padding:0!important;accent-color:#D4001A}.colab-perm-check b{display:block;font-size:9px;color:var(--tx)}.colab-perm-check small{display:block;font-size:8px;font-weight:500;color:var(--tx2);margin-top:2px}.colab-perm-sector-title{font-size:8px;font-weight:800;text-transform:uppercase;color:var(--tx2);margin:10px 0 5px}.colab-perm-sectors{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:4px}.colab-perm-sector{display:flex!important;align-items:center;gap:5px;padding:5px 6px;border-radius:6px;background:var(--surf);font-size:8px!important;text-transform:none!important;letter-spacing:0!important;margin:0!important}.colab-perm-note{display:block;margin-top:6px;font-size:8px;color:var(--tx2);line-height:1.4}
 .colab-modal-foot{display:flex;justify-content:flex-end;gap:7px;margin-top:13px}
 @media(max-width:900px){.colab-row{grid-template-columns:1fr 1fr}.colab-actions{justify-content:flex-start}}
 @media(max-width:560px){.colab-row,.colab-form,.colab-kpis{grid-template-columns:1fr}}
+body.aura-admin-sem-tarefas #sec-tarefas,body.aura-admin-sem-tarefas #asBadgeTarefas{display:none!important}
+
 
 /* ═══════════════════════════════════════════════════════════════
    BOSS VISION — AÇOUGUE
@@ -2165,6 +2138,12 @@ html.light input, html.light select, html.light textarea { background: #fff !imp
 @media(max-width:850px){.nfe-scan{grid-template-columns:1fr 1fr}.nfe-key{grid-column:1/-1}.nfe-kpis{grid-template-columns:1fr 1fr}.nfe-product-wrap{align-items:flex-start}.nfe-info-list{grid-template-columns:1fr}.nfe-grid2{grid-template-columns:1fr}.nfe-lote{grid-template-columns:minmax(0,1fr) 90px minmax(80px,1fr) 34px}.nfe-validade-cell{flex-wrap:wrap}.nfe-validade-cell .nfe-indeterminada-btn{height:34px;padding:0 7px;font-size:9px}.nfe-toolbar{align-items:stretch}.nfe-field{width:100%}.nfe-field select,.nfe-field input{width:100%}}
 @media(max-width:560px){.nfe-wrap{gap:12px}.nfe-hero{padding:14px}.nfe-title{font-size:16px}.nfe-sub{font-size:11px}.nfe-note-head,.nfe-kpis,.nfe-toolbar,.nfe-items,.nfe-foot{padding-left:12px;padding-right:12px}.nfe-note-name{font-size:15px}.nfe-note-total{font-size:16px}.nfe-kpi b{font-size:20px}.nfe-item-hd,.nfe-item-body{padding:12px}.nfe-item-statusrow{margin-bottom:10px}.nfe-product-wrap{gap:10px}.nfe-thumb{width:108px;height:108px;border-radius:10px}.nfe-item-name{font-size:15px}.nfe-bank-tag{font-size:10px}.nfe-info-line{font-size:11px;padding:7px 8px}.nfe-info-line .lbl{font-size:9px}.nfe-lote{grid-template-columns:minmax(0,1fr) 82px 34px}.nfe-lote .nfe-lote-id{display:none}.nfe-validade-cell{flex-wrap:nowrap}.nfe-validade-cell .nfe-indeterminada-btn{padding:0 6px;font-size:8px}.nfe-field select,.nfe-field input,.nfe-mini-btn,.nfe-lote input,.nfe-lote-del{height:36px}.nfe-item-statusleft{gap:8px}}
 .nfe-setor-note{margin-top:5px;font-size:9px;line-height:1.35;color:#1D9E75;font-weight:700;display:flex;align-items:flex-start;gap:4px}.nfe-setor-note.warn{color:var(--amber,#BA7517)}.nfe-setor-note b{font-weight:900}
+.nfe-financial{margin:0 0 12px;padding:12px;border:1px solid rgba(29,158,117,.28);border-radius:12px;background:linear-gradient(135deg,rgba(29,158,117,.055),var(--bg))}.nfe-fin-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px}.nfe-fin-head b{font-size:12px;color:var(--tx)}.nfe-fin-head b i{color:var(--green);margin-right:4px}.nfe-fin-head span{font-size:9px;color:var(--tx2)}.nfe-fin-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.nfe-fin-summary>div{padding:8px;border:1px solid var(--bd);border-radius:9px;background:var(--bg)}.nfe-fin-summary small{display:block;font-size:9px;color:var(--tx2);text-transform:uppercase;font-weight:800;line-height:1.3}.nfe-fin-summary b{display:block;font-size:14px;color:var(--tx);margin:4px 0 2px;overflow-wrap:anywhere}.nfe-fin-summary span{display:block;font-size:9px;color:var(--tx2);line-height:1.3}.nfe-fin-summary .nfe-fin-green{color:var(--green)}.nfe-fin-message{margin-top:7px;padding:7px 9px;border-radius:8px;background:rgba(29,158,117,.09);font-size:10px;line-height:1.4;color:var(--tx)}.nfe-fin-message b{color:var(--green);margin-right:3px}.nfe-fin-variance{margin-top:6px;font-size:10px;color:var(--tx2)}.nfe-fin-details{margin-top:8px;border-top:1px solid var(--bd);padding-top:7px}.nfe-fin-details summary{font-size:10px;font-weight:800;color:var(--tx2);cursor:pointer}.nfe-fin-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:7px 0;font-size:10px;color:var(--tx2)}.nfe-fin-detail-grid b{color:var(--tx)}.nfe-fin-tags,.nfe-fin-tax-list{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}.nfe-fin-tags span,.nfe-fin-tax-list span{padding:4px 7px;border-radius:999px;background:var(--bg2);border:1px solid var(--bd);font-size:9px;color:var(--tx);font-weight:700}.nfe-fin-note{margin-top:6px;font-size:9px;line-height:1.4;color:var(--tx2)}
+.nfe-tax-note{padding:9px 18px;border-bottom:1px solid var(--bd);background:rgba(55,138,221,.04)}.nfe-tax-note>b{font-size:10px;color:var(--tx2)}.nfe-tax-note>b i{color:#378ADD;margin-right:4px}.nfe-tax-note>div{display:flex;gap:5px;flex-wrap:wrap;margin:5px 0}.nfe-tax-note>div span{padding:4px 7px;border-radius:999px;border:1px solid var(--bd);background:var(--bg2);font-size:9px;color:var(--tx);font-weight:750}.nfe-tax-note small{font-size:9px;color:var(--tx2)}
+@media(max-width:560px){.nfe-tax-note{padding:8px 12px}}
+@media(max-width:1100px){.nfe-fin-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.nfe-financial{padding:9px}.nfe-fin-summary{gap:5px}.nfe-fin-summary>div{padding:7px}.nfe-fin-summary small{font-size:8px}.nfe-fin-summary b{font-size:12px}.nfe-fin-detail-grid{grid-template-columns:1fr}}
+
 
 .nfe-conv-box.pendente{border-color:rgba(239,159,39,.75);background:rgba(239,159,39,.10)}
 .nfe-conv-box.decidida{border-color:rgba(29,158,117,.55);background:rgba(29,158,117,.06)}
@@ -2954,6 +2933,7 @@ function tentarLogin() {
     if (_USUARIOS[usuario] && _USUARIOS[usuario] === hash) {
       try { sessionStorage.setItem(_SESSAO_KEY, JSON.stringify({ usuario: usuario, ts: Date.now() })); } catch(e) {}
       document.getElementById('loginScreen').className = 'hidden';
+      try{if(typeof auraAtualizarAcessoTarefas_==='function')auraAtualizarAcessoTarefas_();}catch(ePerm){}
       document.getElementById('loginSenha').value = '';
     } else {
       erro.textContent = 'Usuário ou senha incorretos.';
@@ -2979,6 +2959,7 @@ function tentarLogin() {
     if (s) {
       var dados = JSON.parse(s);
       if (dados && dados.ts && (Date.now() - dados.ts) < 8 * 3600 * 1000) {
+        _usuarioSelecionado = String(dados.usuario||'').toLowerCase();
         document.getElementById('loginScreen').className = 'hidden';
         return;
       }
@@ -3049,7 +3030,6 @@ function tentarLogin() {
     <button onclick="auraNav(this,'antecipacao')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <span>Antecipação Encarte</span>
-      <span class="sb-nav-badge" id="asBadgeAnt" style="display:none">0</span>
     </button>
     <button onclick="auraNav(this,'cobertura')">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
@@ -3137,13 +3117,6 @@ function toggleTheme() {
     var promoCount = pg ? pg.querySelectorAll('.ecard,.promo-card').length : 0;
     if (pb) { if (promoCount>0){ pb.textContent=promoCount; pb.style.display='inline-flex'; } else { pb.style.display='none'; } }
     if (eb && origEnc) { eb.textContent=origEnc.textContent; eb.style.display=origEnc.style.display==='none'?'none':'inline-flex'; }
-    // Sync badge Antecipação
-    try {
-      var antSel = JSON.parse(localStorage.getItem('aura_ant_sel') || '{}');
-      var antCount = Object.keys(antSel).length;
-      var ab = document.getElementById('asBadgeAnt');
-      if (ab) { if (antCount>0){ ab.textContent=antCount; ab.style.display='inline-flex'; } else { ab.style.display='none'; } }
-    } catch(e){}
     // Sync bar
     // (removido: linha antiga apagava os filhos de #auraSyncBar via textContent,
     // destruindo #dot e #stText e quebrando o sync)
@@ -3291,127 +3264,37 @@ function toggleTheme() {
     </div>
   </div>
   <div id="sec-antecipacao" class="sec">
-    <!-- Header -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px">
       <div>
-        <div style="font-size:15px;font-weight:700;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-clock-hour-4" style="color:var(--amber)"></i> Antecipação de Produtos para Encarte</div>
-        <p style="font-size:12px;color:var(--tx2)">Identifique produtos com potencial de venda antes de virarem ação de queima rápida. Selecione os que farão parte do próximo encarte.</p>
+        <div style="font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px"><i class="ti ti-calendar-event" style="color:#ef4444"></i> Planejamento de Encartes · Shelf Life</div>
+        <div style="font-size:12px;color:var(--tx2);margin-top:4px;max-width:760px">Lotes de NF-e recebidos com menos de 80% da vida útil restante e saldo disponível. Organize a entrada por semana ou por mês antes que o vencimento se aproxime.</div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn" onclick="antLimparSelecao()"><i class="ti ti-x"></i> Limpar seleção</button>
-        <button class="btn btn-green" onclick="abrirRelatorioAntecipacao()"><i class="ti ti-file-text"></i> Gerar PDF Encarte</button>
+      <button class="btn" onclick="antCarregarShelfLife_(true)"><i class="ti ti-refresh"></i> Atualizar recebimentos</button>
+    </div>
+
+    <div id="antShelfNotice" style="margin:0 0 12px"></div>
+    <div id="antShelfResumo" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:14px"></div>
+
+    <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin:0 0 12px">
+      <button class="btn btn-sm ant-shelf-tab active" data-filtro="TODOS" onclick="antShelfDefinirFiltro_('TODOS',this)">Todos</button>
+      <button class="btn btn-sm ant-shelf-tab" data-filtro="SEM_PROGRAMACAO" onclick="antShelfDefinirFiltro_('SEM_PROGRAMACAO',this)">Sem programação</button>
+      <button class="btn btn-sm ant-shelf-tab" data-filtro="SEMANA" onclick="antShelfDefinirFiltro_('SEMANA',this)">Por semana</button>
+      <button class="btn btn-sm ant-shelf-tab" data-filtro="MES" onclick="antShelfDefinirFiltro_('MES',this)">Por mês</button>
+      <div style="flex:1"></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <select id="antShelfSetor" onchange="renderAntecipacao()" style="min-width:145px;font-size:12px;padding:7px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg)">
+          <option value="">Todos os setores</option><option>Açougue</option><option>Bazar</option><option>Bebidas</option><option>Congelados</option><option>Frios</option><option>Horti</option><option>Laticínios</option><option>Limpeza</option><option>Outros</option><option>Padaria</option><option>Perfumaria</option><option>Pet</option><option>Pilhas/Baterias</option><option>Seca</option><option>Seca doce</option>
+        </select>
+        <input id="antShelfBusca" type="search" placeholder="Buscar produto, EAN ou fornecedor" oninput="renderAntecipacao()" style="min-width:230px;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg)">
+        <select id="antShelfUrgencia" onchange="renderAntecipacao()" style="font-size:12px;padding:7px 9px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg)">
+          <option value="">Qualquer vencimento</option><option value="7">Vence em até 7 dias</option><option value="15">Vence em até 15 dias</option><option value="30">Vence em até 30 dias</option>
+        </select>
       </div>
     </div>
 
-    <!-- Filtros -->
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:0;flex-wrap:wrap">
-        <div id="antFiltrosToggle" onclick="antToggleFiltros()" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
-          <i class="ti ti-filter" style="color:var(--muted);font-size:14px"></i>
-          <span style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">Filtros de busca</span>
-          <i id="antFiltrosChevron" class="ti ti-chevron-down" style="color:var(--muted);font-size:14px;transition:transform .15s"></i>
-        </div>
-        <div style="flex:1"></div>
-        <div id="antSelCount" style="font-size:12px;font-weight:600;color:var(--green);white-space:nowrap">0 selecionado(s)</div>
-        <button class="btn btn-sm" onclick="antLimparFiltros()"><i class="ti ti-eraser"></i> Limpar filtros</button>
-      </div>
-
-      <div id="antFiltrosBody" style="display:none;margin-top:10px">
-
-      <!-- Linha 1: Setor + Busca produto + Validade De/Até -->
-      <div style="display:grid;grid-template-columns:minmax(140px,180px) 1fr minmax(120px,150px) minmax(120px,150px);gap:10px;align-items:end;margin-bottom:10px">
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Setor</label>
-          <select id="antFiltroSetor" onchange="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-            <option value="">Todos os setores</option>
-<option>Açougue</option>
-<option>Bazar</option>
-<option>Bebidas</option>
-<option>Congelados</option>
-<option>Frios</option>
-<option>Horti</option>
-<option>Laticínios</option>
-<option>Limpeza</option>
-<option>Outros</option>
-<option>Padaria</option>
-<option>Perfumaria</option>
-<option>Pet</option>
-<option>Pilhas/Baterias</option>
-<option>Seca</option>
-<option>Seca doce</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Buscar produto</label>
-          <div style="position:relative">
-            <input type="text" id="antFiltroBusca" placeholder="Digite nome ou código..." oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 34px 7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none;box-sizing:border-box">
-            <button type="button" onclick="abrirScannerAura('antFiltroBusca')" title="Buscar por código de barras (câmera)" style="position:absolute;right:4px;top:50%;transform:translateY(-50%);width:26px;height:26px;background:transparent;border:none;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center"><i class="ti ti-barcode"></i></button>
-          </div>
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Validade de</label>
-          <input type="date" id="antFiltroDataDe" onchange="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Validade até</label>
-          <input type="date" id="antFiltroDataAte" onchange="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-        </div>
-      </div>
-
-      <!-- Linha 2: Qtde mín + Preço mín + Preço máx + Fornecedor + Mes seletor -->
-      <div style="display:grid;grid-template-columns:minmax(100px,130px) minmax(100px,130px) minmax(100px,130px) 1fr minmax(160px,220px);gap:10px;align-items:end">
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Qtde mínima</label>
-          <input type="number" id="antFiltroMinQtde" placeholder="Ex: 3" min="0" oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Preço mín (R$)</label>
-          <input type="number" id="antFiltroPrecoMin" placeholder="Ex: 10,00" min="0" step="0.01" oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Preço máx (R$)</label>
-          <input type="number" id="antFiltroPrecoMax" placeholder="Ex: 50,00" min="0" step="0.01" oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Fornecedor</label>
-          <input type="text" id="antFiltroForn" placeholder="Digite o fornecedor..." oninput="renderAntecipacao()" style="width:100%;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px">Selecionar mês inteiro</label>
-          <div style="display:flex;gap:6px;align-items:center">
-            <select id="antFiltroMesSel" style="flex:1;font-size:12px;padding:7px 10px;border:1px solid var(--bds);border-radius:var(--r);background:var(--surface);color:var(--fg);outline:none">
-              <option value="">-- Selecione o mês --</option>
-            </select>
-            <button class="btn btn-sm" onclick="antSelecionarMes()" title="Marcar todos deste mês" style="white-space:nowrap"><i class="ti ti-checks"></i> Marcar</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Linha 3: Atalhos rápidos de data -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);align-items:center">
-        <span style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-right:4px">Atalhos:</span>
-        <button class="btn btn-sm" onclick="antAtalhoData('mesAtual')">Este mês</button>
-        <button class="btn btn-sm" onclick="antAtalhoData('proximoMes')">Próximo mês</button>
-        <button class="btn btn-sm" onclick="antAtalhoData('julho')">Julho 2026</button>
-        <button class="btn btn-sm" onclick="antAtalhoData('agosto')">Agosto 2026</button>
-        <button class="btn btn-sm" onclick="antAtalhoData('setembro')">Setembro 2026</button>
-        <button class="btn btn-sm" onclick="antAtalhoData('30d')">Próx. 30 dias</button>
-        <button class="btn btn-sm" onclick="antAtalhoData('60d')">Próx. 60 dias</button>
-        <button class="btn btn-sm" onclick="antAtalhoData('90d')">Próx. 90 dias</button>
-      </div>
-
-      </div>
-    </div>
-
-    <!-- Cards por mês -->
-    <div id="antMesesContainer"></div>
+    <div id="antShelfCards"></div>
   </div>
 
-
-
-  <!-- ═══════════════════════════════════════════════════════
-       COBERTURA FORNECEDOR
-       ═══════════════════════════════════════════════════════ -->
   <div id="sec-cobertura" class="sec">
     <div class="cf-head">
       <div>
@@ -12038,7 +11921,7 @@ function nfeAgendarRascunho_(){
   if(_nfeDraftTimer_)clearTimeout(_nfeDraftTimer_);
   _nfeDraftTimer_=setTimeout(function(){_nfeDraftTimer_=null;nfeSalvarRascunho_();},180);
 }
-function nfeAjustarConversaoLive_(idx,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];if(!it)return;var f=Number(String(v||'').replace(',','.'));if(!(f>0))return;var antiga=Number(it.qtdEstoque||it.qCom||0)||0,nova=(Number(it.qCom)||0)*f;it.fatorConversaoSugerido=f;it.qtdConversaoSugerida=nova;if(it.conversaoDecisao==='converter'){if(Array.isArray(it.lotes)&&it.lotes.length){var soma=it.lotes.reduce(function(a,l){return a+(Number(l.quantidade)||0);},0);if(antiga>0&&soma>0&&Math.abs(soma-antiga)<0.001){var razao=nova/antiga;it.lotes.forEach(function(l){l.quantidade=(Number(l.quantidade)||0)*razao;});}else if(it.lotes.length===1&&(!(Number(it.lotes[0].quantidade)>0)||Math.abs((Number(it.lotes[0].quantidade)||0)-antiga)<0.001))it.lotes[0].quantidade=nova;}it.fatorConversao=f;it.qtdEstoque=nova;}nfeAgendarRascunho_();}
+function nfeAjustarConversaoLive_(idx,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];if(!it)return;var f=Number(String(v||'').replace(',','.'));if(!(f>0))return;var antiga=Number(it.qtdEstoque||it.qCom||0)||0,nova=(Number(it.qCom)||0)*f;it.fatorConversaoSugerido=f;it.qtdConversaoSugerida=nova;if(it.conversaoDecisao==='converter'){if(Array.isArray(it.lotes)&&it.lotes.length){var soma=it.lotes.reduce(function(a,l){return a+(Number(l.quantidade)||0);},0);if(antiga>0&&soma>0&&Math.abs(soma-antiga)<0.001){var razao=nova/antiga;it.lotes.forEach(function(l){l.quantidade=(Number(l.quantidade)||0)*razao;});}else if(it.lotes.length===1&&(!(Number(it.lotes[0].quantidade)>0)||Math.abs((Number(it.lotes[0].quantidade)||0)-antiga)<0.001))it.lotes[0].quantidade=nova;}it.fatorConversao=f;it.qtdEstoque=nova;}nfeAtualizarFinanceiroItemAura_(idx);nfeAgendarRascunho_();}
 window.addEventListener('pagehide',function(){try{nfeAutosaveAgora_();}catch(e){}});
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){try{nfeAutosaveAgora_();}catch(e){}}});
 var NFE_SETORES=['Açougue','Bazar','Bebidas','Congelados','Frios','Horti','Laticínios','Limpeza','Outros','Padaria','Perfumaria','Pet','Pilhas/Baterias','Seca','Seca doce'];
@@ -12099,7 +11982,7 @@ function nfePrepararItens_(nota){
       it.conversaoDecisao='nao_aplicavel';
     }
     if(!Array.isArray(it.lotes)||!it.lotes.length)it.lotes=[{validade:'',quantidade:Number(it.qtdEstoque||it.qCom||0)||0,lote:''}];
-    else it.lotes=it.lotes.map(function(l){return {validade:String(l.validade||''),quantidade:Number(l.quantidade)||0,lote:String(l.lote||'')};});
+    else it.lotes=it.lotes.map(function(l){return {validade:String(l.validade||''),fabricacao:String(l.fabricacao||''),quantidade:Number(l.quantidade)||0,lote:String(l.lote||''),aceitarVidaUtilCurta:l.aceitarVidaUtilCurta===true,acaoVenda:String(l.acaoVenda||''),dataAcao:String(l.dataAcao||'')};});
     if(it.eanAura)it.eanAura=nfeDigitos_(it.eanAura);
   });
 }
@@ -12115,10 +11998,10 @@ async function nfeBuscarChave_(){
     if(!mesma||Number(srv.versao||0)>Number(local.serverVersion||0)){nfeAdotarRascunhoServidorAura_(srv);if(i)i.value=ch;if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}nfeStatus_('ok','Conferência em andamento recuperada do servidor. Você pode continuar no PC de onde o tablet parou.');return;}
   }
   if(mesma){_nfeNota=local.nota;nfePrepararItens_(_nfeNota);nfeRenderNota_();if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}nfeStatus_('ok','Rascunho local restaurado.');return;}
-  nfeStatus_('','Nenhum rascunho encontrado. Localizando XML e confrontando os itens com o Banco AURA...');var r=await nfePost_({action:'nfeBuscarChave',chave:ch});if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}if(!r||!r.ok){if(r&&r.codigo==='XML_NAO_LOCALIZADO')nfeStatus_('warn','XML não localizado. Importe o XML desta nota ou configure a fonte fiscal automática.');else nfeStatus_('err',(r&&r.erro)||'Não foi possível ler a NF-e.');return;}nfeReceberNota_(r.nota);
+  nfeStatus_('','Nenhum rascunho encontrado. Localizando XML e confrontando os itens com o Banco AURA...');var r=await nfePost_({action:'nfeBuscarChave',actor:_usuarioSelecionado,chave:ch});if(b){b.disabled=false;b.innerHTML='<i class="ti ti-search"></i> Ler NF-e';}if(!r||!r.ok){if(r&&r.codigo==='XML_NAO_LOCALIZADO')nfeStatus_('warn','XML não localizado. Importe o XML desta nota ou configure a fonte fiscal automática.');else nfeStatus_('err',(r&&r.erro)||'Não foi possível ler a NF-e.');return;}nfeReceberNota_(r.nota);
 }
-function nfeImportarXml_(inp){var f=inp&&inp.files&&inp.files[0];if(!f)return;nfeStatus_('','Lendo XML '+f.name+'...');var rd=new FileReader();rd.onload=function(){nfePost_({action:'nfeLerXml',xml:String(rd.result||''),salvarDrive:true}).then(function(r){inp.value='';if(!r||!r.ok){nfeStatus_('err',(r&&r.erro)||'XML inválido.');return;}var ch=document.getElementById('nfeChave');if(ch)ch.value=r.nota.chave||'';nfeReceberNota_(r.nota);});};rd.onerror=function(){nfeStatus_('err','Não foi possível ler o arquivo XML.');};rd.readAsText(f);}
-function nfeReceberNota_(nota){_nfeNota=nota||null;if(!_nfeNota)return;nfePrepararItens_(_nfeNota);nfeSalvarRascunho_();nfeStatus_('ok','NF-e '+(_nfeNota.numero||'')+' carregada: '+(_nfeNota.totalEncontrados||0)+' de '+(_nfeNota.totalItens||0)+' itens reconhecidos.');nfeRenderNota_();setTimeout(function(){nfeRenderOperadores_();nfeCarregarFotosPendentes_();},0);}
+function nfeImportarXml_(inp){var f=inp&&inp.files&&inp.files[0];if(!f)return;nfeStatus_('','Lendo XML '+f.name+'...');var rd=new FileReader();rd.onload=function(){nfePost_({action:'nfeLerXml',actor:_usuarioSelecionado,xml:String(rd.result||''),salvarDrive:true}).then(function(r){inp.value='';if(!r||!r.ok){nfeStatus_('err',(r&&r.erro)||'XML inválido.');return;}var ch=document.getElementById('nfeChave');if(ch)ch.value=r.nota.chave||'';nfeReceberNota_(r.nota);});};rd.onerror=function(){nfeStatus_('err','Não foi possível ler o arquivo XML.');};rd.readAsText(f);}
+function nfeReceberNota_(nota){_nfeNota=nota||null;if(!_nfeNota)return;_nfeNota.recebidoEm=_nfeNota.recebidoEm||nfeDataHojeLocalAura_();nfePrepararItens_(_nfeNota);nfeSalvarRascunho_();nfeStatus_('ok','NF-e '+(_nfeNota.numero||'')+' carregada: '+(_nfeNota.totalEncontrados||0)+' de '+(_nfeNota.totalItens||0)+' itens reconhecidos.');nfeRenderNota_();setTimeout(function(){nfeRenderOperadores_();nfeCarregarFotosPendentes_();},0);}
 var _nfeEscudoCatalogoAura_=[];
 var _nfeEscudoCatalogoKeyAura_='';
 var _nfeEscudoCatalogoBusyAura_='';
@@ -12161,8 +12044,44 @@ function nfeSetorNotaHtml_(it){var s=String((it&&it.setor)||(it&&it.setorSugerid
 
 function nfeFmtQtd_(n){n=Number(n)||0;return n.toLocaleString('pt-BR',{maximumFractionDigits:3});}
 function nfeFmtBRL_(n){return (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function nfeDataHojeLocalAura_(){var d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');}
+function nfeVidaUtilInfoAura_(fab,val,rec){function ms(x){var m=String(x||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?Date.UTC(+m[1],+m[2]-1,+m[3]):NaN;}var f=ms(fab),v=ms(val),r=ms(rec);if(!isFinite(f)||!isFinite(v)||!isFinite(r))return {ok:false,missing:true};if(v<=f||r<f||r>v)return {ok:false,invalid:true};return {ok:true,pct:100*(v-r)/(v-f)};}
+function nfeTotaisImpostoNotaHtmlAura_(nota){var t=nota&&nota.impostosNotaXML||{},a=[];[['ICMS',t.icms],['ICMS-ST',t.icmsST],['IPI',t.ipi],['PIS',t.pis],['COFINS',t.cofins],['II',t.ii],['IBS',t.ibs],['CBS',t.cbs],['Tributos aprox.',t.tributosAproximados]].forEach(function(x){if(Number(x[1])>0)a.push('<span>'+x[0]+' '+nfeFmtBRL_(x[1])+'</span>');});if(!a.length)return '';return '<div class="nfe-tax-note"><b><i class="ti ti-receipt-tax"></i> Valores fiscais declarados na NF-e</b><div>'+a.join('')+'</div><small>Referência do XML; o tratamento como custo ou crédito depende do regime fiscal.</small></div>';}
+function nfeSetRecebidoEmAura_(v){if(!_nfeNota)return;_nfeNota.recebidoEm=String(v||'');nfeSalvarRascunho_();nfeRenderNota_();}
+function nfeVidaUtilHtmlAura_(l,idx,li){var d=nfeVidaUtilInfoAura_(l.fabricacao,l.validade,_nfeNota&&_nfeNota.recebidoEm),status=d.ok?(d.pct>=80?'<b style="color:#16794b">Vida restante: '+d.pct.toFixed(1)+'% · dentro da regra de 80%</b>':'<b style="color:#b54708">Vida restante: '+d.pct.toFixed(1)+'% · abaixo de 80%</b>'):(d.invalid?'<b style="color:#b42318">Datas incompatíveis: confira fabricação, recebimento e validade.</b>':'<span>Informe fabricação, validade e recebimento para calcular.</span>');var extra=d.ok&&d.pct<80?'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:5px"><label style="font-size:10px"><input type="checkbox" '+(l.aceitarVidaUtilCurta===true?'checked':'')+' onchange="nfeLoteCampo_('+idx+','+li+',\'aceitarVidaUtilCurta\',this.checked)"> Aceitar exceção e planejar venda</label><select onchange="nfeLoteCampo_('+idx+','+li+',\'acaoVenda\',this.value)"><option value="">Escolher ação…</option><option value="PROMOCAO_IMEDIATA" '+(l.acaoVenda==='PROMOCAO_IMEDIATA'?'selected':'')+'>Promoção imediata</option><option value="EXPOSICAO_PRIORITARIA" '+(l.acaoVenda==='EXPOSICAO_PRIORITARIA'?'selected':'')+'>Exposição prioritária</option><option value="REAVALIAR" '+(l.acaoVenda==='REAVALIAR'?'selected':'')+'>Reavaliar antes da data</option></select><label style="font-size:10px">Data da ação <input type="date" value="'+nfeEsc_(l.dataAcao||(_nfeNota&&_nfeNota.recebidoEm)||'')+'" onchange="nfeLoteCampo_('+idx+','+li+',\'dataAcao\',this.value)"></label></div>':'';return '<div id="nfeVidaAura_'+idx+'_'+li+'" style="grid-column:1/-1;font-size:10px;padding:5px 7px;background:#f7f8fa;border-radius:6px">'+status+extra+'</div>';}
 function nfeItemLotesDefault_(it){var l=Array.isArray(it.lotes)?it.lotes.slice():[];if(!l.length)l=[{validade:'',quantidade:Number(it.qtdEstoque||it.qCom||0)||0,lote:''}];return l;}
 function nfeThumbHtml_(it,idx){if(it&&it.fotoDataUrl)return '<div class="nfe-thumb" id="nfeThumb_'+idx+'"><img src="'+nfeEsc_(it.fotoDataUrl)+'" alt="Produto"></div>';if(it&&it.fotoCarregando)return '<div class="nfe-thumb loading" id="nfeThumb_'+idx+'"><i class="ti ti-loader-2 spin"></i></div>';return '<div class="nfe-thumb" id="nfeThumb_'+idx+'"><i class="ti ti-photo"></i></div>';}
+function nfeUnidadeFinanceiraKeyAura_(v){var u=String(v||'').trim().toUpperCase().replace(/[.\s]/g,'');var m={UND:'UN',UNID:'UN',UNIDADE:'UN',PC:'UN',PCA:'UN',PÇ:'UN',PECA:'UN',KGM:'KG',QUILO:'KG',QUILOGRAMA:'KG',LT:'L',LTR:'L',LITRO:'L',ML:'ML',GR:'G',GRAMA:'G'};return m[u]||u;}
+function nfeFinanceiroDadosAura_(it){
+  var margem=Number(_nfeNota&&_nfeNota.margemAlvoPct);if(!(margem>0&&margem<90))margem=30;
+  var qCom=Number(it.qCom)||0,qRecebida=Number(it.qtdRecebida!==undefined?it.qtdRecebida:it.qCom)||0,qEstoque=Number(it.qtdEstoque!==undefined?it.qtdEstoque:qRecebida)||0;
+  var embalagem=nfeEhEmbalagemFront_(it.uCom),dec=String(it.conversaoDecisao||''),pendConv=embalagem&&dec!=='converter'&&dec!=='nao_converter';
+  var fator=dec==='converter'?(Number(it.fatorConversao||it.fatorConversaoSugerido)||1):1;
+  var unidadeDestino=nfeUnidadeFinanceiraKeyAura_(it.unidadeAura||it.unidadeDestinoSugerida||it.uCom),unidadeNf=embalagem?(dec==='converter'?unidadeDestino:nfeUnidadeFinanceiraKeyAura_(it.uCom)):nfeUnidadeFinanceiraKeyAura_(it.uCom);
+  var unidadesCompativeis=!!unidadeDestino&&!!unidadeNf&&unidadeDestino===unidadeNf;
+  var vProd=Number(it.vProd)||((Number(it.vUnCom)||0)*qCom),xmlBase=Math.max(0,vProd-(Number(it.vDesc)||0)+(Number(it.vFrete)||0)+(Number(it.vSeg)||0)+(Number(it.vOutro)||0)),xmlUnit=(xmlBase>0&&qCom>0&&!pendConv)?xmlBase/(qCom*fator):0;
+  var custoBanco=Number(it.custoBanco)||0,precoAtual=Number(it.precoBanco)||0,custoBase=custoBanco>0?custoBanco:xmlUnit;
+  var origemCusto=custoBanco>0?'Custo gerencial do Banco AURA':(xmlUnit>0?'Referência comercial preliminar do XML':'Sem custo para calcular');
+  var podeCalcular=!pendConv&&unidadesCompativeis&&custoBase>0&&qEstoque>0&&String(it.recebimentoStatus||'RECEBIDO')!=='NAO_RECEBIDO';
+  var precoAlvo=0;if(podeCalcular){var bruto=custoBase/(1-margem/100);precoAlvo=typeof auraPrecoCharm_==='function'?auraPrecoCharm_(bruto,{modo:'seguro',custo:custoBase,margemMinPct:margem}):Math.ceil(bruto*100)/100;}
+  var margemAtual=!pendConv&&unidadesCompativeis&&precoAtual>0&&custoBase>0?(precoAtual-custoBase)/precoAtual*100:null;
+  return {margem:margem,qCom:qCom,qRecebida:qRecebida,qEstoque:qEstoque,vProd:vProd,xmlUnit:xmlUnit,custoBanco:custoBanco,custoBase:custoBase,precoAtual:precoAtual,precoAlvo:precoAlvo,margemAtual:margemAtual,podeCalcular:podeCalcular,pendConv:pendConv,unidadesCompativeis:unidadesCompativeis,origemCusto:origemCusto,custoTotal:podeCalcular?custoBase*qEstoque:0,unidade:it.unidadeAura||it.unidadeDestinoSugerida||it.uCom||'',tributos:it.tributosXML||{}};
+}
+function nfeFinanceiroHtmlAura_(it,idx){
+  var d=nfeFinanceiroDadosAura_(it),t=d.tributos||{},temFiscal=!!(it.cfop||it.ncm||d.vProd||Number(t.icms)||Number(t.icmsST)||Number(t.ipi)||Number(t.pis)||Number(t.cofins)||Number(t.ibs)||Number(t.cbs)||Number(t.impostoSeletivo)||Number(t.totalAproximado));
+  var msg=d.podeCalcular?'<b>Preço sugerido '+nfeFmtBRL_(d.precoAlvo)+'</b><span> Margem bruta gerencial alvo '+d.margem+'% · base: '+nfeEsc_(d.origemCusto)+'.</span>':(d.pendConv?'<b>Defina a conversão da embalagem</b><span> para calcular com a unidade correta.</span>':(!d.unidadesCompativeis?'<b>Unidades incompatíveis</b><span> ('+nfeEsc_(it.uCom||'—')+' na NF e '+nfeEsc_(d.unidade||'—')+' no Banco). Confira o vínculo/conversão.</span>':(!d.custoBase?'<b>Sem custo gerencial ou referência de valor no XML</b><span> — preço não calculado.</span>':'<b>Sem quantidade recebida</b><span> — preço não calculado.</span>')));
+  var precoAtual=d.precoAtual>0?'<div><small>Preço de venda atual</small><b>'+nfeFmtBRL_(d.precoAtual)+'</b><span>'+(d.margemAtual===null?'':('Margem gerencial '+d.margemAtual.toFixed(1)+'%'))+'</span></div>':'<div><small>Preço de venda atual</small><b>Não cadastrado</b><span>Confira no Banco AURA</span></div>';
+  var preco=d.podeCalcular?'<div><small>Preço de trabalho sugerido</small><b class="nfe-fin-green">'+nfeFmtBRL_(d.precoAlvo)+'</b><span>'+nfeEsc_(d.unidade)+' · alvo '+d.margem+'%, antes de tributos/despesas da venda</span></div>':'<div><small>Preço de trabalho sugerido</small><b>—</b><span>Ajuste os dados indicados</span></div>';
+  var custo=d.custoBase>0?'<div><small>Custo unitário usado</small><b>'+nfeFmtBRL_(d.custoBase)+'</b><span>'+nfeEsc_(d.origemCusto)+'</span></div>':'<div><small>Custo unitário</small><b>—</b><span>Atualize o banco ou confira o XML</span></div>';
+  var recebido='<div><small>Custo total recebido</small><b>'+(d.podeCalcular?nfeFmtBRL_(d.custoTotal):'—')+'</b><span>'+nfeFmtQtd_(d.qEstoque)+' '+nfeEsc_(d.unidade||'un.')+' × custo unitário</span></div>';
+  var alerta='';if(d.custoBanco>0&&d.xmlUnit>0){var dif=(d.xmlUnit-d.custoBanco)/d.custoBanco*100;alerta='<div class="nfe-fin-variance">NF-e (vProd/qtd): '+nfeFmtBRL_(d.xmlUnit)+' por '+nfeEsc_(d.unidade||'un.')+' · variação contra custo gerencial '+(dif>0?'+':'')+dif.toFixed(1)+'%'+(Math.abs(dif)>10?' · confira a diferença':'')+'</div>';}
+  var fiscais='<div class="nfe-fin-tags">'+(it.cfop?'<span>CFOP '+nfeEsc_(it.cfop)+'</span>':'')+(it.ncm?'<span>NCM '+nfeEsc_(it.ncm)+'</span>':'')+(it.cProd?'<span>Cód. fornecedor '+nfeEsc_(it.cProd)+'</span>':'')+'</div>';
+  var impostos=[];[['ICMS',t.icms],['ICMS-ST',t.icmsST],['IPI',t.ipi],['PIS',t.pis],['COFINS',t.cofins],['II',t.ii],['IBS',t.ibs],['IBS UF',t.ibsUf],['IBS municipal',t.ibsMunicipal],['CBS',t.cbs],['IS',t.impostoSeletivo],['FCP',t.fcp],['Tributos aprox.',t.totalAproximado]].forEach(function(x){if(Number(x[1])>0)impostos.push('<span>'+x[0]+' '+nfeFmtBRL_(x[1])+'</span>');});
+  var xmlFiscal=temFiscal?'<details class="nfe-fin-details"><summary>Ver valores do XML, CFOP, NCM e tributos</summary><div class="nfe-fin-detail-grid"><span>Valor bruto do item (vProd): <b>'+nfeFmtBRL_(d.vProd)+'</b></span><span>Unitário comercial (vUnCom): <b>'+nfeFmtBRL_(it.vUnCom)+'</b></span><span>Desconto do item: <b>'+nfeFmtBRL_(it.vDesc)+'</b></span><span>Frete, seguro e outras despesas: <b>'+nfeFmtBRL_((Number(it.vFrete)||0)+(Number(it.vSeg)||0)+(Number(it.vOutro)||0))+'</b></span></div>'+fiscais+(impostos.length?'<div class="nfe-fin-tax-list">'+impostos.join('')+'</div>':'<div class="nfe-fin-note">O XML não informou valores de tributos destacados para este item.</div>')+'<div class="nfe-fin-note">Valores fiscais declarados na NF-e. Eles não indicam automaticamente imposto recuperável nem imposto efetivamente suportado pela loja. A sugestão usa o custo gerencial ou, quando ausente, uma referência preliminar do vProd. Não inclui regime tributário, créditos nem tributos da venda.</div></details>':'';
+  return '<section id="nfeFinanceiro_'+idx+'" class="nfe-financial"><div class="nfe-fin-head"><b><i class="ti ti-chart-dots-3"></i> Análise de compra e preço</b><span>Estimativa gerencial · decisão do gestor</span></div><div class="nfe-fin-summary">'+preco+custo+precoAtual+recebido+'</div><div class="nfe-fin-message">'+msg+'</div>'+alerta+xmlFiscal+'</section>';
+}
+function nfeAtualizarFinanceiroItemAura_(idx){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx],el=document.getElementById('nfeFinanceiro_'+idx);if(it&&el)el.outerHTML=nfeFinanceiroHtmlAura_(it,idx);}
+function nfeSetMargemAlvoAura_(v){var m=Number(String(v||'').replace(',','.'));if(!(m>0&&m<90)){mostrarToast('Informe uma margem alvo entre 1% e 89%.','warn');return;}if(!_nfeNota)return;_nfeNota.margemAlvoPct=m;nfeSalvarRascunho_();(_nfeNota.itens||[]).forEach(function(it,idx){nfeAtualizarFinanceiroItemAura_(idx);});}
 function nfeItemHtml_(it,idx){
   var ok=it.status==='encontrado'&&it.eanAura,aguardando=it.status==='aguardando_cadastro'&&it.eanAura;
   var qtd=Number(it.qtdEstoque||it.qCom||0)||0;
@@ -12182,16 +12101,16 @@ function nfeItemHtml_(it,idx){
       +'<div class="nfe-conv-decision">'+(decisao==='converter'?('Escolhido: <b>'+nfeFmtQtd_(it.qtdEstoque)+' '+nfeEsc_(it.unidadeAura||unDestino)+'</b>.'):(decisao==='nao_converter'?('Escolhido: manter a quantidade numérica da NF-e: <b>'+nfeFmtQtd_(it.qCom)+' '+nfeEsc_(unDestino)+'</b>.'):'<b>Escolha uma das opções antes de gravar.</b>'))+'</div>'
       +'<div class="nfe-conv-note">'+origemTxt+' A conversão nunca será aplicada silenciosamente.</div></div>';
   }
-  var lotes=it.validadeIndeterminada===true&&it.conferenciaSemValidade===true?'<div class="nfe-sem-validade"><i class="ti ti-infinity"></i> VALIDADE INDETERMINADA · ITEM CONFERIDO · sem lote de validade</div>':nfeItemLotesDefault_(it).map(function(l,li){return '<div class="nfe-lote"><div class="nfe-validade-cell"><input type="date" class="nfe-lot-val" value="'+nfeEsc_(l.validade||'')+'" oninput="nfeLoteCampo_('+idx+','+li+',\'validade\',this.value)" onchange="nfeLoteCampo_('+idx+','+li+',\'validade\',this.value)">'+(li===0?'<button type=\'button\' class=\'nfe-indeterminada-btn\' onclick=\'nfeDefinirValidadeIndeterminada_('+idx+')\' title=\'Concluir sem criar lote de validade\'><i class=\'ti ti-infinity\'></i> Validade indeterminada</button>':'')+'</div><input type="number" step="0.001" min="0" class="nfe-lot-qtd" value="'+nfeEsc_(l.quantidade||'')+'" oninput="nfeLoteCampo_('+idx+','+li+',\'quantidade\',this.value)" onchange="nfeLoteCampo_('+idx+','+li+',\'quantidade\',this.value)" placeholder="Qtd"><input class="nfe-lote-id" value="'+nfeEsc_(l.lote||'')+'" oninput="nfeLoteCampo_('+idx+','+li+',\'lote\',this.value)" onchange="nfeLoteCampo_('+idx+','+li+',\'lote\',this.value)" placeholder="Lote (opcional)"><button class="nfe-lote-del" onclick="nfeRemoverLote_('+idx+','+li+')"><i class="ti ti-x"></i></button></div>';}).join('');
+  var lotes=it.validadeIndeterminada===true&&it.conferenciaSemValidade===true?'<div class="nfe-sem-validade"><i class="ti ti-infinity"></i> VALIDADE INDETERMINADA · ITEM CONFERIDO · sem lote de validade</div>':nfeItemLotesDefault_(it).map(function(l,li){return '<div class="nfe-lote"><div class="nfe-validade-cell"><input type="date" class="nfe-lot-val" value="'+nfeEsc_(l.validade||'')+'" oninput="nfeLoteCampo_('+idx+','+li+',\'validade\',this.value)" onchange="nfeLoteCampo_('+idx+','+li+',\'validade\',this.value)">'+(li===0?'<button type=\'button\' class=\'nfe-indeterminada-btn\' onclick=\'nfeDefinirValidadeIndeterminada_('+idx+')\' title=\'Concluir sem criar lote de validade\'><i class=\'ti ti-infinity\'></i> Validade indeterminada</button>':'')+'</div><input type="number" step="0.001" min="0" class="nfe-lot-qtd" value="'+nfeEsc_(l.quantidade||'')+'" oninput="nfeLoteCampo_('+idx+','+li+',\'quantidade\',this.value)" onchange="nfeLoteCampo_('+idx+','+li+',\'quantidade\',this.value)" placeholder="Qtd"><input class="nfe-lote-id" value="'+nfeEsc_(l.lote||'')+'" oninput="nfeLoteCampo_('+idx+','+li+',\'lote\',this.value)" onchange="nfeLoteCampo_('+idx+','+li+',\'lote\',this.value)" placeholder="Lote (opcional)"><button class="nfe-lote-del" onclick="nfeRemoverLote_('+idx+','+li+')"><i class="ti ti-x"></i></button></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:4px 0"><label style="font-size:10px">Fabricação <input type="date" class="nfe-lot-fab" value="'+nfeEsc_(l.fabricacao||'')+'" onchange="nfeLoteCampo_('+idx+','+li+',\'fabricacao\',this.value)"></label></div>'+nfeVidaUtilHtmlAura_(l,idx,li);}).join('');
   var infoNF=(nomeAURA&&nomeNF&&nomeAURA!==nomeNF)?('<div class="nfe-info-line"><span class="lbl">Descrição na NF-e</span>'+nfeEsc_(nomeNF)+'</div>'):'';
   return '<div class="nfe-item '+(it.controlar===false?'off':'')+'" id="nfeItem_'+idx+'"><div class="nfe-item-hd">'
     +'<div class="nfe-item-statusrow"><div class="nfe-item-statusleft"><input class="nfe-check" type="checkbox" '+(it.controlar===false?'':'checked')+' id="nfeControlar_'+idx+'" onchange="nfeToggleItem_('+idx+',this.checked)"><span class="nfe-item-status-label">Controlar validade</span></div><span class="nfe-badge '+(ok?'ok':(aguardando?'wait':'err'))+'">'+(ok?'Vinculado':(aguardando?'Aguarda Telecon':'EAN / cadastro'))+'</span></div>'
     +'<div class="nfe-product-wrap">'+nfeThumbHtml_(it,idx)+'<div class="nfe-item-main"><div class="nfe-item-name">'+nfeEsc_(nomeExibir)+'</div>'
     +(nomeAURA?'<div class="nfe-bank-tag"><i class="ti ti-database"></i> Banco AURA / Telecon</div>':(aguardando?'<div class="nfe-bank-tag" style="color:#B76E00"><i class="ti ti-hourglass"></i> Produto novo · será gravado agora e vinculado depois</div>':''))
     +'<div class="nfe-info-list">'+infoNF+'<div class="nfe-info-line"><span class="lbl">Código do fornecedor</span>'+nfeEsc_(it.cProd||'—')+'</div><div class="nfe-info-line"><span class="lbl">Recebido na NF</span><b>'+nfeFmtQtd_(it.qCom)+' '+nfeEsc_(it.uCom||'')+'</b></div><div class="nfe-info-line"><span class="lbl">Quantidade que será gravada</span><b>'+nfeFmtQtd_(qtd)+' '+nfeEsc_(it.unidadeAura||unDestino||'')+'</b></div><div class="nfe-info-line"><span class="lbl">EAN</span>'+(it.eanAura?'<b>'+nfeEsc_(it.eanAura)+'</b>':'Informe o código de barras')+'</div></div></div></div></div>'
-    +'<div class="nfe-item-body"><div class="nfe-pending-inline" id="nfePendencia_'+idx+'"></div>'+convHtml+'<div class="nfe-grid2" style="margin-bottom:9px"><div class="nfe-field"><label>Recebimento</label><select id="nfeRecebimento_'+idx+'" onchange="nfeSetRecebimento_('+idx+',this.value)"><option value="RECEBIDO" '+((it.recebimentoStatus||'RECEBIDO')==='RECEBIDO'?'selected':'')+'>Recebido integral</option><option value="PARCIAL" '+(it.recebimentoStatus==='PARCIAL'?'selected':'')+'>Recebimento parcial</option><option value="NAO_RECEBIDO" '+(it.recebimentoStatus==='NAO_RECEBIDO'?'selected':'')+'>Item faltante / não recebido</option></select></div><div class="nfe-field"><label>Quantidade recebida ('+nfeEsc_(it.uCom||'un')+')</label><input id="nfeQtdRecebida_'+idx+'" type="number" min="0" step="any" value="'+(it.qtdRecebida!==undefined?it.qtdRecebida:it.qCom)+'" oninput="nfeQtdRecebidaAlterar_('+idx+',this.value)"></div></div>'+((it.recebimentoStatus==='PARCIAL'||it.recebimentoStatus==='NAO_RECEBIDO')?'<div class="nfe-field" style="margin-bottom:9px"><label>Motivo / observação</label><input id="nfeMotivoRecebimento_'+idx+'" value="'+nfeEsc_(it.motivoDivergencia||'')+'" placeholder="Ex.: entrega incompleta" oninput="_nfeNota.itens['+idx+'].motivoDivergencia=this.value;nfeAgendarRascunho_()"></div>':'')+'<div class="nfe-grid2"><div class="nfe-field"><label>EAN / código de barras</label><div class="nfe-ean-row"><div class="nfe-ean-search-wrap"><input id="nfeEan_'+idx+'" type="text" inputmode="numeric" autocomplete="off" value="'+nfeEsc_(it._campoBusca!==undefined?it._campoBusca:(it.eanAura||''))+'" placeholder="Código interno/EAN ou nome" oninput="nfeBuscaProdutoInput_('+idx+',this)" onkeydown="nfeCampoCodigoKey_(event,'+idx+',this)" onblur="nfeCampoCodigoBlur_('+idx+',this)"><button type="button" class="nfe-kbd-toggle" onclick="nfeTrocarTeclado_('+idx+',this)" title="Buscar também por nome">ABC</button><div class="nfe-autocomplete" id="nfeAuto_'+idx+'"></div></div><button class="nfe-mini-btn nfe-camera-btn" onclick="nfeEscanearEanAura_('+idx+')"><i class="ti ti-camera"></i> Câmera</button></div></div><div class="nfe-field"><label>Setor</label><select id="nfeSetor_'+idx+'" onchange="nfeSetSetor_('+idx+',this.value)">'+nfeSetorOptions_(it.setor||it.setorSugerido||'Outros')+'</select>'+nfeSetorNotaHtml_(it)+'</div><div class="nfe-field" style="grid-column:1/-1"><label>Vínculo com o estoque do Escudo Padaria</label><select id="nfeEscudo_'+idx+'" onchange="nfeEscudoSelecionarProdutoAura_('+idx+',this.value)">'+nfeEscudoOptionsAura_(it)+'</select><button type="button" id="nfeEscudoProvisionar_'+idx+'" class="nfe-mini-btn" style="margin-top:6px" onclick="nfeEscudoProvisionarAura_('+idx+')"><i class="ti ti-refresh"></i> Habilitar / sincronizar item</button><small id="nfeEscudoHint_'+idx+'" style="display:block;margin-top:5px;color:var(--tx2);font-size:10px">Opcional. Selecione o item próprio do Escudo. Os lotes conferidos serão enviados em kg.</small><div class="nfe-field" style="margin-top:8px"><label>Kg por unidade da NF-e</label><input id="nfeEscudoFator_'+idx+'" type="number" min="0.001" step="any" inputmode="decimal" value="'+nfeEscudoFatorValor_(it)+'" placeholder="Ex.: 2,8" oninput="nfeEscudoFatorAlterar_('+idx+',this.value)"><small style="display:block;margin-top:4px;color:var(--tx2);font-size:10px">Informe o peso de cada pacote/unidade. Ex.: 50 pacotes × 2,8 kg = 140 kg. O fator fica salvo para as próximas notas deste fornecedor.</small></div></div>'+(it.validadeIndeterminada===true&&it.conferenciaSemValidade===true?'<div class="nfe-lotes-title"><span>Validade indeterminada · item conferido sem gerar lote</span></div>':'<div class="nfe-lotes-title"><span>Validades / lotes · total a gravar '+nfeFmtQtd_(qtd)+'</span><button class="nfe-add-lote" onclick="nfeAdicionarLote_('+idx+')"><i class="ti ti-plus"></i> Outra validade</button></div>')+'<div id="nfeLotesRows_'+idx+'">'+lotes+'</div></div></div></div>';
+    +'<div class="nfe-item-body"><div class="nfe-pending-inline" id="nfePendencia_'+idx+'"></div>'+nfeFinanceiroHtmlAura_(it,idx)+convHtml+'<div class="nfe-grid2" style="margin-bottom:9px"><div class="nfe-field"><label>Recebimento</label><select id="nfeRecebimento_'+idx+'" onchange="nfeSetRecebimento_('+idx+',this.value)"><option value="RECEBIDO" '+((it.recebimentoStatus||'RECEBIDO')==='RECEBIDO'?'selected':'')+'>Recebido integral</option><option value="PARCIAL" '+(it.recebimentoStatus==='PARCIAL'?'selected':'')+'>Recebimento parcial</option><option value="NAO_RECEBIDO" '+(it.recebimentoStatus==='NAO_RECEBIDO'?'selected':'')+'>Item faltante / não recebido</option></select></div><div class="nfe-field"><label>Quantidade recebida ('+nfeEsc_(it.uCom||'un')+')</label><input id="nfeQtdRecebida_'+idx+'" type="number" min="0" step="any" value="'+(it.qtdRecebida!==undefined?it.qtdRecebida:it.qCom)+'" oninput="nfeQtdRecebidaAlterar_('+idx+',this.value)"></div></div>'+((it.recebimentoStatus==='PARCIAL'||it.recebimentoStatus==='NAO_RECEBIDO')?'<div class="nfe-field" style="margin-bottom:9px"><label>Motivo / observação</label><input id="nfeMotivoRecebimento_'+idx+'" value="'+nfeEsc_(it.motivoDivergencia||'')+'" placeholder="Ex.: entrega incompleta" oninput="_nfeNota.itens['+idx+'].motivoDivergencia=this.value;nfeAgendarRascunho_()"></div>':'')+'<div class="nfe-grid2"><div class="nfe-field"><label>EAN / código de barras</label><div class="nfe-ean-row"><div class="nfe-ean-search-wrap"><input id="nfeEan_'+idx+'" type="text" inputmode="numeric" autocomplete="off" value="'+nfeEsc_(it._campoBusca!==undefined?it._campoBusca:(it.eanAura||''))+'" placeholder="Código interno/EAN ou nome" oninput="nfeBuscaProdutoInput_('+idx+',this)" onkeydown="nfeCampoCodigoKey_(event,'+idx+',this)" onblur="nfeCampoCodigoBlur_('+idx+',this)"><button type="button" class="nfe-kbd-toggle" onclick="nfeTrocarTeclado_('+idx+',this)" title="Buscar também por nome">ABC</button><div class="nfe-autocomplete" id="nfeAuto_'+idx+'"></div></div><button class="nfe-mini-btn nfe-camera-btn" onclick="nfeEscanearEanAura_('+idx+')"><i class="ti ti-camera"></i> Câmera</button></div></div><div class="nfe-field"><label>Setor</label><select id="nfeSetor_'+idx+'" onchange="nfeSetSetor_('+idx+',this.value)">'+nfeSetorOptions_(it.setor||it.setorSugerido||'Outros')+'</select>'+nfeSetorNotaHtml_(it)+'</div><div class="nfe-field" style="grid-column:1/-1"><label>Vínculo com o estoque do Escudo Padaria</label><select id="nfeEscudo_'+idx+'" onchange="nfeEscudoSelecionarProdutoAura_('+idx+',this.value)">'+nfeEscudoOptionsAura_(it)+'</select><button type="button" id="nfeEscudoProvisionar_'+idx+'" class="nfe-mini-btn" style="margin-top:6px" onclick="nfeEscudoProvisionarAura_('+idx+')"><i class="ti ti-refresh"></i> Habilitar / sincronizar item</button><small id="nfeEscudoHint_'+idx+'" style="display:block;margin-top:5px;color:var(--tx2);font-size:10px">Opcional. Selecione o item próprio do Escudo. Os lotes conferidos serão enviados em kg.</small><div class="nfe-field" style="margin-top:8px"><label>Kg por unidade da NF-e</label><input id="nfeEscudoFator_'+idx+'" type="number" min="0.001" step="any" inputmode="decimal" value="'+nfeEscudoFatorValor_(it)+'" placeholder="Ex.: 2,8" oninput="nfeEscudoFatorAlterar_('+idx+',this.value)"><small style="display:block;margin-top:4px;color:var(--tx2);font-size:10px">Informe o peso de cada pacote/unidade. Ex.: 50 pacotes × 2,8 kg = 140 kg. O fator fica salvo para as próximas notas deste fornecedor.</small></div></div>'+(it.validadeIndeterminada===true&&it.conferenciaSemValidade===true?'<div class="nfe-lotes-title"><span>Validade indeterminada · item conferido sem gerar lote</span></div>':'<div class="nfe-lotes-title"><span>Validades / lotes · total a gravar '+nfeFmtQtd_(qtd)+'</span><button class="nfe-add-lote" onclick="nfeAdicionarLote_('+idx+')"><i class="ti ti-plus"></i> Outra validade</button></div>')+'<div id="nfeLotesRows_'+idx+'">'+lotes+'</div></div></div></div>';
 }
-function nfeRenderNota_(){var box=document.getElementById('nfeNotaBox'),n=_nfeNota;if(!box||!n)return;box.style.display='block';if(typeof n.canhotoRetido==='undefined')n.canhotoRetido=false;(n.itens||[]).forEach(function(it){if(typeof it.recebimentoStatus==='undefined')it.recebimentoStatus='RECEBIDO';if(typeof it.qtdRecebida==='undefined')it.qtdRecebida=Number(it.qCom)||0;});var itens=(n.itens||[]).map(function(it,idx){return nfeItemHtml_(it,idx);}).join('');box.innerHTML='<div class="nfe-note">'+(n.jaProcessada?'<div class="nfe-processed"><i class="ti ti-alert-triangle"></i> Esta NF-e já consta como concluída'+(n.processadaEm?' em '+nfeEsc_(n.processadaEm):'')+'. Uma nova gravação é bloqueada por segurança.</div>':'')+'<div class="nfe-note-head"><div><div class="nfe-note-name">'+nfeEsc_(n.fornecedor||'Fornecedor')+'</div><div class="nfe-note-meta">CNPJ '+nfeEsc_(n.cnpjFornecedor||'—')+' · NF '+nfeEsc_(n.numero||'—')+' série '+nfeEsc_(n.serie||'—')+' · emissão '+nfeEsc_(n.emissao||'—')+'<br>Chave '+nfeEsc_(n.chave||'')+' · fonte '+nfeEsc_(n.fonte||'XML')+'</div></div><div class="nfe-note-total">'+nfeFmtBRL_(n.valorTotal)+'</div></div><div class="nfe-kpis"><div class="nfe-kpi"><span>Itens da NF-e</span><b>'+Number(n.totalItens||0)+'</b></div><div class="nfe-kpi ok"><span>Reconhecidos</span><b>'+Number(n.totalEncontrados||0)+'</b></div><div class="nfe-kpi warn"><span>Para vincular</span><b>'+Number(n.totalNaoEncontrados||0)+'</b></div><div class="nfe-kpi"><span>Valor da nota</span><b>'+nfeFmtBRL_(n.valorTotal)+'</b></div></div><div class="nfe-toolbar"><div class="nfe-field"><label>Aplicar setor a todos</label><select id="nfeSetorTodos" onchange="nfeAplicarSetorTodos_()"><option value="">Selecione...</option>'+nfeSetorOptions_('')+'</select></div><div class="nfe-field"><label>Recebido por</label><select id="nfeOperador"><option value="">Não informado</option></select></div><div class="nfe-field" style="min-width:180px"><label>Canhoto da entrega</label><label style="display:flex;align-items:center;gap:8px;height:38px;text-transform:none"><input id="nfeCanhotoRetido" type="checkbox" '+(n.canhotoRetido?'checked':'')+' onchange="_nfeNota.canhotoRetido=this.checked;nfeSalvarRascunho_()"> Canhoto retido</label></div><div class="nfe-toolbar-help">Produtos reconhecidos já mostram o nome do Banco AURA e a foto do item. Confira a quantidade e distribua integralmente as validades/lotes.<br><b style="color:#1D9E75"><i class="ti ti-device-floppy"></i> Rascunho salvo automaticamente enquanto você preenche.</b></div></div><div class="nfe-items">'+itens+'</div><div class="nfe-foot"><div style="min-width:280px;flex:1"><div id="nfeDiagnostico" class="nfe-diag"></div><div id="nfeErros" class="nfe-errors"></div></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn" onclick="nfeLimpar_()"><i class="ti ti-trash"></i> Descartar NF-e</button><button class="btn btn-green" id="nfeBtnSalvar" '+(n.jaProcessada?'disabled':'')+' onclick="nfeSalvar_()"><i class="ti '+(n.jaProcessada?'ti-circle-check':'ti-device-floppy')+'"></i> '+(n.jaProcessada?'NF-e concluída':((n.itens||[]).some(function(it){return it&&it.controlar!==false&&String(it.recebimentoStatus||'RECEBIDO').toUpperCase()!=='NAO_RECEBIDO';})?'Gravar validades da NF-e':'Gravar conferência da NF-e'))+'</button></div></div></div>';nfeInstalarAvancoPendenciasAura_(box);if(nfePendenciasVisiveisAura_)nfeAtualizarPendenciasVisuaisAura_();nfeRenderOperadores_();setTimeout(nfeCarregarFotosPendentes_,0);setTimeout(nfeEscudoGarantirCatalogoAura_,0);}
+function nfeRenderNota_(){var box=document.getElementById('nfeNotaBox'),n=_nfeNota;if(!box||!n)return;n.recebidoEm=n.recebidoEm||nfeDataHojeLocalAura_();if(!(Number(n.margemAlvoPct)>0&&Number(n.margemAlvoPct)<90))n.margemAlvoPct=30;box.style.display='block';if(typeof n.canhotoRetido==='undefined')n.canhotoRetido=false;(n.itens||[]).forEach(function(it){if(typeof it.recebimentoStatus==='undefined')it.recebimentoStatus='RECEBIDO';if(typeof it.qtdRecebida==='undefined')it.qtdRecebida=Number(it.qCom)||0;});var itens=(n.itens||[]).map(function(it,idx){return nfeItemHtml_(it,idx);}).join('');box.innerHTML='<div class="nfe-note">'+(n.jaProcessada?'<div class="nfe-processed"><i class="ti ti-alert-triangle"></i> Esta NF-e já consta como concluída'+(n.processadaEm?' em '+nfeEsc_(n.processadaEm):'')+'. Uma nova gravação é bloqueada por segurança.</div>':'')+'<div class="nfe-note-head"><div><div class="nfe-note-name">'+nfeEsc_(n.fornecedor||'Fornecedor')+'</div><div class="nfe-note-meta">CNPJ '+nfeEsc_(n.cnpjFornecedor||'—')+' · NF '+nfeEsc_(n.numero||'—')+' série '+nfeEsc_(n.serie||'—')+' · emissão '+nfeEsc_(n.emissao||'—')+'<br>Chave '+nfeEsc_(n.chave||'')+' · fonte '+nfeEsc_(n.fonte||'XML')+'</div></div><div class="nfe-note-total">'+nfeFmtBRL_(n.valorTotal)+'</div></div>'+nfeTotaisImpostoNotaHtmlAura_(n)+'<div class="nfe-kpis"><div class="nfe-kpi"><span>Itens da NF-e</span><b>'+Number(n.totalItens||0)+'</b></div><div class="nfe-kpi ok"><span>Reconhecidos</span><b>'+Number(n.totalEncontrados||0)+'</b></div><div class="nfe-kpi warn"><span>Para vincular</span><b>'+Number(n.totalNaoEncontrados||0)+'</b></div><div class="nfe-kpi"><span>Valor da nota</span><b>'+nfeFmtBRL_(n.valorTotal)+'</b></div></div><div class="nfe-toolbar"><div class="nfe-field"><label>Data real do recebimento</label><input type="date" value="'+nfeEsc_(n.recebidoEm||nfeDataHojeLocalAura_())+'" onchange="nfeSetRecebidoEmAura_(this.value)"></div><div class="nfe-field"><label>Margem bruta alvo (%)</label><input type="number" min="1" max="89" step="1" value="'+Number(n.margemAlvoPct||30)+'" onchange="nfeSetMargemAlvoAura_(this.value)"></div><div class="nfe-field"><label>Aplicar setor a todos</label><select id="nfeSetorTodos" onchange="nfeAplicarSetorTodos_()"><option value="">Selecione...</option>'+nfeSetorOptions_('')+'</select></div><div class="nfe-field"><label>Recebido por</label><select id="nfeOperador"><option value="">Não informado</option></select></div><div class="nfe-field" style="min-width:180px"><label>Canhoto da entrega</label><label style="display:flex;align-items:center;gap:8px;height:38px;text-transform:none"><input id="nfeCanhotoRetido" type="checkbox" '+(n.canhotoRetido?'checked':'')+' onchange="_nfeNota.canhotoRetido=this.checked;nfeSalvarRascunho_()"> Canhoto retido</label></div><div class="nfe-toolbar-help">Produtos reconhecidos já mostram o nome do Banco AURA e a foto do item. Confira a quantidade e distribua integralmente as validades/lotes.<br><b style="color:#1D9E75"><i class="ti ti-device-floppy"></i> Rascunho salvo automaticamente enquanto você preenche.</b></div></div><div class="nfe-items">'+itens+'</div><div class="nfe-foot"><div style="min-width:280px;flex:1"><div id="nfeDiagnostico" class="nfe-diag"></div><div id="nfeErros" class="nfe-errors"></div></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn" onclick="nfeLimpar_()"><i class="ti ti-trash"></i> Descartar NF-e</button><button class="btn btn-green" id="nfeBtnSalvar" '+(n.jaProcessada?'disabled':'')+' onclick="nfeSalvar_()"><i class="ti '+(n.jaProcessada?'ti-circle-check':'ti-device-floppy')+'"></i> '+(n.jaProcessada?'NF-e concluída':((n.itens||[]).some(function(it){return it&&it.controlar!==false&&String(it.recebimentoStatus||'RECEBIDO').toUpperCase()!=='NAO_RECEBIDO';})?'Gravar validades da NF-e':'Gravar conferência da NF-e'))+'</button></div></div></div>';nfeInstalarAvancoPendenciasAura_(box);if(nfePendenciasVisiveisAura_)nfeAtualizarPendenciasVisuaisAura_();nfeRenderOperadores_();setTimeout(nfeCarregarFotosPendentes_,0);setTimeout(nfeEscudoGarantirCatalogoAura_,0);}
 function nfeAtualizarThumb_(idx){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];var el=document.getElementById('nfeThumb_'+idx);if(!it||!el)return;if(it.fotoDataUrl){el.innerHTML='<img src="'+nfeEsc_(it.fotoDataUrl)+'" alt="Produto">';el.className='nfe-thumb';return;}if(it.fotoCarregando){el.innerHTML='<i class="ti ti-loader-2 spin"></i>';el.className='nfe-thumb loading';return;}el.innerHTML='<i class="ti ti-photo"></i>';el.className='nfe-thumb';}
 async function nfeCarregarFotoItem_(idx){var n=_nfeNota,it=n&&n.itens?n.itens[idx]:null;if(!it)return;var ean=nfeDigitos_(it.eanAura);if(!ean||it.fotoDataUrl||it.fotoCarregando)return;it.fotoCarregando=true;nfeAtualizarThumb_(idx);try{var u=await _resolverFotoTarefaChain(ean,it.nomeAura||it.nome||'',false);if(u)it.fotoDataUrl=u;}catch(e){}it.fotoCarregando=false;nfeAtualizarThumb_(idx);}
 function nfeCarregarFotosPendentes_(){var n=_nfeNota;if(!n||!Array.isArray(n.itens))return;n.itens.forEach(function(it,idx){if(it&&it.eanAura)nfeCarregarFotoItem_(idx);});}
@@ -12205,7 +12124,7 @@ function nfeEscanearEanAura_(idx){
   _auraScanAfterFill=function(){setTimeout(function(){nfeValidarEan_(idx);},60);};
   abrirScannerAura('nfeEan_'+idx);
 }
-function nfeSetEan_(idx,v){var it=_nfeNota.itens[idx];if(it){it._campoBusca=String(v||'');it.eanAura=nfeDigitos_(v);it.status='nao_encontrado';it.origemVinculo='manual';it.nomeAura='';it.unidadeAura=it.unidadeAura||it.uCom||'';it.fotoDataUrl='';it.fotoCarregando=false;nfeSalvarRascunho_();}}
+function nfeSetEan_(idx,v){var it=_nfeNota.itens[idx];if(it){var novo=nfeDigitos_(v),mudou=novo!==nfeDigitos_(it.eanAura||'');it._campoBusca=String(v||'');it.eanAura=novo;it.status='nao_encontrado';it.origemVinculo='manual';it.nomeAura='';it.custoBanco=null;it.precoBanco=null;if(mudou){it.unidadeAura=it.uCom||'';it.unidadeDestinoSugerida=it.unidadeAura;it.fatorConversao=1;it.fatorConversaoSugerido=1;it.conversaoDecisao=nfeEhEmbalagemFront_(it.uCom)?'':'nao_aplicavel';it.conversaoExigirDecisao=nfeEhEmbalagemFront_(it.uCom);}it.fotoDataUrl='';it.fotoCarregando=false;nfeAtualizarFinanceiroItemAura_(idx);nfeSalvarRascunho_();}}
 
 // v6.57 — busca no Banco AURA/Telecon por código ou nome durante o vínculo da NF-e
 var _nfeBuscaProdutoTimer_={};
@@ -12255,7 +12174,7 @@ function nfeEscolherConversao_(idx,aplicar){
   mostrarToast(aplicar?('Conversão escolhida: '+nfeFmtQtd_(it.qCom)+' '+(it.uCom||'')+' → '+nfeFmtQtd_(nova)+' '+destino):('Sem conversão: será gravada a quantidade '+nfeFmtQtd_(nova)+' '+destino),'ok');
   nfeSalvarRascunho_();nfeRenderNota_();nfeRevalidarAvancoPendenciaAura_(idx);
 }
-function nfeLoteCampo_(idx,li,campo,v){var it=_nfeNota.itens[idx];if(!it||!it.lotes[li])return;it.lotes[li][campo]=campo==='quantidade'?(Number(v)||0):String(v||'');nfeAgendarRascunho_();nfeRevalidarAvancoPendenciaAura_(idx);}
+function nfeLoteCampo_(idx,li,campo,v){var it=_nfeNota.itens[idx];if(!it||!it.lotes[li])return;it.lotes[li][campo]=campo==='quantidade'?(Number(v)||0):(typeof v==='boolean'?v:String(v||''));nfeAgendarRascunho_();if(campo==='fabricacao'||campo==='validade'||campo==='aceitarVidaUtilCurta')nfeRenderNota_();else nfeRevalidarAvancoPendenciaAura_(idx);}
 function nfeAdicionarLote_(idx){var it=_nfeNota.itens[idx];if(!it)return;it.lotes.push({validade:'',quantidade:0,lote:''});nfeSalvarRascunho_();nfeRenderNota_();}
 function nfeRemoverLote_(idx,li){var it=_nfeNota.itens[idx];if(!it)return;if(it.lotes.length<=1){mostrarToast('Mantenha ao menos uma validade','warn');return;}it.lotes.splice(li,1);nfeSalvarRascunho_();nfeRenderNota_();}
 function nfeValidarEan_(idx){
@@ -12264,14 +12183,14 @@ function nfeValidarEan_(idx){
   nfeStatus_('','Validando EAN '+ean+' no Banco AURA...');
   _gasGetJsonp('buscarEANCompleto','&ean='+encodeURIComponent(ean),30000).then(function(r){
     if(!r||!r.ok){
-      it.eanAura=ean;it.nomeAura='';it.status='aguardando_cadastro';it.origemVinculo='manual_novo';
+      it.eanAura=ean;it.nomeAura='';it.custoBanco=null;it.precoBanco=null;it.status='aguardando_cadastro';it.origemVinculo='manual_novo';
       if(nfeEhEmbalagemFront_(it.uCom)){it.conversaoExigirDecisao=true;var ud=String(it.unidadeDestinoSugerida||'UN');if(!ud||nfeEhEmbalagemFront_(ud))ud='UN';it.unidadeDestinoSugerida=ud;it.unidadeAura=ud;it.fatorConversaoSugerido=Number(it.fatorConversaoSugerido||it.fatorConversao||1)||1;if(it.conversaoDecisao!=='converter'&&it.conversaoDecisao!=='nao_converter')it.conversaoDecisao='';}
       else it.unidadeAura=it.unidadeAura||it.uCom||'UN';
       it.fotoDataUrl='';it.fotoCarregando=false;
       nfeStatus_('warn','Produto novo aceito. O EAN será gravado em Respostas ao formulário 1 e vinculado quando entrar na Telecon.');
       nfeSalvarRascunho_();nfeRenderNota_();nfeRevalidarAvancoPendenciaAura_(idx);return;
     }
-    it.eanAura=nfeDigitos_(r.ean||ean);it.nomeAura=r.descricao||'';it.unidadeAura=r.unidade||it.uCom||'';it.unidadeDestinoSugerida=r.unidade||it.unidadeDestinoSugerida||it.unidadeAura;it.status='encontrado';it.origemVinculo='manual';
+    it.eanAura=nfeDigitos_(r.ean||ean);it.nomeAura=r.descricao||'';it.custoBanco=Number(r.custo)||null;it.precoBanco=Number(r.preco)||null;it.unidadeAura=r.unidade||it.uCom||'';it.unidadeDestinoSugerida=r.unidade||it.unidadeDestinoSugerida||it.unidadeAura;it.status='encontrado';it.origemVinculo='manual';
     if(r.setor&&r.setor!=='Outros'){it.setor=r.setor;it.setorSugerido=r.setor;it.setorOrigem=r.setorOrigem||'banco_dados';}
     if(nfeEhEmbalagemFront_(it.uCom)){it.conversaoExigirDecisao=true;if(it.conversaoDecisao!=='converter'&&it.conversaoDecisao!=='nao_converter')it.conversaoDecisao='';}
     it.fotoDataUrl='';it.fotoCarregando=false;nfeStatus_('ok','Produto vinculado.');nfeSalvarRascunho_();nfeRenderNota_();nfeRevalidarAvancoPendenciaAura_(idx);
@@ -12279,7 +12198,7 @@ function nfeValidarEan_(idx){
 }
 function nfeRenderOperadores_(){var sel=document.getElementById('nfeOperador');if(!sel)return;var atual=localStorage.getItem('aura_nfe_operador')||sel.value||'';var lista=(typeof COLABORADORES!=='undefined'?COLABORADORES:[])||[];sel.innerHTML='<option value="">Não informado</option>'+lista.map(function(c){return '<option value="'+nfeEsc_(c.email||'')+'">'+nfeEsc_(c.nome||c.email||'')+'</option>';}).join('');sel.value=atual;sel.onchange=function(){try{localStorage.setItem('aura_nfe_operador',sel.value||'');}catch(e){}nfeSalvarRascunho_();};}
 function nfeSetRecebimento_(i,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[i];if(!it)return;it.validadeIndeterminada=false;it.conferenciaSemValidade=false;it.recebimentoStatus=String(v||'RECEBIDO').toUpperCase();if(it.recebimentoStatus==='NAO_RECEBIDO')it.qtdRecebida=0;else if(it.recebimentoStatus==='RECEBIDO')it.qtdRecebida=Number(it.qCom)||0;else if(!(Number(it.qtdRecebida)>0))it.qtdRecebida=Number(it.qCom)||0;it.motivoDivergencia=it.motivoDivergencia||'';nfeSalvarRascunho_();nfeRenderNota_();}
-function nfeQtdRecebidaAlterar_(i,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[i];if(!it)return;if(it.controlar===false){it.validadeIndeterminada=false;it.conferenciaSemValidade=false;}it.qtdRecebida=Math.max(0,Number(v)||0);if(it.recebimentoStatus==='RECEBIDO'&&it.qtdRecebida<(Number(it.qCom)||0))it.recebimentoStatus='PARCIAL';var d=String(it.conversaoDecisao||'').toLowerCase(),f=Number(it.fatorConversaoSugerido||it.fatorConversao||1)||1;it.qtdEstoque=d==='converter'?it.qtdRecebida*f:it.qtdRecebida;var ls=document.querySelectorAll('#nfeLotesRows_'+i+' .nfe-lote');if(ls.length===1){var q=ls[0].querySelector('.nfe-lot-qtd');if(q)q.value=it.qtdEstoque;}nfeSalvarRascunho_();}
+function nfeQtdRecebidaAlterar_(i,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[i];if(!it)return;if(it.controlar===false){it.validadeIndeterminada=false;it.conferenciaSemValidade=false;}it.qtdRecebida=Math.max(0,Number(v)||0);if(it.recebimentoStatus==='RECEBIDO'&&it.qtdRecebida<(Number(it.qCom)||0))it.recebimentoStatus='PARCIAL';var d=String(it.conversaoDecisao||'').toLowerCase(),f=Number(it.fatorConversaoSugerido||it.fatorConversao||1)||1;it.qtdEstoque=d==='converter'?it.qtdRecebida*f:it.qtdRecebida;var ls=document.querySelectorAll('#nfeLotesRows_'+i+' .nfe-lote');if(ls.length===1){var q=ls[0].querySelector('.nfe-lot-qtd');if(q)q.value=it.qtdEstoque;}nfeAtualizarFinanceiroItemAura_(i);nfeSalvarRascunho_();}
 var nfePendenciasVisiveisAura_=false,_nfeAvancoPendenciaTimerAura_=null;
 function nfeVibrarPendenciaAura_(){try{if(typeof navigator!=='undefined'&&typeof navigator.vibrate==='function')navigator.vibrate([110,55,110]);}catch(e){}}
 function nfeLimparDestaquePendenciaAura_(idx){var c=document.getElementById('nfeItem_'+idx);if(c)c.querySelectorAll('.nfe-missing-field').forEach(function(el){el.classList.remove('nfe-missing-field');});}
@@ -12346,7 +12265,7 @@ function nfeColetarPayload_(){
       if(ehNovo)diag.novos++;else if(ean)diag.reconhecidos++;
       if(it.conversaoExigirDecisao===true&&['converter','nao_converter'].indexOf(String(it.conversaoDecisao||''))<0){diag.conversoesPendentes++;erroItem_((it.nomeAura||it.nome||ean)+': escolha CONVERTER ou NÃO CONVERTER a embalagem.');}
       var rows=document.querySelectorAll('#nfeLotesRows_'+idx+' .nfe-lote'),soma=0,todasValidades=true,todasQtd=true;
-      rows.forEach(function(r){var v=(r.querySelector('.nfe-lot-val')||{}).value||'',q=Number((r.querySelector('.nfe-lot-qtd')||{}).value)||0,l=(r.querySelector('.nfe-lote-id')||{}).value||'';if(!v){todasValidades=false;}if(!(q>0)){todasQtd=false;}if(!v||!(q>0))erroItem_((it.nomeAura||it.nome||ean)+': preencha validade e quantidade.');soma+=q;lotes.push({validade:v,quantidade:q,lote:l});});
+      rows.forEach(function(r,li){var v=(r.querySelector('.nfe-lot-val')||{}).value||'',fab=(r.nextElementSibling&&r.nextElementSibling.querySelector('.nfe-lot-fab')||{}).value||'',q=Number((r.querySelector('.nfe-lot-qtd')||{}).value)||0,l=(r.querySelector('.nfe-lote-id')||{}).value||'',m=r.parentElement.querySelector('#nfeVidaAura_'+idx+'_'+li),acc=!!(m&&m.querySelector('input[type=checkbox]')&&m.querySelector('input[type=checkbox]').checked),acao=(m&&m.querySelector('select')||{}).value||'',dataAcao=(m&&m.querySelector('input[type=date]')||{}).value||'';if(!v){todasValidades=false;}if(!(q>0)){todasQtd=false;}if(!v||!(q>0))erroItem_((it.nomeAura||it.nome||ean)+': preencha validade e quantidade.');var vi=nfeVidaUtilInfoAura_(fab,v,n.recebidoEm);if(!vi.ok)erroItem_((it.nomeAura||it.nome||ean)+': informe fabricação e confira as datas com a data real do recebimento.');else if(vi.pct<80&&!(acc&&['PROMOCAO_IMEDIATA','EXPOSICAO_PRIORITARIA','REAVALIAR'].indexOf(acao)>=0&&dataAcao>=String(n.recebidoEm||'')&&dataAcao<=String(v||'')))erroItem_((it.nomeAura||it.nome||ean)+': restam '+vi.pct.toFixed(1)+'% da vida útil; aceite a exceção e registre plano de venda e data.');soma+=q;lotes.push({validade:v,fabricacao:fab,quantidade:q,lote:l,aceitarVidaUtilCurta:acc,acaoVenda:acao,dataAcao:dataAcao});});
       diag.lotes+=lotes.length;
       if(rows.length&&todasValidades)diag.comValidade++;
       if(rows.length&&todasQtd&&Math.abs(soma-qtd)<=0.001)diag.quantidadesOk++;
@@ -12354,7 +12273,7 @@ function nfeColetarPayload_(){
     }
     return {nItem:it.nItem,cProd:it.cProd,nome:it.nome,qCom:it.qCom,qtdRecebida:qtdRecebida,recebimentoStatus:recebimento,motivoDivergencia:it.motivoDivergencia||'',ean:ean,qtdEstoque:qtd,fatorConversao:it.fatorConversao||1,fatorConversaoSugerido:it.fatorConversaoSugerido||it.fatorConversao||1,conversaoExigirDecisao:!!it.conversaoExigirDecisao,conversaoDecisao:it.conversaoDecisao||'',unidadeNFe:it.uCom||'',unidadeAura:it.unidadeAura||it.unidadeDestinoSugerida||it.uCom||'',setor:setor,controlar:controlar,validadeIndeterminada:!controlar&&it.validadeIndeterminada===true,conferenciaSemValidade:!controlar&&it.conferenciaSemValidade===true,lotes:lotes,origemVinculo:it.origemVinculo||'',escudoCodigo:String(it.escudoCodigo||''),escudoNome:String(it.escudoNome||''),escudoUnidade:String(it.escudoUnidade||'kg'),escudoFatorKg:Number(it.escudoFatorKg)||0,escudoRemoverVinculo:!!it.escudoRemoverVinculo};
   });
-  return {erros:errs,diagnostico:diag,payload:{action:'nfeRegistrarValidades',chave:n.chave,fornecedor:n.fornecedor,cnpjFornecedor:n.cnpjFornecedor,numero:n.numero,serie:n.serie,emissao:n.emissao,fonte:n.fonte,operador:String((document.getElementById('nfeOperador')||{}).value||''),itens:itens,canhotoRetido:!!(document.getElementById('nfeCanhotoRetido')&&document.getElementById('nfeCanhotoRetido').checked),aceitarProdutoNovo:true,exigirDecisaoConversao:true}};
+  return {erros:errs,diagnostico:diag,payload:{action:'nfeRegistrarValidades',actor:_usuarioSelecionado,chave:n.chave,fornecedor:n.fornecedor,cnpjFornecedor:n.cnpjFornecedor,numero:n.numero,serie:n.serie,emissao:n.emissao,fonte:n.fonte,recebidoEm:n.recebidoEm||'',operador:String((document.getElementById('nfeOperador')||{}).value||''),itens:itens,canhotoRetido:!!(document.getElementById('nfeCanhotoRetido')&&document.getElementById('nfeCanhotoRetido').checked),aceitarProdutoNovo:true,exigirDecisaoConversao:true}};
 }
 function nfeVinculoManualBotoesHtmlAura_(nota){
   nota=nota||_nfeNota;var itens=Array.isArray(nota&&nota.itens)?nota.itens:[],html=[];
@@ -12364,14 +12283,14 @@ function nfeVinculoManualBotoesHtmlAura_(nota){
 function nfeAbrirVinculoManualAura_(idx){
   var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];if(!it)return;var antigo=document.getElementById('nfeVinculoManualAuraModal');if(antigo)antigo.remove();
   var lotes=nfeItemLotesDefault_(it),primeiro=lotes[0]||{},extras=lotes.slice(1).reduce(function(a,l){return a+(Number(l.quantidade)||0);},0),base=Number(it.qtdEstoque||it.qtdRecebida||it.qCom)||0,fModal=String(it.conversaoDecisao||'')==='converter'?(Number(it.fatorConversao||it.fatorConversaoSugerido)||1):1,qPadrao=(Number(primeiro.quantidade)||Math.max(0,base-extras))/fModal;
-  var html='<div id="nfeVinculoManualAuraModal" style="position:fixed;inset:0;z-index:100500;background:rgba(12,18,28,.72);display:flex;align-items:center;justify-content:center;padding:16px"><div style="width:min(440px,100%);max-height:92vh;overflow:auto;background:var(--surface,#fff);color:var(--text,#20242a);border:1px solid #d99b22;border-radius:14px;padding:16px;box-shadow:0 18px 60px rgba(0,0,0,.35)"><div style="font-weight:900;font-size:15px;margin-bottom:4px"><i class="ti ti-link"></i> Vincular produto manualmente</div><div style="font-size:11px;color:var(--muted,#687078);margin-bottom:12px">'+nfeEsc_(it.nomeAura||it.nome||it.cProd||'Item da NF-e')+'</div><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">EAN / código de barras</label><input id="nfeManualAuraEan" inputmode="numeric" autocomplete="off" value="'+nfeEsc_(it._campoBusca||it.eanAura||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Validade</label><input id="nfeManualAuraValidade" type="date" value="'+nfeEsc_(primeiro.validade||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Quantidade deste lote ('+nfeEsc_(it.uCom||'un')+')</label><input id="nfeManualAuraQuantidade" type="number" min="0.001" step="any" inputmode="decimal" value="'+nfeEsc_(qPadrao||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Setor</label><select id="nfeManualAuraSetor" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:13px">'+nfeSetorOptions_(it.setor||it.setorSugerido||'Outros')+'</select><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button type="button" onclick="document.getElementById(\'nfeVinculoManualAuraModal\').remove()" style="border:1px solid #c8cdd2;background:transparent;border-radius:8px;padding:9px 13px;font-weight:800">Cancelar</button><button type="button" onclick="nfeSalvarVinculoManualAura_('+idx+')" style="border:1px solid #8a5200;background:#b76e00;color:white;border-radius:8px;padding:9px 13px;font-weight:850">Aplicar ao item</button></div></div></div>';
+  var html='<div id="nfeVinculoManualAuraModal" style="position:fixed;inset:0;z-index:100500;background:rgba(12,18,28,.72);display:flex;align-items:center;justify-content:center;padding:16px"><div style="width:min(440px,100%);max-height:92vh;overflow:auto;background:var(--surface,#fff);color:var(--text,#20242a);border:1px solid #d99b22;border-radius:14px;padding:16px;box-shadow:0 18px 60px rgba(0,0,0,.35)"><div style="font-weight:900;font-size:15px;margin-bottom:4px"><i class="ti ti-link"></i> Vincular produto manualmente</div><div style="font-size:11px;color:var(--muted,#687078);margin-bottom:12px">'+nfeEsc_(it.nomeAura||it.nome||it.cProd||'Item da NF-e')+'</div><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">EAN / código de barras</label><input id="nfeManualAuraEan" inputmode="numeric" autocomplete="off" value="'+nfeEsc_(it._campoBusca||it.eanAura||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Data de fabricação</label><input id="nfeManualAuraFabricacao" type="date" value="'+nfeEsc_(primeiro.fabricacao||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Validade</label><input id="nfeManualAuraValidade" type="date" value="'+nfeEsc_(primeiro.validade||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Quantidade deste lote ('+nfeEsc_(it.uCom||'un')+')</label><input id="nfeManualAuraQuantidade" type="number" min="0.001" step="any" inputmode="decimal" value="'+nfeEsc_(qPadrao||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Setor</label><select id="nfeManualAuraSetor" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:13px">'+nfeSetorOptions_(it.setor||it.setorSugerido||'Outros')+'</select><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button type="button" onclick="document.getElementById(\'nfeVinculoManualAuraModal\').remove()" style="border:1px solid #c8cdd2;background:transparent;border-radius:8px;padding:9px 13px;font-weight:800">Cancelar</button><button type="button" onclick="nfeSalvarVinculoManualAura_('+idx+')" style="border:1px solid #8a5200;background:#b76e00;color:white;border-radius:8px;padding:9px 13px;font-weight:850">Aplicar ao item</button></div></div></div>';
   document.body.insertAdjacentHTML('beforeend',html);setTimeout(function(){var e=document.getElementById('nfeManualAuraEan');if(e)e.focus();},30);
 }
 function nfeSalvarVinculoManualAura_(idx){
-  var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx],ean=nfeDigitos_((document.getElementById('nfeManualAuraEan')||{}).value||''),validade=String((document.getElementById('nfeManualAuraValidade')||{}).value||''),q=Number((document.getElementById('nfeManualAuraQuantidade')||{}).value)||0,setor=String((document.getElementById('nfeManualAuraSetor')||{}).value||'Outros');
-  if(!it)return;if(!ean){mostrarToast('Informe o EAN ou código de barras.','warn');return;}if(!/^\d{4}-\d{2}-\d{2}$/.test(validade)){mostrarToast('Informe uma validade válida.','warn');return;}if(!(q>0)){mostrarToast('Informe uma quantidade maior que zero.','warn');return;}
+  var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx],ean=nfeDigitos_((document.getElementById('nfeManualAuraEan')||{}).value||''),fabricacao=String((document.getElementById('nfeManualAuraFabricacao')||{}).value||''),validade=String((document.getElementById('nfeManualAuraValidade')||{}).value||''),q=Number((document.getElementById('nfeManualAuraQuantidade')||{}).value)||0,setor=String((document.getElementById('nfeManualAuraSetor')||{}).value||'Outros');
+  if(!it)return;if(!ean){mostrarToast('Informe o EAN ou código de barras.','warn');return;}if(!/^\d{4}-\d{2}-\d{2}$/.test(fabricacao)){mostrarToast('Informe a data de fabricação.','warn');return;}if(!/^\d{4}-\d{2}-\d{2}$/.test(validade)){mostrarToast('Informe uma validade válida.','warn');return;}if(!(q>0)){mostrarToast('Informe uma quantidade maior que zero.','warn');return;}
   var fator=String(it.conversaoDecisao||'')==='converter'?(Number(it.fatorConversao||it.fatorConversaoSugerido)||1):1;it.eanAura=ean;it._campoBusca=ean;it.status='aguardando_cadastro';it.origemVinculo='manual_novo';it.setor=setor;it.setorOrigem='manual';it.controlar=true;it.validadeIndeterminada=false;it.conferenciaSemValidade=false;
-  var lotes=nfeItemLotesDefault_(it);if(!lotes.length)lotes=[{validade:validade,quantidade:q*fator,lote:''}];else{lotes[0].validade=validade;lotes[0].quantidade=q*fator;}it.lotes=lotes;it.qtdEstoque=lotes.reduce(function(a,l){return a+(Number(l.quantidade)||0);},0);it.qtdRecebida=fator?it.qtdEstoque/fator:q;it.recebimentoStatus=it.qtdRecebida<(Number(it.qCom)||0)-0.001?'PARCIAL':'RECEBIDO';it._nfePendencias=[];
+  var lotes=nfeItemLotesDefault_(it);if(!lotes.length)lotes=[{fabricacao:fabricacao,validade:validade,quantidade:q*fator,lote:''}];else{lotes[0].fabricacao=fabricacao;lotes[0].validade=validade;lotes[0].quantidade=q*fator;}it.lotes=lotes;it.qtdEstoque=lotes.reduce(function(a,l){return a+(Number(l.quantidade)||0);},0);it.qtdRecebida=fator?it.qtdEstoque/fator:q;it.recebimentoStatus=it.qtdRecebida<(Number(it.qCom)||0)-0.001?'PARCIAL':'RECEBIDO';it._nfePendencias=[];
   var modal=document.getElementById('nfeVinculoManualAuraModal');if(modal)modal.remove();nfeSalvarRascunho_();nfeRenderNota_();mostrarToast('EAN, validade, quantidade e setor aplicados. Revise o item e grave a NF-e.','ok');
 }
 function nfeMostrarDiagnostico_(c,tipo,extra){
@@ -12647,7 +12566,7 @@ async function nfeHistGeralSalvarEdicao_(idx){
   if(c)Array.prototype.forEach.call(c.querySelectorAll('.nfe-hist-edit-lote'),function(row){var d=row.querySelector('input[type="date"]'),q=row.querySelector('input[type="number"]');lotes.push({validade:d?d.value:'',quantidade:q?Number(q.value):0});});
   if(!lotes.length||lotes.some(function(l){return !/^\d{4}-\d{2}-\d{2}$/.test(l.validade)||!(l.quantidade>0);})){mostrarToast('Preencha uma data de validade e uma quantidade positiva em cada lote.','warn');return;}
   if(!confirm('Salvar as alterações deste item? As validades e quantidades correspondentes serão atualizadas no estoque da AURA.'))return;
-  try{mostrarToast('Validando o produto e atualizando os lotes…','warn');var res=await nfePost_({action:'nfeEditarItemHistoricoCompleto',chave:n.chave,operador:n.operador,editor:editor,itemId:it.itemId,nItem:it.nItem,cProd:it.cProd,eanNovo:ean,setor:setor,lotes:lotes});if(!res||!res.ok)throw new Error((res&&res.erro)||'Falha ao atualizar o item.');mostrarToast('Item e lotes atualizados. A alteração ficou registrada na auditoria.','ok');nfeHistoricoGeralAbrir_(n.chave);}catch(e){mostrarToast(String(e&&e.message||'Não foi possível atualizar o item.'),'err');}
+  try{mostrarToast('Validando o produto e atualizando os lotes…','warn');var res=await nfePost_({action:'nfeEditarItemHistoricoCompleto',chave:n.chave,operador:n.operador,email:_usuarioSelecionado,editor:editor,itemId:it.itemId,nItem:it.nItem,cProd:it.cProd,eanNovo:ean,setor:setor,lotes:lotes});if(!res||!res.ok)throw new Error((res&&res.erro)||'Falha ao atualizar o item.');mostrarToast('Item e lotes atualizados. A alteração ficou registrada na auditoria.','ok');nfeHistoricoGeralAbrir_(n.chave);}catch(e){mostrarToast(String(e&&e.message||'Não foi possível atualizar o item.'),'err');}
 }
 
 
@@ -13727,13 +13646,29 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v7.32-telecon-anexo-autofit';
+var AURA_CONTROLE_VALIDADE_BUILD='v7.40-analise-financeira-nfe';
 console.info('[AURA] organização de entradas v7.02 — CEASA operacional na aba Conferência NF-e; Boss Vision somente gerencial');
 console.info('[AURA] encarte imagens v7.04 — loader Arsenal restaurado + link/upload/consulta central');
 var currentTabName='dashboard';
+function auraPerfilSessaoAtual_(){
+  var chave=String(_usuarioSelecionado||'').trim().toLowerCase(),nome=String(_usuarioSelecionado||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  var lista=Array.isArray(COLABORADORES_TODOS)?COLABORADORES_TODOS:[];
+  for(var i=0;i<lista.length;i++){var c=lista[i]||{};if(String(c.email||'').trim().toLowerCase()===chave||String(c.nome||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()===nome)return c;}
+  return null;
+}
+function auraAtualizarAcessoTarefas_(){
+  var p=auraPerfilSessaoAtual_(),u=String(_usuarioSelecionado||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),bloqueado=p?p.veTarefas===false:(['leonardo','cesar','taiti','1960 nf'].indexOf(u)>=0),admin=!!(p&&p.gerenciaUsuarios)||u==='leonardo';
+  document.body.classList.toggle('aura-admin-sem-tarefas',bloqueado);
+  var btns=document.querySelectorAll('#auraNav button');Array.prototype.forEach.call(btns,function(b){var oc=b.getAttribute('onclick')||'';if(oc.indexOf("'tarefas'")>=0)b.style.display=bloqueado?'none':'';if(oc.indexOf("'colaboradores'")>=0)b.style.display=admin?'':'none';});
+  var badge=document.getElementById('asBadgeTarefas');if(badge&&bloqueado){badge.textContent='';badge.style.display='none';}
+  if(bloqueado&&currentTabName==='tarefas')goTab('dashboard');
+  return !bloqueado;
+}
 function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma visão de Estoque */ return 'unificado'; }
 function goTab(name){
   if(name==='validades')name='estoque'; // compatibilidade com atalhos antigos
+  if(name==='tarefas'&&!auraAtualizarAcessoTarefas_())return;
+  if(name==='colaboradores'){var perfilAdmin=auraPerfilSessaoAtual_();if(!(perfilAdmin&&perfilAdmin.gerenciaUsuarios)&&String(_usuarioSelecionado||'').toLowerCase()!=='leonardo'){mostrarToast('Seu perfil não pode gerenciar colaboradores.','warn');return;}}
   currentTabName=name;
   document.querySelectorAll('.tab').forEach(function(t){
     var oc=t.getAttribute('onclick')||'';
@@ -15302,6 +15237,7 @@ function _iniciarDadosSecundariosAposCarga_(){
   if(window._auraDadosSecundariosIniciados)return;
   window._auraDadosSecundariosIniciados=true;
   carregarColaboradoresUniversal_(false);
+  setTimeout(function(){try{auraAtualizarAcessoTarefas_();}catch(e){}},0);
   sincronizarTarefasCompleto();
   cloudLoad();
 }
@@ -15340,581 +15276,146 @@ if(_cfg.id){
   auraProdCarregarCache_().then(function(cache){if(cache&&cache.length)products=cache;refresh();}).catch(function(){products=auraProdLerManuais_();refresh();});
 }
 
-// ── ANTECIPAÇÃO DE ENCARTES ──────────────────────────────────────────────
-var ANT_SEL_KEY = 'aura_ant_sel';
-// v-fix: getAntSel() existia (lia do localStorage) mas nunca era chamada —
-// a seleção era salva certinho (saveAntSel, 4 chamadas no arquivo), só que
-// nunca restaurada, então toda seleção feita se perdia ao recarregar a
-// página. Agora inicializa direto da última seleção salva.
-var antSelecionados = getAntSel(); // cod_index → true
-var _antUltimoClicado = null; // último item clicado para seleção em range
-var _antProdutosVisiveis = []; // lista ordenada de produtos visíveis (para shift+click)
-var _antProdutosPorMes = {}; // { '2026-07': [prod1, prod2, ...], ... }
-
-function getAntSel() { try { return JSON.parse(localStorage.getItem(ANT_SEL_KEY) || '{}'); } catch(e) { return {}; } }
-function saveAntSel() { localStorage.setItem(ANT_SEL_KEY, JSON.stringify(antSelecionados)); }
-
-// Retorna o mês/ano alvo (YYYY-MM) para um produto
-function getMesAlvo(validade) {
-  if (!validade) return null;
-  var parts = validade.split('-');
-  if (parts.length !== 3) return null;
-  return parts[0] + '-' + parts[1];
+// ── PLANEJAMENTO DE ENCARTES POR SHELF LIFE ───────────────────────────────
+var _antShelfLifeDados = [];
+var _antShelfLifeAtualizado = 0;
+var _antShelfLifeCarregando = false;
+var _antShelfLifeErro = '';
+function antShelfAtualizarAviso_(quantidade) {
+  var el=document.getElementById('antShelfNotice');if(!el)return;
+  if(_antShelfLifeErro){el.innerHTML='<div style="padding:10px 12px;border:1px solid rgba(245,158,11,.45);border-radius:10px;background:rgba(245,158,11,.08);color:var(--fg);font-size:12px"><b>Alertas de shelf life indisponíveis.</b> '+nfeEsc_(_antShelfLifeErro)+' <button class="btn btn-sm" style="margin-left:8px" onclick="antCarregarShelfLife_(true)">Tentar novamente</button></div>';return;}
+  if(_antShelfLifeCarregando&&!_antShelfLifeAtualizado){el.innerHTML='<div style="padding:9px 12px;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px"><i class="ti ti-loader-2"></i> Conferindo recebimentos com vida útil curta…</div>';return;}
+  var total=Number(quantidade)||0;
+  el.innerHTML=total?'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(239,68,68,.35);border-radius:10px;background:rgba(239,68,68,.07);color:var(--fg);font-size:12px"><span style="font-size:17px">⚠️</span><span><b>'+total+' lote'+(total===1?'':'s')+' com shelf life em potencial</b> — recebidos abaixo de 80% de vida útil e ainda com saldo. Ação planejada na NF-e indicada em cada produto.</span><button class="btn btn-sm" style="margin-left:auto" onclick="antCarregarShelfLife_(true)"><i class="ti ti-refresh"></i> Atualizar</button></div>':'<div style="padding:9px 12px;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px">Nenhum lote de shelf life em potencial com saldo atual.</div>';
+}
+function antCarregarShelfLife_(forcar) {
+  var agora=Date.now();
+  if(_antShelfLifeCarregando)return;
+  if(!forcar&&_antShelfLifeAtualizado&&agora-_antShelfLifeAtualizado<45000)return;
+  _antShelfLifeCarregando=true;_antShelfLifeErro='';antShelfAtualizarAviso_(0);
+  nfePost_({action:'nfeAntecipacaoShelfLife'}).then(function(r){
+    if(!r||!r.ok)throw new Error((r&&r.erro)||'Falha ao consultar os recebimentos.');
+    _antShelfLifeDados=Array.isArray(r.itens)?r.itens:[];
+    _antShelfLifeAtualizado=Date.now();
+  }).catch(function(e){_antShelfLifeErro=String(e&&e.message||e||'Erro de conexão.');}).finally(function(){
+    _antShelfLifeCarregando=false;
+    var sec=document.getElementById('sec-antecipacao');
+    if(sec&&getComputedStyle(sec).display!=='none')renderAntecipacao();
+  });
 }
 
-// Nome amigável do mês: "Julho 2026"
-function mesLabel(ym) {
-  var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  var parts = ym.split('-');
-  var mi = parseInt(parts[1], 10) - 1;
-  return meses[mi] + ' ' + parts[0];
+var _antShelfFiltroAtual='TODOS';
+function antShelfDefinirFiltro_(filtro,botao){
+  _antShelfFiltroAtual=filtro||'TODOS';
+  document.querySelectorAll('.ant-shelf-tab').forEach(function(b){
+    var ativo=b.getAttribute('data-filtro')===_antShelfFiltroAtual;
+    b.style.background=ativo?'var(--green)':'var(--surface)';
+    b.style.color=ativo?'#fff':'var(--fg)';
+    b.style.borderColor=ativo?'var(--green)':'var(--bds)';
+  });
+  renderAntecipacao();
 }
-
-// Ordena YYYY-MM cronologicamente
-function mesSort(a, b) { return a < b ? -1 : a > b ? 1 : 0; }
-
-// Determina a "janela de encarte" ideal — quantos dias antes do vencimento o produto deve entrar no encarte
-// Retornar "potencial" baseado em: tem preço promocional, desconto registrado, ou quantidade ≥ 2
-function temPotencialEncarte(p) {
-  return (p.precoPromo && p.precoPromo > 0) ||
-         (p.pctDesc && p.pctDesc > 0) ||
-         (parseInt(p.qtde) || 1) >= 2 ||
-         (p.precoNormal && p.precoNormal > 0);
+function antShelfDataLocal_(iso){
+  var m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m?new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),12,0,0):null;
 }
-
-// Cor da faixa do mês baseado na urgência
-function mesCor(ym) {
-  var hoje = new Date(); hoje.setHours(0,0,0,0);
-  var parts = ym.split('-');
-  var mesDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, 1);
-  var diff = Math.floor((mesDate - hoje) / (86400000 * 30));
-  if (diff <= 0) return { bg: 'rgba(239,68,68,.12)', border: 'rgba(239,68,68,.35)', txt: '#f87171', label: 'Mês atual' };
-  if (diff === 1) return { bg: 'rgba(249,115,22,.10)', border: 'rgba(249,115,22,.30)', txt: '#fb923c', label: 'Mês que vem' };
-  return { bg: 'rgba(59,130,246,.08)', border: 'rgba(59,130,246,.25)', txt: '#60a5fa', label: 'Futuro' };
+function antShelfIso_(date){return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');}
+function antShelfSemana_(iso){
+  var d=antShelfDataLocal_(iso);if(!d)return null;
+  var mon=new Date(d);mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+  var sun=new Date(mon);sun.setDate(sun.getDate()+6);
+  var jan4=new Date(mon.getFullYear(),0,4,12),firstMon=new Date(jan4);firstMon.setDate(jan4.getDate()-((jan4.getDay()+6)%7));
+  var week=Math.floor((mon-firstMon)/(7*86400000))+1;
+  return {key:antShelfIso_(mon),start:antShelfIso_(mon),end:antShelfIso_(sun),label:'Semana '+String(week).padStart(2,'0')+' · '+mon.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})+'–'+sun.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})};
 }
-
-function produtoChaveAnt(p) {
-  return (p.cod || '') + '_' + (p.nome || '') + '_' + (p.validade || '');
+function antShelfFaixa_(item){
+  var p=item.programacao;if(!p||p.status!=='PROGRAMADO')return {key:'SEM_PROGRAMACAO',label:'Sem programação',tipo:'SEM_PROGRAMACAO'};
+  if(p.tipo==='SEMANA'){
+    var w=antShelfSemana_(p.dataEncarte);return w?{key:'SEMANA_'+w.key,label:w.label,tipo:'SEMANA'}:{key:'SEM_PROGRAMACAO',label:'Sem programação',tipo:'SEM_PROGRAMACAO'};
+  }
+  var d=antShelfDataLocal_(p.dataEncarte);if(!d)return {key:'SEM_PROGRAMACAO',label:'Sem programação',tipo:'SEM_PROGRAMACAO'};
+  var ym=antShelfIso_(d).slice(0,7);
+  return {key:'MES_'+ym,label:d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}),tipo:'MES'};
 }
-
+function antShelfResumoCard_(titulo,valor,sub,cor,icone){
+  return '<div style="padding:12px 14px;border:1px solid '+cor+'44;border-radius:12px;background:linear-gradient(135deg,'+cor+'12, var(--surface));min-height:76px"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.04em">'+titulo+'</span><i class="ti '+icone+'" style="font-size:18px;color:'+cor+'"></i></div><div style="font-size:23px;line-height:1.1;font-weight:900;color:var(--fg);margin-top:5px">'+valor+'</div><div style="font-size:10px;color:var(--muted);margin-top:3px">'+sub+'</div></div>';
+}
+function antShelfProgramar_(ean,validade,id){
+  var tipoEl=document.getElementById('antShelfTipo_'+id),dataEl=document.getElementById('antShelfData_'+id);
+  var tipo=tipoEl&&tipoEl.value||'',data=dataEl&&dataEl.value||'';
+  if(!tipo||!data){mostrarToast('Escolha semana/mês e informe a data prevista do encarte.','warn');return;}
+  var btn=document.getElementById('antShelfSave_'+id);if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Salvando';}
+  nfePost_({action:'nfeSalvarProgramacaoEncarteShelfLife',ean:ean,validade:validade,tipo:tipo,dataEncarte:data,editor:(typeof _usuarioSelecionado!=='undefined'?_usuarioSelecionado:'')}).then(function(r){
+    if(!r||!r.ok)throw new Error((r&&r.erro)||'Não foi possível salvar a programação.');
+    mostrarToast(r.mensagem||'Programação salva.','ok');antCarregarShelfLife_(true);
+  }).catch(function(e){mostrarToast(String(e&&e.message||e),'err');}).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-calendar-check"></i> Salvar programação';}});
+}
+function antShelfRetirarProgramacao_(ean,validade){
+  nfePost_({action:'nfeSalvarProgramacaoEncarteShelfLife',ean:ean,validade:validade,remover:true,editor:(typeof _usuarioSelecionado!=='undefined'?_usuarioSelecionado:'')}).then(function(r){
+    if(!r||!r.ok)throw new Error((r&&r.erro)||'Não foi possível retirar a programação.');
+    mostrarToast(r.mensagem||'Programação retirada.','ok');antCarregarShelfLife_(true);
+  }).catch(function(e){mostrarToast(String(e&&e.message||e),'err');});
+}
 function renderAntecipacao() {
-  var filtroSetor = document.getElementById('antFiltroSetor').value;
-  var filtroBusca = (document.getElementById('antFiltroBusca').value || '').toLowerCase().trim();
-  var filtroDataDe = document.getElementById('antFiltroDataDe').value; // YYYY-MM-DD or empty
-  var filtroDataAte = document.getElementById('antFiltroDataAte').value;
-  var filtroQtde = parseInt(document.getElementById('antFiltroMinQtde').value) || 0;
-  var filtroPrecoMin = parseFloat(document.getElementById('antFiltroPrecoMin').value) || 0;
-  var filtroPrecoMax = parseFloat(document.getElementById('antFiltroPrecoMax').value) || 0;
-  var filtroForn = (document.getElementById('antFiltroForn').value || '').toLowerCase().trim();
-  var resolvidos = getResolvidos();
-
-  // Converter datas de filtro em objetos Date
-  var dataDe = filtroDataDe ? new Date(filtroDataDe + 'T00:00:00') : null;
-  var dataAte = filtroDataAte ? new Date(filtroDataAte + 'T23:59:59') : null;
-
-  // Se nenhum filtro de data, usar padrão: hoje até +4 meses
-  var hoje = new Date(); hoje.setHours(0,0,0,0);
-  if (!dataDe) dataDe = hoje;
-  if (!dataAte) dataAte = new Date(hoje.getFullYear(), hoje.getMonth() + 4, 0, 23, 59, 59);
-
-  var candidatos = products.filter(function(p) {
-    if (!p.validade) return false;
-    var d = daysDiff(p.validade);
-    if (d === null) return false;
-    // Não incluir já vencidos
-    if (d < 0) return false;
-    // Filtro de data
-    var parts = p.validade.split('-');
-    var valDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-    if (valDate < dataDe || valDate > dataAte) return false;
-    // Filtros
-    if (filtroSetor && p.setor !== filtroSetor) return false;
-    if (filtroBusca) {
-      var nomeLC = (p.nome || '').toLowerCase();
-      var codLC = (p.cod || '').toLowerCase();
-      if (nomeLC.indexOf(filtroBusca) < 0 && codLC.indexOf(filtroBusca) < 0) return false;
-    }
-    if (filtroQtde > 0 && (parseInt(p.qtde) || 1) < filtroQtde) return false;
-    var preco = p.precoNormal || p.precoPromo || 0;
-    if (filtroPrecoMin > 0 && preco < filtroPrecoMin) return false;
-    if (filtroPrecoMax > 0 && preco > filtroPrecoMax) return false;
-    // Fornecedor
-    if (filtroForn) {
-      var forn = (p.fornecedor || '').toLowerCase();
-      var fornBanco = (bancoFornecedor[(p.cod||'').replace(/[^0-9]/g,'')] || '').toLowerCase();
-      if (forn.indexOf(filtroForn) < 0 && fornBanco.indexOf(filtroForn) < 0) return false;
-    }
-    // Não incluir já resolvidos
-    if (resolvidos.includes(produtoChave(p))) return false;
-    // Só os que têm potencial de encarte
-    return temPotencialEncarte(p);
+  antCarregarShelfLife_(false);
+  var setor=(document.getElementById('antShelfSetor')||{}).value||'';
+  var busca=((document.getElementById('antShelfBusca')||{}).value||'').trim().toLocaleLowerCase('pt-BR');
+  var maxDias=Number((document.getElementById('antShelfUrgencia')||{}).value)||0;
+  var todos=_antShelfLifeDados.filter(function(x){return Number(x.quantidadeAtual)>0&&Number(x.diasParaVencer)>=0;});
+  var semProgramacao=todos.filter(function(x){return !x.programacao||x.programacao.status!=='PROGRAMADO';}).length;
+  var sete=todos.filter(function(x){return Number(x.diasParaVencer)<=7;}).length;
+  var trinta=todos.filter(function(x){return Number(x.diasParaVencer)<=30;}).length;
+  var programados=todos.length-semProgramacao;
+  var resumo=document.getElementById('antShelfResumo');
+  if(resumo)resumo.innerHTML=antShelfResumoCard_('Lotes em potencial',todos.length,'Saldo ativo · shelf life < 80%','#ef4444','ti-alert-triangle')+
+    antShelfResumoCard_('Sem programação',semProgramacao,'Precisam de uma data para o encarte','#f59e0b','ti-calendar-plus')+
+    antShelfResumoCard_('Vencem em até 7 dias',sete,'Prioridade máxima de decisão','#dc2626','ti-alarm')+
+    antShelfResumoCard_('Já programados',programados,'Semana ou mês definido','#16a34a','ti-calendar-check');
+  antShelfAtualizarAviso_(todos.length);
+  var filtrados=todos.filter(function(x){
+    if(setor&&x.setor!==setor)return false;
+    if(maxDias&&Number(x.diasParaVencer)>maxDias)return false;
+    if(busca){var text=[x.produto,x.ean,x.fornecedor,x.numeroNFe].join(' ').toLocaleLowerCase('pt-BR');if(text.indexOf(busca)<0)return false;}
+    var faixa=antShelfFaixa_(x);
+    if(_antShelfFiltroAtual==='SEM_PROGRAMACAO'&&faixa.tipo!=='SEM_PROGRAMACAO')return false;
+    if((_antShelfFiltroAtual==='SEMANA'||_antShelfFiltroAtual==='MES')&&faixa.tipo!==_antShelfFiltroAtual)return false;
+    return true;
   });
-
-  // Agrupar por mês-alvo
-  var grupos = {};
-  candidatos.forEach(function(p) {
-    var ym = getMesAlvo(p.validade);
-    if (!ym) return;
-    if (!grupos[ym]) grupos[ym] = [];
-    grupos[ym].push(p);
+  var container=document.getElementById('antShelfCards');if(!container)return;
+  if(!filtrados.length){container.innerHTML='<div style="padding:34px 18px;text-align:center;border:1px dashed var(--bds);border-radius:14px;color:var(--muted);background:var(--surface)"><i class="ti ti-calendar-check" style="font-size:28px;color:var(--green)"></i><div style="font-size:14px;font-weight:800;color:var(--fg);margin:8px 0 4px">'+(todos.length?'Nenhum lote corresponde a este filtro.':'Nenhum lote de shelf life em potencial com saldo ativo.')+'</div><div style="font-size:12px">'+(todos.length?'Troque o filtro ou ajuste a busca.':'Quando uma NF-e for recebida abaixo de 80% da vida útil e uma ação for definida, o lote aparecerá aqui.')+'</div></div>';return;}
+  var grupos={};
+  filtrados.forEach(function(x){var f=antShelfFaixa_(x);if(!grupos[f.key])grupos[f.key]={faixa:f,itens:[]};grupos[f.key].itens.push(x);});
+  var keys=Object.keys(grupos).sort(function(a,b){
+    if(a==='SEM_PROGRAMACAO')return -1;if(b==='SEM_PROGRAMACAO')return 1;
+    var aa=grupos[a].itens[0],bb=grupos[b].itens[0];return String(aa.programacao.dataEncarte).localeCompare(String(bb.programacao.dataEncarte));
   });
-
-  // Ordenar meses
-  var mesesOrdenados = Object.keys(grupos).sort(mesSort);
-
-  // Atualizar dropdown de seleção de mês
-  var selMes = document.getElementById('antFiltroMesSel');
-  if (selMes) {
-    var valAtual = selMes.value;
-    selMes.innerHTML = '<option value="">-- Selecione o mês --</option>';
-    mesesOrdenados.forEach(function(ym) {
-      var opt = document.createElement('option');
-      opt.value = ym;
-      opt.textContent = mesLabel(ym) + ' (' + grupos[ym].length + ')';
-      selMes.appendChild(opt);
+  var html='';
+  keys.forEach(function(key){
+    var grupo=grupos[key],items=grupo.itens.sort(function(a,b){return Number(a.diasParaVencer)-Number(b.diasParaVencer);});
+    var sem=grupo.faixa.tipo==='SEM_PROGRAMACAO',cor=sem?'#f59e0b':(grupo.faixa.tipo==='SEMANA'?'#3b82f6':'#16a34a');
+    html+='<section style="margin:0 0 16px;border:1px solid '+cor+'44;border-radius:14px;overflow:hidden;background:var(--surface)">';
+    html+='<header style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:'+cor+'12;border-bottom:1px solid '+cor+'33;flex-wrap:wrap"><i class="ti '+(sem?'ti-calendar-plus':grupo.faixa.tipo==='SEMANA'?'ti-calendar-week':'ti-calendar-month')+'" style="font-size:19px;color:'+cor+'"></i><b style="font-size:13px;color:var(--fg)">'+grupo.faixa.label+'</b><span style="font-size:10px;padding:3px 8px;border-radius:999px;background:'+cor+'20;color:'+cor+';font-weight:800">'+items.length+' lote'+(items.length===1?'':'s')+'</span><span style="font-size:11px;color:var(--muted)">'+(sem?'Defina a entrada em uma semana ou mês de encarte':'Produtos organizados por período de entrada')+'</span></header>';
+    html+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,350px),1fr));gap:10px;padding:11px">';
+    items.forEach(function(x){
+      var dias=Number(x.diasParaVencer)||0,urgCor=dias<=7?'#dc2626':dias<=15?'#ea580c':dias<=30?'#d97706':'#2563eb';
+      var id=(String(x.ean||'').replace(/\D/g,'')+'_'+String(x.validade||'').replace(/\D/g,''));
+      var prog=x.programacao&&x.programacao.status==='PROGRAMADO'?x.programacao:null;
+      var venc=String(x.validade||'').split('-').reverse().join('/'),acao=x.acaoVenda==='PROMOCAO_IMEDIATA'?'Promoção imediata':x.acaoVenda==='EXPOSICAO_PRIORITARIA'?'Exposição prioritária':'Reavaliar';
+      var sugestao=x.dataAcao&&x.dataAcao>=antShelfIso_(new Date())&&x.dataAcao<=x.validade?x.dataAcao:antShelfIso_(new Date());
+      html+='<article style="border:1px solid var(--border);border-left:4px solid '+urgCor+';border-radius:12px;padding:12px;background:var(--surface-2)">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="min-width:0"><div style="font-size:13px;font-weight:850;color:var(--fg);line-height:1.3">'+nfeEsc_(x.produto||'Produto')+'</div><div style="font-size:10px;color:var(--muted);margin-top:3px">'+nfeEsc_(x.setor||'--')+' · EAN '+nfeEsc_(x.ean||'--')+'</div></div><span style="flex:none;padding:5px 8px;border-radius:8px;background:'+urgCor+'18;color:'+urgCor+';font-size:11px;font-weight:900">'+dias+' dia'+(dias===1?'':'s')+'</span></div>';
+      html+='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0"><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Saldo atual</div><b style="font-size:13px;color:var(--fg)">'+Number(x.quantidadeAtual||0).toLocaleString('pt-BR')+' '+nfeEsc_(x.unidade||'un.')+'</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Validade</div><b style="font-size:12px;color:var(--fg)">'+venc+'</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Vida útil na entrada</div><b style="font-size:13px;color:'+urgCor+'">'+Math.round(Number(x.vidaUtilRecebidaPct)||0)+'%</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Preço de venda</div><b style="font-size:13px;color:var(--fg)">'+(Number(x.precoVenda)>0?fmtR(x.precoVenda):'--')+'</b></div></div>';
+      html+='<div style="font-size:10px;color:var(--muted);line-height:1.45;margin-bottom:9px">Recebido '+String(x.recebidoEm||'').split('-').reverse().join('/')+' · vida útil atual '+(x.vidaUtilAtualPct==null?'--':Math.round(x.vidaUtilAtualPct)+'%')+'<br>NF-e '+nfeEsc_(x.numeroNFe||'--')+' · '+nfeEsc_(x.fornecedor||'Fornecedor não informado')+'<br>Ação definida no recebimento: <b style="color:var(--fg)">'+acao+'</b> · '+String(x.dataAcao||'').split('-').reverse().join('/')+'</div>';
+      if(prog)html+='<div style="margin-bottom:8px;padding:7px 9px;border-radius:8px;background:rgba(22,163,74,.1);color:#15803d;font-size:11px;font-weight:800"><i class="ti ti-calendar-check"></i> No encarte '+(prog.tipo==='SEMANA'?'da semana de ':'do mês de ')+String(prog.dataEncarte||'').split('-').reverse().join('/')+'</div>';
+      html+='<div style="display:grid;grid-template-columns:minmax(105px,.8fr) minmax(130px,1fr);gap:7px;align-items:end"><label style="font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase">Período<select id="antShelfTipo_'+id+'" style="display:block;width:100%;margin-top:3px;padding:8px;border:1px solid var(--bds);border-radius:8px;background:var(--surface);color:var(--fg);font-size:12px"><option value="SEMANA" '+(!prog||prog.tipo==='SEMANA'?'selected':'')+'>Semana</option><option value="MES" '+(prog&&prog.tipo==='MES'?'selected':'')+'>Mês</option></select></label><label style="font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase">Data prevista<input id="antShelfData_'+id+'" type="date" min="'+antShelfIso_(new Date())+'" max="'+x.validade+'" value="'+(prog?prog.dataEncarte:sugestao)+'" style="display:block;box-sizing:border-box;width:100%;margin-top:3px;padding:7px;border:1px solid var(--bds);border-radius:8px;background:var(--surface);color:var(--fg);font-size:12px"></label></div>';
+      html+='<div style="display:flex;gap:7px;margin-top:8px"><button id="antShelfSave_'+id+'" class="btn btn-sm btn-green" style="flex:1" onclick="antShelfProgramar_(\''+x.ean+'\',\''+x.validade+'\',\''+id+'\')"><i class="ti ti-calendar-check"></i> '+(prog?'Atualizar programação':'Salvar programação')+'</button>';
+      if(prog)html+='<button class="btn btn-sm" title="Retirar programação" onclick="antShelfRetirarProgramacao_(\''+x.ean+'\',\''+x.validade+'\')"><i class="ti ti-calendar-x"></i></button>';
+      html+='</div></article>';
     });
-    if (valAtual && mesesOrdenados.indexOf(valAtual) >= 0) selMes.value = valAtual;
-  }
-
-  // Ordenar produtos dentro de cada grupo: mais urgente primeiro, depois por qtde desc
-  mesesOrdenados.forEach(function(ym) {
-    grupos[ym].sort(function(a, b) {
-      var da = daysDiff(a.validade), db = daysDiff(b.validade);
-      if (da !== db) return da - db;
-      return (parseInt(b.qtde) || 1) - (parseInt(a.qtde) || 1);
-    });
+    html+='</div></section>';
   });
-
-  // Popular listas para shift+click (range selection)
-  _antProdutosPorMes = {};
-  _antProdutosVisiveis = [];
-  mesesOrdenados.forEach(function(ym) {
-    _antProdutosPorMes[ym] = grupos[ym].map(function(p) { return produtoChaveAnt(p); });
-    _antProdutosVisiveis = _antProdutosVisiveis.concat(grupos[ym].map(function(p) { return produtoChaveAnt(p); }));
-  });
-
-  var container = document.getElementById('antMesesContainer');
-  if (mesesOrdenados.length === 0) {
-    container.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="ti ti-search-off"></i>Nenhum produto encontrado com esses filtros.<br>Ajuste a data, quantidade ou outros campos.</div>';
-    atualizarContadorAnt();
-    return;
-  }
-
-  var html = '';
-  mesesOrdenados.forEach(function(ym) {
-    var prods = grupos[ym];
-    var cor = mesCor(ym);
-    var totalQtde = prods.reduce(function(s, p) { return s + (parseInt(p.qtde) || 1); }, 0);
-    var totalValor = prods.reduce(function(s, p) {
-      var preco = p.precoPromo || p.precoNormal || 0;
-      return s + (preco * (parseInt(p.qtde) || 1));
-    }, 0);
-    var selCount = prods.filter(function(p) { return antSelecionados[produtoChaveAnt(p)]; }).length;
-    var allSel = selCount === prods.length;
-
-    html += '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:16px;overflow:hidden">';
-    // Cabeçalho do mês
-    html += '<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:'+cor.bg+';flex-wrap:wrap">';
-    html += '<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">';
-    html += '<div style="width:10px;height:10px;border-radius:50%;background:'+cor.txt+';flex-shrink:0"></div>';
-    html += '<div style="font-size:14px;font-weight:700;color:'+cor.txt+'">'+mesLabel(ym)+'</div>';
-    html += '<span style="font-size:11px;color:var(--muted);background:var(--surface);padding:2px 8px;border-radius:999px;border:1px solid '+cor.border+'">'+prods.length+' produto'+(prods.length!==1?'s':'')+'</span>';
-    html += '</div>';
-    html += '<div style="display:flex;gap:14px;font-size:12px;flex-wrap:wrap;align-items:center">';
-    html += '<span style="color:var(--muted)"><b style="color:var(--fg)">'+totalQtde+'</b> unidades</span>';
-    html += '<span style="color:var(--muted)">Valor: <b style="color:var(--fg)">'+fmtR(totalValor)+'</b></span>';
-    if (selCount > 0) html += '<span style="color:var(--green);font-weight:700">'+selCount+'/'+prods.length+' selecionados</span>';
-    html += '<button class="btn btn-sm" onclick="antSelecionarMesEspec(\''+ym+'\')" title="'+(allSel?'Desmarcar todos':'Marcar todos deste mês')+'" style="font-size:11px;padding:4px 10px">'+(allSel?'<i class="ti ti-x"></i> Desmarcar':'<i class="ti ti-checks"></i> Marcar todos')+'</button>';
-    html += '</div>';
-    html += '</div>';
-
-    // Grid de cards
-    html += '<div class="ant-mes-grid" style="padding:12px 12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px">';
-    prods.forEach(function(p) {
-      var chave = produtoChaveAnt(p);
-      var sel = !!antSelecionados[chave];
-      var days = daysDiff(p.validade);
-      var nomeLimpo = cleanNome(p.nome || '--');
-      var valFmt = p.validade ? p.validade.split('-').reverse().join('/') : '--';
-      var preco = p.precoNormal || 0;
-      var precoPromo = p.precoPromo || 0;
-      var pct = p.pctDesc || 0;
-      var forn = p.fornecedor || bancoFornecedor[(p.cod||'').replace(/[^0-9]/g,'')] || '--';
-      var custoProd = p.custo || bancoCusto[(p.cod||'').replace(/[^0-9]/g,'')] || 0;
-      var qtd = parseInt(p.qtde) || 1;
-
-      // Cor do badge de quantidade baseada no volume
-      function corBadge(q) {
-        if (q >= 20) return { bg: '#fff', border: '#ec4899', txt: '#db2777', shadow: '0 2px 8px rgba(236,72,153,.3)' };
-        if (q >= 10) return { bg: '#fff', border: '#f97316', txt: '#ea580c', shadow: '0 2px 8px rgba(249,115,22,.25)' };
-        if (q >= 5)  return { bg: '#fff', border: '#22c55e', txt: '#16a34a', shadow: '0 2px 8px rgba(34,197,94,.2)' };
-        if (q >= 3)  return { bg: '#fff', border: '#3b82f6', txt: '#2563eb', shadow: '0 2px 6px rgba(59,130,246,.2)' };
-        return { bg: '#fff', border: '#9ca3af', txt: '#6b7280', shadow: '0 1px 4px rgba(156,163,175,.15)' };
-      }
-      var corQtd = corBadge(qtd);
-
-      html += '<div class="ant-prod-card" data-ant-mes="'+ym+'" data-ant-chave="'+chave.replace(/"/g,'&quot;')+'" style="background:var(--surface-2);border:1px solid '+(sel?'var(--green)':'var(--border)')+';border-radius:var(--rl);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;position:relative" onclick="toggleAntSel(event, \''+chave.replace(/'/g,"\\'")+'\', \''+ym+'\')" title="Clique para '+(sel?'remover da':'adicionar à')+' lista do encarte">';
-      
-      // Badge de quantidade (canto superior direito)
-      html += '<div class="ant-prod-qtybadge" style="position:absolute;top:10px;right:10px;min-width:32px;height:32px;padding:0 9px;border-radius:999px;background:'+corQtd.bg+';border:2px solid '+corQtd.border+';box-shadow:'+corQtd.shadow+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:'+corQtd.txt+';letter-spacing:-.5px" title="'+qtd+' unidade'+(qtd>1?'s':'')+' a vencer">'+qtd+'</div>';
-
-      // Checkbox visual
-      html += '<div class="ant-prod-check" style="position:absolute;top:10px;left:10px;width:20px;height:20px;border-radius:5px;border:2px solid '+(sel?'var(--green)':'var(--bds)')+';background:'+(sel?'var(--green)':'transparent')+';display:flex;align-items:center;justify-content:center;transition:all .15s">';
-      if (sel) html += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-      html += '</div>';
-
-      // Conteúdo do card
-      html += '<div class="ant-prod-body" style="padding-left:28px;padding-right:36px">';
-      html += '<div class="ant-prod-name" style="font-size:13px;font-weight:700;color:var(--fg);line-height:1.3;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+nomeLimpo+'">'+nomeLimpo+'</div>';
-      
-      // Linha de info: vencimento + dias
-      html += '<div class="ant-prod-badges" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">';
-      html += '<span style="font-size:11px;color:var(--muted);background:var(--surface);padding:2px 7px;border-radius:4px;font-weight:600">'+valFmt+'</span>';
-      html += '<span style="font-size:11px;font-weight:700;color:'+(days<=3?'#f87171':days<=7?'#fb923c':days<=15?'#fbbf24':'#34d399')+'">'+
-        (days===0?'Hoje':days<=3?days+'d':days+'d')+'</span>';
-      html += '<span style="font-size:11px;color:var(--muted);background:'+(p.setor==='FLV'?'rgba(52,211,153,.12)':p.setor==='Bebidas'?'rgba(59,130,246,.12)':'var(--surface)')+';padding:2px 7px;border-radius:4px">'+( p.setor||'--')+'</span>';
-      html += '</div>';
-
-      // Dados do produto em grid
-      html += '<div class="ant-prod-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:11px">';
-      html += '<div><span style="color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em">Preço</span><div style="font-weight:700;color:var(--fg)">'+fmtR(preco)+'</div></div>';
-      if (precoPromo > 0) {
-        html += '<div><span style="color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em">Promo</span><div style="font-weight:700;color:var(--green)">'+fmtR(precoPromo)+'</div></div>';
-      } else {
-        html += '<div><span style="color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em">Custo</span><div style="font-weight:600;color:var(--muted)">'+fmtR(custoProd)+'</div></div>';
-      }
-      html += '</div>';
-
-      // Barra de indicadores de potencial
-      html += '<div class="ant-prod-tags" style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap">';
-      if (qtd >= 5) html += '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(52,211,153,.15);color:#34d399;white-space:nowrap">VOLUME</span>';
-      if (preco >= 20) html += '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(59,130,246,.15);color:#60a5fa;white-space:nowrap">TICKET ALTO</span>';
-      if (pct >= 10) html += '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(245,158,11,.15);color:#fbbf24;white-space:nowrap">'+fmtPct(pct)+' OFF</span>';
-      if (precoPromo > 0 && preco > 0) html += '<span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:rgba(239,68,68,.12);color:#f87171;white-space:nowrap">PROMO ATIVA</span>';
-      html += '</div>';
-
-      // Fornecedor (se disponível)
-      if (forn && forn !== '--') {
-        html += '<div class="ant-prod-forn" style="font-size:10px;color:var(--muted);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+forn+'"><i class="ti ti-truck-delivery" style="opacity:.5"></i> '+forn+'</div>';
-      }
-
-      html += '</div>'; // padding-left
-      html += '</div>'; // card
-    });
-    html += '</div>'; // grid
-    html += '</div>'; // month container
-  });
-
-  container.innerHTML = html;
-  atualizarContadorAnt();
-}
-
-function toggleAntSel(event, chave, mes) {
-  var shiftPressionado = event && event.shiftKey;
-  
-  if (shiftPressionado && _antUltimoClicado) {
-    // Shift+click: selecionar range dentro do mesmo mês
-    var listaMes = _antProdutosPorMes[mes] || [];
-    var idxUltimo = listaMes.indexOf(_antUltimoClicado);
-    var idxAtual = listaMes.indexOf(chave);
-    
-    if (idxUltimo >= 0 && idxAtual >= 0) {
-      var inicio = Math.min(idxUltimo, idxAtual);
-      var fim = Math.max(idxUltimo, idxAtual);
-      
-      // Selecionar todos no range
-      for (var i = inicio; i <= fim; i++) {
-        antSelecionados[listaMes[i]] = true;
-      }
-    }
-  } else {
-    // Click normal: toggle do item
-    if (antSelecionados[chave]) {
-      delete antSelecionados[chave];
-    } else {
-      antSelecionados[chave] = true;
-    }
-  }
-  
-  // Atualizar último clicado
-  _antUltimoClicado = chave;
-  
-  saveAntSel();
-  renderAntecipacao();
-}
-
-// Selecionar/desmarcar todos os produtos de um mês específico pelo botão no header
-function antSelecionarMesEspec(ym) {
-  var meses = document.querySelectorAll('#antMesesContainer [data-ant-mes]');
-  var todosSel = true;
-  // Checar se todos do mês estão selecionados
-  meses.forEach(function(card) {
-    if (card.getAttribute('data-ant-mes') === ym) {
-      var chave = card.getAttribute('data-ant-chave');
-      if (!antSelecionados[chave]) todosSel = false;
-    }
-  });
-  // Se todos selecionados → desmarcar. Senão → marcar todos
-  meses.forEach(function(card) {
-    if (card.getAttribute('data-ant-mes') === ym) {
-      var chave = card.getAttribute('data-ant-chave');
-      if (todosSel) {
-        delete antSelecionados[chave];
-      } else {
-        antSelecionados[chave] = true;
-      }
-    }
-  });
-  saveAntSel();
-  renderAntecipacao();
-}
-
-// Selecionar mês via dropdown
-function antSelecionarMes() {
-  var ym = document.getElementById('antFiltroMesSel').value;
-  if (!ym) { mostrarToast('Selecione um mês no campo ao lado.','warn'); return; }
-  // Seleciona todos os produtos visíveis desse mês
-  var meses = document.querySelectorAll('#antMesesContainer [data-ant-mes]');
-  var count = 0;
-  meses.forEach(function(card) {
-    if (card.getAttribute('data-ant-mes') === ym) {
-      var chave = card.getAttribute('data-ant-chave');
-      antSelecionados[chave] = true;
-      count++;
-    }
-  });
-  saveAntSel();
-  if (count > 0) mostrarToast(count + ' produtos de ' + mesLabel(ym) + ' selecionados!','ok');
-  else mostrarToast('Nenhum produto encontrado para esse mês.','warn');
-  renderAntecipacao();
-}
-
-function antToggleFiltros() {
-  var body = document.getElementById('antFiltrosBody');
-  var chevron = document.getElementById('antFiltrosChevron');
-  var aberto = body.style.display !== 'none';
-  body.style.display = aberto ? 'none' : '';
-  if (chevron) chevron.style.transform = aberto ? '' : 'rotate(180deg)';
-}
-
-function antLimparSelecao() {
-  antSelecionados = {};
-  _antUltimoClicado = null;
-  saveAntSel();
-  renderAntecipacao();
-}
-
-function antLimparFiltros() {
-  document.getElementById('antFiltroSetor').value = '';
-  document.getElementById('antFiltroBusca').value = '';
-  document.getElementById('antFiltroDataDe').value = '';
-  document.getElementById('antFiltroDataAte').value = '';
-  document.getElementById('antFiltroMinQtde').value = '';
-  document.getElementById('antFiltroPrecoMin').value = '';
-  document.getElementById('antFiltroPrecoMax').value = '';
-  document.getElementById('antFiltroForn').value = '';
-  document.getElementById('antFiltroMesSel').value = '';
-  renderAntecipacao();
-}
-
-// Atalhos de data
-function antAtalhoData(tipo) {
-  var hoje = new Date(); hoje.setHours(0,0,0,0);
-  var de, ate;
-  function fmt(d) { return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0'); }
-
-  if (tipo === 'mesAtual') {
-    de = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    ate = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0);
-  } else if (tipo === 'proximoMes') {
-    de = new Date(hoje.getFullYear(), hoje.getMonth()+1, 1);
-    ate = new Date(hoje.getFullYear(), hoje.getMonth()+2, 0);
-  } else if (tipo === 'julho') {
-    de = new Date(2026, 6, 1); ate = new Date(2026, 6, 31);
-  } else if (tipo === 'agosto') {
-    de = new Date(2026, 7, 1); ate = new Date(2026, 7, 31);
-  } else if (tipo === 'setembro') {
-    de = new Date(2026, 8, 1); ate = new Date(2026, 8, 30);
-  } else if (tipo === '30d') {
-    de = new Date(hoje); ate = new Date(hoje.getTime() + 30*86400000);
-  } else if (tipo === '60d') {
-    de = new Date(hoje); ate = new Date(hoje.getTime() + 60*86400000);
-  } else if (tipo === '90d') {
-    de = new Date(hoje); ate = new Date(hoje.getTime() + 90*86400000);
-  }
-  document.getElementById('antFiltroDataDe').value = fmt(de);
-  document.getElementById('antFiltroDataAte').value = fmt(ate);
-  renderAntecipacao();
-}
-
-function atualizarContadorAnt() {
-  var count = Object.keys(antSelecionados).length;
-  var el = document.getElementById('antSelCount');
-  if (el) el.textContent = count + ' selecionado' + (count !== 1 ? 's' : '');
-  var badge = document.getElementById('asBadgeAnt');
-  if (badge) {
-    if (count > 0) { badge.textContent = count; badge.style.display = 'inline-flex'; }
-    else { badge.style.display = 'none'; }
-  }
-}
-
-// Busca produto pela chave no array products
-function buscarProdutoPorChave(chave) {
-  var partes = chave.split('_');
-  var cod = partes[0] || '';
-  var nome = partes.slice(1, -1).join('_');
-  var val = partes[partes.length - 1];
-  for (var i = 0; i < products.length; i++) {
-    var p = products[i];
-    if ((p.cod || '') === cod && (p.nome || '') === nome && (p.validade || '') === val) return p;
-  }
-  return null;
-}
-
-function abrirRelatorioAntecipacao() {
-  var selecionados = [];
-  for (var chave in antSelecionados) {
-    if (antSelecionados[chave]) {
-      var p = buscarProdutoPorChave(chave);
-      if (p) selecionados.push(p);
-    }
-  }
-
-  if (selecionados.length === 0) {
-    mostrarToast('Selecione ao menos um produto para gerar o PDF.','warn');
-    return;
-  }
-
-  // Agrupar por mês
-  var grupos = {};
-  selecionados.forEach(function(p) {
-    var ym = getMesAlvo(p.validade);
-    if (!ym) return;
-    if (!grupos[ym]) grupos[ym] = [];
-    grupos[ym].push(p);
-  });
-  var mesesOrdenados = Object.keys(grupos).sort(mesSort);
-
-  var dataHoje = new Date();
-  var dataFmt = dataHoje.toLocaleDateString('pt-BR', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-  var dataFmtCurta = dataHoje.toLocaleDateString('pt-BR');
-
-  var totalQtde = selecionados.reduce(function(s,p){ return s+qtdeEfetiva(p.qtde); }, 0);
-  var totalValor = selecionados.reduce(function(s,p){
-    var preco = p.precoPromo || p.precoNormal || 0;
-    return s + (preco * qtdeEfetiva(p.qtde));
-  }, 0);
-
-  var cardsHtml = '';
-  mesesOrdenados.forEach(function(ym) {
-    var prods = grupos[ym];
-    var cor = mesCor(ym);
-    cardsHtml += '<div style="margin-bottom:18px">';
-    cardsHtml += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 12px;background:'+cor.bg+';border-radius:10px;border:1px solid '+cor.border+'">';
-    cardsHtml += '<div style="width:10px;height:10px;border-radius:50%;background:'+cor.txt+'"></div>';
-    cardsHtml += '<div style="font-size:15px;font-weight:800;color:'+cor.txt+'">'+mesLabel(ym)+'</div>';
-    cardsHtml += '<span style="font-size:11px;color:#666;margin-left:auto">'+prods.length+' produto'+(prods.length!==1?'s':'')+'</span>';
-    cardsHtml += '</div>';
-
-    prods.sort(function(a,b) { return (daysDiff(a.validade)||0) - (daysDiff(b.validade)||0); });
-    prods.forEach(function(p) {
-      var nomeLimpo = cleanNome(p.nome || '--');
-      var valFmt = p.validade ? p.validade.split('-').reverse().join('/') : '--';
-      var preco = p.precoNormal || 0;
-      var precoPromo = p.precoPromo || 0;
-      var pct = p.pctDesc || 0;
-      var qtd = parseInt(p.qtde) || 1;
-      var days = daysDiff(p.validade);
-
-      // Cor do badge baseado na quantidade
-      var badgeCor;
-      if (qtd >= 20) badgeCor = { border: '#ec4899', txt: '#db2777', shadow: 'rgba(236,72,153,.4)' };
-      else if (qtd >= 10) badgeCor = { border: '#f97316', txt: '#ea580c', shadow: 'rgba(249,115,22,.35)' };
-      else if (qtd >= 5) badgeCor = { border: '#22c55e', txt: '#16a34a', shadow: 'rgba(34,197,94,.3)' };
-      else if (qtd >= 3) badgeCor = { border: '#3b82f6', txt: '#2563eb', shadow: 'rgba(59,130,246,.25)' };
-      else badgeCor = { border: '#9ca3af', txt: '#6b7280', shadow: 'rgba(156,163,175,.2)' };
-
-      cardsHtml += '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:10px">';
-      // Header do card
-      var headerBg = days <= 3 ? 'linear-gradient(135deg,#92190c,#b91c1c)' : days <= 7 ? 'linear-gradient(135deg,#9a3412,#c2410c)' : days <= 15 ? 'linear-gradient(135deg,#92400e,#b45309)' : 'linear-gradient(135deg,#065f46,#047857)';
-      cardsHtml += '<div style="background:'+headerBg+';padding:13px 14px 13px 54px;position:relative;min-height:58px;display:flex;flex-direction:column;justify-content:center">';
-      cardsHtml += '<span style="position:absolute;top:50%;left:10px;transform:translateY(-50%);min-width:34px;height:34px;padding:0 8px;border-radius:999px;background:#fff;border:2px solid '+badgeCor.border+';color:'+badgeCor.txt+';font-size:16px;font-weight:900;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px '+badgeCor.shadow+';white-space:nowrap">'+qtd+'</span>';
-      cardsHtml += '<div style="font-size:14px;font-weight:800;color:#fff;line-height:1.25;padding-right:8px">'+nomeLimpo+'</div>';
-      cardsHtml += '<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:3px">'+( p.setor||'--')+' · Vence '+valFmt+(days!==null?' ('+days+'d)':'')+'</div>';
-      cardsHtml += '</div>';
-      // Body do card
-      cardsHtml += '<div style="padding:10px 14px 12px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px 10px">';
-      cardsHtml += '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:3px">Preço Normal</div><div style="font-size:13px;font-weight:700;color:#1c1c1e">'+fmtR(preco)+'</div></div>';
-      if (precoPromo > 0) {
-        cardsHtml += '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:3px">Preço Promo</div><div style="font-size:15px;font-weight:900;color:#047857">'+fmtR(precoPromo)+'</div></div>';
-      } else {
-        cardsHtml += '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:3px">Custo</div><div style="font-size:13px;font-weight:600;color:#666">'+fmtR(p.custo||0)+'</div></div>';
-      }
-      if (pct > 0) {
-        cardsHtml += '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:3px">Desconto</div><div style="font-size:15px;font-weight:900;color:#b45309">'+fmtPct(pct)+'</div></div>';
-      }
-      var valorTotal = (precoPromo || preco) * qtd;
-      cardsHtml += '<div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:3px">Valor Total</div><div style="font-size:13px;font-weight:800;color:#1c1c1e">'+fmtR(valorTotal)+'</div></div>';
-      cardsHtml += '</div>';
-      // Fornecedor
-      var forn = p.fornecedor || '--';
-      if (forn && forn !== '--') {
-        cardsHtml += '<div style="padding:6px 14px 10px;font-size:10px;color:#999;border-top:1px solid #eee;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">🏪 '+forn+'</div>';
-      }
-      cardsHtml += '</div>';
-    });
-    cardsHtml += '</div>';
-  });
-
-  var html = [
-    '<!DOCTYPE html><html lang="pt-BR"><head>',
-    '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">',
-    '<title>Antecipação Encarte - '+dataFmtCurta+'</title>',
-    '<style>',
-      '*{box-sizing:border-box;margin:0;padding:0}',
-      'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f2f2f7;color:#1c1c1e}',
-      '.topo{background:linear-gradient(135deg,#b91c1c,#7f1d1d);color:#fff;padding:20px 16px 18px;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,.25)}',
-      '.topo-linha{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}',
-      '.topo-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;opacity:.75;margin-bottom:4px}',
-      '.topo h1{font-size:22px;font-weight:900;letter-spacing:-.4px;line-height:1.1}',
-      '.topo-data{font-size:12px;opacity:.8;margin-top:5px;text-transform:capitalize}',
-      '.topo-badge{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);border-radius:999px;padding:5px 14px;font-size:14px;font-weight:800;white-space:nowrap;flex-shrink:0;margin-top:2px}',
-      '.resumo{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:14px 14px 6px}',
-      '.res-card{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.08)}',
-      '.res-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#999;margin-bottom:4px}',
-      '.res-val{font-size:22px;font-weight:900;line-height:1}',
-      '.res-val.red{color:#b91c1c}',
-      '.res-val.green{color:#047857}',
-      '.res-val.amber{color:#b45309}',
-      '.cards{padding:8px 14px 16px}',
-      '.print-btn{display:block;margin:0 14px 14px;background:#b91c1c;color:#fff;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:800;text-align:center;cursor:pointer;width:calc(100% - 28px);letter-spacing:.02em}',
-      '.rodape{text-align:center;font-size:11px;color:#bbb;padding:0 14px 24px}',
-      '@media print{.print-btn,.topo{position:relative;box-shadow:none}.print-btn{display:none}}',
-    '</style></head><body>',
-    '<div class="topo">',
-      '<div class="topo-linha">',
-        '<div>',
-          '<div class="topo-label">Boas Compras · Antecipação de Encarte</div>',
-          '<h1>📋 Produtos para o Próximo Encarte</h1>',
-          '<div class="topo-data">'+dataFmt+'</div>',
-        '</div>',
-        '<div class="topo-badge">'+selecionados.length+(selecionados.length>1?' itens':' item')+'</div>',
-      '</div>',
-    '</div>',
-    '<div class="resumo">',
-      '<div class="res-card"><div class="res-lbl">Produtos</div><div class="res-val red">'+selecionados.length+'</div></div>',
-      '<div class="res-card"><div class="res-lbl">Unidades</div><div class="res-val amber">'+totalQtde+'</div></div>',
-      '<div class="res-card"><div class="res-lbl">Valor Total</div><div class="res-val green">'+fmtR(totalValor)+'</div></div>',
-    '</div>',
-    '<div class="cards">',cardsHtml,'</div>',
-    '<button class="print-btn" onclick="window.print()">🖨️  Salvar como PDF</button>',
-    '<div class="rodape">AURA Vencimentos · Antecipação de Encarte · '+new Date().toLocaleString('pt-BR')+'</div>',
-    '</body></html>'
-  ].join('');
-
-  var janela = window.open('', '_blank', 'width=430,height=860');
-  janela.document.write(html);
-  janela.document.close();
+  container.innerHTML=html;
+  document.querySelectorAll('.ant-shelf-tab').forEach(function(b){var ativo=b.getAttribute('data-filtro')===_antShelfFiltroAtual;b.style.background=ativo?'var(--green)':'var(--surface)';b.style.color=ativo?'#fff':'var(--fg)';b.style.borderColor=ativo?'var(--green)':'var(--bds)';});
 }
 
 // ── Relatório de Retirada (original) ────────────────────────────────────────────────────────
@@ -16131,6 +15632,7 @@ function carregarColaboradoresUniversal_(forcar){
     .then(function(j){
       if(!j||!j.ok||!Array.isArray(j.usuarios))throw new Error((j&&j.erro)||'Resposta inválida de getUsuarios');
       COLABORADORES_TODOS=j.usuarios.slice();
+      try{if(typeof auraAtualizarAcessoTarefas_==='function')auraAtualizarAcessoTarefas_();}catch(ePerm){}
       COLABORADORES=COLABORADORES_TODOS.filter(function(c){return c.ativo!==false&&_colabNormEmail_(c.email);});
       _colabUniversalCarregado=true;
       _colabUniversalPromise=null;
@@ -16187,7 +15689,7 @@ _ucGetUsers=function(){
 _ucResolveNome=function(email){return _colabNomePorEmail_(email);};
 _ucSaveUser=function(email,nome){
   var existente=_colabPorEmail_(email);
-  return _colabPost_({action:'salvarUsuario',usuario:{
+  return _colabPost_({action:'salvarUsuario',actor:_usuarioSelecionado,usuario:{
     id:existente&&existente.id||'',linha:existente&&existente.linha||'',
     email:existente&&existente.email||_colabNormEmail_(email),nome:String(nome||'').trim(),
     aniv:existente&&existente.aniv||'',ativo:existente?existente.ativo!==false:true,
@@ -16199,7 +15701,7 @@ _ucSalvarUser=async function(email){
   var nome=inp?inp.value.trim():'';
   if(!nome){if(inp){inp.style.borderColor='#ef4444';inp.focus();}return;}
   var existente=_colabPorEmail_(email);
-  var res=await _colabPost_({action:'salvarUsuario',usuario:{
+  var res=await _colabPost_({action:'salvarUsuario',actor:_usuarioSelecionado,usuario:{
     id:existente&&existente.id||'',linha:existente&&existente.linha||'',
     email:existente&&existente.email||_colabNormEmail_(email),nome:nome,
     aniv:existente&&existente.aniv||'',ativo:existente?existente.ativo!==false:true,
@@ -16332,9 +15834,27 @@ function renderLembreteAniversariosGestor_(){
   el.innerHTML='<div class="bday-gestor-hd"><div><div class="bday-gestor-title"><i class="ti ti-cake"></i> Aniversários da equipe — '+nomeMes.charAt(0).toUpperCase()+nomeMes.slice(1)+'</div><div class="bday-gestor-sub">'+sub+'</div></div><div style="font-size:9px;color:var(--tx2)">Somente colaboradores ativos</div></div>'+(itens?'<div class="bday-list">'+itens+'</div>':'');
 }
 
+function _colabPermissaoPadraoForm_(nome,email){
+  var n=String((nome||'')+' '+(email||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(),setores=['Açougue','Bazar','Bebidas','Congelados','Frios','Horti','Laticínios','Limpeza','Outros','Padaria','Perfumaria','Pet','Pilhas/Baterias','Seca','Seca doce'];
+  var p={recebeTarefas:false,veTarefas:false,executaTarefas:false,setoresTarefas:'',podeConsultar:true,podeLancar:false,podeEditar:false,acessaNFe:false,editaNFe:false,gerenciaUsuarios:false};
+  function all_(){p.setoresTarefas=setores.join('; ');}
+  if(n.indexOf('leonardo')>=0){p.podeLancar=true;p.podeEditar=true;p.acessaNFe=true;p.editaNFe=true;p.gerenciaUsuarios=true;}
+  else if(n.indexOf('1960 nf')>=0){p.podeLancar=true;p.podeEditar=true;p.acessaNFe=true;p.editaNFe=true;}
+  else if(n.indexOf('cesar')>=0||n.indexOf('taiti')>=0){p.podeLancar=true;p.podeEditar=true;p.acessaNFe=true;}
+  else if(n.indexOf('eduardo')>=0||n.indexOf('vini')>=0){p.veTarefas=true;p.executaTarefas=true;all_();p.podeLancar=true;p.acessaNFe=true;}
+  else if(n.indexOf('nataniele')>=0||n.indexOf('werner')>=0){p.recebeTarefas=true;p.veTarefas=true;p.executaTarefas=true;all_();p.podeLancar=true;p.acessaNFe=true;}
+  else if(n.indexOf('wagner')>=0){p.recebeTarefas=true;p.veTarefas=true;p.executaTarefas=true;all_();p.podeLancar=true;p.podeEditar=true;p.acessaNFe=true;p.editaNFe=true;}
+  return p;
+}
 function colabAdminAbrirModal(chave){
   var c=chave?_colabPorChave_(chave):null;
   var aliases=c&&Array.isArray(c.aliases)?c.aliases:[];
+  var permBase=c||_colabPermissaoPadraoForm_((document.getElementById('colabFormNome')||{}).value||'',(document.getElementById('colabFormEmail')||{}).value||'');
+  if(!c)permBase=_colabPermissaoPadraoForm_('','');
+  var setorLista=['Açougue','Bazar','Bebidas','Congelados','Frios','Horti','Laticínios','Limpeza','Outros','Padaria','Perfumaria','Pet','Pilhas/Baterias','Seca','Seca doce'];
+  var setoresAtuais=String(permBase.setoresTarefas||'').split(/[;,\n]+/).map(function(x){return x.trim();});
+  function permCheck_(id,label,valor,sub){return '<label class="colab-perm-check"><input type="checkbox" id="colabPerm_'+id+'" '+(valor?'checked':'')+'><span><b>'+label+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</span></label>';}
+  var setoresHtml=setorLista.map(function(s){return '<label class="colab-perm-sector"><input type="checkbox" class="colabPermSetor" value="'+escHtml(s)+'" '+(setoresAtuais.indexOf(s)>=0?'checked':'')+'><span>'+escHtml(s)+'</span></label>';}).join('');
   var modal=document.createElement('div');
   modal.className='colab-modal-back';modal.id='colabAdminModal';
   modal.innerHTML='<div class="colab-modal">'
@@ -16344,6 +15864,25 @@ function colabAdminAbrirModal(chave){
       +'<div class="colab-field full"><label>E-mail atual</label><input id="colabFormEmail" type="email" value="'+escHtml(c&&c.email||'')+'" placeholder="email@dominio.com"></div>'
       +'<div class="colab-field"><label>Aniversário (DD/MM)</label><input id="colabFormAniv" value="'+escHtml(c&&c.aniv||'')+'" placeholder="29/04"></div>'
       +'<div class="colab-field"><label>Situação</label><div style="height:34px;display:flex;align-items:center;gap:7px"><input id="colabFormAtivo" type="checkbox" style="width:auto" '+(!c||c.ativo!==false?'checked':'')+'><span style="font-size:11px;color:var(--tx2)">Ativo</span></div></div>'
+      +'<div class="colab-field full"><label>Permissões do AURA</label><div class="colab-perm-panel">'
+        +'<section><b class="colab-perm-title">Tarefas</b><div class="colab-perm-grid">'
+          +permCheck_('recebeTarefas','Recebe tarefas',!!permBase.recebeTarefas,'Entra nas atribuições automáticas.')
+          +permCheck_('veTarefas','Vê tarefas',!!permBase.veTarefas,'Acesso a avisos, contadores, listas e histórico.')
+          +permCheck_('executaTarefas','Executa tarefas',!!permBase.executaTarefas,'Pode confirmar ações e atualizar a tarefa.')
+        +'</div><div class="colab-perm-sector-title">Setores permitidos</div><div class="colab-perm-sectors">'+setoresHtml+'</div></section>'
+        +'<section><b class="colab-perm-title">Operação</b><div class="colab-perm-grid">'
+          +permCheck_('podeConsultar','Consultar informações',!!permBase.podeConsultar)
+          +permCheck_('podeLancar','Lançar novos dados',!!permBase.podeLancar)
+          +permCheck_('podeEditar','Editar dados lançados',!!permBase.podeEditar)
+        +'</div></section>'
+        +'<section><b class="colab-perm-title">Conferência NF-e</b><div class="colab-perm-grid">'
+          +permCheck_('acessaNFe','Acessa e confere NF-e',!!permBase.acessaNFe)
+          +permCheck_('editaNFe','Edita itens de NF-e',!!permBase.editaNFe)
+        +'</div></section>'
+        +'<section><b class="colab-perm-title">Administração</b><div class="colab-perm-grid">'
+          +permCheck_('gerenciaUsuarios','Gerencia colaboradores e permissões',!!permBase.gerenciaUsuarios)
+        +'</div></section>'
+      +'</div><small class="colab-perm-note">As opções são independentes. Para não mostrar nenhuma informação de tarefas, desative “Recebe”, “Vê” e “Executa”.</small></div>'
       +(c?'<div class="colab-field full"><label>Referência do cadastro</label><input value="'+escHtml(c.id||('Linha '+(c.linha||'—')))+'" disabled></div>':'')
       +(aliases.length?'<div class="colab-field full"><label>E-mails anteriores preservados</label><input value="'+escHtml(aliases.join('; '))+'" disabled></div>':'')
     +'</div>'
@@ -16354,6 +15893,9 @@ function colabAdminAbrirModal(chave){
     +'</div></div>';
   document.body.appendChild(modal);
   modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
+  var permView=document.getElementById('colabPerm_veTarefas'),permReceive=document.getElementById('colabPerm_recebeTarefas'),permExec=document.getElementById('colabPerm_executaTarefas');
+  if(permView)permView.addEventListener('change',function(){if(!this.checked){if(permReceive)permReceive.checked=false;if(permExec)permExec.checked=false;}});
+  [permReceive,permExec].forEach(function(x){if(x)x.addEventListener('change',function(){if(this.checked&&permView)permView.checked=true;});});
   setTimeout(function(){var n=document.getElementById('colabFormNome');if(n)n.focus();},40);
 }
 
@@ -16363,15 +15905,17 @@ async function colabAdminSalvar(chave){
   var email=_colabNormEmail_((document.getElementById('colabFormEmail')||{}).value||'');
   var aniv=String((document.getElementById('colabFormAniv')||{}).value||'').trim();
   var ativo=!!((document.getElementById('colabFormAtivo')||{}).checked);
+  var permissoes={};['recebeTarefas','veTarefas','executaTarefas','podeConsultar','podeLancar','podeEditar','acessaNFe','editaNFe','gerenciaUsuarios'].forEach(function(k){permissoes[k]=!!((document.getElementById('colabPerm_'+k)||{}).checked);});
+  permissoes.setoresTarefas=Array.prototype.map.call(document.querySelectorAll('.colabPermSetor:checked'),function(x){return x.value;});
   if(!nome){mostrarToast('Informe o nome completo.','warn');return;}
 
   var btn=document.getElementById('colabFormSalvar');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Salvando...';}
   var res=await _colabPost_({
-    action:'salvarUsuario',
+    action:'salvarUsuario',actor:_usuarioSelecionado,
     usuario:{
       id:c&&c.id||'',linha:c&&c.linha||'',email:email,nome:nome,aniv:aniv,ativo:ativo,
-      aliases:c&&c.aliases||[]
+      aliases:c&&c.aliases||[],permissoes:permissoes
     }
   });
   if(!res||!res.ok){
@@ -16386,7 +15930,7 @@ async function colabAdminSalvar(chave){
   if(!c && ativo===false){
     var recem=_colabPorEmail_(email);
     if(recem && recem.ativo!==false){
-      await _colabPost_({action:'ativarDesativarUsuario',id:recem.id||'',linha:recem.linha||'',ativo:false});
+      await _colabPost_({action:'ativarDesativarUsuario',actor:_usuarioSelecionado,id:recem.id||'',linha:recem.linha||'',ativo:false});
       await carregarColaboradoresUniversal_(true);
     }
   }
@@ -16397,7 +15941,7 @@ async function colabAdminSalvar(chave){
 async function colabAdminAlternar(chave,ativo){
   var c=_colabPorChave_(chave);
   if(!c){mostrarToast('Colaborador não encontrado.','err');return;}
-  var res=await _colabPost_({action:'ativarDesativarUsuario',id:c.id||'',linha:c.linha||'',ativo:!!ativo});
+  var res=await _colabPost_({action:'ativarDesativarUsuario',actor:_usuarioSelecionado,id:c.id||'',linha:c.linha||'',ativo:!!ativo});
   if(!res||!res.ok){mostrarToast('Erro ao alterar colaborador: '+((res&&res.erro)||'falha'),'err');return;}
   await carregarColaboradoresUniversal_(true);
   colabAdminRender();
@@ -16440,7 +15984,7 @@ async function colabEfetivarTesteConfirmar(){
   if(email===COLAB_EMAIL_TESTE){mostrarToast('O e-mail definitivo precisa ser diferente do login de teste.','warn');return;}
   if(!confirm('Transferir TODO o histórico atual de '+COLAB_EMAIL_TESTE+' para '+email+' e liberar o login de teste?'))return;
   var btn=document.getElementById('colabEfetivarBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Migrando...';}
-  var res=await _colabPost_({action:'efetivarUsuarioTeste',emailDestino:email,nomeDestino:nome,anivDestino:aniv});
+  var res=await _colabPost_({action:'efetivarUsuarioTeste',actor:_usuarioSelecionado,emailDestino:email,nomeDestino:nome,anivDestino:aniv});
   if(!res||!res.ok){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-transfer"></i> Transferir e efetivar';}mostrarToast('Erro na efetivação: '+((res&&res.erro)||'falha'),'err');return;}
   var modal=document.getElementById('colabEfetivarModal');if(modal)modal.remove();
   await carregarColaboradoresUniversal_(true);colabAdminRender();
@@ -16478,7 +16022,7 @@ async function colabUnificarConfirmar(){
   var o=_colabPorChave_(ko),d=_colabPorChave_(kd);if(!o||!d){mostrarToast('Cadastro não encontrado.','err');return;}
   if(!confirm('Unificar '+(o.nome||o.email)+' ('+o.email+') em '+(d.nome||d.email)+' ('+d.email+')? O cadastro de origem será removido.'))return;
   var btn=document.getElementById('colabUnificarBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2 spin"></i> Unificando...';}
-  var res=await _colabPost_({action:'unificarUsuarios',origemId:o.id||'',origemLinha:o.linha||'',emailOrigem:o.email||'',destinoId:d.id||'',destinoLinha:d.linha||'',emailDestino:d.email||''});
+  var res=await _colabPost_({action:'unificarUsuarios',actor:_usuarioSelecionado,origemId:o.id||'',origemLinha:o.linha||'',emailOrigem:o.email||'',destinoId:d.id||'',destinoLinha:d.linha||'',emailDestino:d.email||''});
   if(!res||!res.ok){if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-arrows-join"></i> Unificar';}mostrarToast('Erro ao unificar: '+((res&&res.erro)||'falha'),'err');return;}
   var modal=document.getElementById('colabUnificarModal');if(modal)modal.remove();
   await carregarColaboradoresUniversal_(true);colabAdminRender();
@@ -18847,34 +18391,18 @@ function _auraOnScanSuccess(code) {
   window.nfeValidarEan_=function(idx){
     var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx],inp=document.getElementById('nfeEan_'+idx),ean=nfeDigitos_((inp&&inp.value)||(it&&it.eanAura)||'');if(!it||!ean){if(typeof nfeValidarServidor_==='function')return nfeValidarServidor_(idx);return;}
     ensure();var p=core.lookup(ean);
-    if(p){it.eanAura=p.ean;it.nomeAura=p.descricao||'';it.unidadeAura=p.unidade||it.uCom||'';it.unidadeDestinoSugerida=p.unidade||it.unidadeDestinoSugerida||it.unidadeAura;it.status='encontrado';it.origemVinculo='manual_local';it.fotoDataUrl='';it.fotoCarregando=false;nfeStatus_('ok','Produto vinculado instantaneamente pelo índice local.');nfeSalvarRascunho_();nfeRenderNota_();nfeRevalidarAvancoPendenciaAura_(idx);
+    if(p){it.eanAura=p.ean;it.nomeAura=p.descricao||'';it.unidadeAura=p.unidade||it.uCom||'';it.unidadeDestinoSugerida=p.unidade||it.unidadeDestinoSugerida||it.unidadeAura;it.custoBanco=Number(p.custo)||Number(it.custoBanco)||0;it.precoBanco=Number(p.preco)||Number(it.precoBanco)||0;it.status='encontrado';it.origemVinculo='manual_local';it.fotoDataUrl='';it.fotoCarregando=false;nfeStatus_('ok','Produto vinculado instantaneamente pelo índice local.');nfeSalvarRascunho_();nfeRenderNota_();nfeRevalidarAvancoPendenciaAura_(idx);
       // Enriquecimento assíncrono (setor/cadastro mais recente), sem bloquear o operador.
-      try{_gasGetJsonp('buscarEANCompleto','&ean='+encodeURIComponent(p.ean),10000).then(function(r){if(!r||!r.ok||!_nfeNota||!_nfeNota.itens[idx])return;var cur=_nfeNota.itens[idx];cur.eanAura=nfeDigitos_(r.ean||p.ean);cur.nomeAura=r.descricao||cur.nomeAura;cur.unidadeAura=r.unidade||cur.unidadeAura;if(r.setor&&r.setor!=='Outros'){cur.setor=r.setor;cur.setorSugerido=r.setor;cur.setorOrigem=r.setorOrigem||'banco_dados';}nfeSalvarRascunho_();});}catch(e){}
+      try{_gasGetJsonp('buscarEANCompleto','&ean='+encodeURIComponent(p.ean),10000).then(function(r){if(!r||!r.ok||!_nfeNota||!_nfeNota.itens[idx])return;var cur=_nfeNota.itens[idx];cur.eanAura=nfeDigitos_(r.ean||p.ean);cur.nomeAura=r.descricao||cur.nomeAura;cur.unidadeAura=r.unidade||cur.unidadeAura;cur.custoBanco=Number(r.custo||(r.produto&&r.produto.custoAtual))||Number(cur.custoBanco)||0;cur.precoBanco=Number(r.preco||(r.produto&&r.produto.precoVenda))||Number(cur.precoBanco)||0;nfeAtualizarFinanceiroItemAura_(idx);if(r.setor&&r.setor!=='Outros'){cur.setor=r.setor;cur.setorSugerido=r.setor;cur.setorOrigem=r.setorOrigem||'banco_dados';}nfeSalvarRascunho_();});}catch(e){}
       return;
     }
     if(typeof nfeValidarServidor_==='function')return nfeValidarServidor_(idx);
   };
 
-  // Antecipação: se a câmera/bipe entregou um EAN completo, reduz a fonte de
-  // dados aos lotes daquele código antes de executar o renderer original.
-  var _renderAntecipacaoOriginal=window.renderAntecipacao;
-  if(typeof _renderAntecipacaoOriginal==='function')window.renderAntecipacao=function(){
-    var q=String((document.getElementById('antFiltroBusca')||{}).value||'').trim();
-    if(core.isFullCode(q)&&typeof estoqueLotesPorCodigo_==='function'&&typeof products!=='undefined'){
-      var todos=products,sub=estoqueLotesPorCodigo_(q);
-      try{products=sub;return _renderAntecipacaoOriginal();}finally{products=todos;}
-    }
-    return _renderAntecipacaoOriginal();
-  };
-
   function debounceInput(id,fn,ms){var el=document.getElementById(id);if(!el)return;el.removeAttribute('oninput');var t=null;el.oninput=function(){clearTimeout(t);var self=this,args=arguments,wait=(typeof ms==='function'?ms(this.value):ms);t=setTimeout(function(){fn.apply(self,args);},wait==null?90:wait);};}
   // Filtros pesados que antes reconstruíam a tela em cada tecla.
   setTimeout(function(){
-    debounceInput('antFiltroBusca',function(){renderAntecipacao();},function(v){return core.isFullCode(v)?0:90;});
-    debounceInput('antFiltroForn',function(){renderAntecipacao();},90);
-    debounceInput('antFiltroMinQtde',function(){renderAntecipacao();},90);
-    debounceInput('antFiltroPrecoMin',function(){renderAntecipacao();},90);
-    debounceInput('antFiltroPrecoMax',function(){renderAntecipacao();},90);
+    debounceInput('antShelfBusca',function(){renderAntecipacao();},function(v){return core.isFullCode(v)?0:100;});
     debounceInput('tarefasBusca',function(){renderTarefas();},90);
     debounceInput('afBuscaAcoes',function(){afRenderLista_();},90);
   },0);
