@@ -6615,6 +6615,36 @@ function _ucResolveNome(email){
   var u=_ucGetUsers();
   return u[email.toLowerCase().trim()]||null;
 }
+// Completa somente os cards visíveis com o catálogo central e o cadastro
+// oficial de colaboradores; mantém o carregamento geral das abas sob demanda.
+var _ucProdutoResolvido_=Object.create(null),_ucUsuarioResolvido_=Object.create(null),_ucEnriquecerPendente_=null;
+function _ucEnriquecerVisiveis_(visiveis){
+  visiveis=Array.isArray(visiveis)?visiveis:[];
+  if(!visiveis.length||_ucEnriquecerPendente_)return;
+  var eans=[],emails=[];
+  visiveis.forEach(function(d){
+    var cod=String(d.ean||'').replace(/\D/g,'');
+    if(cod&&!Object.prototype.hasOwnProperty.call(_ucProdutoResolvido_,cod))eans.push(cod);
+    var email=String(d.email||'').trim().toLowerCase();
+    if(email&&!Object.prototype.hasOwnProperty.call(_ucUsuarioResolvido_,email))emails.push(email);
+  });
+  eans=[...new Set(eans)].slice(0,50);emails=[...new Set(emails)].slice(0,50);
+  if(!eans.length&&!emails.length)return;
+  var extra='&eans='+encodeURIComponent(eans.join(','))+'&emails='+encodeURIComponent(emails.join(','));
+  _ucEnriquecerPendente_=_gasGetJsonp('resolverColetasRecentes',extra,30000).then(function(r){
+    if(!r||!r.ok)return;
+    eans.forEach(function(cod){var p=r.produtos&&r.produtos[cod];_ucProdutoResolvido_[cod]=p&&p.descricao?String(p.descricao):'';});
+    emails.forEach(function(email){var nome=r.usuarios&&r.usuarios[email];_ucUsuarioResolvido_[email]=nome?String(nome):'';});
+    var alterou=false;
+    _ucDados.forEach(function(d){
+      var cod=String(d.ean||'').replace(/\D/g,'');
+      if(cod&&_ucProdutoResolvido_[cod]&&d.nome!==_ucProdutoResolvido_[cod]){d.nome=_ucProdutoResolvido_[cod];alterou=true;}
+      var email=String(d.email||'').trim().toLowerCase(),oficial=email&&_ucUsuarioResolvido_[email];
+      if(oficial&&d.nomeColeta!==oficial){d.nomeColeta=oficial;alterou=true;}
+    });
+    if(alterou){_ucIndex=null;if(typeof currentTabName!=='undefined'&&currentTabName==='dashboard')_ucFiltrar();else if(typeof currentTabName!=='undefined'&&currentTabName==='estoque'&&typeof renderEstoque==='function')renderEstoque();}
+  }).catch(function(err){console.warn('[AURA] Não foi possível completar os nomes das coletas recentes:',err&&err.message||err);}).finally(function(){_ucEnriquecerPendente_=null;});
+}
 function _ucAbrirCadastroUser(email){
   var existente=_ucResolveNome(email)||'';
   var modal=document.createElement('div');
@@ -6986,6 +7016,7 @@ function _ucFiltrar() {
   if (dados.length > MAX) {
     el.innerHTML += '<div style="grid-column:1/-1;text-align:center;padding:12px;color:var(--muted);font-size:12px">Exibindo '+MAX+' de '+dados.length+' registros. Use os filtros para refinar.</div>';
   }
+  _ucEnriquecerVisiveis_(exibir);
 }
 
 
@@ -13664,7 +13695,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v7.50-lazy-tab-loading';
+var AURA_CONTROLE_VALIDADE_BUILD='v7.52-recent-collections-light-enrichment';
 console.info('[AURA] organização de entradas v7.02 — CEASA operacional na aba Conferência NF-e; Boss Vision somente gerencial');
 console.info('[AURA] encarte imagens v7.04 — loader Arsenal restaurado + link/upload/consulta central');
 var currentTabName='dashboard';
@@ -15429,7 +15460,7 @@ function renderAntecipacao() {
     if(setor&&x.setor!==setor)return false;
     if(classe&&!(classe==='NCM'?String(x.classificacaoShelf||'').indexOf('NCM_')===0:x.classificacaoShelf===classe))return false;
     if(maxDias&&Number(x.diasParaVencer)>maxDias)return false;
-    if(busca){var text=[x.produto,x.ean,x.fornecedor,x.numeroNFe].join(' ').toLocaleLowerCase('pt-BR');if(text.indexOf(busca)<0)return false;}
+    if(busca){var text=[x.produtoBanco,x.produtoXml,x.produto,x.ean,x.fornecedor,x.numeroNFe].join(' ').toLocaleLowerCase('pt-BR');if(text.indexOf(busca)<0)return false;}
     var faixa=antShelfFaixa_(x);
     if(_antShelfFiltroAtual==='SEM_PROGRAMACAO'&&faixa.tipo!=='SEM_PROGRAMACAO')return false;
     if((_antShelfFiltroAtual==='SEMANA'||_antShelfFiltroAtual==='MES')&&faixa.tipo!==_antShelfFiltroAtual)return false;
@@ -15440,13 +15471,19 @@ function renderAntecipacao() {
   var grupos={};
   filtrados.forEach(function(x){var f=antShelfFaixa_(x),cc=x.classificacaoShelf||'NAO_CLASSIFICADO',ck=cc+'::'+f.key;if(!grupos[ck])grupos[ck]={faixa:f,classe:cc,classeLabel:x.classificacaoShelfLabel||'Classificação pendente',itens:[]};grupos[ck].itens.push(x);});
   var keys=Object.keys(grupos).sort(function(a,b){
-    var ga=grupos[a],gb=grupos[b],c=String(ga.classeLabel).localeCompare(String(gb.classeLabel),'pt-BR');if(c)return c;
-    if(ga.faixa.tipo==='SEM_PROGRAMACAO')return -1;if(gb.faixa.tipo==='SEM_PROGRAMACAO')return 1;
-    var aa=ga.itens[0],bb=gb.itens[0];return String(aa.programacao.dataEncarte).localeCompare(String(bb.programacao.dataEncarte));
+    var ga=grupos[a],gb=grupos[b];
+    function urgente_(g){return g.itens.reduce(function(best,x){if(!best)return x;var dx=Number(x.diasParaVencer),db=Number(best.diasParaVencer);return dx<db||(dx===db&&Number(x.vidaUtilAtualPct)<Number(best.vidaUtilAtualPct))?x:best;},null);}
+    var ia=urgente_(ga),ib=urgente_(gb);
+    var diff=Number(ia&&ia.diasParaVencer)-Number(ib&&ib.diasParaVencer);if(diff)return diff;
+    diff=Number(ia&&ia.vidaUtilAtualPct)-Number(ib&&ib.vidaUtilAtualPct);if(diff)return diff;
+    if(ga.faixa.tipo==='SEM_PROGRAMACAO'&&gb.faixa.tipo!=='SEM_PROGRAMACAO')return -1;
+    if(gb.faixa.tipo==='SEM_PROGRAMACAO'&&ga.faixa.tipo!=='SEM_PROGRAMACAO')return 1;
+    var c=String(ga.classeLabel).localeCompare(String(gb.classeLabel),'pt-BR');if(c)return c;
+    var da=ia&&ia.programacao&&ia.programacao.dataEncarte||'',db=ib&&ib.programacao&&ib.programacao.dataEncarte||'';return String(da).localeCompare(String(db));
   });
   var html='';
   keys.forEach(function(key){
-    var grupo=grupos[key],items=grupo.itens.sort(function(a,b){return Number(a.diasParaVencer)-Number(b.diasParaVencer);});
+    var grupo=grupos[key],items=grupo.itens.sort(function(a,b){return Number(a.diasParaVencer)-Number(b.diasParaVencer)||Number(a.vidaUtilAtualPct)-Number(b.vidaUtilAtualPct)||String(a.recebidoEm||'').localeCompare(String(b.recebidoEm||''));});
     var sem=grupo.faixa.tipo==='SEM_PROGRAMACAO',cor=sem?'#f59e0b':(grupo.faixa.tipo==='SEMANA'?'#3b82f6':'#16a34a');
     html+='<section style="margin:0 0 16px;border:1px solid '+cor+'44;border-radius:14px;overflow:hidden;background:var(--surface)">';
     html+='<header style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:'+cor+'12;border-bottom:1px solid '+cor+'33;flex-wrap:wrap"><i class="ti '+(sem?'ti-calendar-plus':grupo.faixa.tipo==='SEMANA'?'ti-calendar-week':'ti-calendar-month')+'" style="font-size:19px;color:'+cor+'"></i><b style="font-size:13px;color:var(--fg)">'+nfeEsc_(grupo.classeLabel)+'</b><span style="font-size:12px;color:var(--muted)">·</span><b style="font-size:13px;color:var(--fg)">'+nfeEsc_(grupo.faixa.label)+'</b><span style="font-size:10px;padding:3px 8px;border-radius:999px;background:'+cor+'20;color:'+cor+';font-weight:800">'+items.length+' lote'+(items.length===1?'':'s')+'</span><span style="font-size:11px;color:var(--muted)">'+(sem?'Defina a entrada em uma semana ou mês de encarte':'Produtos organizados por período de entrada')+'</span></header>';
@@ -15458,7 +15495,8 @@ function renderAntecipacao() {
       var venc=String(x.validade||'').split('-').reverse().join('/'),acao=x.acaoVenda==='PROMOCAO_IMEDIATA'?'Promoção imediata':x.acaoVenda==='EXPOSICAO_PRIORITARIA'?'Exposição prioritária':x.acaoVenda==='REAVALIAR'?'Reavaliar':'Não definida no recebimento';
       var sugestao=x.dataAcao&&x.dataAcao>=antShelfIso_(new Date())&&x.dataAcao<=x.validade?x.dataAcao:antShelfIso_(new Date());
       html+='<article style="border:1px solid var(--border);border-left:4px solid '+urgCor+';border-radius:12px;padding:12px;background:var(--surface-2)">';
-      html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="min-width:0"><div style="font-size:13px;font-weight:850;color:var(--fg);line-height:1.3">'+nfeEsc_(x.produto||'Produto')+'</div><div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:4px"><span style="font-size:9px;padding:2px 6px;border:1px solid var(--bds);border-radius:999px;color:var(--fg);background:var(--surface)">'+nfeEsc_(x.classificacaoShelfLabel||'Classificação pendente')+'</span><span style="font-size:9px;color:var(--muted)">'+nfeEsc_(x.setor||'--')+' · EAN '+nfeEsc_(x.ean||'--')+'</span></div>'+(x.classificacaoShelfOrigem?'<div style="font-size:9px;color:var(--muted);margin-top:3px">Classificado por '+nfeEsc_(x.classificacaoShelfOrigem)+(x.ncm?' · NCM '+nfeEsc_(x.ncm):'')+(x.cfop?' · CFOP '+nfeEsc_(x.cfop):'')+'</div>':'')+'</div><span style="flex:none;padding:5px 8px;border-radius:8px;background:'+urgCor+'18;color:'+urgCor+';font-size:11px;font-weight:900">'+dias+' dia'+(dias===1?'':'s')+'</span></div>';
+      var nomeBanco=String(x.produtoBanco||x.produto||'Produto'),nomeXml=String(x.produtoXml||'').trim(),mostrarXml=!!nomeXml&&nomeXml.trim().toLocaleLowerCase('pt-BR')!==nomeBanco.trim().toLocaleLowerCase('pt-BR');
+      html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="min-width:0"><div style="font-size:13px;font-weight:850;color:var(--fg);line-height:1.3">'+nfeEsc_(nomeBanco)+'</div>'+(mostrarXml?'<div style="font-size:10px;color:var(--muted);line-height:1.3;margin-top:2px">NF-e: '+nfeEsc_(nomeXml)+'</div>':'')+'<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:4px"><span style="font-size:9px;padding:2px 6px;border:1px solid var(--bds);border-radius:999px;color:var(--fg);background:var(--surface)">'+nfeEsc_(x.classificacaoShelfLabel||'Classificação pendente')+'</span><span style="font-size:9px;color:var(--muted)">'+nfeEsc_(x.setor||'--')+' · EAN '+nfeEsc_(x.ean||'--')+'</span></div>'+(x.classificacaoShelfOrigem?'<div style="font-size:9px;color:var(--muted);margin-top:3px">Classificado por '+nfeEsc_(x.classificacaoShelfOrigem)+(x.ncm?' · NCM '+nfeEsc_(x.ncm):'')+(x.cfop?' · CFOP '+nfeEsc_(x.cfop):'')+'</div>':'')+'</div><span style="flex:none;padding:5px 8px;border-radius:8px;background:'+urgCor+'18;color:'+urgCor+';font-size:11px;font-weight:900">'+dias+' dia'+(dias===1?'':'s')+'</span></div>';
       html+='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0"><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Saldo atual</div><b style="font-size:13px;color:var(--fg)">'+Number(x.quantidadeAtual||0).toLocaleString('pt-BR')+' '+nfeEsc_(x.unidade||'un.')+'</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Validade</div><b style="font-size:12px;color:var(--fg)">'+venc+'</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Vida útil na entrada</div><b style="font-size:13px;color:'+urgCor+'">'+Math.round(Number(x.vidaUtilRecebidaPct)||0)+'%</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Preço de venda</div><b style="font-size:13px;color:var(--fg)">'+(Number(x.precoVenda)>0?fmtR(x.precoVenda):'--')+'</b></div></div>';
       html+='<div style="font-size:10px;color:var(--muted);line-height:1.45;margin-bottom:9px">Recebido '+String(x.recebidoEm||'').split('-').reverse().join('/')+' · vida útil na entrada '+(x.vidaUtilRecebidaPct==null?'--':Math.round(x.vidaUtilRecebidaPct)+'%')+' · atual <b style="color:'+urgCor+'">'+(x.vidaUtilAtualPct==null?'--':Math.round(x.vidaUtilAtualPct)+'%')+'</b><br>NF-e '+nfeEsc_(x.numeroNFe||'--')+' · '+nfeEsc_(x.fornecedor||'Fornecedor não informado')+'<br>Ação definida no recebimento: <b style="color:var(--fg)">'+acao+'</b>'+(x.dataAcao?' · '+String(x.dataAcao).split('-').reverse().join('/'):'')+'</div>';
       if(prog)html+='<div style="margin-bottom:8px;padding:7px 9px;border-radius:8px;background:rgba(22,163,74,.1);color:#15803d;font-size:11px;font-weight:800"><i class="ti ti-calendar-check"></i> No encarte '+(prog.tipo==='SEMANA'?'da semana de ':'do mês de ')+String(prog.dataEncarte||'').split('-').reverse().join('/')+'</div>';
