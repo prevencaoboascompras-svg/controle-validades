@@ -3267,7 +3267,7 @@ function toggleTheme() {
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:16px">
       <div>
         <div style="font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px"><i class="ti ti-calendar-event" style="color:#ef4444"></i> Planejamento de Encartes · Shelf Life</div>
-        <div style="font-size:12px;color:var(--tx2);margin-top:4px;max-width:760px">Lotes de NF-e com saldo ativo e vida útil restante abaixo de 80%, organizados por setor confirmado e classe fiscal do NCM. Sugestões por nome não são usadas como confirmação de setor.</div>
+        <div style="font-size:12px;color:var(--tx2);margin-top:4px;max-width:760px">Lotes com saldo ativo: vida útil confirmada abaixo de 80% ou, sem fabricação no XML, validade em até 30 dias com estimativa claramente identificada. Organizados por setor confirmado e classe fiscal do NCM.</div>
       </div>
       <button class="btn" id="antShelfRefreshBtn" onclick="antCarregarShelfLife_(true)"><i class="ti ti-refresh"></i> Atualizar recebimentos</button>
     </div>
@@ -6617,33 +6617,62 @@ function _ucResolveNome(email){
 }
 // Completa somente os cards visíveis com o catálogo central e o cadastro
 // oficial de colaboradores; mantém o carregamento geral das abas sob demanda.
-var _ucProdutoResolvido_=Object.create(null),_ucUsuarioResolvido_=Object.create(null),_ucEnriquecerPendente_=null;
+var _ucProdutoResolvido_=Object.create(null),_ucUsuarioResolvido_=Object.create(null),_ucEnriquecerPendente_=null,_ucResolverFallbackPendente_=null;
+function _ucPrecisaResolver_(map,chave){
+  var item=map[chave];
+  return !item||(!item.valor&&Date.now()-Number(item.ts||0)>120000);
+}
+function _ucResolverValor_(map,chave){var item=map[chave];return item&&typeof item==='object'?String(item.valor||''):String(item||'');}
+function _ucNomeBancoLocalPorEAN_(cod){
+  cod=String(cod||'').replace(/\D/g,'');if(!cod)return '';
+  var alts=[cod];if(cod.length===12)alts.push('0'+cod);if(cod.length===13&&cod.charAt(0)==='0')alts.push(cod.slice(1));
+  for(var i=0;i<alts.length;i++)if(typeof banco!=='undefined'&&banco[alts[i]])return String(banco[alts[i]]);
+  return '';
+}
+function _ucEnriquecerFallbackBanco_(eans,emails){
+  if(_ucResolverFallbackPendente_)return _ucResolverFallbackPendente_;
+  _ucResolverFallbackPendente_=Promise.all([
+    (typeof _auraBancoCarregado_!=='undefined'&&_auraBancoCarregado_)?Promise.resolve(true):loadBanco(loadCfg()),
+    typeof carregarColaboradoresUniversal_==='function'?carregarColaboradoresUniversal_(false):Promise.resolve([])
+  ]).then(function(){
+    eans.forEach(function(cod){var nome=_ucNomeBancoLocalPorEAN_(cod);_ucProdutoResolvido_[cod]={valor:nome,ts:Date.now()};});
+    emails.forEach(function(email){var c=typeof _colabNomePorEmail_==='function'?_colabNomePorEmail_(email):'';_ucUsuarioResolvido_[email]={valor:c||'',ts:Date.now()};});
+    _ucDados.forEach(function(d){var cod=String(d.ean||'').replace(/\D/g,'');var nome=cod&&_ucResolverValor_(_ucProdutoResolvido_,cod);if(nome)d.nome=nome;var email=String(d.email||'').trim().toLowerCase();var oficial=email&&_ucResolverValor_(_ucUsuarioResolvido_,email);if(oficial)d.nomeColeta=oficial;});
+    _ucResolverFallbackPendente_=null;
+    if(typeof currentTabName!=='undefined'&&currentTabName==='dashboard')_ucFiltrar();
+    return true;
+  }).catch(function(err){_ucResolverFallbackPendente_=null;console.warn('[AURA] Fallback de descrição das coletas falhou:',err&&err.message||err);return false;});
+  return _ucResolverFallbackPendente_;
+}
+// Completa os cards visíveis com o catálogo central e o cadastro oficial de colaboradores.
+// Se o Code.gs ainda não tiver o resolver rápido, faz fallback para o banco completo uma única vez.
 function _ucEnriquecerVisiveis_(visiveis){
   visiveis=Array.isArray(visiveis)?visiveis:[];
   if(!visiveis.length||_ucEnriquecerPendente_)return;
   var eans=[],emails=[];
   visiveis.forEach(function(d){
     var cod=String(d.ean||'').replace(/\D/g,'');
-    if(cod&&!Object.prototype.hasOwnProperty.call(_ucProdutoResolvido_,cod))eans.push(cod);
+    if(cod&&_ucPrecisaResolver_(_ucProdutoResolvido_,cod))eans.push(cod);
     var email=String(d.email||'').trim().toLowerCase();
-    if(email&&!Object.prototype.hasOwnProperty.call(_ucUsuarioResolvido_,email))emails.push(email);
+    if(email&&_ucPrecisaResolver_(_ucUsuarioResolvido_,email))emails.push(email);
   });
   eans=[...new Set(eans)].slice(0,50);emails=[...new Set(emails)].slice(0,50);
   if(!eans.length&&!emails.length)return;
   var extra='&eans='+encodeURIComponent(eans.join(','))+'&emails='+encodeURIComponent(emails.join(','));
   _ucEnriquecerPendente_=_gasGetJsonp('resolverColetasRecentes',extra,30000).then(function(r){
-    if(!r||!r.ok)return;
-    eans.forEach(function(cod){var p=r.produtos&&r.produtos[cod];_ucProdutoResolvido_[cod]=p&&p.descricao?String(p.descricao):'';});
-    emails.forEach(function(email){var nome=r.usuarios&&r.usuarios[email];_ucUsuarioResolvido_[email]=nome?String(nome):'';});
-    var alterou=false;
+    if(!r||!r.ok){return _ucEnriquecerFallbackBanco_(eans,emails);}
+    var agora=Date.now();
+    eans.forEach(function(cod){var p=r.produtos&&r.produtos[cod];_ucProdutoResolvido_[cod]={valor:p&&p.descricao?String(p.descricao):'',ts:agora};});
+    emails.forEach(function(email){var nome=r.usuarios&&r.usuarios[email];_ucUsuarioResolvido_[email]={valor:nome?String(nome):'',ts:agora};});
     _ucDados.forEach(function(d){
-      var cod=String(d.ean||'').replace(/\D/g,'');
-      if(cod&&_ucProdutoResolvido_[cod]&&d.nome!==_ucProdutoResolvido_[cod]){d.nome=_ucProdutoResolvido_[cod];alterou=true;}
-      var email=String(d.email||'').trim().toLowerCase(),oficial=email&&_ucUsuarioResolvido_[email];
-      if(oficial&&d.nomeColeta!==oficial){d.nomeColeta=oficial;alterou=true;}
+      var cod=String(d.ean||'').replace(/\D/g,'');var nome=cod&&_ucResolverValor_(_ucProdutoResolvido_,cod);if(nome)d.nome=nome;
+      var email=String(d.email||'').trim().toLowerCase(),oficial=email&&_ucResolverValor_(_ucUsuarioResolvido_,email);if(oficial)d.nomeColeta=oficial;
     });
-    if(alterou){_ucIndex=null;if(typeof currentTabName!=='undefined'&&currentTabName==='dashboard')_ucFiltrar();else if(typeof currentTabName!=='undefined'&&currentTabName==='estoque'&&typeof renderEstoque==='function')renderEstoque();}
-  }).catch(function(err){console.warn('[AURA] Não foi possível completar os nomes das coletas recentes:',err&&err.message||err);}).finally(function(){_ucEnriquecerPendente_=null;});
+    // Re-renderiza sempre: podem ter chegado novas coletas enquanto o resolver respondia.
+    if(typeof currentTabName!=='undefined'&&currentTabName==='dashboard')_ucFiltrar();
+    return true;
+  }).catch(function(err){console.warn('[AURA] Não foi possível completar os nomes das coletas recentes:',err&&err.message||err);return false;}).finally(function(){_ucEnriquecerPendente_=null;});
+  return _ucEnriquecerPendente_;
 }
 function _ucAbrirCadastroUser(email){
   var existente=_ucResolveNome(email)||'';
@@ -12094,10 +12123,10 @@ function nfeSetorNotaHtml_(it){var s=String((it&&it.setor)||(it&&it.setorSugerid
 function nfeFmtQtd_(n){n=Number(n)||0;return n.toLocaleString('pt-BR',{maximumFractionDigits:3});}
 function nfeFmtBRL_(n){return (Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
 function nfeDataHojeLocalAura_(){var d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-');}
-function nfeVidaUtilInfoAura_(fab,val,rec){function ms(x){var m=String(x||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?Date.UTC(+m[1],+m[2]-1,+m[3]):NaN;}var f=ms(fab),v=ms(val),r=ms(rec);if(!isFinite(f)||!isFinite(v)||!isFinite(r))return {ok:false,missing:true};if(v<=f||r<f||r>v)return {ok:false,invalid:true};return {ok:true,pct:100*(v-r)/(v-f)};}
+function nfeVidaUtilInfoAura_(fab,val,rec){function ms(x){var m=String(x||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return NaN;var t=Date.UTC(+m[1],+m[2]-1,+m[3]),d=new Date(t);return d.getUTCFullYear()===+m[1]&&d.getUTCMonth()===+m[2]-1&&d.getUTCDate()===+m[3]?t:NaN;}var f=ms(fab),v=ms(val),r=ms(rec);if(!isFinite(v)||!isFinite(r))return {ok:false,missing:true};if(v<r)return {ok:false,invalid:true};if(!String(fab||'').trim())return {ok:true,estimado:true,dias:Math.floor((v-r)/86400000),pct:null};if(!isFinite(f)||v<=f||r<f||r>v)return {ok:false,invalid:true};return {ok:true,pct:100*(v-r)/(v-f)};}
 function nfeTotaisImpostoNotaHtmlAura_(nota){var t=nota&&nota.impostosNotaXML||{},a=[];[['ICMS',t.icms],['ICMS-ST',t.icmsST],['IPI',t.ipi],['PIS',t.pis],['COFINS',t.cofins],['II',t.ii],['IBS',t.ibs],['CBS',t.cbs],['Tributos aprox.',t.tributosAproximados]].forEach(function(x){if(Number(x[1])>0)a.push('<span>'+x[0]+' '+nfeFmtBRL_(x[1])+'</span>');});if(!a.length)return '';return '<div class="nfe-tax-note"><b><i class="ti ti-receipt-tax"></i> Valores fiscais declarados na NF-e</b><div>'+a.join('')+'</div><small>Referência do XML; o tratamento como custo ou crédito depende do regime fiscal.</small></div>';}
 function nfeSetRecebidoEmAura_(v){if(!_nfeNota)return;_nfeNota.recebidoEm=String(v||'');nfeSalvarRascunho_();nfeRenderNota_();}
-function nfeVidaUtilHtmlAura_(l,idx,li){var d=nfeVidaUtilInfoAura_(l.fabricacao,l.validade,_nfeNota&&_nfeNota.recebidoEm),status=d.ok?(d.pct>=80?'<b style="color:#16794b">Vida útil restante na entrada: '+d.pct.toFixed(1)+'% · dentro do mínimo de 80%</b>':'<b style="color:#b42318">ALERTA SHELF LIFE: '+d.pct.toFixed(1)+'% restante na entrada · abaixo de 80%</b><div style="margin-top:3px;color:#475467">A NF-e será gravada normalmente. O lote ficará disponível na aba Shelf Life para planejamento do gestor.</div>'):(d.invalid?'<b style="color:#b42318">Datas incompatíveis: confira fabricação, recebimento e validade.</b>':'<span>Informe fabricação, validade e recebimento para calcular.</span>');return '<div id="nfeVidaAura_'+idx+'_'+li+'" style="grid-column:1/-1;font-size:10px;padding:5px 7px;background:'+(d.ok&&d.pct<80?'#fff1f0':'#f7f8fa')+';border:1px solid '+(d.ok&&d.pct<80?'#fda29b':'#eaecf0')+';border-radius:6px">'+status+'</div>';}
+function nfeVidaUtilHtmlAura_(l,idx,li){var d=nfeVidaUtilInfoAura_(l.fabricacao,l.validade,_nfeNota&&_nfeNota.recebidoEm),status=d.ok?(d.estimado?'<b style="color:#9a6700">ESTIMATIVA: '+d.dias+' dias entre recebimento e validade.</b><div style="margin-top:3px;color:#7a5a16">O XML não trouxe a fabricação. A conferência pode ser gravada; o percentual de 80% não será presumido. Fabricação pode ser preenchida depois.</div>':(d.pct>=80?'<b style="color:#16794b">Vida útil restante na entrada: '+d.pct.toFixed(1)+'% · dentro do mínimo de 80%</b>':'<b style="color:#b42318">ALERTA SHELF LIFE: '+d.pct.toFixed(1)+'% restante na entrada · abaixo de 80%</b><div style="margin-top:3px;color:#475467">A NF-e será gravada normalmente. O lote ficará disponível na aba Shelf Life para planejamento do gestor.</div>')):(d.invalid?'<b style="color:#b42318">Datas incompatíveis: confira fabricação, recebimento e validade.</b>':'<span>Informe validade e data real do recebimento para calcular.</span>');var alerta=d.ok&&!d.estimado&&d.pct<80,estimado=d.ok&&d.estimado;return '<div id="nfeVidaAura_'+idx+'_'+li+'" style="grid-column:1/-1;font-size:10px;padding:5px 7px;background:'+(alerta?'#fff1f0':estimado?'#fff8e6':'#f7f8fa')+';border:1px solid '+(alerta?'#fda29b':estimado?'#e7bd54':'#eaecf0')+';border-radius:6px">'+status+'</div>'; }
 function nfeItemLotesDefault_(it){var l=Array.isArray(it.lotes)?it.lotes.slice():[];if(!l.length)l=[{validade:'',quantidade:Number(it.qtdEstoque||it.qCom||0)||0,lote:''}];return l;}
 function nfeThumbHtml_(it,idx){if(it&&it.fotoDataUrl)return '<div class="nfe-thumb" id="nfeThumb_'+idx+'"><img src="'+nfeEsc_(it.fotoDataUrl)+'" alt="Produto"></div>';if(it&&it.fotoCarregando)return '<div class="nfe-thumb loading" id="nfeThumb_'+idx+'"><i class="ti ti-loader-2 spin"></i></div>';return '<div class="nfe-thumb" id="nfeThumb_'+idx+'"><i class="ti ti-photo"></i></div>';}
 function nfeUnidadeFinanceiraKeyAura_(v){var u=String(v||'').trim().toUpperCase().replace(/[.\s]/g,'');var m={UND:'UN',UNID:'UN',UNIDADE:'UN',PC:'UN',PCA:'UN',PÇ:'UN',PECA:'UN',KGM:'KG',QUILO:'KG',QUILOGRAMA:'KG',LT:'L',LTR:'L',LITRO:'L',ML:'ML',GR:'G',GRAMA:'G'};return m[u]||u;}
@@ -12314,7 +12343,7 @@ function nfeColetarPayload_(){
       if(ehNovo)diag.novos++;else if(ean)diag.reconhecidos++;
       if(it.conversaoExigirDecisao===true&&['converter','nao_converter'].indexOf(String(it.conversaoDecisao||''))<0){diag.conversoesPendentes++;erroItem_((it.nomeAura||it.nome||ean)+': escolha CONVERTER ou NÃO CONVERTER a embalagem.');}
       var rows=document.querySelectorAll('#nfeLotesRows_'+idx+' .nfe-lote'),soma=0,todasValidades=true,todasQtd=true;
-      rows.forEach(function(r,li){var v=(r.querySelector('.nfe-lot-val')||{}).value||'',fab=(r.nextElementSibling&&r.nextElementSibling.querySelector('.nfe-lot-fab')||{}).value||'',q=Number((r.querySelector('.nfe-lot-qtd')||{}).value)||0,l=(r.querySelector('.nfe-lote-id')||{}).value||'',m=r.parentElement.querySelector('#nfeVidaAura_'+idx+'_'+li),acc=!!(m&&m.querySelector('input[type=checkbox]')&&m.querySelector('input[type=checkbox]').checked),acao=(m&&m.querySelector('select')||{}).value||'',dataAcao=(m&&m.querySelector('input[type=date]')||{}).value||'';if(!v){todasValidades=false;}if(!(q>0)){todasQtd=false;}if(!v||!(q>0))erroItem_((it.nomeAura||it.nome||ean)+': preencha validade e quantidade.');var vi=nfeVidaUtilInfoAura_(fab,v,n.recebidoEm);if(!vi.ok)erroItem_((it.nomeAura||it.nome||ean)+': informe fabricação e confira as datas com a data real do recebimento.');soma+=q;lotes.push({validade:v,fabricacao:fab,quantidade:q,lote:l,aceitarVidaUtilCurta:acc,acaoVenda:acao,dataAcao:dataAcao});});
+      rows.forEach(function(r,li){var v=(r.querySelector('.nfe-lot-val')||{}).value||'',fab=(r.nextElementSibling&&r.nextElementSibling.querySelector('.nfe-lot-fab')||{}).value||'',q=Number((r.querySelector('.nfe-lot-qtd')||{}).value)||0,l=(r.querySelector('.nfe-lote-id')||{}).value||'',m=r.parentElement.querySelector('#nfeVidaAura_'+idx+'_'+li),acc=!!(m&&m.querySelector('input[type=checkbox]')&&m.querySelector('input[type=checkbox]').checked),acao=(m&&m.querySelector('select')||{}).value||'',dataAcao=(m&&m.querySelector('input[type=date]')||{}).value||'';if(!v){todasValidades=false;}if(!(q>0)){todasQtd=false;}if(!v||!(q>0))erroItem_((it.nomeAura||it.nome||ean)+': preencha validade e quantidade.');var vi=nfeVidaUtilInfoAura_(fab,v,n.recebidoEm);if(!vi.ok)erroItem_((it.nomeAura||it.nome||ean)+': confira validade e data real do recebimento; se informou fabricação, ela deve ser anterior às duas.');soma+=q;lotes.push({validade:v,fabricacao:fab,quantidade:q,lote:l,aceitarVidaUtilCurta:acc,acaoVenda:acao,dataAcao:dataAcao});});
       diag.lotes+=lotes.length;
       if(rows.length&&todasValidades)diag.comValidade++;
       if(rows.length&&todasQtd&&Math.abs(soma-qtd)<=0.001)diag.quantidadesOk++;
@@ -12332,12 +12361,12 @@ function nfeVinculoManualBotoesHtmlAura_(nota){
 function nfeAbrirVinculoManualAura_(idx){
   var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx];if(!it)return;var antigo=document.getElementById('nfeVinculoManualAuraModal');if(antigo)antigo.remove();
   var lotes=nfeItemLotesDefault_(it),primeiro=lotes[0]||{},extras=lotes.slice(1).reduce(function(a,l){return a+(Number(l.quantidade)||0);},0),base=Number(it.qtdEstoque||it.qtdRecebida||it.qCom)||0,fModal=String(it.conversaoDecisao||'')==='converter'?(Number(it.fatorConversao||it.fatorConversaoSugerido)||1):1,qPadrao=(Number(primeiro.quantidade)||Math.max(0,base-extras))/fModal;
-  var html='<div id="nfeVinculoManualAuraModal" style="position:fixed;inset:0;z-index:100500;background:rgba(12,18,28,.72);display:flex;align-items:center;justify-content:center;padding:16px"><div style="width:min(440px,100%);max-height:92vh;overflow:auto;background:var(--surface,#fff);color:var(--text,#20242a);border:1px solid #d99b22;border-radius:14px;padding:16px;box-shadow:0 18px 60px rgba(0,0,0,.35)"><div style="font-weight:900;font-size:15px;margin-bottom:4px"><i class="ti ti-link"></i> Vincular produto manualmente</div><div style="font-size:11px;color:var(--muted,#687078);margin-bottom:12px">'+nfeEsc_(it.nomeAura||it.nome||it.cProd||'Item da NF-e')+'</div><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">EAN / código de barras</label><input id="nfeManualAuraEan" inputmode="numeric" autocomplete="off" value="'+nfeEsc_(it._campoBusca||it.eanAura||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Data de fabricação</label><input id="nfeManualAuraFabricacao" type="date" value="'+nfeEsc_(primeiro.fabricacao||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Validade</label><input id="nfeManualAuraValidade" type="date" value="'+nfeEsc_(primeiro.validade||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Quantidade deste lote ('+nfeEsc_(it.uCom||'un')+')</label><input id="nfeManualAuraQuantidade" type="number" min="0.001" step="any" inputmode="decimal" value="'+nfeEsc_(qPadrao||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Setor</label><select id="nfeManualAuraSetor" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:13px">'+nfeSetorOptions_(it.setor||it.setorSugerido||'Outros')+'</select><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button type="button" onclick="document.getElementById(\'nfeVinculoManualAuraModal\').remove()" style="border:1px solid #c8cdd2;background:transparent;border-radius:8px;padding:9px 13px;font-weight:800">Cancelar</button><button type="button" onclick="nfeSalvarVinculoManualAura_('+idx+')" style="border:1px solid #8a5200;background:#b76e00;color:white;border-radius:8px;padding:9px 13px;font-weight:850">Aplicar ao item</button></div></div></div>';
+  var html='<div id="nfeVinculoManualAuraModal" style="position:fixed;inset:0;z-index:100500;background:rgba(12,18,28,.72);display:flex;align-items:center;justify-content:center;padding:16px"><div style="width:min(440px,100%);max-height:92vh;overflow:auto;background:var(--surface,#fff);color:var(--text,#20242a);border:1px solid #d99b22;border-radius:14px;padding:16px;box-shadow:0 18px 60px rgba(0,0,0,.35)"><div style="font-weight:900;font-size:15px;margin-bottom:4px"><i class="ti ti-link"></i> Vincular produto manualmente</div><div style="font-size:11px;color:var(--muted,#687078);margin-bottom:12px">'+nfeEsc_(it.nomeAura||it.nome||it.cProd||'Item da NF-e')+'</div><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">EAN / código de barras</label><input id="nfeManualAuraEan" inputmode="numeric" autocomplete="off" value="'+nfeEsc_(it._campoBusca||it.eanAura||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Data de fabricação (opcional)</label><input id="nfeManualAuraFabricacao" type="date" value="'+nfeEsc_(primeiro.fabricacao||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Validade</label><input id="nfeManualAuraValidade" type="date" value="'+nfeEsc_(primeiro.validade||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Quantidade deste lote ('+nfeEsc_(it.uCom||'un')+')</label><input id="nfeManualAuraQuantidade" type="number" min="0.001" step="any" inputmode="decimal" value="'+nfeEsc_(qPadrao||'')+'" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:14px"><label style="display:block;font-size:10px;font-weight:850;margin:9px 0 4px">Setor</label><select id="nfeManualAuraSetor" style="width:100%;height:40px;box-sizing:border-box;border:1px solid #c8cdd2;border-radius:8px;padding:0 10px;font-size:13px">'+nfeSetorOptions_(it.setor||it.setorSugerido||'Outros')+'</select><div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px"><button type="button" onclick="document.getElementById(\'nfeVinculoManualAuraModal\').remove()" style="border:1px solid #c8cdd2;background:transparent;border-radius:8px;padding:9px 13px;font-weight:800">Cancelar</button><button type="button" onclick="nfeSalvarVinculoManualAura_('+idx+')" style="border:1px solid #8a5200;background:#b76e00;color:white;border-radius:8px;padding:9px 13px;font-weight:850">Aplicar ao item</button></div></div></div>';
   document.body.insertAdjacentHTML('beforeend',html);setTimeout(function(){var e=document.getElementById('nfeManualAuraEan');if(e)e.focus();},30);
 }
 function nfeSalvarVinculoManualAura_(idx){
   var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[idx],ean=nfeDigitos_((document.getElementById('nfeManualAuraEan')||{}).value||''),fabricacao=String((document.getElementById('nfeManualAuraFabricacao')||{}).value||''),validade=String((document.getElementById('nfeManualAuraValidade')||{}).value||''),q=Number((document.getElementById('nfeManualAuraQuantidade')||{}).value)||0,setor=String((document.getElementById('nfeManualAuraSetor')||{}).value||'Outros');
-  if(!it)return;if(!ean){mostrarToast('Informe o EAN ou código de barras.','warn');return;}if(!/^\d{4}-\d{2}-\d{2}$/.test(fabricacao)){mostrarToast('Informe a data de fabricação.','warn');return;}if(!/^\d{4}-\d{2}-\d{2}$/.test(validade)){mostrarToast('Informe uma validade válida.','warn');return;}if(!(q>0)){mostrarToast('Informe uma quantidade maior que zero.','warn');return;}
+  if(!it)return;if(!ean){mostrarToast('Informe o EAN ou código de barras.','warn');return;}if(!/^\d{4}-\d{2}-\d{2}$/.test(validade)){mostrarToast('Informe uma validade válida.','warn');return;}if(!(q>0)){mostrarToast('Informe uma quantidade maior que zero.','warn');return;}
   var fator=String(it.conversaoDecisao||'')==='converter'?(Number(it.fatorConversao||it.fatorConversaoSugerido)||1):1;it.eanAura=ean;it._campoBusca=ean;it.status='aguardando_cadastro';it.origemVinculo='manual_novo';it.setor=setor;it.setorOrigem='manual';it.controlar=true;it.validadeIndeterminada=false;it.conferenciaSemValidade=false;
   var lotes=nfeItemLotesDefault_(it);if(!lotes.length)lotes=[{fabricacao:fabricacao,validade:validade,quantidade:q*fator,lote:''}];else{lotes[0].fabricacao=fabricacao;lotes[0].validade=validade;lotes[0].quantidade=q*fator;}it.lotes=lotes;it.qtdEstoque=lotes.reduce(function(a,l){return a+(Number(l.quantidade)||0);},0);it.qtdRecebida=fator?it.qtdEstoque/fator:q;it.recebimentoStatus=it.qtdRecebida<(Number(it.qCom)||0)-0.001?'PARCIAL':'RECEBIDO';it._nfePendencias=[];
   var modal=document.getElementById('nfeVinculoManualAuraModal');if(modal)modal.remove();nfeSalvarRascunho_();nfeRenderNota_();mostrarToast('EAN, validade, quantidade e setor aplicados. Revise o item e grave a NF-e.','ok');
@@ -13695,7 +13724,7 @@ function afAbrirWhatsapp_(){if(!afEdit_)return;var a=afColetarEditor_(),tel=Stri
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var ov=document.getElementById('afDocPreviewOverlay');if(ov&&ov.style.display!=='none')afFecharPreviewDocumento_();}});
 
-var AURA_CONTROLE_VALIDADE_BUILD='v7.52-recent-collections-light-enrichment';
+var AURA_CONTROLE_VALIDADE_BUILD='v7.54-fabricacao-opcional-shelflife';
 console.info('[AURA] organização de entradas v7.02 — CEASA operacional na aba Conferência NF-e; Boss Vision somente gerencial');
 console.info('[AURA] encarte imagens v7.04 — loader Arsenal restaurado + link/upload/consulta central');
 var currentTabName='dashboard';
@@ -15240,19 +15269,27 @@ function cloudLoad(){
 // Carrega só os conjuntos de nuvem da aba que acabou de ser aberta.
 var _auraCloudLoaded_={};
 var _auraCloudPending_={};
+var _auraCloudActionLoaded_={};
+var _auraCloudActionPending_={};
 var _auraCloudActionMap_={buscarEncartes:'encartes',buscarNegociacoes:'negociacoes',buscarResolvidos:'resolvidos',buscarEncerradas:'encerradas',buscarBiblioteca:'biblioteca',buscarModalidades:'modalidades',buscarPromoAtivas:'promoAtivas',buscarSetorCorrigido:'setorCorrigido'};
 function auraCarregarDadosCloudDaAba_(grupo,acoes,forcar){
-  if(_auraCloudPending_[grupo])return _auraCloudPending_[grupo];
-  if(_auraCloudLoaded_[grupo]&&!forcar)return Promise.resolve(true);
-  var lista=(acoes||[]).filter(function(a){return !!_auraCloudActionMap_[a];});
+  var lista=[...new Set((acoes||[]).filter(function(a){return !!_auraCloudActionMap_[a];}))];
   if(!lista.length){_auraCloudLoaded_[grupo]=true;return Promise.resolve(true);}
-  _auraCloudPending_[grupo]=Promise.all(lista.map(function(action){
-    return _gasGet(action).then(function(res){
+  // O estado é por ação, não apenas por aba: chamadas simultâneas de duas telas
+  // podem pedir conjuntos diferentes sem a segunda lista ser descartada.
+  var jobs=lista.map(function(action){
+    if(_auraCloudActionLoaded_[action]&&!forcar)return Promise.resolve(true);
+    if(_auraCloudActionPending_[action])return _auraCloudActionPending_[action];
+    _auraCloudActionPending_[action]=_gasGet(action).then(function(res){
       if(!res||!res.ok||res.dados===undefined)throw new Error((res&&res.erro)||'Falha ao buscar '+action);
-      _cloudLoadHandlers[_auraCloudActionMap_[action]](res.dados);return true;
-    });
-  })).then(function(){_auraCloudLoaded_[grupo]=true;return true;}).catch(function(e){
-    console.warn('[AURA] Dados da aba '+grupo+' não carregados:',e&&e.message||e);return false;
+      _cloudLoadHandlers[_auraCloudActionMap_[action]](res.dados);_auraCloudActionLoaded_[action]=true;return true;
+    }).catch(function(e){
+      console.warn('[AURA] Dados da ação '+action+' não carregados (aba '+grupo+'):',e&&e.message||e);return false;
+    }).finally(function(){_auraCloudActionPending_[action]=null;});
+    return _auraCloudActionPending_[action];
+  });
+  _auraCloudPending_[grupo]=Promise.all(jobs).then(function(resultados){
+    var ok=resultados.every(function(x){return x===true;});_auraCloudLoaded_[grupo]=ok;return ok;
   }).finally(function(){_auraCloudPending_[grupo]=null;});
   return _auraCloudPending_[grupo];
 }
@@ -15322,7 +15359,7 @@ async function auraIniciarDadosPrincipais_(){
 
   // Busca somente os dados necessários ao Dashboard inicial. O Banco de Dados,
   // tarefas, colaboradores e coleções de outras telas aguardam a primeira visita.
-  syncAll('dashboard').then(function(){auraCarregarDadosCloudDaAba_('dashboard',['buscarEncerradas']);});
+  syncAll('dashboard');
 }
 if(_cfg.id){
   auraIniciarDadosPrincipais_();
@@ -15360,7 +15397,7 @@ function antShelfAtualizarAviso_(quantidade) {
   if(!_antShelfLifeAtualizado){el.innerHTML='<div style="padding:10px 12px;border:1px solid var(--border);border-radius:10px;color:var(--muted);font-size:12px">A consulta ainda não foi iniciada.</div>';return;}
   var total=Number(quantidade)||0;
   var hora=new Date(_antShelfLifeAtualizado).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  var d=_antShelfRetroDiagnostico||{},recuperacao=_antShelfRetroBackendOk===false?'<br><b>O backend não retornou os dados da varredura retroativa. Publique o Code.gs v8.33 e atualize a implantação do Web App.</b>':_antShelfRetroBackendOk===true?'<br><b>Varredura retroativa:</b> '+(Number(d.linhasAntigasSemFab)||0)+' linhas sem fabricação · '+(Number(d.linhasComSaldo)||0)+' com saldo ativo · '+_antShelfRetroAnalisadas+' XML(s) consultado(s) · '+_antShelfRetroAtualizados+' fabricação(ões) recuperada(s) · '+_antShelfRetroFiscaisRecuperados+' classificações fiscais recuperadas.<br><span style="color:var(--muted)">Sem validade: '+(Number(d.semValidade)||0)+' · sem EAN: '+(Number(d.semEan)||0)+' · sem saldo: '+(Number(d.semSaldo)||0)+' · já verificadas: '+(Number(d.ignoradasCache)||0)+'</span>':'',semDados=(_antShelfRetroSemXml+_antShelfRetroSemFabricacao)>0?'<br>'+_antShelfRetroSemXml+' XML(s) inacessível(is) · '+_antShelfRetroSemFabricacao+' lote(s) sem fabricação identificável no XML.':'';el.innerHTML=total?'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(239,68,68,.35);border-radius:10px;background:rgba(239,68,68,.07);color:var(--fg);font-size:12px"><span style="font-size:17px">⚠️</span><span><b>Consulta concluída às '+hora+' · '+total+' lote'+(total===1?'':'s')+' elegível(is)</b><br>Vida útil restante atual abaixo de 80%, com saldo. Planeje o encarte antes do vencimento.'+recuperacao+semDados+'</span></div>':'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(22,163,74,.35);border-radius:10px;background:rgba(22,163,74,.07);color:var(--fg);font-size:12px"><i class="ti ti-circle-check" style="font-size:18px;color:#16a34a"></i><span><b>Consulta concluída às '+hora+' · 0 lotes elegíveis</b><br>O AURA respondeu. Não encontrou lotes de NF-e com saldo ativo abaixo de 80% da vida útil restante.'+recuperacao+semDados+'</span></div>';
+  var d=_antShelfRetroDiagnostico||{},recuperacao=_antShelfRetroBackendOk===false?'<br><b>O backend não retornou os dados da varredura retroativa. Publique o Code.gs v8.33 e atualize a implantação do Web App.</b>':_antShelfRetroBackendOk===true?'<br><b>Varredura retroativa:</b> '+(Number(d.linhasAntigasSemFab)||0)+' linhas sem fabricação · '+(Number(d.linhasComSaldo)||0)+' com saldo ativo · '+_antShelfRetroAnalisadas+' XML(s) consultado(s) · '+_antShelfRetroAtualizados+' fabricação(ões) recuperada(s) · '+_antShelfRetroFiscaisRecuperados+' classificações fiscais recuperadas.<br><span style="color:var(--muted)">Sem validade: '+(Number(d.semValidade)||0)+' · sem EAN: '+(Number(d.semEan)||0)+' · sem saldo: '+(Number(d.semSaldo)||0)+' · já verificadas: '+(Number(d.ignoradasCache)||0)+'</span>':'',semDados=(_antShelfRetroSemXml+_antShelfRetroSemFabricacao)>0?'<br>'+_antShelfRetroSemXml+' XML(s) inacessível(is) · '+_antShelfRetroSemFabricacao+' lote(s) sem fabricação identificável no XML.':'';el.innerHTML=total?'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(239,68,68,.35);border-radius:10px;background:rgba(239,68,68,.07);color:var(--fg);font-size:12px"><span style="font-size:17px">⚠️</span><span><b>Consulta concluída às '+hora+' · '+total+' lote'+(total===1?'':'s')+' elegível(is)</b><br>Inclui lotes confirmados abaixo de 80% e estimativas sem fabricação com vencimento em até 30 dias. Planeje o encarte antes do vencimento.'+recuperacao+semDados+'</span></div>':'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid rgba(22,163,74,.35);border-radius:10px;background:rgba(22,163,74,.07);color:var(--fg);font-size:12px"><i class="ti ti-circle-check" style="font-size:18px;color:#16a34a"></i><span><b>Consulta concluída às '+hora+' · 0 lotes elegíveis</b><br>O AURA respondeu. Não encontrou lotes com vida útil confirmada abaixo de 80% nem estimativas sem fabricação com vencimento em até 30 dias.'+recuperacao+semDados+'</span></div>';
 }
 function antCarregarShelfLife_(forcar) {
   var agora=Date.now();
@@ -15445,13 +15482,13 @@ function renderAntecipacao() {
   var classe=(document.getElementById('antShelfClasse')||{}).value||'';
   var busca=((document.getElementById('antShelfBusca')||{}).value||'').trim().toLocaleLowerCase('pt-BR');
   var maxDias=Number((document.getElementById('antShelfUrgencia')||{}).value)||0;
-  var todos=_antShelfLifeDados.filter(function(x){return Number(x.quantidadeAtual)>0&&Number(x.diasParaVencer)>=0;});
+  var todos=_antShelfLifeDados.filter(function(x){return Number(x.quantidadeAtual)>0&&Number(x.diasParaVencer)>=0;}),estimados= todos.filter(function(x){return x.fabricacaoPendente||x.vidaUtilRecebidaPct==null;}).length,confirmados=todos.length-estimados;
   var semProgramacao=todos.filter(function(x){return !x.programacao||x.programacao.status!=='PROGRAMADO';}).length;
   var sete=todos.filter(function(x){return Number(x.diasParaVencer)<=7;}).length;
   var trinta=todos.filter(function(x){return Number(x.diasParaVencer)<=30;}).length;
   var programados=todos.length-semProgramacao;
   var resumo=document.getElementById('antShelfResumo');
-  if(resumo)resumo.innerHTML=antShelfResumoCard_('Lotes em potencial',todos.length,'Saldo ativo · vida útil atual < 80%','#ef4444','ti-alert-triangle')+
+  if(resumo)resumo.innerHTML=antShelfResumoCard_('Lotes em potencial',todos.length,confirmados+' confirmados <80% · '+estimados+' estimativas sem fabricação','#ef4444','ti-alert-triangle')+
     antShelfResumoCard_('Sem programação',semProgramacao,'Precisam de uma data para o encarte','#f59e0b','ti-calendar-plus')+
     antShelfResumoCard_('Vencem em até 7 dias',sete,'Prioridade máxima de decisão','#dc2626','ti-alarm')+
     antShelfResumoCard_('Já programados',programados,'Semana ou mês definido','#16a34a','ti-calendar-check');
@@ -15467,7 +15504,7 @@ function renderAntecipacao() {
     return true;
   });
   var container=document.getElementById('antShelfCards');if(!container)return;
-  if(!filtrados.length){var carregandoInicial=_antShelfLifeCarregando&&!_antShelfLifeAtualizado,erroSemDados=!!_antShelfLifeErro&&!_antShelfLifeAtualizado;container.innerHTML='<div style="padding:34px 18px;text-align:center;border:1px dashed var(--bds);border-radius:14px;color:var(--muted);background:var(--surface)"><i class="ti '+(carregandoInicial?'ti-loader-2 spin':erroSemDados?'ti-wifi-off':'ti-calendar-check')+'" style="font-size:28px;color:'+(carregandoInicial?'#3b82f6':erroSemDados?'#ef4444':'var(--green)')+'"></i><div style="font-size:14px;font-weight:800;color:var(--fg);margin:8px 0 4px">'+(carregandoInicial?'Consultando os recebimentos e o saldo atual…':erroSemDados?'A consulta não foi concluída.':todos.length?'Nenhum lote corresponde a este filtro.':'Nenhum lote de NF-e com saldo ativo abaixo de 80% da vida útil restante.')+'</div><div style="font-size:12px">'+(carregandoInicial?'Aguarde a resposta do Code.gs.':erroSemDados?'Veja o motivo acima e tente novamente.':todos.length?'Troque o filtro ou ajuste a busca.':'O lote aparecerá automaticamente quando a vida útil restante calculada cair abaixo de 80%.')+'</div></div>';return;}
+  if(!filtrados.length){var carregandoInicial=_antShelfLifeCarregando&&!_antShelfLifeAtualizado,erroSemDados=!!_antShelfLifeErro&&!_antShelfLifeAtualizado;container.innerHTML='<div style="padding:34px 18px;text-align:center;border:1px dashed var(--bds);border-radius:14px;color:var(--muted);background:var(--surface)"><i class="ti '+(carregandoInicial?'ti-loader-2 spin':erroSemDados?'ti-wifi-off':'ti-calendar-check')+'" style="font-size:28px;color:'+(carregandoInicial?'#3b82f6':erroSemDados?'#ef4444':'var(--green)')+'"></i><div style="font-size:14px;font-weight:800;color:var(--fg);margin:8px 0 4px">'+(carregandoInicial?'Consultando os recebimentos e o saldo atual…':erroSemDados?'A consulta não foi concluída.':todos.length?'Nenhum lote corresponde a este filtro.':'Nenhum lote elegível: vida útil confirmada abaixo de 80% ou estimativa sem fabricação vencendo em até 30 dias.')+'</div><div style="font-size:12px">'+(carregandoInicial?'Aguarde a resposta do Code.gs.':erroSemDados?'Veja o motivo acima e tente novamente.':todos.length?'Troque o filtro ou ajuste a busca.':'Lotes sem fabricação aparecem como estimativa quando vencem em até 30 dias; com fabricação, entram ao cair abaixo de 80%.')+'</div></div>';return;}
   var grupos={};
   filtrados.forEach(function(x){var f=antShelfFaixa_(x),cc=x.classificacaoShelf||'NAO_CLASSIFICADO',ck=cc+'::'+f.key;if(!grupos[ck])grupos[ck]={faixa:f,classe:cc,classeLabel:x.classificacaoShelfLabel||'Classificação pendente',itens:[]};grupos[ck].itens.push(x);});
   var keys=Object.keys(grupos).sort(function(a,b){
@@ -15475,7 +15512,7 @@ function renderAntecipacao() {
     function urgente_(g){return g.itens.reduce(function(best,x){if(!best)return x;var dx=Number(x.diasParaVencer),db=Number(best.diasParaVencer);return dx<db||(dx===db&&Number(x.vidaUtilAtualPct)<Number(best.vidaUtilAtualPct))?x:best;},null);}
     var ia=urgente_(ga),ib=urgente_(gb);
     var diff=Number(ia&&ia.diasParaVencer)-Number(ib&&ib.diasParaVencer);if(diff)return diff;
-    diff=Number(ia&&ia.vidaUtilAtualPct)-Number(ib&&ib.vidaUtilAtualPct);if(diff)return diff;
+    diff=(ia&&ia.vidaUtilAtualPct==null?101:Number(ia&&ia.vidaUtilAtualPct))-(ib&&ib.vidaUtilAtualPct==null?101:Number(ib&&ib.vidaUtilAtualPct));if(diff)return diff;
     if(ga.faixa.tipo==='SEM_PROGRAMACAO'&&gb.faixa.tipo!=='SEM_PROGRAMACAO')return -1;
     if(gb.faixa.tipo==='SEM_PROGRAMACAO'&&ga.faixa.tipo!=='SEM_PROGRAMACAO')return 1;
     var c=String(ga.classeLabel).localeCompare(String(gb.classeLabel),'pt-BR');if(c)return c;
@@ -15483,7 +15520,7 @@ function renderAntecipacao() {
   });
   var html='';
   keys.forEach(function(key){
-    var grupo=grupos[key],items=grupo.itens.sort(function(a,b){return Number(a.diasParaVencer)-Number(b.diasParaVencer)||Number(a.vidaUtilAtualPct)-Number(b.vidaUtilAtualPct)||String(a.recebidoEm||'').localeCompare(String(b.recebidoEm||''));});
+    var grupo=grupos[key],items=grupo.itens.sort(function(a,b){return Number(a.diasParaVencer)-Number(b.diasParaVencer)||(a.vidaUtilAtualPct==null?101:Number(a.vidaUtilAtualPct))-(b.vidaUtilAtualPct==null?101:Number(b.vidaUtilAtualPct))||String(a.recebidoEm||'').localeCompare(String(b.recebidoEm||''));});
     var sem=grupo.faixa.tipo==='SEM_PROGRAMACAO',cor=sem?'#f59e0b':(grupo.faixa.tipo==='SEMANA'?'#3b82f6':'#16a34a');
     html+='<section style="margin:0 0 16px;border:1px solid '+cor+'44;border-radius:14px;overflow:hidden;background:var(--surface)">';
     html+='<header style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:'+cor+'12;border-bottom:1px solid '+cor+'33;flex-wrap:wrap"><i class="ti '+(sem?'ti-calendar-plus':grupo.faixa.tipo==='SEMANA'?'ti-calendar-week':'ti-calendar-month')+'" style="font-size:19px;color:'+cor+'"></i><b style="font-size:13px;color:var(--fg)">'+nfeEsc_(grupo.classeLabel)+'</b><span style="font-size:12px;color:var(--muted)">·</span><b style="font-size:13px;color:var(--fg)">'+nfeEsc_(grupo.faixa.label)+'</b><span style="font-size:10px;padding:3px 8px;border-radius:999px;background:'+cor+'20;color:'+cor+';font-weight:800">'+items.length+' lote'+(items.length===1?'':'s')+'</span><span style="font-size:11px;color:var(--muted)">'+(sem?'Defina a entrada em uma semana ou mês de encarte':'Produtos organizados por período de entrada')+'</span></header>';
@@ -15497,8 +15534,8 @@ function renderAntecipacao() {
       html+='<article style="border:1px solid var(--border);border-left:4px solid '+urgCor+';border-radius:12px;padding:12px;background:var(--surface-2)">';
       var nomeBanco=String(x.produtoBanco||x.produto||'Produto'),nomeXml=String(x.produtoXml||'').trim(),mostrarXml=!!nomeXml&&nomeXml.trim().toLocaleLowerCase('pt-BR')!==nomeBanco.trim().toLocaleLowerCase('pt-BR');
       html+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="min-width:0"><div style="font-size:13px;font-weight:850;color:var(--fg);line-height:1.3">'+nfeEsc_(nomeBanco)+'</div>'+(mostrarXml?'<div style="font-size:10px;color:var(--muted);line-height:1.3;margin-top:2px">NF-e: '+nfeEsc_(nomeXml)+'</div>':'')+'<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:4px"><span style="font-size:9px;padding:2px 6px;border:1px solid var(--bds);border-radius:999px;color:var(--fg);background:var(--surface)">'+nfeEsc_(x.classificacaoShelfLabel||'Classificação pendente')+'</span><span style="font-size:9px;color:var(--muted)">'+nfeEsc_(x.setor||'--')+' · EAN '+nfeEsc_(x.ean||'--')+'</span></div>'+(x.classificacaoShelfOrigem?'<div style="font-size:9px;color:var(--muted);margin-top:3px">Classificado por '+nfeEsc_(x.classificacaoShelfOrigem)+(x.ncm?' · NCM '+nfeEsc_(x.ncm):'')+(x.cfop?' · CFOP '+nfeEsc_(x.cfop):'')+'</div>':'')+'</div><span style="flex:none;padding:5px 8px;border-radius:8px;background:'+urgCor+'18;color:'+urgCor+';font-size:11px;font-weight:900">'+dias+' dia'+(dias===1?'':'s')+'</span></div>';
-      html+='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0"><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Saldo atual</div><b style="font-size:13px;color:var(--fg)">'+Number(x.quantidadeAtual||0).toLocaleString('pt-BR')+' '+nfeEsc_(x.unidade||'un.')+'</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Validade</div><b style="font-size:12px;color:var(--fg)">'+venc+'</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Vida útil na entrada</div><b style="font-size:13px;color:'+urgCor+'">'+Math.round(Number(x.vidaUtilRecebidaPct)||0)+'%</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Preço de venda</div><b style="font-size:13px;color:var(--fg)">'+(Number(x.precoVenda)>0?fmtR(x.precoVenda):'--')+'</b></div></div>';
-      html+='<div style="font-size:10px;color:var(--muted);line-height:1.45;margin-bottom:9px">Recebido '+String(x.recebidoEm||'').split('-').reverse().join('/')+' · vida útil na entrada '+(x.vidaUtilRecebidaPct==null?'--':Math.round(x.vidaUtilRecebidaPct)+'%')+' · atual <b style="color:'+urgCor+'">'+(x.vidaUtilAtualPct==null?'--':Math.round(x.vidaUtilAtualPct)+'%')+'</b><br>NF-e '+nfeEsc_(x.numeroNFe||'--')+' · '+nfeEsc_(x.fornecedor||'Fornecedor não informado')+'<br>Ação definida no recebimento: <b style="color:var(--fg)">'+acao+'</b>'+(x.dataAcao?' · '+String(x.dataAcao).split('-').reverse().join('/'):'')+'</div>';
+      html+='<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0"><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Saldo atual</div><b style="font-size:13px;color:var(--fg)">'+Number(x.quantidadeAtual||0).toLocaleString('pt-BR')+' '+nfeEsc_(x.unidade||'un.')+'</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Validade</div><b style="font-size:12px;color:var(--fg)">'+venc+'</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Vida útil / estimativa na entrada</div><b style="font-size:12px;color:'+urgCor+'">'+(x.vidaUtilRecebidaPct==null?('Estimativa · '+Number(x.diasUtilEstimadosNaEntrada||0)+' dias'):Math.round(Number(x.vidaUtilRecebidaPct))+'%')+'</b></div><div style="padding:7px;background:var(--surface);border-radius:8px"><div style="font-size:9px;color:var(--muted);text-transform:uppercase">Preço de venda</div><b style="font-size:13px;color:var(--fg)">'+(Number(x.precoVenda)>0?fmtR(x.precoVenda):'--')+'</b></div></div>';
+      html+='<div style="font-size:10px;color:var(--muted);line-height:1.45;margin-bottom:9px">Recebido '+String(x.recebidoEm||'').split('-').reverse().join('/')+' · vida útil na entrada '+(x.vidaUtilRecebidaPct==null?('estimativa sem fabricação · '+Number(x.diasUtilEstimadosNaEntrada||0)+' dias entre recebimento e validade'):Math.round(x.vidaUtilRecebidaPct)+'%')+' · atual <b style="color:'+urgCor+'">'+(x.vidaUtilAtualPct==null?'--':Math.round(x.vidaUtilAtualPct)+'%')+'</b><br>NF-e '+nfeEsc_(x.numeroNFe||'--')+' · '+nfeEsc_(x.fornecedor||'Fornecedor não informado')+'<br>Ação definida no recebimento: <b style="color:var(--fg)">'+acao+'</b>'+(x.dataAcao?' · '+String(x.dataAcao).split('-').reverse().join('/'):'')+'</div>';
       if(prog)html+='<div style="margin-bottom:8px;padding:7px 9px;border-radius:8px;background:rgba(22,163,74,.1);color:#15803d;font-size:11px;font-weight:800"><i class="ti ti-calendar-check"></i> No encarte '+(prog.tipo==='SEMANA'?'da semana de ':'do mês de ')+String(prog.dataEncarte||'').split('-').reverse().join('/')+'</div>';
       html+='<div style="display:grid;grid-template-columns:minmax(105px,.8fr) minmax(130px,1fr);gap:7px;align-items:end"><label style="font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase">Período<select id="antShelfTipo_'+id+'" style="display:block;width:100%;margin-top:3px;padding:8px;border:1px solid var(--bds);border-radius:8px;background:var(--surface);color:var(--fg);font-size:12px"><option value="SEMANA" '+(!prog||prog.tipo==='SEMANA'?'selected':'')+'>Semana</option><option value="MES" '+(prog&&prog.tipo==='MES'?'selected':'')+'>Mês</option></select></label><label style="font-size:9px;font-weight:800;color:var(--muted);text-transform:uppercase">Data prevista<input id="antShelfData_'+id+'" type="date" min="'+antShelfIso_(new Date())+'" max="'+x.validade+'" value="'+(prog?prog.dataEncarte:sugestao)+'" style="display:block;box-sizing:border-box;width:100%;margin-top:3px;padding:7px;border:1px solid var(--bds);border-radius:8px;background:var(--surface);color:var(--fg);font-size:12px"></label></div>';
       html+='<div style="display:flex;gap:7px;margin-top:8px"><button id="antShelfSave_'+id+'" class="btn btn-sm btn-green" style="flex:1" onclick="antShelfProgramar_(\''+x.ean+'\',\''+x.validade+'\',\''+id+'\')"><i class="ti ti-calendar-check"></i> '+(prog?'Atualizar programação':'Salvar programação')+'</button>';
@@ -17504,6 +17541,15 @@ function _auraPrepararFotoEncontradaElemento(img){
   var boss=img.closest('.boss-photo');
   if(boss){var ic2=boss.querySelector('.foto-central-empty-icon');if(ic2)ic2.remove();}
 }
+function _auraAgendarRetryFoto_(img,cod,atraso){
+  if(!img)return;
+  var token=String(Date.now())+Math.random();img.setAttribute('data-retry-token',token);
+  setTimeout(function(){
+    if(!img.isConnected||img.getAttribute('data-retry-token')!==token)return;
+    img.removeAttribute('data-retry-token');img.removeAttribute('data-resolvido');img.removeAttribute('data-resolvendo');
+    if(_auraFotoObserver)_auraFotoObserver.observe(img);else _auraResolverImagemProdutoElemento(img);
+  },atraso);
+}
 function _auraResolverImagemProdutoElemento(img){
   if(!img||!img.isConnected)return;
   if(img.getAttribute('data-resolvendo')==='1'||img.getAttribute('data-resolvido')==='1')return;
@@ -17514,24 +17560,20 @@ function _auraResolverImagemProdutoElemento(img){
   img.setAttribute('data-resolvendo','1');
   _resolverFotoTarefaChain(cod,nome).then(function(url){
     if(!img.isConnected)return;
-    img.removeAttribute('data-resolvendo');
-    img.setAttribute('data-resolvido','1');
+    img.removeAttribute('data-resolvendo');img.setAttribute('data-resolvido','1');
     if(url){
       _auraPrepararFotoEncontradaElemento(img);
-      img.onerror=function(){
-        img.onerror=null;
-        _invalidarFotoCentralAura(cod);
-        _auraMostrarSemFotoElemento(img);
-      };
+      img.onerror=function(){img.onerror=null;_invalidarFotoCentralAura(cod);_auraMostrarSemFotoElemento(img);img.removeAttribute('data-resolvido');_auraAgendarRetryFoto_(img,cod,30000);};
       img.src=url;
     }else{
       _auraMostrarSemFotoElemento(img);
+      // Falha de rede: tente novamente em 30s. Ausência confirmada: repita após expirar o cache negativo.
+      var conhecido=_thumbCacheLookup(cod)!==undefined;
+      _auraAgendarRetryFoto_(img,cod,conhecido?THUMB_CACHE_TTL_NEG_MS+1000:30000);
     }
   }).catch(function(){
     if(!img.isConnected)return;
-    img.removeAttribute('data-resolvendo');
-    img.setAttribute('data-resolvido','1');
-    _auraMostrarSemFotoElemento(img);
+    img.removeAttribute('data-resolvendo');_auraMostrarSemFotoElemento(img);_auraAgendarRetryFoto_(img,cod,30000);
   });
 }
 function _auraObservarImagemProduto(img){
@@ -18348,25 +18390,29 @@ function _auraOnScanSuccess(code) {
     if(_auraBaseCompletaCarregada_&&_auraBancoCarregado_)return Promise.resolve(true);
     return syncAll('completo').then(function(){return !!(_auraBaseCompletaCarregada_&&_auraBancoCarregado_);});
   }
+  function auraGarantirSetores_(){return auraCarregarDadosCloudDaAba_('setores-compartilhados',['buscarSetorCorrigido']);}
+  function auraGarantirBancoESetores_(){return Promise.all([auraGarantirBanco_(),auraGarantirSetores_()]).then(function(r){return !!(r[0]&&r[1]);});}
   function auraPrepararAba_(name){
     if(name==='dashboard'){
-      if(!_auraDashboardCarregado_)syncAll('dashboard');
-      auraCarregarDadosCloudDaAba_('dashboard',['buscarEncerradas']);
+      if(!_auraDashboardCarregado_&&!_auraSyncInFlight_)syncAll('dashboard');
+      auraCarregarDadosCloudDaAba_('dashboard',['buscarEncerradas','buscarSetorCorrigido']);
+      // O cadastro oficial é necessário para identificar corretamente quem fez as coletas recentes.
+      carregarColaboradoresUniversal_(false).then(function(){if(currentTabName==='dashboard'&&typeof _ucFiltrar==='function')_ucFiltrar();});
+      if(typeof _ucDados!=='undefined'&&_ucDados.length&&typeof _ucEnriquecerVisiveis_==='function')_ucEnriquecerVisiveis_(_ucDados.slice(0,30));
     }else if(name==='estoque'){
       renderEstoqueFast_(false); // exibe o snapshot local enquanto atualiza
-      auraGarantirBaseCompleta_().then(function(ok){if(ok&&currentTabName==='estoque')renderEstoqueFast_(false);else if(!ok)mostrarToast('Não foi possível atualizar estoque agora. Tente Sincronizar.','err');});
+      Promise.all([auraGarantirBaseCompleta_(),auraGarantirSetores_()]).then(function(r){if(r[0]&&currentTabName==='estoque')renderEstoqueFast_(false);else if(!r[0])mostrarToast('Não foi possível atualizar o catálogo agora. Tente Sincronizar.','err');});
       auraCarregarDadosCloudDaAba_('estoque',['buscarPromoAtivas','buscarEncerradas']).then(function(){if(currentTabName==='estoque')renderEstoqueFast_(false);});
     }else if(name==='nfe'){
-      auraGarantirBanco_().then(function(ok){if(currentTabName!=='nfe')return;if(!ok)mostrarToast('Banco de produtos indisponível; confira a conexão e tente novamente.','err');nfeInit_();});
+      auraGarantirBancoESetores_().then(function(ok){if(currentTabName!=='nfe')return;if(!ok)mostrarToast('Banco de produtos indisponível; confira a conexão e tente novamente.','err');nfeInit_();});
     }else if(name==='cobertura'){
-      auraGarantirBanco_().then(function(){if(currentTabName==='cobertura')cfCarregar(false);});
+      auraGarantirBancoESetores_().then(function(){if(currentTabName==='cobertura')cfCarregar(false);});
     }else if(name==='antecipacao'){
       if(typeof renderAntecipacao==='function')renderAntecipacao();
     }else if(name==='acoesfornecedores'){
-      if(typeof afCarregar==='function')afCarregar(false);
+      auraGarantirBancoESetores_().then(function(){if(currentTabName==='acoesfornecedores'&&typeof afCarregar==='function')afCarregar(false);});
     }else if(name==='bossvision'){
-      if(window._bossDados&&typeof bossReanimarGraficosBoss_==='function')bossReanimarGraficosBoss_();
-      if(typeof bossCarregar==='function')bossCarregar(false);
+      auraGarantirBancoESetores_().then(function(){if(currentTabName!=='bossvision')return;if(window._bossDados&&typeof bossReanimarGraficosBoss_==='function')bossReanimarGraficosBoss_();if(typeof bossCarregar==='function')bossCarregar(false);});
     }else if(name==='tarefas'){
       if(typeof renderTarefas==='function')renderTarefas();
       setTimeout(function(){if(currentTabName==='tarefas'&&typeof sincronizarTarefasCompleto==='function')sincronizarTarefasCompleto();},0);
@@ -18375,9 +18421,10 @@ function _auraOnScanSuccess(code) {
     }else if(name==='modalidades'){
       auraCarregarDadosCloudDaAba_('modalidades',['buscarModalidades']).then(function(){if(currentTabName==='modalidades')renderModalidades();});
     }else if(name==='promocoes'){
-      auraCarregarDadosCloudDaAba_('promocoes',['buscarEncerradas','buscarBiblioteca','buscarPromoAtivas','buscarEncartes']).then(function(){if(currentTabName==='promocoes')renderPromos();});
+      renderPromos();
+      Promise.all([auraGarantirBancoESetores_(),auraCarregarDadosCloudDaAba_('promocoes',['buscarEncerradas','buscarBiblioteca','buscarPromoAtivas','buscarEncartes'])]).then(function(){if(currentTabName==='promocoes')renderPromos();});
     }else if(name==='relatorio'){
-      auraCarregarDadosCloudDaAba_('relatorio',['buscarNegociacoes','buscarResolvidos','buscarEncerradas']).then(function(){if(currentTabName==='relatorio')renderRelatorio();});
+      Promise.all([auraGarantirBancoESetores_(),auraCarregarDadosCloudDaAba_('relatorio',['buscarNegociacoes','buscarResolvidos','buscarEncerradas'])]).then(function(){if(currentTabName==='relatorio')renderRelatorio();});
     }else if(name==='ajuda'){
       // Conteúdo local: nenhuma consulta remota.
     }
@@ -18407,6 +18454,8 @@ function _auraOnScanSuccess(code) {
       auraPrepararAba_(name);
     });
   };
+  // A tela inicial não passa por goTab(); prepara explicitamente apenas seus dados essenciais.
+  if(_cfg&&_cfg.id)setTimeout(function(){if(currentTabName==='dashboard')auraPrepararAba_('dashboard');},0);
 })();
 </script>
 
