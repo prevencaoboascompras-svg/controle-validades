@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AURA System v7.55 — cache local do Shelf Life + indexação de XML em segundo plano -->
+<!-- AURA System v7.56 — conversão histórica de embalagem para kg no Escudo -->
 <!-- AURA build v7.34 — Chart.js carregado sem bloquear a leitura inicial -->
 <!-- AURA DOSSIÊ TELECON v6.99 — relatório original sempre como Anexo I + compactação apenas de áreas em branco -->
 <html lang="pt-BR" class="dark">
@@ -12083,7 +12083,7 @@ function nfeReceberNota_(nota){_nfeNota=nota||null;if(!_nfeNota)return;_nfeNota.
 var _nfeEscudoCatalogoAura_=[];
 var _nfeEscudoCatalogoKeyAura_='';
 var _nfeEscudoCatalogoBusyAura_='';
-function nfeEscudoFatorPadrao_(it){var d=String(it&&it.nome||'').toUpperCase().replace(/,/g,'.'),m=d.match(/(?:^|[^0-9])(\d+(?:\.\d+)?)\s*KG(?:\b|$)/);if(m&&Number(m[1])>0)return Number(m[1]);var u=String(it&&(it.uCom||it.unidadeNFe)||'').trim().toUpperCase();return /^(KG|KGM|QUILO|QUILOGRAMA)$/.test(u)?1:'';}
+function nfeEscudoFatorPadrao_(it){var u=String(it&&(it.uCom||it.unidadeNFe)||'').trim().toUpperCase();if(/^(KG|KGM|QUILO|QUILOGRAMA)$/.test(u))return 1;var d=String(it&&(it.nome||it.nomeAura||it.nomeNFe)||'').toUpperCase().replace(/,/g,'.'),m=d.match(/(?:^|[^0-9])(\d+(?:\.\d+)?)\s*KG(?:\b|$)/);return m&&Number(m[1])>0?Number(m[1]):'';}
 function nfeEscudoFatorValor_(it){return it&&it.escudoFatorKg!==undefined&&it.escudoFatorKg!==null&&it.escudoFatorKg!==''?it.escudoFatorKg:nfeEscudoFatorPadrao_(it);}
 function nfeEscudoFatorAlterar_(i,v){var it=_nfeNota&&_nfeNota.itens&&_nfeNota.itens[i];if(!it)return;var raw=String(v||'').replace(',','.');it.escudoFatorKg=raw===''?'':Math.max(0,Number(raw)||0);nfeSalvarRascunho_();}
 function nfeEscudoOptionsAura_(it){
@@ -12098,7 +12098,7 @@ function nfeEscudoGarantirCatalogoAura_(){
   nfePost_({action:'nfeEscudoCatalogo',cnpjFornecedor:n.cnpjFornecedor||'',itens:(n.itens||[]).map(function(it){return {nItem:it.nItem,cProd:it.cProd,eanAura:it.eanAura||it.ean||it.cEAN||it.cEANTrib||''};})}).then(function(j){
     if(_nfeEscudoCatalogoBusyAura_===key)_nfeEscudoCatalogoBusyAura_='';if(!j||!j.ok){console.warn('[AURA NF-e] Catálogo Escudo indisponível:',j&&j.erro);return;}
     _nfeEscudoCatalogoAura_=Array.isArray(j.produtos)?j.produtos:[];_nfeEscudoCatalogoKeyAura_=key;
-    (n.itens||[]).forEach(function(it){var v=(j.vinculos||{})[String(it.nItem||it.cProd||'')];if(v){if(!it.escudoCodigo){it.escudoCodigo=String(v.codigo||'');it.escudoNome=String(v.nome||'');it.escudoUnidade=String(v.unidade||'kg');}if(it.escudoFatorKg===undefined||it.escudoFatorKg==='')it.escudoFatorKg=Number(v.fatorKg)||nfeEscudoFatorPadrao_(it);}});
+    (n.itens||[]).forEach(function(it){var v=(j.vinculos||{})[String(it.nItem||it.cProd||'')];if(v){if(!it.escudoCodigo){it.escudoCodigo=String(v.codigo||'');it.escudoNome=String(v.nome||'');it.escudoUnidade=String(v.unidade||'kg');}var fatorNome=nfeEscudoFatorPadrao_(it),fatorSalvo=Number(v.fatorKg)||0,unNF=String(it.uCom||it.unidadeNFe||'').trim().toUpperCase(),nfPeso=/^(KG|KGM|QUILO|QUILOGRAMA)$/.test(unNF);if(!nfPeso&&Number(fatorNome)>1&&fatorSalvo<=1)it.escudoFatorKg=fatorNome;else if(it.escudoFatorKg===undefined||it.escudoFatorKg==='')it.escudoFatorKg=fatorSalvo||fatorNome;}});
     if(_nfeNota===n){nfeSalvarRascunho_();nfeRenderNota_();}
   }).catch(function(e){if(_nfeEscudoCatalogoBusyAura_===key)_nfeEscudoCatalogoBusyAura_='';console.warn('[AURA NF-e] Falha ao consultar o Escudo:',e);});
 }
@@ -12591,7 +12591,7 @@ function nfeHistGeralLoteEditorRow_(idx,li,l){
 }
 function nfeHistGeralEditarHtml_(it,idx){
   var lotes=Array.isArray(it.lotes)?it.lotes:[],loteHtml=(lotes.length?lotes:[{validade:'',quantidade:''}]).map(function(l,i){return nfeHistGeralLoteEditorRow_(idx,i,l);}).join('');
-  return '<button class="nfe-hist-edit-btn" onclick="nfeHistGeralAbrirEdicao_('+idx+')"><i class="ti ti-edit"></i> EDITAR INFORMAÇÕES DO ITEM</button><button class="nfe-hist-edit-btn" style="margin-left:6px;border-color:#b77c24;color:#f2c46d" onclick="nfeHistGeralCorrigirVinculoEscudo_('+idx+')"><i class="ti ti-arrows-exchange"></i> CORRIGIR ENTRADA NO ESCUDO</button><div class="nfe-hist-editbox" id="nfeHistGeralEdit'+idx+'"><div style="font-size:10px;font-weight:900">Corrigir dados gravados desta NF-e</div><div class="nfe-hist-warning">O código precisa existir no Banco Telecon. Alterações de validade e quantidade atualizam o lançamento correspondente e ficam registradas na auditoria.</div><label>Código de barras / EAN</label><input id="nfeHistGeralEan'+idx+'" inputmode="numeric" value="'+nfeEsc_(it.eanCanonico||it.ean||'')+'"><label>Setor</label><select id="nfeHistGeralSetor'+idx+'">'+nfeHistSetoresOptions_(it.setor||'Outros')+'</select><div class="nfe-hist-edit-lotes-title">Validades e quantidades</div><div id="nfeHistGeralLotes'+idx+'">'+loteHtml+'</div><button type="button" class="nfe-hist-add-lote" onclick="nfeHistGeralAddLote_('+idx+')"><i class="ti ti-plus"></i> Adicionar validade</button><div class="nfe-hist-edit-actions"><button onclick="nfeHistGeralFecharEdicao_('+idx+')">Cancelar</button><button class="save" onclick="nfeHistGeralSalvarEdicao_('+idx+')"><i class="ti ti-device-floppy"></i> Salvar alterações</button></div></div>';
+  return '<button class="nfe-hist-edit-btn" onclick="nfeHistGeralAbrirEdicao_('+idx+')"><i class="ti ti-edit"></i> EDITAR INFORMAÇÕES DO ITEM</button><button class="nfe-hist-edit-btn" style="margin-left:6px;border-color:#b77c24;color:#f2c46d" onclick="nfeHistGeralCorrigirVinculoEscudo_('+idx+')"><i class="ti ti-arrows-exchange"></i> CORRIGIR VÍNCULO NO ESCUDO</button><button class="nfe-hist-edit-btn" style="margin-left:6px;border-color:#19a87e;color:#72e2bd" onclick="nfeHistGeralConverterEntradaEscudo_('+idx+')"><i class="ti ti-scale"></i> CONVERTER PESO NO ESCUDO</button><div class="nfe-hist-editbox" id="nfeHistGeralEdit'+idx+'"><div style="font-size:10px;font-weight:900">Corrigir dados gravados desta NF-e</div><div class="nfe-hist-warning">O código precisa existir no Banco Telecon. Alterações de validade e quantidade atualizam o lançamento correspondente e ficam registradas na auditoria.</div><label>Código de barras / EAN</label><input id="nfeHistGeralEan'+idx+'" inputmode="numeric" value="'+nfeEsc_(it.eanCanonico||it.ean||'')+'"><label>Setor</label><select id="nfeHistGeralSetor'+idx+'">'+nfeHistSetoresOptions_(it.setor||'Outros')+'</select><div class="nfe-hist-edit-lotes-title">Validades e quantidades</div><div id="nfeHistGeralLotes'+idx+'">'+loteHtml+'</div><button type="button" class="nfe-hist-add-lote" onclick="nfeHistGeralAddLote_('+idx+')"><i class="ti ti-plus"></i> Adicionar validade</button><div class="nfe-hist-edit-actions"><button onclick="nfeHistGeralFecharEdicao_('+idx+')">Cancelar</button><button class="save" onclick="nfeHistGeralSalvarEdicao_('+idx+')"><i class="ti ti-device-floppy"></i> Salvar alterações</button></div></div>';
 }
 function nfeHistoricoGeralRenderDetalhe_(r){
   var modal=document.getElementById('nfeHistModalGlobal');if(!modal)return;
@@ -12635,6 +12635,18 @@ async function nfeHistGeralCorrigirVinculoEscudo_(idx){
   var codigo=String(prompt('Código próprio do produto correto no Escudo Padaria:','')||'').trim();if(!codigo)return;var nome=String(prompt('Descrição correta do produto no Escudo Padaria:',it.nomeBanco||it.nomeNFe||'')||'').trim();if(!nome)return;var ean=nfeDigitos_(((document.getElementById('nfeHistGeralEan'+idx)||{}).value)||it.eanCanonico||it.ean||'');
   if(!confirm('Mover a entrada já enviada para '+nome+' ('+codigo+'), mantendo quantidade, validade e a linha original do histórico?'))return;
   try{mostrarToast('Conferindo o lote original e corrigindo o vínculo no Escudo…','warn');var x=await nfePost_({action:'nfeEscudoCorrigirVinculoHistorico',chave:n.chave,nItem:it.nItem||it.itemId,cProd:it.cProd,codigoNovo:codigo,nomeNovo:nome,eanAura:ean,cnpjFornecedor:n.cnpj||n.cnpjFornecedor||'',operador:n.operador||'',editor:editor,editorNome:editor});if(!x||!x.ok)throw new Error((x&&x.erro)||'Falha ao corrigir a entrada no Escudo.');mostrarToast(x.mensagem||'Entrada sincronizada com o vínculo corrigido.','ok');nfeHistoricoGeralAbrir_(n.chave);}catch(e){mostrarToast(String(e&&e.message||e||'Não foi possível corrigir a entrada do Escudo.'),'err');}
+}
+
+
+async function nfeHistGeralConverterEntradaEscudo_(idx){
+  var r=_nfeHistGeralDetalheAtual_||{},n=r.nota||{},it=(r.itens||[])[idx],editor=nfeHistSessaoUsuario_();
+  if(!it||!nfeHistPodeEditarNota_(n)||!editor){mostrarToast('Entre com Leonardo ou Wagner para converter esta entrada.','warn');return;}
+  var nome=[it.nomeNFe,it.nomeBanco].filter(Boolean).join(' '),m=String(nome).toUpperCase().replace(/,/g,'.').match(/(?:^|[^0-9])(\d+(?:\.\d+)?)\s*KG(?:\b|$)/),padrao=m&&Number(m[1])>0?String(Number(m[1])):'';
+  var fatorTxt=prompt('Informe quantos kg pesa cada pacote. O valor será aplicado à entrada original no Escudo e guardado para este fornecedor/produto.',padrao);if(fatorTxt===null)return;
+  var fator=Number(String(fatorTxt).replace(',','.'));if(!(fator>0)){mostrarToast('Informe um peso maior que zero.','warn');return;}
+  var qtd=(it.lotes||[]).reduce(function(a,l){return a+(Number(l.quantidade)||0);},0),total=qtd*fator;
+  if(!confirm('Converter no Escudo Padaria, sem duplicar a entrada?\n\n'+qtd.toLocaleString('pt-BR')+' pacotes × '+fator.toLocaleString('pt-BR')+' kg = '+total.toLocaleString('pt-BR')+' kg\n\nA quantidade da NF-e/AURA permanece como foi conferida.'))return;
+  try{mostrarToast('Convertendo a entrada original no Escudo…','warn');var x=await nfePost_({action:'nfeEscudoConverterEntradaHistorico',chave:n.chave,nItem:it.nItem||it.itemId,cProd:it.cProd,kgPorPacote:fator,editor:editor,email:_usuarioSelecionado||'',operador:n.operador||''});if(!x||!x.ok)throw new Error((x&&x.erro)||x&&x.mensagem||'Falha ao converter a entrada no Escudo.');mostrarToast(x.mensagem||'Conversão aplicada no Escudo.','ok');nfeHistoricoGeralAbrir_(n.chave);}catch(e){mostrarToast(String(e&&e.message||e||'Não foi possível converter a entrada.'),'err');}
 }
 
 async function nfeHistGeralSalvarEdicao_(idx){
