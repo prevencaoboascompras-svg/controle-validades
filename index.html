@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<!-- AURA System v7.57 — Tarefas Otimizadas: Agrupamento + Avatares + Notificação -->
-<!-- AURA build v7.34 — Chart.js carregado sem bloquear a leitura inicial -->
+<!-- AURA System — Tarefas Otimizadas v7.58 -->
 <html lang="pt-BR" class="dark">
 <head>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -35,9 +34,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 html,body{overflow-x:hidden;max-width:100%}
 .app{max-width:100%;margin:0;padding:0;overflow-x:hidden}
 
-/* ──────────────────────────────────────────────────────
-   ESTILOS ORIGINAIS MANTIDOS
-   ────────────────────────────────────────────────────── */
+/* Estilos gerais mantidos */
 .cfg{background:var(--bg);border:2px dashed var(--bds);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;display:none}
 .cfg h3{font-size:15px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--amber)}
 .cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -49,7 +46,10 @@ html,body{overflow-x:hidden;max-width:100%}
 .dot{width:8px;height:8px;border-radius:50%;background:#888;flex-shrink:0}
 .dot.ok{background:var(--green)}.dot.err{background:var(--red)}.dot.loading{background:var(--amber)}
 .st{font-size:13px;color:var(--tx2)}.sync-time{font-size:12px;color:var(--tx2);margin-left:auto}
-.topbar{display:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--bd);margin-bottom:20px}
+.topbar h1{font-size:20px;font-weight:600;display:flex;align-items:center;gap:8px}
+.topbar h1 i{color:var(--green)}.topbar p{font-size:13px;color:var(--tx2);margin-top:3px}
+.topbar-right{display:flex;gap:8px;flex-wrap:wrap}
 .btn{border:1px solid var(--bds);background:var(--bg);color:var(--tx);font-size:13px;font-weight:500;padding:7px 16px;border-radius:var(--r);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .15s;white-space:nowrap}
 .btn:hover{background:var(--bg2)}.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-green{background:var(--green);border-color:var(--green);color:#fff}.btn-green:hover{background:var(--gd)}
@@ -61,176 +61,148 @@ html,body{overflow-x:hidden;max-width:100%}
 .metric-lbl{font-size:11px;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
 .metric-val{font-size:28px;font-weight:600}
 .metric-val.danger{color:var(--red)}.metric-val.warn{color:var(--amber)}.metric-val.ok{color:var(--green)}.metric-val.info{color:var(--blue)}
-.tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--bd)}
+.tabs{display:flex;gap:2px;margin-bottom:20px;border-bottom:1px solid var(--bd);padding:0 20px}
 .tab{font-size:13px;font-weight:500;padding:10px 18px;cursor:pointer;color:var(--tx2);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:7px;transition:color .15s}
 .tab.active{color:var(--tx);border-bottom-color:var(--green)}.tab:hover:not(.active){color:var(--tx)}
 .badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block;white-space:nowrap}
 .b-danger{background:#FCEBEB;color:#A32D2D}.b-warn{background:#FAEEDA;color:#854F0B}
 .b-ok{background:#EAF3DE;color:#3B6D11}.b-blue{background:#E6F1FB;color:#185FA5}.b-gray{background:var(--bg2);color:var(--tx2)}
 
-/* ──────────────────────────────────────────────────────
-   NOVOS ESTILOS — TELA TAREFAS OTIMIZADA
-   ────────────────────────────────────────────────────── */
+/* Estilos da Tela de Tarefas Otimizada */
+.tarefas-container{padding:0 20px 20px}
+.tarefas-header-bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:10px 14px;background:var(--bg);border-radius:var(--rl);border:1px solid var(--bd);margin-bottom:14px}
+.tarefas-header-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tarefas-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2)}
+.tarefas-sort{display:flex;gap:4px}
+.tarefas-sort-btn{background:var(--bg2);border:none;color:var(--tx2);font-size:11px;padding:4px 10px;border-radius:6px;cursor:pointer;transition:all .15s}
+.tarefas-sort-btn:hover,.tarefas-sort-btn.active{background:var(--green);color:#fff}
+.tarefas-header-actions{display:flex;gap:6px}
+.filtros-linha{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filtro-tag{font-size:11px;padding:4px 10px;border-radius:99px;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.filtro-tag:hover,.filtro-tag.ativo{border-color:var(--bds)}
+.filtro-tag.todos{background:var(--bg2);color:var(--tx)}
+.filtro-tag.critica{background:rgba(226,75,74,.10);color:#fca5a5}
+.filtro-tag.naovisto{background:rgba(55,138,221,.10);color:#93c5fd}
+.contador-naovistos{background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:99px;margin-left:6px}
 
-/* Cabeçalho da seção de Tarefas */
-.tarefas-header-bar {
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
-  padding: 10px 14px; background: var(--bg); border-radius: var(--rl); border: 1px solid var(--bd); margin-bottom: 14px;
-}
-.tarefas-header-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.tarefas-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--tx2); }
-.tarefas-sort { display: flex; gap: 4px; }
-.tarefas-sort-btn {
-  background: var(--bg2); border: none; color: var(--tx2); font-size: 11px; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all .15s;
-}
-.tarefas-sort-btn:hover, .tarefas-sort-btn.active { background: var(--green); color: #fff; }
-.tarefas-header-actions { display: flex; gap: 6px; }
+/* Card Agrupado */
+.tarefa-produto-card{background:var(--bg);border:1px solid var(--bd);border-radius:var(--rl);overflow:hidden;transition:border-color .15s,box-shadow .15s;margin-bottom:10px}
+.tarefa-produto-card:hover{border-color:var(--bds);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.tarefa-produto-card.prioridade-critica{border-left:3px solid var(--red)}
+.tarefa-produto-card.prioridade-urgente{border-left:3px solid var(--amber)}
+.tarefa-produto-card.prioridade-atencao{border-left:3px solid var(--yellow)}
+.tarefa-produto-card.prioridade-ok{border-left:3px solid var(--green)}
 
-/* Filtros */
-.filtros-linha { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.filtro-tag { font-size: 11px; padding: 4px 10px; border-radius: 99px; cursor: pointer; border: 1px solid transparent; transition: all .15s; }
-.filtro-tag:hover, .filtro-tag.ativo { border-color: var(--bds); }
-.filtro-tag.todos { background: var(--bg2); color: var(--tx); }
-.filtro-tag.critica { background: rgba(226,75,74,.10); color: #fca5a5; }
-.filtro-tag.naovisto { background: rgba(55,138,221,.10); color: #93c5fd; }
-.contador-naovistos {
-  background: var(--red); color: #fff; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 99px; margin-left: 6px;
-}
+.tarefa-produto-hd{display:grid;grid-template-columns:64px 1fr auto;gap:12px;padding:12px 14px;align-items:center;cursor:pointer}
+.tarefa-produto-hd:hover{background:var(--bg2)}
+.tarefa-produto-img{width:56px;height:56px;border-radius:8px;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tarefa-produto-img img{width:100%;height:100%;object-fit:contain}
+.tarefa-produto-info{min-width:0}
+.tarefa-produto-nome{font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tarefa-produto-meta{display:flex;gap:10px;margin-top:4px;flex-wrap:wrap;font-size:11px;color:var(--tx2)}
+.tarefa-produto-cod{font-family:monospace;background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:10px}
+.tarefa-produto-venc{display:flex;align-items:center;gap:4px}
+.tarefa-produto-venc.danger{color:var(--red);font-weight:600}
+.tarefa-produto-venc.warn{color:var(--amber);font-weight:600}
+.tarefa-produto-qtd{font-weight:600;color:var(--tx)}
+.tarefa-produto-badges{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.badge-prioridade{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.badge-prioridade.critica{background:rgba(226,75,74,.15);color:#fca5a5}
+.badge-prioridade.urgente{background:rgba(186,117,23,.15);color:#fcd34d}
+.badge-prioridade.atencao{background:rgba(234,179,8,.15);color:#fde68a}
+.badge-prioridade.ok{background:rgba(29,158,117,.15);color:#6ee7b7}
+.tarefa-produto-preco{font-size:11px;color:var(--tx2)}
+.tarefa-produto-preco b{color:var(--green);font-weight:700}
 
-/* Card Agrupado por Produto */
-.tarefa-produto-card {
-  background: var(--bg); border: 1px solid var(--bd); border-radius: var(--rl); overflow: hidden;
-  transition: border-color .15s, box-shadow .15s; margin-bottom: 10px;
-}
-.tarefa-produto-card:hover { border-color: var(--bds); box-shadow: 0 4px 12px rgba(0,0,0,.15); }
-.tarefa-produto-card.prioridade-critica { border-left: 3px solid var(--red); }
-.tarefa-produto-card.prioridade-urgente { border-left: 3px solid var(--amber); }
-.tarefa-produto-card.prioridade-atencao { border-left: 3px solid var(--yellow); }
-.tarefa-produto-card.prioridade-ok { border-left: 3px solid var(--green); }
+/* Corpo expandido */
+.tarefa-produto-body{border-top:1px solid var(--bd);padding:12px 14px;display:none;animation:fadeIn .2s ease}
+.tarefa-produto-body.expandido{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 
-/* Cabeçalho do Card */
-.tarefa-produto-hd {
-  display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; padding: 12px 14px; align-items: center;
-  cursor: pointer;
-}
-.tarefa-produto-hd:hover { background: var(--bg2); }
+.tarefa-lotes-box{margin-bottom:12px}
+.tarefa-lotes-title{display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:6px}
+.tarefa-lotes-list{display:flex;flex-direction:column;gap:4px}
+.tarefa-lote-item{display:grid;grid-template-columns:120px 80px 1fr;gap:8px;align-items:center;padding:6px 10px;background:var(--bg2);border-radius:6px;font-size:11px}
+.tarefa-lote-data{font-weight:700}
+.tarefa-lote-qtd{text-align:right;font-weight:700}
+.tarefa-lote-obs{color:var(--tx2);font-size:10px}
 
-.tarefa-produto-img {
-  width: 56px; height: 56px; border-radius: 8px; background: #fff; overflow: hidden;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.tarefa-produto-img img { width: 100%; height: 100%; object-fit: contain; }
+/* Avatares */
+.tarefa-colab-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.tarefa-colab-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
+.btn-notificar-todos{background:rgba(55,138,221,.15);border:none;color:#93c5fd;font-size:10px;padding:3px 8px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all .15s}
+.btn-notificar-todos:hover{background:rgba(55,138,221,.3)}
+.avatares-grid{display:flex;flex-wrap:wrap;gap:8px}
+.avatar-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:transform .15s;position:relative}
+.avatar-item:hover{transform:translateY(-2px)}
+.avatar-circle{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;position:relative;border:2px solid transparent;transition:all .15s}
+.avatar-status-naovisto{background:var(--bg2);color:var(--tx2);border-color:var(--bd)}
+.avatar-status-visto{background:rgba(55,138,221,.2);color:#93c5fd;border-color:rgba(55,138,221,.4)}
+.avatar-status-andamento{background:rgba(186,117,23,.2);color:#fcd34d;border-color:rgba(186,117,23,.4)}
+.avatar-status-concluido{background:rgba(29,158,117,.2);color:#6ee7b7;border-color:rgba(29,158,117,.4)}
+.avatar-notif-dot{position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;background:var(--red);border:2px solid var(--bg)}
+.avatar-name{font-size:9px;color:var(--tx2);max-width:52px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.avatar-actions{display:none;position:absolute;top:42px;left:50%;transform:translateX(-50%);background:var(--bg);border:1px solid var(--bds);border-radius:6px;padding:6px;z-index:50;box-shadow:0 4px 12px rgba(0,0,0,.25);min-width:140px}
+.avatar-item:hover .avatar-actions{display:flex;flex-direction:column;gap:3px}
+.avatar-action-btn{background:transparent;border:none;color:var(--tx);font-size:10px;padding:5px 8px;border-radius:4px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:5px;width:100%}
+.avatar-action-btn:hover{background:var(--bg2)}
+.avatar-action-btn.notificar{color:var(--blue)}
+.avatar-action-btn.concluir{color:var(--green)}
+.avatar-action-btn.adiar{color:var(--amber)}
 
-.tarefa-produto-info { min-width: 0; }
-.tarefa-produto-nome { font-size: 13px; font-weight: 700; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.tarefa-produto-meta { display: flex; gap: 10px; margin-top: 4px; flex-wrap: wrap; font-size: 11px; color: var(--tx2); }
-.tarefa-produto-cod { font-family: monospace; background: var(--bg2); padding: 1px 6px; border-radius: 4px; font-size: 10px; }
-.tarefa-produto-venc { display: flex; align-items: center; gap: 4px; }
-.tarefa-produto-venc.danger { color: var(--red); font-weight: 600; }
-.tarefa-produto-venc.warn { color: var(--amber); font-weight: 600; }
-.tarefa-produto-qtd { font-weight: 600; color: var(--tx); }
+.btn-notificar{background:rgba(55,138,221,.15);color:#93c5fd;border:none}
+.btn-notificar:hover{background:rgba(55,138,221,.3)}
+.btn-expandir{background:var(--bg2);color:var(--tx);border:none}
 
-.tarefa-produto-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
-.badge-prioridade {
-  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap;
-}
-.badge-prioridade.critica { background: rgba(226,75,74,.15); color: #fca5a5; }
-.badge-prioridade.urgente { background: rgba(186,117,23,.15); color: #fcd34d; }
-.badge-prioridade.atencao { background: rgba(234,179,8,.15); color: #fde68a; }
-.badge-prioridade.ok { background: rgba(29,158,117,.15); color: #6ee7b7; }
-.tarefa-produto-preco { font-size: 11px; color: var(--tx2); }
-.tarefa-produto-preco b { color: var(--green); font-weight: 700; }
-
-/* Corpo Expandido */
-.tarefa-produto-body {
-  border-top: 1px solid var(--bd); padding: 12px 14px; display: none; animation: fadeIn .2s ease;
-}
-.tarefa-produto-body.expandido { display: block; }
-@keyframes fadeIn { from { opacity:0; transform: translateY(-4px); } to { opacity:1; transform:none; } }
-
-/* Lotes */
-.tarefa-lotes-box { margin-bottom: 12px; }
-.tarefa-lotes-title {
-  display: flex; align-items: center; justify-content: space-between; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--tx2); margin-bottom: 6px;
-}
-.tarefa-lotes-list { display: flex; flex-direction: column; gap: 4px; }
-.tarefa-lote-item {
-  display: grid; grid-template-columns: 120px 80px 1fr; gap: 8px; align-items: center; padding: 6px 10px; background: var(--bg2); border-radius: 6px; font-size: 11px;
-}
-.tarefa-lote-data { font-weight: 700; }
-.tarefa-lote-qtd { text-align: right; font-weight: 700; }
-.tarefa-lote-obs { color: var(--tx2); font-size: 10px; }
-
-/* Painel de Avatares dos Colaboradores */
-.tarefa-colab-section { }
-.tarefa-colab-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.tarefa-colab-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--tx2); }
-.btn-notificar-todos {
-  background: rgba(55,138,221,.15); border: none; color: #93c5fd; font-size: 10px; padding: 3px 8px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all .15s;
-}
-.btn-notificar-todos:hover { background: rgba(55,138,221,.3); }
-
-/* Grade de Avatares */
-.avatares-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-.avatar-item {
-  display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: transform .15s; position: relative;
-}
-.avatar-item:hover { transform: translateY(-2px); }
-.avatar-circle {
-  width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; position: relative; border: 2px solid transparent; transition: all .15s;
-}
-/* Status do Avatar */
-.avatar-status-naovisto { background: var(--bg2); color: var(--tx2); border-color: var(--bd); }
-.avatar-status-visto { background: rgba(55,138,221,.2); color: #93c5fd; border-color: rgba(55,138,221,.4); }
-.avatar-status-andamento { background: rgba(186,117,23,.2); color: #fcd34d; border-color: rgba(186,117,23,.4); }
-.avatar-status-concluido { background: rgba(29,158,117,.2); color: #6ee7b7; border-color: rgba(29,158,117,.4); }
-/* Ponto de pendência */
-.avatar-notif-dot {
-  position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--red); border: 2px solid var(--bg);
-}
-.avatar-name { font-size: 9px; color: var(--tx2); max-width: 52px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; }
-/* Menu de ações no hover */
-.avatar-actions {
-  display: none; position: absolute; top: 42px; left: 50%; transform: translateX(-50%);
-  background: var(--bg); border: 1px solid var(--bds); border-radius: 6px; padding: 6px; z-index: 50;
-  box-shadow: 0 4px 12px rgba(0,0,0,.25); min-width: 140px;
-}
-.avatar-item:hover .avatar-actions { display: flex; flex-direction: column; gap: 3px; }
-.avatar-action-btn {
-  background: transparent; border: none; color: var(--tx); font-size: 10px; padding: 5px 8px; border-radius: 4px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 5px; width: 100%;
-}
-.avatar-action-btn:hover { background: var(--bg2); }
-.avatar-action-btn.notificar { color: var(--blue); }
-.avatar-action-btn.concluir { color: var(--green); }
-.avatar-action-btn.adiar { color: var(--amber); }
-
-/* Botões de ação */
-.btn-notificar { background: rgba(55,138,221,.15); color: #93c5fd; border: none; }
-.btn-notificar:hover { background: rgba(55,138,221,.3); }
-.btn-expandir { background: var(--bg2); color: var(--tx); border: none; }
-
-/* Responsividade */
-@media(max-width:768px) {
-  .tarefa-produto-hd { grid-template-columns: 48px 1fr; gap: 10px; padding: 10px; }
-  .tarefa-produto-img { width: 44px; height: 44px; }
-  .tarefa-produto-badges { grid-column: 1/-1; flex-direction: row; justify-content: flex-start; margin-top: 4px; }
-  .tarefa-lote-item { grid-template-columns: 1fr 1fr; }
-  .tarefa-lote-item > div:last-child { grid-column: 1/-1; }
-  .avatares-grid { gap: 6px; }
-  .avatar-circle { width: 32px; height: 32px; font-size: 11px; }
-  .tarefas-header-bar { flex-direction: column; align-items: stretch; }
+/* Responsivo */
+@media(max-width:768px){
+  .tarefa-produto-hd{grid-template-columns:48px 1fr;gap:10px;padding:10px}
+  .tarefa-produto-img{width:44px;height:44px}
+  .tarefa-produto-badges{grid-column:1/-1;flex-direction:row;justify-content:flex-start;margin-top:4px}
+  .tarefa-lote-item{grid-template-columns:1fr 1fr}
+  .tarefa-lote-item>div:last-child{grid-column:1/-1}
+  .avatares-grid{gap:6px}
+  .avatar-circle{width:32px;height:32px;font-size:11px}
+  .tarefas-header-bar{flex-direction:column;align-items:stretch}
+  .tabs{padding:0 10px}
+  .tarefas-container{padding:0 10px 15px}
 }
 </style>
 </head>
 <body class="app">
 
-<!-- Área Principal — Conteúdo da Tela de Tarefas -->
-<main style="padding: 20px 24px;">
+<!-- Barra Superior -->
+<div class="topbar">
+  <div>
+    <h1><i class="ti ti-checklist"></i> AURA Vencimentos</h1>
+    <p>Central de Prevenção de Perdas</p>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-sm" id="btnSincronizar"><i class="ti ti-refresh-cw"></i> Sincronizar</button>
+    <button class="btn btn-sm btn-green" id="btnNovaTarefa"><i class="ti ti-plus"></i> Nova Tarefa</button>
+    <span class="sync-time" id="syncTime">Última sincronização: —</span>
+  </div>
+</div>
 
-  <!-- Contadores Gerais (mantidos como na sua tela) -->
-  <div class="metrics" style="margin-bottom:16px;">
+<!-- Abas -->
+<div class="tabs">
+  <div class="tab" data-tab="dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+  <div class="tab active" data-tab="tarefas"><i class="ti ti-list-check"></i> Tarefas <span class="badge b-danger">95</span></div>
+  <div class="tab" data-tab="retiradas"><i class="ti ti-trash"></i> Retiradas</div>
+  <div class="tab" data-tab="config"><i class="ti ti-settings"></i> Configuração</div>
+</div>
+
+<!-- Conteúdo — Tela de Tarefas -->
+<div class="tarefas-container" id="telaTarefas">
+
+  <!-- Contadores -->
+  <div class="metrics">
     <div class="metric">
       <div class="metric-lbl">Total</div>
       <div class="metric-val">4539</div>
     </div>
-    <div class="metric clickable" data-filt
+    <div class="metric clickable" data-filter="vencidos">
+      <div class="metric-lbl">Vencidos</div>
+      <div class="metric-val danger">16</div>
+    </div>
+    <div class="metric clickable" data-filter="
