@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AURA System v7.59 — Tarefas reorganizadas + permissões configuráveis + navegação lazy corrigida -->
+<!-- AURA System v7.60 — tarefas automáticas agrupadas por produto/lote + layout responsivo -->
 <!-- AURA build v7.34 — Chart.js carregado sem bloquear a leitura inicial -->
 <!-- AURA DOSSIÊ TELECON v6.99 — relatório original sempre como Anexo I + compactação apenas de áreas em branco -->
 <html lang="pt-BR" class="dark">
@@ -4682,11 +4682,16 @@ function toggleTheme() {
 .tf2-search input{flex:1;min-width:0;font-size:13px;padding:8px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;font-family:inherit}
 .tf2-hint{font-size:12px;color:var(--tx2);margin:0 0 10px}
 #tarefasSplit{display:block!important}
-#tarefasSplit .tarefas-col{padding:0!important;border:none!important;max-width:880px}
+#tarefasSplit .tarefas-col{padding:0!important;border:none!important;max-width:none!important;width:100%;min-width:0}
 #tarefasSplit[data-aba="prontos"] #tarefasColTarefas{display:none}
 #tarefasSplit:not([data-aba="prontos"]) #tarefasColProntos{display:none}
-#tarefasGrid,#tarefasProntosGrid{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
-.tf2-card{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:10px 12px}
+#tarefasGrid,#tarefasProntosGrid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr))!important;gap:10px!important;align-items:start}
+.tf2-card{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:10px 12px;min-width:0}
+.tf2-assignees{display:grid;gap:5px;margin-top:8px;padding-top:7px;border-top:1px solid var(--bd)}
+.tf2-assignee{display:flex;align-items:center;gap:7px;min-width:0;font-size:11px;color:var(--tx2)}
+.tf2-assignee-name{display:flex;align-items:center;gap:6px;min-width:0;flex:1;font-weight:700;color:var(--tx)}
+.tf2-assignee-actions{display:flex;gap:4px;flex-shrink:0}
+.tf2-assignee-actions .tf2-ico{width:26px;height:26px}
 .tf2-card .urg-photobox{width:60px!important;height:60px!important;flex-shrink:0;cursor:zoom-in}
 .tf2-body{flex:1;min-width:0}
 .tf2-line1{display:flex;align-items:flex-start;gap:8px;justify-content:space-between}
@@ -17051,10 +17056,11 @@ function renderTarefas() {
     return d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}) + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
   };
 
-  var renderCard = function(t) {
-    var isPend = t.status === 'pendente';
-    var thumbCod = (t.cod||'').replace(/[^0-9]/g,'');
-    var tarefaFotoId = 'tarefaFoto_' + t.id.replace(/[^a-zA-Z0-9]/g,'_');
+  var renderCard = function(t, grupo) {
+    grupo = Array.isArray(grupo) && grupo.length ? grupo : [t];
+    var isPend = t.status === 'pendente', agrupada = grupo.length > 1;
+    var thumbCod = String(t.cod||'').replace(/[^0-9]/g,'');
+    var tarefaFotoId = 'tarefaFoto_' + String(t.id||'').replace(/[^a-zA-Z0-9]/g,'_');
     var fotoHtml = thumbCod
       ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + tarefaFotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + tarefaFotoId + '" data-cod="' + thumbCod + '" data-nome="' + escHtml(cleanNome(t.produto || '')) + '" src="" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
@@ -17065,11 +17071,13 @@ function renderTarefas() {
       var cls = (dv !== null && dv <= 3) ? 'red' : (dv !== null && dv <= 7 ? 'amber' : '');
       chips += '<span class="tf2-chip ' + cls + '"><i class="ti ti-calendar-exclamation"></i> Validade ' + fmtDataExtenso(t.validade) + '</span>';
     }
-    if (t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
+    if (!agrupada && t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
       var zero = Number(t.quantidadeConfirmada) === 0;
       chips += '<span class="tf2-chip ' + (zero ? 'red' : 'green') + '"><i class="ti ti-package"></i> Confirmado: ' + t.quantidadeConfirmada + ' un.</span>';
     }
-    chips += '<span class="tf2-chip"><i class="ti ti-user"></i> ' + escHtml(t.nomeColaborador || '—') + '</span>';
+    chips += agrupada
+      ? '<span class="tf2-chip"><i class="ti ti-users"></i> ' + grupo.length + ' colaboradores</span>'
+      : '<span class="tf2-chip"><i class="ti ti-user"></i> ' + escHtml(t.nomeColaborador || '—') + '</span>';
     if (t.precoAcao) {
       chips += '<span class="tf2-chip green">Preço ação ' + Number(t.precoAcao).toLocaleString('pt-BR', {style:'currency', currency:'BRL'}) + '</span>';
       if (t.margemAcaoPct !== null && t.margemAcaoPct !== undefined) chips += '<span class="tf2-chip">Margem ' + Number(t.margemAcaoPct).toFixed(1) + '%</span>';
@@ -17080,30 +17088,51 @@ function renderTarefas() {
     var foot = (t.cod ? 'cód. ' + escHtml(String(t.cod)) + ' · ' : '')
       + 'Enviada ' + fmtDH(dataCriacao)
       + (t.confirmadoEm ? ' · Concluída ' + fmtDH(new Date(t.confirmadoEm)) : '');
+    var assigneesHtml = agrupada
+      ? '<div class="tf2-assignees">' + grupo.map(function(gt) {
+          var qInfo = gt.status === 'concluida' && gt.quantidadeConfirmada !== null && gt.quantidadeConfirmada !== undefined
+            ? '<span>' + escHtml(String(gt.quantidadeConfirmada)) + ' un.</span>' : '';
+          return '<div class="tf2-assignee">'
+            + (gt.status === 'pendente' ? '<label class="tf2-assignee-name"><input type="checkbox" class="tf2-chk" data-id="' + escHtml(String(gt.id)) + '" ' + (selecionadas.has(gt.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + gt.id + '\',this.checked)" title="Selecionar tarefa">' + escHtml(gt.nomeColaborador || gt.email || 'Sem responsável') + '</label>' : '<span class="tf2-assignee-name"><i class="ti ti-user-check"></i>' + escHtml(gt.nomeColaborador || gt.email || 'Sem responsável') + '</span>')
+            + qInfo
+            + (gt.status === 'pendente' ? '<div class="tf2-assignee-actions"><button type="button" class="tf2-ico blue" onclick="abrirTransferirModal(\'' + gt.id + '\')" title="Transferir tarefa"><i class="ti ti-arrows-exchange"></i></button><button type="button" class="tf2-ico red" onclick="cancelarTarefa(\'' + gt.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button></div>' : '')
+            + '</div>';
+        }).join('') + '</div>' : '';
 
     return '<div class="tf2-card">'
       + fotoHtml
       + '<div class="tf2-body">'
       +   '<div class="tf2-line1">'
       +     '<div class="tf2-nomewrap">'
-      +       (isPend ? '<input type="checkbox" class="tf2-chk" data-id="' + t.id + '" ' + (selecionadas.has(t.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + t.id + '\',this.checked)" title="Selecionar tarefa">' : '')
+      +       (!agrupada && isPend ? '<input type="checkbox" class="tf2-chk" data-id="' + t.id + '" ' + (selecionadas.has(t.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + t.id + '\',this.checked)" title="Selecionar tarefa">' : '')
       +       '<div class="tf2-nome">' + escHtml(t.produto) + '</div>'
       +     '</div>'
-      +     (isPend ? '<div class="tf2-acts">'
-      +       '<button type="button" class="tf2-ico blue" onclick="abrirTransferirModal(\'' + t.id + '\')" title="Transferir para outro colaborador"><i class="ti ti-arrows-exchange"></i></button>'
-      +       '<button type="button" class="tf2-ico red" onclick="cancelarTarefa(\'' + t.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button>'
-      +     '</div>' : '')
+      +     (!agrupada && isPend ? '<div class="tf2-acts"><button type="button" class="tf2-ico blue" onclick="abrirTransferirModal(\'' + t.id + '\')" title="Transferir para outro colaborador"><i class="ti ti-arrows-exchange"></i></button><button type="button" class="tf2-ico red" onclick="cancelarTarefa(\'' + t.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button></div>' : '')
       +   '</div>'
       +   '<div class="tf2-chips">' + chips + '</div>'
       +   (t.descricao ? '<div class="tf2-desc"><i class="ti ti-note" style="opacity:.7"></i> ' + escHtml(t.descricao) + '</div>' : '')
       +   _tarefasLotesDetails_(t.cod, t.validade, t.quantidadeConfirmada)
       +   '<div class="tf2-foot">' + foot + '</div>'
+      +   assigneesHtml
       + '</div>'
       + '</div>';
   };
 
-  var html = filtered.map(renderCard).join('');
+  var agruparCartoes = function(lista) {
+    var mapa = Object.create(null);
+    lista.forEach(function(t) {
+      var automatica = t.automatica === true || String(t.tipoTarefa||'') === 'validade_automatica';
+      var cod = String(t.cod||'').trim(), validade = String(t.validade||'').trim();
+      var chave = automatica && cod && validade
+        ? 'auto|' + cod + '|' + validade + '|' + String(t.status||'')
+        : 'individual|' + String(t.id||Math.random());
+      if (!mapa[chave]) mapa[chave] = [];
+      mapa[chave].push(t);
+    });
+    return Object.keys(mapa).map(function(k) { return mapa[k]; });
+  };
 
+  var html = agruparCartoes(filtered).map(function(grupo) { return renderCard(grupo[0], grupo); }).join('');
   if (zeradas.length) {
     html += '<div style="margin-top:6px">'
       +   '<button type="button" class="tf2-more" onclick="var b=document.getElementById(\'tarefasZeradasBox\');var i=document.getElementById(\'tarefasZeradasIcon\');var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'grid\';i.style.transform=open?\'rotate(0deg)\':\'rotate(90deg)\';">'
@@ -17111,7 +17140,7 @@ function renderTarefas() {
       +     'Confirmadas com 0 un. — ' + zeradas.length + ' <span style="opacity:.7">(nada a fazer aqui)</span>'
       +   '</button>'
       +   '<div id="tarefasZeradasBox" style="display:none;grid-template-columns:1fr;gap:8px;margin-top:8px;opacity:.55">'
-      +     zeradas.map(renderCard).join('')
+      +     agruparCartoes(zeradas).map(function(grupo) { return renderCard(grupo[0], grupo); }).join('')
       +   '</div>'
       + '</div>';
   }
