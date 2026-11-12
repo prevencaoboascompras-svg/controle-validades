@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AURA System v7.57 — permissões configuráveis + navegação lazy corrigida -->
+<!-- AURA System v7.58 — coletas NF-e sem validade indeterminada visíveis -->
 <!-- AURA build v7.34 — Chart.js carregado sem bloquear a leitura inicial -->
 <!-- AURA DOSSIÊ TELECON v6.99 — relatório original sempre como Anexo I + compactação apenas de áreas em branco -->
 <html lang="pt-BR" class="dark">
@@ -6891,8 +6891,9 @@ async function renderUltimasColetas(forceRefresh) {
         var origem = String((c[ciOrigem]&&c[ciOrigem].f)||(c[ciOrigem]&&c[ciOrigem].v)||'').trim();
         var viaNFe = /^NFE:/i.test(origem);
         var nfeChave = viaNFe ? String(origem.split(':')[1]||'') : '';
+        var semValidade = /:SEM_VALIDADE:/i.test(origem);
         var nomeColeta = _ucResolveNome(email);
-        _ucDados.push({ ean: ean, nome: nome, setor: setor, qtde: qtde, dias: dias, valStr: valStr, ts: tsDate, email: email, nomeColeta: nomeColeta, origem:origem, viaNFe:viaNFe, nfeChave:nfeChave });
+        _ucDados.push({ ean: ean, nome: nome, setor: setor, qtde: qtde, dias: dias, valStr: valStr, ts: tsDate, email: email, nomeColeta: nomeColeta, origem:origem, viaNFe:viaNFe, nfeChave:nfeChave, semValidade:semValidade });
         } catch(errLinha) {
           // Uma linha com dado inesperado não pode derrubar a lista inteira.
           console.warn('Coleta ignorada (dado inválido na linha):', errLinha);
@@ -6993,9 +6994,9 @@ function _ucFiltrar() {
 
   el.innerHTML = exibir.map(function(d) {
     var s = statusFromDays(d.dias);
-    var cor = statusCor[s] || '#6b7280';
-    var lbl = statusLbl[s] || 'Aguardando';
-    var diasTxt = d.dias === null ? '—' : d.dias < 0 ? 'Vencido há '+Math.abs(d.dias)+'d' : d.dias === 0 ? 'Vence hoje!' : 'Faltam '+d.dias+'d';
+    var cor = d.semValidade ? '#8b5cf6' : (statusCor[s] || '#6b7280');
+    var lbl = d.semValidade ? 'Sem validade' : (statusLbl[s] || 'Aguardando');
+    var diasTxt = d.semValidade ? 'Validade indeterminada' : (d.dias === null ? '—' : d.dias < 0 ? 'Vencido há '+Math.abs(d.dias)+'d' : d.dias === 0 ? 'Vence hoje!' : 'Faltam '+d.dias+'d');
     var tsTxt = d.ts ? d.ts.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
     var qtdeColor = d.qtde >= 20 ? '#f97316' : d.qtde >= 10 ? '#fbbf24' : '#94a3b8';
     // Linha do colaborador
@@ -7026,11 +7027,12 @@ function _ucFiltrar() {
       +'<div class="uc-card-tags">'
         +'<span class="uc-card-tag mono">'+escHtml(d.ean)+'</span>'
         +(d.setor?'<span class="uc-card-tag">'+escHtml(d.setor)+'</span>':'')
+        +(d.semValidade?'<span class="uc-card-tag" title="Recebido sem controle de validade" style="background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.35);color:#8b5cf6;font-weight:800"><i class="ti ti-infinity" style="margin-right:3px"></i>Sem validade</span>':'')
         +(d.viaNFe?'<span class="uc-card-tag" title="Lançado pela Conferência NF-e" style="background:rgba(29,158,117,.12);border-color:rgba(29,158,117,.35);color:#1D9E75;font-weight:800"><i class="ti ti-file-invoice" style="margin-right:3px"></i>NF-e</span>':'')
       +'</div>'
       // Validade + dias
       +'<div class="uc-card-val">'
-        +'<div class="uc-card-val-lbl">📅 Vence: <strong style="color:var(--text)">'+(d.valStr?d.valStr.split('-').reverse().join('/'):'—')+'</strong></div>'
+        +'<div class="uc-card-val-lbl">📅 Validade: <strong style="color:var(--text)">'+(d.semValidade?'Indeterminada':(d.valStr?d.valStr.split('-').reverse().join('/'):'—'))+'</strong></div>'
         +'<div class="uc-card-val-dias" style="color:'+cor+'">'+escHtml(diasTxt)+'</div>'
       +'</div>'
       // Quantidade
