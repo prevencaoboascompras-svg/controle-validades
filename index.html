@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AURA System v7.58 — coletas NF-e sem validade indeterminada visíveis -->
+<!-- AURA System v7.60 — tarefas automáticas agrupadas por produto/lote + layout responsivo -->
 <!-- AURA build v7.34 — Chart.js carregado sem bloquear a leitura inicial -->
 <!-- AURA DOSSIÊ TELECON v6.99 — relatório original sempre como Anexo I + compactação apenas de áreas em branco -->
 <html lang="pt-BR" class="dark">
@@ -3376,7 +3376,7 @@ function toggleTheme() {
           </div>
           <div class="cf-field">
             <label>Quantas unidades tem no estoque?</label>
-            <input type="number" min="0" step="1" id="cfEstoqueInicial" value="1" oninput="cfAtualizarReferencia_()">
+            <input type="number" min="0" step="1" id="cfEstoqueInicial" value="1">
           </div>
           <div class="cf-field">
             <label>Unidade</label>
@@ -3384,7 +3384,7 @@ function toggleTheme() {
           </div>
           <div class="cf-field">
             <label>Custo atual</label>
-            <input type="number" min="0" step="0.01" id="cfCusto" placeholder="R$" oninput="cfAtualizarReferencia_()">
+            <input type="number" min="0" step="0.01" id="cfCusto" placeholder="R$">
           </div>
           <div class="cf-field">
             <label>Preço normal atual</label>
@@ -3392,11 +3392,11 @@ function toggleTheme() {
           </div>
           <div class="cf-field">
             <label>Preço que será praticado na ação</label>
-            <input type="number" min="0" step="0.01" id="cfPrecoAcao" placeholder="R$" oninput="cfAtualizarCoberturaPorPreco_()" onchange="cfAtualizarCoberturaPorPreco_()">
+            <input type="number" min="0" step="0.01" id="cfPrecoAcao" placeholder="R$" oninput="cfAtualizarReferencia_()">
           </div>
           <div class="cf-field">
             <label>Cobertura acordada / unidade</label>
-            <input type="number" min="0" step="0.01" id="cfCoberturaUnit" placeholder="R$" oninput="cfAtualizarPrecoAcaoPorCobertura_()" onchange="cfAtualizarPrecoAcaoPorCobertura_()">
+            <input type="number" min="0" step="0.01" id="cfCoberturaUnit" placeholder="R$" oninput="cfAtualizarReferencia_()">
           </div>
         </div>
 
@@ -3442,6 +3442,7 @@ function toggleTheme() {
       <div class="cf-savebar" style="justify-content:space-between">
         <div class="cf-report-actions">
           <button class="btn" onclick="cfCompletarNegociacaoViaApi_()"><i class="ti ti-database-search"></i> Atualizar dados do Banco</button>
+          <button class="btn" style="border-color:#eab308;color:#facc15;font-weight:850" onclick="cfEnviarSelloutArsenal_()" title="Agrupar os itens da negociação por preço da ação e abrir cada grupo no Arsenal como placa Unir"><i class="ti ti-currency-real"></i> R$ Sellout</button>
           <button class="btn cf-btn-neg" onclick="cfImprimirNegociacaoAtual_()"><i class="ti ti-file-invoice"></i> PDF Negociação</button>
           <button class="btn cf-btn-result" onclick="cfImprimirResultadoAtual_()"><i class="ti ti-report-analytics"></i> PDF Resultado</button>
         </div>
@@ -4668,29 +4669,87 @@ function toggleTheme() {
     <!-- Compatibilidade interna: antigas rotinas que ainda chamam renderTable não criam uma segunda tela visível. -->
     <div id="valGrid" style="display:none!important"></div>
   </div>
+  <style id="tarefasV2css">
+.tf2-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.tf2-title{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.tf2-sub{font-size:12px;color:var(--tx2);margin-top:2px}
+.tf2-head-actions{display:flex;gap:7px;flex-wrap:wrap}
+.tf2-tabs{display:flex;gap:4px;border-bottom:1px solid var(--bd);margin-bottom:12px;overflow-x:auto}
+.tf2-tab{background:none;border:none;border-bottom:3px solid transparent;padding:9px 12px;font-size:13px;font-weight:600;color:var(--tx2);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;font-family:inherit}
+.tf2-tab.active{color:var(--tx);border-bottom-color:var(--green)}
+.tf2-cnt{font-size:11px;font-weight:800;min-width:20px;padding:1px 6px;border-radius:10px;background:var(--bg2);border:1px solid var(--bd);text-align:center;color:var(--tx2)}
+.tf2-tab.active .tf2-cnt{background:var(--green);border-color:var(--green);color:#fff}
+.tf2-search{display:flex;gap:8px;margin-bottom:12px;align-items:center;max-width:880px}
+.tf2-search input{flex:1;min-width:0;font-size:13px;padding:8px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;font-family:inherit}
+.tf2-hint{font-size:12px;color:var(--tx2);margin:0 0 10px}
+#tarefasSplit{display:block!important}
+#tarefasSplit .tarefas-col{padding:0!important;border:none!important;max-width:none!important;width:100%;min-width:0}
+#tarefasSplit[data-aba="prontos"] #tarefasColTarefas{display:none}
+#tarefasSplit:not([data-aba="prontos"]) #tarefasColProntos{display:none}
+#tarefasGrid,#tarefasProntosGrid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr))!important;gap:10px!important;align-items:start}
+.tf2-card{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:10px 12px;min-width:0}
+.tf2-assignees{display:grid;gap:5px;margin-top:8px;padding-top:7px;border-top:1px solid var(--bd)}
+.tf2-assignee{display:flex;align-items:center;gap:7px;min-width:0;font-size:11px;color:var(--tx2)}
+.tf2-assignee-name{display:flex;align-items:center;gap:6px;min-width:0;flex:1;font-weight:700;color:var(--tx)}
+.tf2-assignee-actions{display:flex;gap:4px;flex-shrink:0}
+.tf2-assignee-actions .tf2-ico{width:26px;height:26px}
+.tf2-card .urg-photobox{width:60px!important;height:60px!important;flex-shrink:0;cursor:zoom-in}
+.tf2-body{flex:1;min-width:0}
+.tf2-line1{display:flex;align-items:flex-start;gap:8px;justify-content:space-between}
+.tf2-nomewrap{display:flex;align-items:flex-start;gap:8px;min-width:0}
+.tf2-chk{width:16px;height:16px;margin-top:2px;cursor:pointer;accent-color:var(--blue);flex-shrink:0}
+.tf2-nome{font-size:14px;font-weight:700;line-height:1.3;word-break:break-word}
+.tf2-acts{display:flex;gap:4px;flex-shrink:0}
+.tf2-ico{background:none;border:1px solid var(--bd);border-radius:7px;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);font-size:15px;padding:0}
+.tf2-ico.blue{color:var(--blue);border-color:var(--blue)}
+.tf2-ico.red{color:var(--red);border-color:var(--red)}
+.tf2-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.tf2-chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--bg2);border:1px solid var(--bd);color:var(--tx2)}
+.tf2-chip.red{color:var(--red);background:rgba(239,68,68,.1);border-color:transparent}
+.tf2-chip.amber{color:var(--amber);background:rgba(245,158,11,.12);border-color:transparent}
+.tf2-chip.green{color:var(--green);background:rgba(16,185,129,.12);border-color:transparent}
+.tf2-desc{font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.4}
+.tf2-foot{font-size:10.5px;color:var(--muted);margin-top:6px}
+.tf2-det{margin-top:8px}
+.tf2-det>summary{cursor:pointer;font-size:12px;font-weight:700;color:var(--blue);list-style:none;display:flex;align-items:center;gap:5px}
+.tf2-det>summary::-webkit-details-marker{display:none}
+.tf2-det>summary i{transition:transform .15s}
+.tf2-det[open]>summary i{transform:rotate(90deg)}
+.tf2-det .tarefa-lotes-box{margin-top:6px}
+.tf2-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tf2-vazio{text-align:center;padding:40px 16px;color:var(--muted);font-size:13px}
+.tf2-vazio i{font-size:34px;display:block;margin-bottom:8px;opacity:.4}
+.tf2-more{width:100%;text-align:left;background:none;border:1px dashed var(--border);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;font-family:inherit}
+@media(max-width:480px){
+  .tf2-card{padding:9px;gap:8px}
+  .tf2-card .urg-photobox{width:52px!important;height:52px!important}
+  .tf2-head-actions{width:100%}
+  .tf2-head-actions .btn{flex:1;justify-content:center}
+}
+  </style>
   <div id="sec-tarefas" class="sec">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="tf2-head">
       <div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px"><i class="ti ti-clipboard-check" style="color:var(--amber)"></i> Tarefas atribuídas</div>
-        <p style="font-size:12px;color:var(--tx2)">Atribua tarefas de conferência de estoque para os colaboradores</p>
+        <div class="tf2-title"><i class="ti ti-clipboard-check" style="color:var(--amber)"></i> Tarefas</div>
+        <div class="tf2-sub" id="tarefasResumo">—</div>
       </div>
-      <div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn" onclick="auraGerarTarefasAutoAgora_()"><i class="ti ti-sparkles"></i> Atualizar automáticas</button><button class="btn btn-green" onclick="openTarefaModal()"><i class="ti ti-plus"></i> Nova tarefa</button></div>
+      <div class="tf2-head-actions">
+        <button class="btn btn-sm" onclick="auraGerarTarefasAutoAgora_()" title="Gera as tarefas automáticas por validade"><i class="ti ti-refresh"></i> Atualizar automáticas</button>
+        <button class="btn btn-green" onclick="openTarefaModal()"><i class="ti ti-plus"></i> Nova tarefa</button>
+      </div>
     </div>
-    <div class="tarefas-mobile-toggle" id="tarefasMobileToggle">
-      <button type="button" class="active" id="tmt_tarefas" onclick="trocarColunaTarefasMobile('tarefas')"><i class="ti ti-clipboard-list"></i> Tarefas</button>
-      <button type="button" id="tmt_prontos" onclick="trocarColunaTarefasMobile('prontos')"><i class="ti ti-tag"></i> Prontos p/ encarte</button>
+    <div class="tf2-tabs" role="tablist">
+      <button type="button" class="tf2-tab active" id="tf_pendentes" onclick="filtrarTarefas('pendentes')">Pendentes <span class="tf2-cnt" id="tfc_pendentes">0</span></button>
+      <button type="button" class="tf2-tab" id="tf_prontos" onclick="filtrarTarefas('prontos')">Prontos p/ encarte <span class="tf2-cnt" id="tfc_prontos">0</span></button>
+      <button type="button" class="tf2-tab" id="tf_concluidas" onclick="filtrarTarefas('concluidas')">Concluídas <span class="tf2-cnt" id="tfc_concluidas">0</span></button>
     </div>
-    <div class="tarefas-split">
+    <div class="tf2-search" id="tarefasBuscaWrap">
+      <input type="text" id="tarefasBusca" placeholder="Buscar produto, código ou colaborador..." oninput="renderTarefas()">
+      <button type="button" class="btn-scan" onclick="abrirScannerAura('tarefasBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
+    </div>
+    <div class="tarefas-split" id="tarefasSplit" data-aba="pendentes">
       <div class="tarefas-col" id="tarefasColTarefas">
-        <div class="tarefas-col-title"><i class="ti ti-clipboard-list"></i> Tarefas</div>
-        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center">
-          <input type="text" id="tarefasBusca" placeholder="Buscar por produto, código ou colaborador..." oninput="renderTarefas()" style="font-size:13px;padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);background:var(--bg);color:var(--tx);outline:none;flex:1;min-width:180px">
-          <button type="button" class="btn-scan" onclick="abrirScannerAura('tarefasBusca')" title="Buscar por código de barras (câmera)"><i class="ti ti-barcode"></i></button>
-          <button class="promo-filter-btn active" id="tf_todas" onclick="filtrarTarefas('todas')">Todas</button>
-          <button class="promo-filter-btn" id="tf_pendentes" onclick="filtrarTarefas('pendentes')">Pendentes</button>
-          <button class="promo-filter-btn" id="tf_concluidas" onclick="filtrarTarefas('concluidas')">Concluídas</button>
-        </div>
-        <div id="tarefasBulkBar" style="display:none;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;flex-wrap:wrap">
+        <div id="tarefasBulkBar" style="display:none;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;flex-wrap:wrap">
           <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;user-select:none">
             <input type="checkbox" id="tarefasSelecionarTodasChk" onchange="toggleSelecionarTodasTarefas(this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)">
             Selecionar todas
@@ -4701,12 +4760,11 @@ function toggleTheme() {
             <button class="btn btn-sm" onclick="limparSelecaoTarefas()">Cancelar seleção</button>
           </div>
         </div>
-        <div id="tarefasGrid" style="display:grid;grid-template-columns:1fr;gap:10px"></div>
+        <div id="tarefasGrid"></div>
       </div>
       <div class="tarefas-col" id="tarefasColProntos">
-        <div class="tarefas-col-title"><i class="ti ti-tag" style="color:var(--green)"></i> Prontos para encarte</div>
-        <p style="font-size:12px;color:var(--tx2);margin-bottom:14px">Produtos com tarefa <b>concluída</b> que ainda têm estoque — falta só criar a oferta.</p>
-        <div id="tarefasProntosGrid" style="display:grid;grid-template-columns:1fr;gap:10px"></div>
+        <p class="tf2-hint">Tarefa concluída e ainda com estoque: falta só criar a oferta.</p>
+        <div id="tarefasProntosGrid"></div>
       </div>
     </div>
   </div>
@@ -6891,9 +6949,8 @@ async function renderUltimasColetas(forceRefresh) {
         var origem = String((c[ciOrigem]&&c[ciOrigem].f)||(c[ciOrigem]&&c[ciOrigem].v)||'').trim();
         var viaNFe = /^NFE:/i.test(origem);
         var nfeChave = viaNFe ? String(origem.split(':')[1]||'') : '';
-        var semValidade = /:SEM_VALIDADE:/i.test(origem);
         var nomeColeta = _ucResolveNome(email);
-        _ucDados.push({ ean: ean, nome: nome, setor: setor, qtde: qtde, dias: dias, valStr: valStr, ts: tsDate, email: email, nomeColeta: nomeColeta, origem:origem, viaNFe:viaNFe, nfeChave:nfeChave, semValidade:semValidade });
+        _ucDados.push({ ean: ean, nome: nome, setor: setor, qtde: qtde, dias: dias, valStr: valStr, ts: tsDate, email: email, nomeColeta: nomeColeta, origem:origem, viaNFe:viaNFe, nfeChave:nfeChave });
         } catch(errLinha) {
           // Uma linha com dado inesperado não pode derrubar a lista inteira.
           console.warn('Coleta ignorada (dado inválido na linha):', errLinha);
@@ -6994,9 +7051,9 @@ function _ucFiltrar() {
 
   el.innerHTML = exibir.map(function(d) {
     var s = statusFromDays(d.dias);
-    var cor = d.semValidade ? '#8b5cf6' : (statusCor[s] || '#6b7280');
-    var lbl = d.semValidade ? 'Sem validade' : (statusLbl[s] || 'Aguardando');
-    var diasTxt = d.semValidade ? 'Validade indeterminada' : (d.dias === null ? '—' : d.dias < 0 ? 'Vencido há '+Math.abs(d.dias)+'d' : d.dias === 0 ? 'Vence hoje!' : 'Faltam '+d.dias+'d');
+    var cor = statusCor[s] || '#6b7280';
+    var lbl = statusLbl[s] || 'Aguardando';
+    var diasTxt = d.dias === null ? '—' : d.dias < 0 ? 'Vencido há '+Math.abs(d.dias)+'d' : d.dias === 0 ? 'Vence hoje!' : 'Faltam '+d.dias+'d';
     var tsTxt = d.ts ? d.ts.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
     var qtdeColor = d.qtde >= 20 ? '#f97316' : d.qtde >= 10 ? '#fbbf24' : '#94a3b8';
     // Linha do colaborador
@@ -7027,12 +7084,11 @@ function _ucFiltrar() {
       +'<div class="uc-card-tags">'
         +'<span class="uc-card-tag mono">'+escHtml(d.ean)+'</span>'
         +(d.setor?'<span class="uc-card-tag">'+escHtml(d.setor)+'</span>':'')
-        +(d.semValidade?'<span class="uc-card-tag" title="Recebido sem controle de validade" style="background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.35);color:#8b5cf6;font-weight:800"><i class="ti ti-infinity" style="margin-right:3px"></i>Sem validade</span>':'')
         +(d.viaNFe?'<span class="uc-card-tag" title="Lançado pela Conferência NF-e" style="background:rgba(29,158,117,.12);border-color:rgba(29,158,117,.35);color:#1D9E75;font-weight:800"><i class="ti ti-file-invoice" style="margin-right:3px"></i>NF-e</span>':'')
       +'</div>'
       // Validade + dias
       +'<div class="uc-card-val">'
-        +'<div class="uc-card-val-lbl">📅 Validade: <strong style="color:var(--text)">'+(d.semValidade?'Indeterminada':(d.valStr?d.valStr.split('-').reverse().join('/'):'—'))+'</strong></div>'
+        +'<div class="uc-card-val-lbl">📅 Vence: <strong style="color:var(--text)">'+(d.valStr?d.valStr.split('-').reverse().join('/'):'—')+'</strong></div>'
         +'<div class="uc-card-val-dias" style="color:'+cor+'">'+escHtml(diasTxt)+'</div>'
       +'</div>'
       // Quantidade
@@ -8004,7 +8060,7 @@ function addManual(){
 var BOSS_CACHE_KEY='aura_boss_vision_v8_horti_nf_ceasa';
 var _bossDados=null;
 var BOSS_VISION_BUILD='v8.24-acougue-compras-vendas-sem-quebra';
-var AURA_COBERTURA_BUILD='v8-recalculo-bidirecional-desconto';
+var AURA_COBERTURA_BUILD='v7-custo-fallback-buscarEANCompleto';
 console.info('[AURA] Cobertura Fornecedor',AURA_COBERTURA_BUILD);
 var AURA_COLABORADORES_BUILD='v3-aniversarios-coletas-schema-canonico';
 console.info('[AURA] Colaboradores',AURA_COLABORADORES_BUILD);
@@ -11638,19 +11694,6 @@ function cfSelecionarProduto_(cod){
   setTimeout(function(){document.getElementById('cfEstoqueInicial').focus();document.getElementById('cfEstoqueInicial').select();},80);
 }
 
-function cfCentavos_(valor){return Math.round((cfNum_(valor)+Number.EPSILON)*100)/100;}
-function cfAtualizarPrecoAcaoPorCobertura_(){
-  var normal=cfNum_(document.getElementById('cfPrecoNormal').value);
-  var coberturaEl=document.getElementById('cfCoberturaUnit'),acaoEl=document.getElementById('cfPrecoAcao');
-  if(String(coberturaEl.value).trim()!==''&&normal>0)acaoEl.value=cfCentavos_(Math.max(0,normal-cfNum_(coberturaEl.value))).toFixed(2);
-  cfAtualizarReferencia_();
-}
-function cfAtualizarCoberturaPorPreco_(){
-  var normal=cfNum_(document.getElementById('cfPrecoNormal').value);
-  var acaoEl=document.getElementById('cfPrecoAcao'),coberturaEl=document.getElementById('cfCoberturaUnit');
-  if(String(acaoEl.value).trim()!==''&&normal>0)coberturaEl.value=cfCentavos_(Math.max(0,normal-cfNum_(acaoEl.value))).toFixed(2);
-  cfAtualizarReferencia_();
-}
 function cfAtualizarReferencia_(){
   var pn=cfNum_(document.getElementById('cfPrecoNormal').value);
   var pa=cfNum_(document.getElementById('cfPrecoAcao').value);
@@ -11725,53 +11768,25 @@ function cfRenderProdutos_(){
     return '<tr>'
       +'<td><b>'+cfEsc_(p.nome)+'</b><div style="font-size:8px;color:var(--tx2)">'+cfEsc_(p.unidade||'')+(p.fornecedor?' · '+cfEsc_(p.fornecedor):'')+'</div></td>'
       +'<td>'+cfEsc_(p.cod)+'</td>'
-      +'<td class="cf-num"><input type="number" step="1" min="0" value="'+estoque+'" oninput="cfAtualizarLinhaAoDigitar_('+i+',\'estoqueInicial\',this.value,this)" onchange="cfAtualizarLinha_('+i+',\'estoqueInicial\',this.value)"></td>'
+      +'<td class="cf-num"><input type="number" step="1" min="0" value="'+estoque+'" onchange="cfAtualizarLinha_('+i+',\'estoqueInicial\',this.value)"></td>'
       +'<td class="cf-num">'+cfMoney_(p.custo)+'</td>'
       +'<td class="cf-num">'+cfMoney_(p.precoNormal)+'</td>'
-      +'<td class="cf-num"><input type="number" step="0.01" min="0" class="cf-price-action-input" value="'+cfNum_(p.precoAcao)+'" oninput="cfAtualizarLinhaAoDigitar_('+i+',\'precoAcao\',this.value,this)" onchange="cfAtualizarLinha_('+i+',\'precoAcao\',this.value)"></td>'
-      +'<td class="cf-num"><input type="number" step="0.01" min="0" class="cf-coverage-input" value="'+cfNum_(p.coberturaUnit)+'" oninput="cfAtualizarLinhaAoDigitar_('+i+',\'coberturaUnit\',this.value,this)" onchange="cfAtualizarLinha_('+i+',\'coberturaUnit\',this.value)"></td>'
+      +'<td class="cf-num"><input type="number" step="0.01" min="0" value="'+cfNum_(p.precoAcao)+'" onchange="cfAtualizarLinha_('+i+',\'precoAcao\',this.value)"></td>'
+      +'<td class="cf-num"><input type="number" step="0.01" min="0" value="'+cfNum_(p.coberturaUnit)+'" onchange="cfAtualizarLinha_('+i+',\'coberturaUnit\',this.value)"></td>'
       +'<td class="cf-num cf-potential">'+cfMoney_(potencial)+'</td>'
-      +'<td class="cf-num"><input type="number" step="1" min="0" value="'+vend+'" oninput="cfAtualizarLinhaAoDigitar_('+i+',\'qtdVendida\',this.value,this)" onchange="cfAtualizarLinha_('+i+',\'qtdVendida\',this.value)"></td>'
-      +'<td class="cf-num cf-recognized '+(excedeu?'cf-over':'')+'">'+cfQtd_(reconhecida)+(excedeu?' *':'')+'</td>'
+      +'<td class="cf-num"><input type="number" step="1" min="0" value="'+vend+'" onchange="cfAtualizarLinha_('+i+',\'qtdVendida\',this.value)"></td>'
+      +'<td class="cf-num '+(excedeu?'cf-over':'')+'">'+cfQtd_(reconhecida)+(excedeu?' *':'')+'</td>'
       +'<td class="cf-num cf-due">'+cfMoney_(receber)+'</td>'
       +'<td><button class="btn btn-sm" onclick="cfRemoverProduto_('+i+')" title="Remover"><i class="ti ti-trash"></i></button></td>'
       +'</tr>';
   }).join('');
-  cfRenderProdutosTotais_();
-}
-function cfRenderProdutosTotais_(){
-  var foot=document.getElementById('cfProdutosFoot');if(!foot)return;
-  if(!cfProdutos.length){foot.innerHTML='';return;}
   var r=cfResumoAcao_({produtos:cfProdutos});
   foot.innerHTML='<tr class="cf-total-row"><td colspan="2">TOTAL</td><td class="cf-num">'+cfQtd_(r.estoque)+'</td><td colspan="4"></td><td class="cf-num cf-potential">'+cfMoney_(r.potencial)+'</td><td class="cf-num">'+cfQtd_(r.qtdVendida)+'</td><td class="cf-num">'+cfQtd_(r.qtdReconhecida)+'</td><td class="cf-num cf-due">'+cfMoney_(r.receber)+'</td><td></td></tr>';
 }
-function cfAtualizarLinhaAoDigitar_(i,campo,valor,input){
-  var p=cfProdutos[i];if(!p)return;
-  p[campo]=cfNum_(valor);
-  if(campo==='estoqueInicial')p.qtdCoberta=p.estoqueInicial;
-  var tr=input&&input.closest?input.closest('tr'):null;if(!tr)return;
-  if((campo==='precoAcao'||campo==='coberturaUnit')&&String(valor).trim()!==''){
-    if(campo==='coberturaUnit')p.precoAcao=cfCentavos_(Math.max(0,cfNum_(p.precoNormal)-cfNum_(p.coberturaUnit)));
-    else p.coberturaUnit=cfCentavos_(Math.max(0,cfNum_(p.precoNormal)-cfNum_(p.precoAcao)));
-    var par=tr.querySelector(campo==='coberturaUnit'?'.cf-price-action-input':'.cf-coverage-input');
-    if(par)par.value=cfNum_(campo==='coberturaUnit'?p.precoAcao:p.coberturaUnit).toFixed(2);
-  }
-  var estoque=cfEstoque_(p),vend=cfNum_(p.qtdVendida),reconhecida=Math.min(estoque,vend),excedeu=vend>estoque;
-  var potencial=estoque*cfNum_(p.coberturaUnit),receber=reconhecida*cfNum_(p.coberturaUnit);
-  var potencialCell=tr.querySelector('.cf-potential'),reconhecidaCell=tr.querySelector('.cf-recognized'),receberCell=tr.querySelector('.cf-due');
-  if(potencialCell)potencialCell.textContent=cfMoney_(potencial);
-  if(reconhecidaCell){reconhecidaCell.textContent=cfQtd_(reconhecida)+(excedeu?' *':'');reconhecidaCell.classList.toggle('cf-over',excedeu);}
-  if(receberCell)receberCell.textContent=cfMoney_(receber);
-  cfRenderProdutosTotais_();
-}
 function cfAtualizarLinha_(i,campo,valor){
   if(!cfProdutos[i])return;
-  var p=cfProdutos[i];p[campo]=cfNum_(valor);
-  if(campo==='estoqueInicial')p.qtdCoberta=p.estoqueInicial;
-  if((campo==='precoAcao'||campo==='coberturaUnit')&&String(valor).trim()!==''){
-    if(campo==='coberturaUnit')p.precoAcao=cfCentavos_(Math.max(0,cfNum_(p.precoNormal)-cfNum_(p.coberturaUnit)));
-    else p.coberturaUnit=cfCentavos_(Math.max(0,cfNum_(p.precoNormal)-cfNum_(p.precoAcao)));
-  }
+  cfProdutos[i][campo]=cfNum_(valor);
+  if(campo==='estoqueInicial')cfProdutos[i].qtdCoberta=cfProdutos[i][campo];
   cfRenderProdutos_();
 }
 function cfRemoverProduto_(i){cfProdutos.splice(i,1);cfRenderProdutos_();}
@@ -11923,6 +11938,7 @@ function cfRenderLista_(){
       +'<div class="cf-card-sub"><b>'+cfEsc_(a.fornecedor||'')+'</b> · '+cfFmtData_(a.inicio)+' → '+cfFmtData_(a.fim)+(a.obs?'<br>'+cfEsc_(a.obs):'')+'</div></div>'
       +'<div class="cf-card-tools">'
       +'<button class="btn btn-sm" onclick="cfEditar_(\''+a.id+'\')"><i class="ti ti-pencil"></i> Abrir / lançar vendas</button>'
+      +((a.status||'ABERTA')==='ABERTA'?'<button class="btn btn-sm" style="border-color:#eab308;color:#facc15;font-weight:850" onclick="cfEnviarSelloutDaAcao_(\''+a.id+'\')" title="Agrupar itens desta negociação por preço da ação e abrir no Arsenal"><i class="ti ti-currency-real"></i> R$ Sellout</button>':'')
       +'<button class="btn btn-sm cf-btn-neg" onclick="cfImprimirNegociacao_(\''+a.id+'\')"><i class="ti ti-file-invoice"></i> Negociação</button>'
       +'<button class="btn btn-sm cf-btn-result" onclick="cfImprimirResultado_(\''+a.id+'\')"><i class="ti ti-report-analytics"></i> Resultado</button>'
       +'<button class="btn btn-sm" onclick="cfExcluir_(\''+a.id+'\')"><i class="ti ti-trash"></i></button></div></div>'
@@ -11934,6 +11950,46 @@ function cfRenderLista_(){
       +'</div></div>';
   }).join('');
   cfAtualizarKpis_();
+}
+
+
+// Envia a negociação aberta ao Arsenal, agrupando os produtos pelo preço da ação.
+// O envio usa localStorage compartilhado entre os dois caminhos do GitHub Pages.
+var CF_SELLOUT_TRANSFER_PREFIX_='aura_sellout_transfer_';
+function cfEnviarSelloutArsenal_(acaoFonte){
+  var acao=acaoFonte||cfAcaoForm_();
+  var porPreco=Object.create(null),semCodigo=0,semPreco=0;
+  (acao.produtos||[]).forEach(function(p){
+    var codigo=cfNormalizarCodigo_(p.cod||p.codigo||'');
+    var precoCentavos=Math.round(cfNum_(p.precoAcao)*100);
+    if(!codigo){semCodigo++;return;}
+    if(!(precoCentavos>0)){semPreco++;return;}
+    var grupo=porPreco[precoCentavos]||(porPreco[precoCentavos]={precoCentavos:precoCentavos,itens:[],vistos:Object.create(null)});
+    if(grupo.vistos[codigo])return;
+    grupo.vistos[codigo]=true;
+    grupo.itens.push({cod:codigo,nome:String(p.nome||codigo).trim(),unidade:String(p.unidade||'UN').trim(),precoNormal:cfNum_(p.precoNormal),precoAcao:precoCentavos/100});
+  });
+  var grupos=Object.keys(porPreco).map(function(k){
+    var g=porPreco[k];
+    return {precoCentavos:g.precoCentavos,preco:g.precoCentavos/100,itens:g.itens};
+  }).sort(function(a,b){return a.precoCentavos-b.precoCentavos;});
+  if(!grupos.length){mostrarToast('A negociação não tem itens com código e preço de ação válido para enviar.','warn');return;}
+  var token='rs_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
+  var pacote={versao:1,id:token,campanha:acao.campanha||'Sellout',fornecedor:acao.fornecedor||'',criadoEm:new Date().toISOString(),grupos:grupos};
+  try{localStorage.setItem(CF_SELLOUT_TRANSFER_PREFIX_+token,JSON.stringify(pacote));}
+  catch(e){mostrarToast('Não foi possível preparar o lote R$ Sellout no armazenamento deste navegador.','err');return;}
+  var destino=new URL('/arsenal-ofertas/',window.location.origin);
+  destino.searchParams.set('rsSellout',token);
+  var novaAba=window.open(destino.href,'_blank');
+  if(!novaAba){mostrarToast('O navegador bloqueou a nova aba. Permita pop-ups para abrir o Arsenal. Lote preparado: '+grupos.length+' grupo(s).','warn');return;}
+  var itens=grupos.reduce(function(n,g){return n+g.itens.length;},0);
+  var avisos=[];if(semCodigo)avisos.push(semCodigo+' sem código ignorado(s)');if(semPreco)avisos.push(semPreco+' sem preço de ação ignorado(s)');
+  mostrarToast('R$ Sellout enviado: '+itens+' produto(s) em '+grupos.length+' grupo(s) de preço.'+(avisos.length?' '+avisos.join('; ')+'.':''),'ok');
+}
+function cfEnviarSelloutDaAcao_(id){
+  var acao=cfAcoes.find(function(x){return String(x.id)===String(id);});
+  if(!acao){mostrarToast('Não encontrei essa negociação para enviar ao Arsenal.','warn');return;}
+  cfEnviarSelloutArsenal_(acao);
 }
 
 function cfImprimirNegociacaoAtual_(){
@@ -13796,12 +13852,15 @@ function auraPerfilSessaoAtual_(){
 }
 function auraSessaoEhMaster_(){
   var p=auraPerfilSessaoAtual_(),identidade=[_usuarioSelecionado,p&&p.nome,p&&p.email].join(' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-  return !!(p&&p.gerenciaUsuarios)||/(^|[^a-z])leonardo([^a-z]|$)/.test(identidade);
+  return /(^|[^a-z0-9])leonardo([^a-z0-9]|$)/.test(identidade);
+}
+function auraSessaoPodeGerenciarColaboradores_(){
+  var p=auraPerfilSessaoAtual_();return auraSessaoEhMaster_()||!!(p&&p.gerenciaUsuarios===true);
 }
 function auraAtualizarAcessoTarefas_(){
   var p=auraPerfilSessaoAtual_(),admin=auraSessaoEhMaster_(),bloqueado=!admin&&(!p||p.veTarefas!==true);
   document.body.classList.toggle('aura-admin-sem-tarefas',bloqueado);
-  var btns=document.querySelectorAll('#auraNav button');Array.prototype.forEach.call(btns,function(b){var oc=b.getAttribute('onclick')||'';if(oc.indexOf("'tarefas'")>=0)b.style.display=bloqueado?'none':'';if(oc.indexOf("'colaboradores'")>=0)b.style.display=admin?'':'none';});
+  var btns=document.querySelectorAll('#auraNav button');Array.prototype.forEach.call(btns,function(b){var oc=b.getAttribute('onclick')||'';if(oc.indexOf("'tarefas'")>=0)b.style.display=bloqueado?'none':'';if(oc.indexOf("'colaboradores'")>=0)b.style.display=auraSessaoPodeGerenciarColaboradores_()?'':'none';});
   var badge=document.getElementById('asBadgeTarefas');if(badge&&bloqueado){badge.textContent='';badge.style.display='none';}
   if(bloqueado&&currentTabName==='tarefas')goTab('dashboard');
   return !bloqueado;
@@ -13810,7 +13869,7 @@ function setEstoqueModo(){ /* compatibilidade v6.77: agora existe somente uma vi
 function goTab(name){
   if(name==='validades')name='estoque'; // compatibilidade com atalhos antigos
   if(name==='tarefas'&&!auraAtualizarAcessoTarefas_())return;
-  if(name==='colaboradores'&&!auraSessaoEhMaster_()){mostrarToast('Seu perfil não pode gerenciar colaboradores.','warn');return;}
+  if(name==='colaboradores'&&!auraSessaoPodeGerenciarColaboradores_()){mostrarToast('Seu perfil não pode gerenciar colaboradores.','warn');return;}
   currentTabName=name;
   document.querySelectorAll('.tab').forEach(function(t){
     var oc=t.getAttribute('onclick')||'';
@@ -16370,6 +16429,15 @@ function _tarefasLotesHtml_(cod,validadeAlvo,quantidadeConfirmada){
     +'</div>';
 }
 
+// v7.57 — lotes dentro de um bloco recolhível (a lista de tarefas fica enxuta; o detalhe abre sob demanda)
+function _tarefasLotesDetails_(cod,validadeAlvo,quantidadeConfirmada){
+  var n=0;try{n=_tarefasLotesDoProduto_(cod).length;}catch(e){}
+  if(!n)return '';
+  var box=_tarefasLotesHtml_(cod,validadeAlvo,quantidadeConfirmada);
+  if(!box)return '';
+  return '<details class="tf2-det"><summary><i class="ti ti-chevron-right"></i> Ver lotes ('+n+')</summary>'+box+'</details>';
+}
+
 // Quando uma tarefa concluída chega do Sheets, atualiza imediatamente o lote local
 // correspondente (EAN + validade). Assim a tela do gestor não continua exibindo
 // a quantidade antiga até a próxima sincronização geral da aba 2025.
@@ -16958,17 +17026,46 @@ function renderTarefas() {
   var container = document.getElementById('tarefasGrid');
   if (!container) return;
   var tarefas = getTarefas();
-  var filtro = window._tarefasFiltro || 'todas';
+  var filtro = window._tarefasFiltro || 'pendentes';
+  if (filtro === 'todas') filtro = 'pendentes';
   var selecionadas = window._tarefasSelecionadas || (window._tarefasSelecionadas = new Set());
   // remove da seleção tarefas que não existem mais ou que deixaram de ser pendentes
   Array.from(selecionadas).forEach(function(id) {
     var ainda = tarefas.some(function(t) { return t.id === id && t.status === 'pendente'; });
     if (!ainda) selecionadas.delete(id);
   });
-  
-  var filtered = tarefas.filter(function(t) {
-    if (filtro === 'pendentes' && t.status !== 'pendente') return false;
-    if (filtro === 'concluidas' && t.status !== 'concluida') return false;
+
+  // Lote já vencido: não representa mais uma ação possível (não dá mais tempo de
+  // agir), então some da lista — só ficam visíveis os lotes de hoje pra frente.
+  var ehVencida = function(t) {
+    if (!t.validade) return false;
+    var d = daysDiff(t.validade);
+    return d !== null && d < 0;
+  };
+  // Concluídas confirmadas com 0 unidades: não representam mais risco de perda,
+  // então ficam num bloco recolhido no final da aba Concluídas.
+  var ehZero = function(t) { var q=t.quantidadeConfirmada; return t.status === 'concluida' && q !== null && q !== undefined && String(q).trim() !== '' && Number(q) === 0; };
+
+  var vivas = tarefas.filter(function(t) { return !ehVencida(t); });
+  var cntPend = vivas.filter(function(t) { return t.status === 'pendente'; }).length;
+  var cntConc = vivas.filter(function(t) { return t.status === 'concluida'; }).length;
+
+  // abas (contadores + aba ativa + qual coluna aparece)
+  var setTxt = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+  setTxt('tfc_pendentes', cntPend);
+  setTxt('tfc_concluidas', cntConc);
+  ['pendentes', 'prontos', 'concluidas'].forEach(function(f) {
+    var el = document.getElementById('tf_' + f);
+    if (el) el.classList.toggle('active', f === filtro);
+  });
+  var split = document.getElementById('tarefasSplit');
+  if (split) split.setAttribute('data-aba', filtro === 'prontos' ? 'prontos' : 'tarefas');
+  var buscaWrap = document.getElementById('tarefasBuscaWrap');
+  if (buscaWrap) buscaWrap.style.display = filtro === 'prontos' ? 'none' : 'flex';
+
+  var filtered = vivas.filter(function(t) {
+    if (filtro === 'pendentes') return t.status === 'pendente';
+    if (filtro === 'concluidas') return t.status === 'concluida';
     return true;
   });
 
@@ -16982,18 +17079,6 @@ function renderTarefas() {
     });
   }
 
-  // Lote já vencido: não representa mais uma ação possível (não dá mais tempo de
-  // agir), então some da lista — só ficam visíveis os lotes de hoje pra frente.
-  var ehVencida = function(t) {
-    if (!t.validade) return false;
-    var d = daysDiff(t.validade);
-    return d !== null && d < 0;
-  };
-  filtered = filtered.filter(function(t) { return !ehVencida(t); });
-
-  // Tarefas concluídas confirmadas com 0 unidades: não representam mais um risco de
-  // perda, então saem da visão principal e vão para um bloco recolhido no final.
-  var ehZero = function(t) { return t.status === 'concluida' && Number(t.quantidadeConfirmada) === 0; };
   var zeradas = filtered.filter(ehZero);
   filtered = filtered.filter(function(t) { return !ehZero(t); });
 
@@ -17009,103 +17094,124 @@ function renderTarefas() {
   filtered.sort(ordenarPorValidade);
   zeradas.sort(ordenarPorValidade);
 
-  if (!filtered.length && !zeradas.length) {
-    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:13px"><i class="ti ti-clipboard-check" style="font-size:36px;display:block;margin-bottom:10px;opacity:.4"></i>Nenhuma tarefa ' + (filtro !== 'todas' ? filtro : 'ainda') + '</div>';
-    return;
-  }
+  var fmtDH = function(d) {
+    return d.toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'}) + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+  };
 
-  var renderCard = function(t) {
-    var dataCriacao = new Date(t.criadoEm);
-    var dataFmt = dataCriacao.toLocaleDateString('pt-BR') + ' ' + dataCriacao.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-    var isPend = t.status === 'pendente';
-    var statusColor = isPend ? 'var(--amber)' : 'var(--green)';
-    var statusIcon = isPend ? 'ti-clock' : 'ti-circle-check';
-    var statusText = isPend ? 'Pendente' : 'Concluída';
-
-    var thumbCod = (t.cod||'').replace(/[^0-9]/g,'');
-    var tarefaFotoId = 'tarefaFoto_' + t.id.replace(/[^a-zA-Z0-9]/g,'_');
+  var renderCard = function(t, grupo) {
+    grupo = Array.isArray(grupo) && grupo.length ? grupo : [t];
+    var isPend = t.status === 'pendente', agrupada = grupo.length > 1;
+    var thumbCod = String(t.cod||'').replace(/[^0-9]/g,'');
+    var tarefaFotoId = 'tarefaFoto_' + String(t.id||'').replace(/[^a-zA-Z0-9]/g,'_');
     var fotoHtml = thumbCod
       ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + tarefaFotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + tarefaFotoId + '" data-cod="' + thumbCod + '" data-nome="' + escHtml(cleanNome(t.produto || '')) + '" src="" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
-    
-    var qtdeInfo = '';
-    if (t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
-      qtdeInfo = '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--green);font-weight:600"><i class="ti ti-package"></i> Quantidade confirmada: <b>' + t.quantidadeConfirmada + ' un.</b></div>';
-    }
 
-    var qtdeBadge = '';
-    if (t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
-      qtdeBadge = '<span class="tarefa-qtde-badge" style="position:absolute;top:-8px;right:-8px;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--red);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.35);border:2px solid var(--surface)">' + t.quantidadeConfirmada + '</span>';
-    }
-
-    var validadeInfo = '';
+    var chips = '';
     if (t.validade) {
       var dv = daysDiff(t.validade);
-      var corVal = (dv !== null && dv <= 3) ? 'var(--red)' : (dv !== null && dv <= 7 ? 'var(--amber)' : 'var(--tx2)');
-      validadeInfo = '<div class="tarefa-validade-info" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,.1);color:' + corVal + ';margin-bottom:6px"><i class="ti ti-calendar-exclamation"></i> Validade: ' + fmtDataExtenso(t.validade) + '</div>';
+      var cls = (dv !== null && dv <= 3) ? 'red' : (dv !== null && dv <= 7 ? 'amber' : '');
+      chips += '<span class="tf2-chip ' + cls + '"><i class="ti ti-calendar-exclamation"></i> Validade ' + fmtDataExtenso(t.validade) + '</span>';
     }
-    
-    return '<div class="tarefa-row" style="position:relative">'
-      + qtdeBadge
+    if (!agrupada && t.quantidadeConfirmada !== null && t.quantidadeConfirmada !== undefined) {
+      var zero = Number(t.quantidadeConfirmada) === 0;
+      chips += '<span class="tf2-chip ' + (zero ? 'red' : 'green') + '"><i class="ti ti-package"></i> Confirmado: ' + t.quantidadeConfirmada + ' un.</span>';
+    }
+    chips += agrupada
+      ? '<span class="tf2-chip"><i class="ti ti-users"></i> ' + grupo.length + ' colaboradores</span>'
+      : '<span class="tf2-chip"><i class="ti ti-user"></i> ' + escHtml(t.nomeColaborador || '—') + '</span>';
+    if (t.precoAcao) {
+      chips += '<span class="tf2-chip green">Preço ação ' + Number(t.precoAcao).toLocaleString('pt-BR', {style:'currency', currency:'BRL'}) + '</span>';
+      if (t.margemAcaoPct !== null && t.margemAcaoPct !== undefined) chips += '<span class="tf2-chip">Margem ' + Number(t.margemAcaoPct).toFixed(1) + '%</span>';
+      if (t.materialAcao) chips += '<span class="tf2-chip amber">' + (t.materialAcao === 'PLACA' ? 'Placa / Encarte' : (t.materialAcao === 'ETIQUETA' ? 'Etiqueta' : 'Decidir depois')) + '</span>';
+    }
+
+    var dataCriacao = new Date(t.criadoEm);
+    var foot = (t.cod ? 'cód. ' + escHtml(String(t.cod)) + ' · ' : '')
+      + 'Enviada ' + fmtDH(dataCriacao)
+      + (t.confirmadoEm ? ' · Concluída ' + fmtDH(new Date(t.confirmadoEm)) : '');
+    var assigneesHtml = agrupada
+      ? '<div class="tf2-assignees">' + grupo.map(function(gt) {
+          var qInfo = gt.status === 'concluida' && gt.quantidadeConfirmada !== null && gt.quantidadeConfirmada !== undefined
+            ? '<span>' + escHtml(String(gt.quantidadeConfirmada)) + ' un.</span>' : '';
+          return '<div class="tf2-assignee">'
+            + (gt.status === 'pendente' ? '<label class="tf2-assignee-name"><input type="checkbox" class="tf2-chk" data-id="' + escHtml(String(gt.id)) + '" ' + (selecionadas.has(gt.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + gt.id + '\',this.checked)" title="Selecionar tarefa">' + escHtml(gt.nomeColaborador || gt.email || 'Sem responsável') + '</label>' : '<span class="tf2-assignee-name"><i class="ti ti-user-check"></i>' + escHtml(gt.nomeColaborador || gt.email || 'Sem responsável') + '</span>')
+            + qInfo
+            + (gt.status === 'pendente' ? '<div class="tf2-assignee-actions"><button type="button" class="tf2-ico blue" onclick="abrirTransferirModal(\'' + gt.id + '\')" title="Transferir tarefa"><i class="ti ti-arrows-exchange"></i></button><button type="button" class="tf2-ico red" onclick="cancelarTarefa(\'' + gt.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button></div>' : '')
+            + '</div>';
+        }).join('') + '</div>' : '';
+
+    return '<div class="tf2-card">'
       + fotoHtml
-      + '<div style="flex:1;min-width:0">'
-      + '<div class="tarefa-card-top" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px">'
-      +   '<div style="display:flex;align-items:center;gap:8px">'
-      +     (isPend ? '<input type="checkbox" class="tarefaChk" data-id="' + t.id + '" ' + (selecionadas.has(t.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + t.id + '\',this.checked)" style="width:15px;height:15px;cursor:pointer;accent-color:var(--blue)" title="Selecionar tarefa">' : '')
-      +     '<span class="tarefa-status-badge" style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;background:' + (isPend ? 'rgba(245,158,11,.15)' : 'rgba(16,185,129,.15)') + ';color:' + statusColor + '"><i class="ti ' + statusIcon + '"></i> ' + statusText + '</span>'
+      + '<div class="tf2-body">'
+      +   '<div class="tf2-line1">'
+      +     '<div class="tf2-nomewrap">'
+      +       (!agrupada && isPend ? '<input type="checkbox" class="tf2-chk" data-id="' + t.id + '" ' + (selecionadas.has(t.id) ? 'checked' : '') + ' onchange="toggleSelecaoTarefa(\'' + t.id + '\',this.checked)" title="Selecionar tarefa">' : '')
+      +       '<div class="tf2-nome">' + escHtml(t.produto) + '</div>'
+      +     '</div>'
+      +     (!agrupada && isPend ? '<div class="tf2-acts"><button type="button" class="tf2-ico blue" onclick="abrirTransferirModal(\'' + t.id + '\')" title="Transferir para outro colaborador"><i class="ti ti-arrows-exchange"></i></button><button type="button" class="tf2-ico red" onclick="cancelarTarefa(\'' + t.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button></div>' : '')
       +   '</div>'
-      +   (isPend ? '<div class="tarefa-card-actions" style="display:flex;gap:6px;flex-shrink:0">'
-      +     '<button class="btn btn-sm" style="color:var(--blue);border-color:var(--blue);font-size:11px;padding:3px 8px" onclick="abrirTransferirModal(\'' + t.id + '\')" title="Transferir para outro colaborador"><i class="ti ti-arrows-exchange"></i> Transferir</button>'
-      +     '<button class="btn btn-sm" style="color:var(--red);border-color:var(--red);font-size:11px;padding:3px 8px" onclick="cancelarTarefa(\'' + t.id + '\')" title="Cancelar tarefa"><i class="ti ti-x"></i></button>'
-      +   '</div>' : '')
-      + '</div>'
-      + '<div class="tarefa-card-nome" style="font-size:14px;font-weight:600;margin-bottom:4px">' + escHtml(t.produto) + '</div>'
-      + (t.cod ? '<div class="tarefa-card-cod" style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:6px">' + t.cod + '</div>' : '')
-      + validadeInfo
-      + _tarefasLotesHtml_(t.cod,t.validade,t.quantidadeConfirmada)
-      + (t.descricao ? '<div class="tarefa-card-desc" style="font-size:12px;color:var(--tx2);margin-bottom:6px;line-height:1.4"><i class="ti ti-arrows-exchange" style="font-size:12px;opacity:.7"></i> ' + escHtml(t.descricao) + '</div>' : '')
-      + (t.precoAcao ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px"><span style="font-size:11px;font-weight:800;padding:4px 8px;border-radius:7px;background:rgba(29,158,117,.12);color:var(--green)">Preço ação: '+Number(t.precoAcao).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'</span>'+(t.margemAcaoPct!==null&&t.margemAcaoPct!==undefined?'<span style="font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;background:var(--bg2);border:1px solid var(--bds)">Margem '+Number(t.margemAcaoPct).toFixed(1)+'%</span>':'')+(t.materialAcao?'<span style="font-size:11px;font-weight:800;padding:4px 8px;border-radius:7px;background:rgba(245,158,11,.12);color:var(--amber)">'+(t.materialAcao==='PLACA'?'Placa / Encarte':(t.materialAcao==='ETIQUETA'?'Etiqueta':'Decidir depois'))+'</span>':'')+'</div>' : '')
-      + '<div class="tarefa-card-colab" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tx2)">'
-      +   '<i class="ti ti-user" style="font-size:14px"></i> '
-      +   '<span style="font-weight:600">' + escHtml(t.nomeColaborador) + '</span>'
-      + '</div>'
-      + qtdeInfo
-      + '<div class="tarefa-card-foot" style="font-size:10px;color:var(--muted);margin-top:6px;display:flex;flex-direction:column;gap:2px">'
-      +   '<span>Enviado em: ' + dataFmt + '</span>'
-      +   (t.confirmadoEm ? '<span>Concluído em: ' + new Date(t.confirmadoEm).toLocaleString('pt-BR') + '</span>' : '')
-      + '</div>'
+      +   '<div class="tf2-chips">' + chips + '</div>'
+      +   (t.descricao ? '<div class="tf2-desc"><i class="ti ti-note" style="opacity:.7"></i> ' + escHtml(t.descricao) + '</div>' : '')
+      +   _tarefasLotesDetails_(t.cod, t.validade, t.quantidadeConfirmada)
+      +   '<div class="tf2-foot">' + foot + '</div>'
+      +   assigneesHtml
       + '</div>'
       + '</div>';
   };
 
-  var html = filtered.map(renderCard).join('');
+  var agruparCartoes = function(lista) {
+    var mapa = Object.create(null);
+    lista.forEach(function(t) {
+      var automatica = t.automatica === true || String(t.tipoTarefa||'') === 'validade_automatica';
+      var cod = String(t.cod||'').trim(), validade = String(t.validade||'').trim();
+      var chave = automatica && cod && validade
+        ? 'auto|' + cod + '|' + validade + '|' + String(t.status||'')
+        : 'individual|' + String(t.id||Math.random());
+      if (!mapa[chave]) mapa[chave] = [];
+      mapa[chave].push(t);
+    });
+    return Object.keys(mapa).map(function(k) { return mapa[k]; });
+  };
 
+  var html = agruparCartoes(filtered).map(function(grupo) { return renderCard(grupo[0], grupo); }).join('');
   if (zeradas.length) {
-    var zeroCardsHtml = zeradas.map(renderCard).join('');
-    html += '<div style="grid-column:1/-1;margin-top:10px">'
-      +   '<button type="button" onclick="var b=document.getElementById(\'tarefasZeradasBox\');var i=document.getElementById(\'tarefasZeradasIcon\');var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'grid\';i.style.transform=open?\'rotate(0deg)\':\'rotate(90deg)\';" style="width:100%;text-align:left;background:none;border:1px dashed var(--border);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">'
+    html += '<div style="margin-top:6px">'
+      +   '<button type="button" class="tf2-more" onclick="var b=document.getElementById(\'tarefasZeradasBox\');var i=document.getElementById(\'tarefasZeradasIcon\');var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'grid\';i.style.transform=open?\'rotate(0deg)\':\'rotate(90deg)\';">'
       +     '<i id="tarefasZeradasIcon" class="ti ti-chevron-right" style="transition:transform .15s"></i> '
-      +     'Confirmadas sem quantidade (0 un.) — ' + zeradas.length + ' <span style="opacity:.7">(nada a fazer aqui)</span>'
+      +     'Confirmadas com 0 un. — ' + zeradas.length + ' <span style="opacity:.7">(nada a fazer aqui)</span>'
       +   '</button>'
-      +   '<div id="tarefasZeradasBox" style="display:none;grid-template-columns:1fr;gap:10px;margin-top:10px;opacity:.55">'
-      +     zeroCardsHtml
+      +   '<div id="tarefasZeradasBox" style="display:none;grid-template-columns:1fr;gap:8px;margin-top:8px;opacity:.55">'
+      +     agruparCartoes(zeradas).map(function(grupo) { return renderCard(grupo[0], grupo); }).join('')
       +   '</div>'
       + '</div>';
   }
 
+  if (!html) {
+    var msg = busca ? 'Nada encontrado para essa busca'
+      : (filtro === 'concluidas' ? 'Nenhuma tarefa concluída ainda' : 'Nenhuma tarefa pendente');
+    html = '<div class="tf2-vazio"><i class="ti ti-clipboard-check"></i>' + msg + '</div>';
+  }
+
   container.innerHTML = html;
   resolverFotosTarefasArea(container);
-
   atualizarTarefasBulkBar();
-  
-  var pendCount = tarefas.filter(function(t) { return t.status === 'pendente' && !ehVencida(t); }).length;
+
+  // selo do menu lateral
   var badge = document.getElementById('asBadgeTarefas');
   if (badge) {
-    badge.textContent = pendCount;
-    badge.style.display = pendCount > 0 ? 'inline-flex' : 'none';
+    badge.textContent = cntPend;
+    badge.style.display = cntPend > 0 ? 'inline-flex' : 'none';
   }
 
   renderTarefasProntos();
+
+  // resumo do cabeçalho (usa o contador de "prontos" calculado acima)
+  var elP = document.getElementById('tfc_prontos');
+  var nProntos = elP ? (parseInt(elP.textContent, 10) || 0) : 0;
+  var partes = [cntPend + (cntPend === 1 ? ' pendente' : ' pendentes')];
+  if (nProntos) partes.push(nProntos + ' pronto' + (nProntos === 1 ? '' : 's') + ' p/ encarte');
+  setTxt('tarefasResumo', partes.join(' · '));
 }
 
 // ═══ Coluna direita da aba Tarefas: produtos com tarefa concluída que ainda têm estoque ═══
@@ -17155,7 +17261,7 @@ function renderTarefasProntos() {
     // Considera só os lotes desse produto que ainda não venceram (hoje pra frente)
     // pra somar estoque e escolher qual lote referenciar no encarte.
     var lotesValidos = products.filter(function(p) {
-      if ((p.cod||'').trim() !== cod) return false;
+      if (String(p.cod||'').trim() !== String(cod)) return false;
       var d = daysDiff(p.validade);
       return d === null || d >= 0;
     });
@@ -17188,6 +17294,7 @@ function renderTarefasProntos() {
   };
   prontos.sort(ordenarPorValidadeProntos);
   prontosIgnorados.sort(ordenarPorValidadeProntos);
+  var _cP = document.getElementById('tfc_prontos'); if (_cP) _cP.textContent = prontos.length;
 
   var renderProntoRow = function(item, ignorado) {
     var p = products[item.idx];
@@ -17198,41 +17305,38 @@ function renderTarefasProntos() {
       ? '<div class="urg-photobox" onclick="abrirFotoGrande(document.getElementById(\'' + fotoId + '\').src)"><div class="urg-photobox-imgwrap"><img id="' + fotoId + '" data-cod="' + thumbCod + '" data-nome="' + escHtml(nomeLimpo) + '" src="" alt="" loading="lazy"></div></div>'
       : '<div class="urg-photobox"><div class="urg-photobox-empty"><i class="ti ti-photo-off"></i></div></div>';
 
-    var validadeInfo = '';
+    var chips = '';
     if (item.t.validade) {
       var dv = daysDiff(item.t.validade);
-      var corVal = (dv !== null && dv <= 3) ? 'var(--red)' : (dv !== null && dv <= 7 ? 'var(--amber)' : 'var(--tx2)');
-      validadeInfo = '<div style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,.1);color:' + corVal + ';margin-bottom:6px"><i class="ti ti-calendar-exclamation"></i> Validade: ' + fmtDataExtenso(item.t.validade) + '</div>';
+      var cls = (dv !== null && dv <= 3) ? 'red' : (dv !== null && dv <= 7 ? 'amber' : '');
+      chips += '<span class="tf2-chip ' + cls + '"><i class="ti ti-calendar-exclamation"></i> Validade ' + fmtDataExtenso(item.t.validade) + '</span>';
     }
+    chips += '<span class="tf2-chip"><i class="ti ti-package"></i> ' + item.estoqueTotal + ' un. disponíveis</span>';
 
     var motivo = ignoradosMap[item.cod];
-    var motivoTag = motivo === 'manual'
-      ? '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--amber)"><i class="ti ti-tag" style="font-size:13px"></i> Etiqueta manual aplicada</span>'
-      : '<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2)"><i class="ti ti-eye-off" style="font-size:13px"></i> Ignorado</span>';
+    if (ignorado) {
+      chips += motivo === 'manual'
+        ? '<span class="tf2-chip amber"><i class="ti ti-tag"></i> Etiqueta manual aplicada</span>'
+        : '<span class="tf2-chip"><i class="ti ti-eye-off"></i> Ignorado</span>';
+    } else if (item.t.carrinhoStatus === 'nao') {
+      chips += '<span class="tf2-chip amber"><i class="ti ti-alert-triangle"></i> Colaborador: ainda sem desconto</span>';
+    }
 
-    var acoes = ignorado
-      ? '<button class="btn btn-sm" style="flex-shrink:0" onclick="restaurarProntoEncarte(\'' + item.cod + '\')"><i class="ti ti-rotate"></i> Restaurar</button>'
-      : '<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">'
-        + '<button class="btn btn-green btn-sm" onclick="abrirEncarteDaTarefa_(\'' + item.t.id + '\')"><i class="ti ti-photo"></i> '+(item.t.materialAcao==='ETIQUETA'?'Trocar p/ placa':'Encarte')+'</button>'
-        + '<button class="btn btn-sm" style="color:var(--amber);border-color:var(--amber)" onclick="ignorarProntoEncarte(\'' + item.cod + '\',\'manual\')" title="Já apliquei desconto com etiqueta manual, sem mexer no preço do sistema"><i class="ti ti-basket"></i> Carrinho</button>'
-        + '<button class="btn btn-sm" style="color:var(--tx2)" onclick="ignorarProntoEncarte(\'' + item.cod + '\',\'ignorado\')"><i class="ti ti-x"></i> Ignorar</button>'
-      + '</div>';
+    var botoes = ignorado
+      ? '<button class="btn btn-sm" onclick="restaurarProntoEncarte(\'' + item.cod + '\')"><i class="ti ti-rotate"></i> Restaurar</button>'
+      : '<button class="btn btn-green btn-sm" onclick="abrirEncarteDaTarefa_(\'' + item.t.id + '\')"><i class="ti ti-photo"></i> ' + (item.t.materialAcao === 'ETIQUETA' ? 'Trocar p/ placa' : 'Criar encarte') + '</button>'
+        + '<button class="btn btn-sm" style="color:var(--amber);border-color:var(--amber)" onclick="ignorarProntoEncarte(\'' + item.cod + '\',\'manual\')" title="Já apliquei o desconto com etiqueta manual, sem mexer no preço do sistema"><i class="ti ti-tag"></i> Já etiquetei</button>'
+        + '<button class="btn btn-sm" style="color:var(--tx2)" onclick="ignorarProntoEncarte(\'' + item.cod + '\',\'ignorado\')"><i class="ti ti-eye-off"></i> Ignorar</button>';
 
-    return '<div class="pronto-row">'
+    return '<div class="tf2-card">'
       + fotoHtml
-      + '<div style="flex:1;min-width:0">'
-      +   '<div style="font-size:14px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escHtml(nomeLimpo) + '</div>'
-      +   (item.cod ? '<div style="font-family:monospace;font-size:11px;color:var(--muted);margin-bottom:4px">' + item.cod + '</div>' : '')
-      +   validadeInfo
-      +   '<div style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--tx2);flex-wrap:wrap">'
-      +     '<span><i class="ti ti-package" style="font-size:13px"></i> <b>' + item.estoqueTotal + ' un. disponíveis</b></span>'
-      +     (ignorado ? motivoTag : (item.t.carrinhoStatus === 'nao'
-              ? '<span style="color:var(--amber)"><i class="ti ti-alert-triangle" style="font-size:13px"></i> Colaborador confirmou: ainda sem desconto</span>'
-              : '<span><i class="ti ti-circle-check" style="font-size:13px;color:var(--green)"></i> Tarefa concluída</span>'))
-      +   '</div>'
-      +   _tarefasLotesHtml_(item.cod,item.t.validade,item.t.quantidadeConfirmada)
+      + '<div class="tf2-body">'
+      +   '<div class="tf2-nome">' + escHtml(nomeLimpo) + '</div>'
+      +   '<div class="tf2-chips">' + chips + '</div>'
+      +   _tarefasLotesDetails_(item.cod, item.t.validade, item.t.quantidadeConfirmada)
+      +   '<div class="tf2-btns">' + botoes + '</div>'
+      +   (item.cod ? '<div class="tf2-foot">cód. ' + escHtml(String(item.cod)) + '</div>' : '')
       + '</div>'
-      + acoes
       + '</div>';
   };
 
@@ -17246,8 +17350,8 @@ function renderTarefasProntos() {
     : '<div style="text-align:center;padding:24px 20px;color:var(--muted);font-size:12px">Tudo resolvido por aqui ✅</div>';
 
   if (prontosIgnorados.length) {
-    html += '<div style="margin-top:10px">'
-      +   '<button type="button" onclick="var b=document.getElementById(\'tarefasProntosIgnoradosBox\');var i=document.getElementById(\'tarefasProntosIgnoradosIcon\');var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'grid\';i.style.transform=open?\'rotate(0deg)\':\'rotate(90deg)\';" style="width:100%;text-align:left;background:none;border:1px dashed var(--border);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">'
+    html += '<div style="margin-top:6px">'
+      +   '<button type="button" class="tf2-more" onclick="var b=document.getElementById(\'tarefasProntosIgnoradosBox\');var i=document.getElementById(\'tarefasProntosIgnoradosIcon\');var open=b.style.display!==\'none\';b.style.display=open?\'none\':\'grid\';i.style.transform=open?\'rotate(0deg)\':\'rotate(90deg)\';" style="width:100%;text-align:left;background:none;border:1px dashed var(--border);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer">'
       +     '<i id="tarefasProntosIgnoradosIcon" class="ti ti-chevron-right" style="transition:transform .15s"></i> '
       +     'Ignorados — ' + prontosIgnorados.length + ' <span style="opacity:.7">(clique pra restaurar)</span>'
       +   '</button>'
@@ -17415,11 +17519,8 @@ function confirmarTransferencia() {
 }
 
 function filtrarTarefas(filtro) {
-  window._tarefasFiltro = filtro;
-  ['todas','pendentes','concluidas'].forEach(function(f) {
-    var el = document.getElementById('tf_' + f);
-    if (el) el.classList.toggle('active', f === filtro);
-  });
+  // v7.57: abas Pendentes / Prontos p/ encarte / Concluídas (o estado visual é aplicado em renderTarefas)
+  window._tarefasFiltro = filtro === 'todas' ? 'pendentes' : filtro;
   renderTarefas();
 }
 
@@ -18534,7 +18635,7 @@ function _auraOnScanSuccess(code) {
       return;
     }
     if(name==='tarefas'&&!auraAtualizarAcessoTarefas_())return;
-    if(name==='colaboradores'&&!auraSessaoEhMaster_()){mostrarToast('Seu perfil não pode gerenciar colaboradores.','warn');return;}
+    if(name==='colaboradores'&&!auraSessaoPodeGerenciarColaboradores_()){mostrarToast('Seu perfil não pode gerenciar colaboradores.','warn');return;}
     currentTabName=name;
     document.querySelectorAll('.tab').forEach(function(t){var oc=t.getAttribute('onclick')||'';t.classList.toggle('active',oc.indexOf("goTab('"+name+"')")!==-1);});
     document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('active');});
