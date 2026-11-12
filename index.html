@@ -3506,11 +3506,11 @@ function toggleTheme() {
           </div>
           <div class="cf-field">
             <label>Preço que será praticado na ação</label>
-            <input type="number" min="0" step="0.01" id="cfPrecoAcao" placeholder="R$" oninput="cfAtualizarReferencia_()">
+            <input type="number" min="0" step="0.01" id="cfPrecoAcao" placeholder="R$" oninput="cfAtualizarCoberturaPorPreco_()">
           </div>
           <div class="cf-field">
             <label>Cobertura acordada / unidade</label>
-            <input type="number" min="0" step="0.01" id="cfCoberturaUnit" placeholder="R$" oninput="cfAtualizarReferencia_()">
+            <input type="number" min="0" step="0.01" id="cfCoberturaUnit" placeholder="R$" oninput="cfAtualizarPrecoAcaoPorCobertura_()">
           </div>
         </div>
 
@@ -11675,6 +11675,19 @@ function cfSelecionarProduto_(cod){
   setTimeout(function(){document.getElementById('cfEstoqueInicial').focus();document.getElementById('cfEstoqueInicial').select();},80);
 }
 
+function cfCentavos_(valor){return Math.round((cfNum_(valor)+Number.EPSILON)*100)/100;}
+function cfAtualizarPrecoAcaoPorCobertura_(){
+  var normal=cfNum_(document.getElementById('cfPrecoNormal').value);
+  var coberturaEl=document.getElementById('cfCoberturaUnit'),acaoEl=document.getElementById('cfPrecoAcao');
+  if(String(coberturaEl.value).trim()!==''&&normal>0)acaoEl.value=cfCentavos_(Math.max(0,normal-cfNum_(coberturaEl.value))).toFixed(2);
+  cfAtualizarReferencia_();
+}
+function cfAtualizarCoberturaPorPreco_(){
+  var normal=cfNum_(document.getElementById('cfPrecoNormal').value);
+  var acaoEl=document.getElementById('cfPrecoAcao'),coberturaEl=document.getElementById('cfCoberturaUnit');
+  if(String(acaoEl.value).trim()!==''&&normal>0)coberturaEl.value=cfCentavos_(Math.max(0,normal-cfNum_(acaoEl.value))).toFixed(2);
+  cfAtualizarReferencia_();
+}
 function cfAtualizarReferencia_(){
   var pn=cfNum_(document.getElementById('cfPrecoNormal').value);
   var pa=cfNum_(document.getElementById('cfPrecoAcao').value);
@@ -11752,8 +11765,8 @@ function cfRenderProdutos_(){
       +'<td class="cf-num"><input type="number" step="1" min="0" value="'+estoque+'" oninput="cfAtualizarLinhaAoDigitar_('+i+',\'estoqueInicial\',this.value,this)" onchange="cfAtualizarLinha_('+i+',\'estoqueInicial\',this.value)"></td>'
       +'<td class="cf-num">'+cfMoney_(p.custo)+'</td>'
       +'<td class="cf-num">'+cfMoney_(p.precoNormal)+'</td>'
-      +'<td class="cf-num"><input type="number" step="0.01" min="0" value="'+cfNum_(p.precoAcao)+'" oninput="cfAtualizarLinhaAoDigitar_('+i+',\'precoAcao\',this.value,this)" onchange="cfAtualizarLinha_('+i+',\'precoAcao\',this.value)"></td>'
-      +'<td class="cf-num"><input type="number" step="0.01" min="0" value="'+cfNum_(p.coberturaUnit)+'" oninput="cfAtualizarLinhaAoDigitar_('+i+',\'coberturaUnit\',this.value,this)" onchange="cfAtualizarLinha_('+i+',\'coberturaUnit\',this.value)"></td>'
+      +'<td class="cf-num"><input type="number" step="0.01" min="0" class="cf-price-action-input" value="'+cfNum_(p.precoAcao)+'" oninput="cfAtualizarLinhaAoDigitar_('+i+',\'precoAcao\',this.value,this)" onchange="cfAtualizarLinha_('+i+',\'precoAcao\',this.value)"></td>'
+      +'<td class="cf-num"><input type="number" step="0.01" min="0" class="cf-coverage-input" value="'+cfNum_(p.coberturaUnit)+'" oninput="cfAtualizarLinhaAoDigitar_('+i+',\'coberturaUnit\',this.value,this)" onchange="cfAtualizarLinha_('+i+',\'coberturaUnit\',this.value)"></td>'
       +'<td class="cf-num cf-potential">'+cfMoney_(potencial)+'</td>'
       +'<td class="cf-num"><input type="number" step="1" min="0" value="'+vend+'" oninput="cfAtualizarLinhaAoDigitar_('+i+',\'qtdVendida\',this.value,this)" onchange="cfAtualizarLinha_('+i+',\'qtdVendida\',this.value)"></td>'
       +'<td class="cf-num cf-recognized '+(excedeu?'cf-over':'')+'">'+cfQtd_(reconhecida)+(excedeu?' *':'')+'</td>'
@@ -11775,6 +11788,14 @@ function cfAtualizarLinhaAoDigitar_(i,campo,valor,input){
   if(campo==='estoqueInicial')p.qtdCoberta=p.estoqueInicial;
   var tr=input&&input.closest?input.closest('tr'):null;
   if(!tr)return;
+  // A cobertura por unidade representa o desconto negociado: preço ação = preço normal − cobertura.
+  // Se o usuário editar o preço da ação, recalculamos a cobertura na direção inversa.
+  if((campo==='precoAcao'||campo==='coberturaUnit')&&String(valor).trim()!==''){
+    if(campo==='coberturaUnit')p.precoAcao=cfCentavos_(Math.max(0,cfNum_(p.precoNormal)-cfNum_(p.coberturaUnit)));
+    else p.coberturaUnit=cfCentavos_(Math.max(0,cfNum_(p.precoNormal)-cfNum_(p.precoAcao)));
+    var par=tr.querySelector(campo==='coberturaUnit'?'.cf-price-action-input':'.cf-coverage-input');
+    if(par)par.value=cfNum_(campo==='coberturaUnit'?p.precoAcao:p.coberturaUnit).toFixed(2);
+  }
   var estoque=cfEstoque_(p),vend=cfNum_(p.qtdVendida),reconhecida=Math.min(estoque,vend),excedeu=vend>estoque;
   var potencial=estoque*cfNum_(p.coberturaUnit),receber=reconhecida*cfNum_(p.coberturaUnit);
   var potencialCell=tr.querySelector('.cf-potential'),reconhecidaCell=tr.querySelector('.cf-recognized'),receberCell=tr.querySelector('.cf-due');
