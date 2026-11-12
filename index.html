@@ -11953,26 +11953,54 @@ function cfRenderLista_(){
 }
 
 
-// Envia a negociação aberta ao Arsenal, agrupando os produtos pelo preço da ação.
+// Classifica dimensões comerciais que exigem placas separadas dentro de um preço.
+// Em sorvetes, separa 2 L, 1,5 L e linhas marcadas como 0%/zero lactose, por exemplo.
+function cfSelloutDimensoes_(nome){
+  var n=String(nome||'').toLocaleUpperCase('pt-BR').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+  var sorvete=/\bSORVETES?\b/.test(n),medida='',marcador='';
+  var mm=n.match(/(?:^|\s)(\d+(?:[.,]\d+)?)\s*(ML|LTS?|L|LITROS?|KG|GR|G|GRAMAS?)\b/);
+  if(mm){
+    var unidade=mm[2];
+    if(/^LT|^LITRO/.test(unidade))unidade='L';
+    else if(/^GR|^GRAMA/.test(unidade))unidade='G';
+    medida=String(Number(mm[1].replace(',','.'))).replace('.',',')+' '+unidade;
+  }
+  var zeroPct=n.match(/\b0\s*%\s*(LACTOSE|ACUCAR|GORDURA)?/);
+  var zeroWord=n.match(/\bZERO(?:\s+(LACTOSE|ACUCAR|GORDURA))?/);
+  if(zeroPct)marcador=/LACTOSE/.test(zeroPct[1]||'')?'0% LACTOSE':'0%'+(zeroPct[1]?' '+zeroPct[1]:'');
+  else if(zeroWord)marcador=zeroWord[1]==='LACTOSE'?'0% LACTOSE':'ZERO'+(zeroWord[1]?' '+zeroWord[1]:'');
+  else if(/\bSEM\s+LACTOSE\b/.test(n))marcador='0% LACTOSE';
+  var classe=sorvete?'SORVETE':'';
+  var partes=[];if(classe)partes.push(classe);if(marcador)partes.push(marcador);if(medida)partes.push(medida);
+  // Só a família de sorvetes recebe quebra por apresentação/linha. Nos demais itens,
+  // o agrupamento comercial anterior por preço permanece igual.
+  var chave=sorvete?(classe+'|'+(medida||'SEM MEDIDA')+'|'+(marcador||'PADRAO')):'GERAL';
+  return {chave:chave,classificacao:partes.join(' · ')};
+}
+
+// Envia a negociação aberta ao Arsenal, agrupando por preço e, para sorvetes,
+// também por apresentação e classificação 0%/zero lactose.
 // O envio usa localStorage compartilhado entre os dois caminhos do GitHub Pages.
 var CF_SELLOUT_TRANSFER_PREFIX_='aura_sellout_transfer_';
 function cfEnviarSelloutArsenal_(acaoFonte){
   var acao=acaoFonte||cfAcaoForm_();
-  var porPreco=Object.create(null),semCodigo=0,semPreco=0;
+  var porGrupo=Object.create(null),semCodigo=0,semPreco=0;
   (acao.produtos||[]).forEach(function(p){
     var codigo=cfNormalizarCodigo_(p.cod||p.codigo||'');
     var precoCentavos=Math.round(cfNum_(p.precoAcao)*100);
     if(!codigo){semCodigo++;return;}
     if(!(precoCentavos>0)){semPreco++;return;}
-    var grupo=porPreco[precoCentavos]||(porPreco[precoCentavos]={precoCentavos:precoCentavos,itens:[],vistos:Object.create(null)});
+    var dim=cfSelloutDimensoes_(p.nome||codigo);
+    var chave=precoCentavos+'|'+dim.chave;
+    var grupo=porGrupo[chave]||(porGrupo[chave]={precoCentavos:precoCentavos,classificacao:dim.classificacao,itens:[],vistos:Object.create(null)});
     if(grupo.vistos[codigo])return;
     grupo.vistos[codigo]=true;
     grupo.itens.push({cod:codigo,nome:String(p.nome||codigo).trim(),unidade:String(p.unidade||'UN').trim(),precoNormal:cfNum_(p.precoNormal),precoAcao:precoCentavos/100});
   });
-  var grupos=Object.keys(porPreco).map(function(k){
-    var g=porPreco[k];
-    return {precoCentavos:g.precoCentavos,preco:g.precoCentavos/100,itens:g.itens};
-  }).sort(function(a,b){return a.precoCentavos-b.precoCentavos;});
+  var grupos=Object.keys(porGrupo).map(function(k){
+    var g=porGrupo[k];
+    return {precoCentavos:g.precoCentavos,preco:g.precoCentavos/100,classificacao:g.classificacao,itens:g.itens};
+  }).sort(function(a,b){return a.precoCentavos-b.precoCentavos||String(a.classificacao).localeCompare(String(b.classificacao),'pt-BR');});
   if(!grupos.length){mostrarToast('A negociação não tem itens com código e preço de ação válido para enviar.','warn');return;}
   var token='rs_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
   var pacote={versao:1,id:token,campanha:acao.campanha||'Sellout',fornecedor:acao.fornecedor||'',criadoEm:new Date().toISOString(),grupos:grupos};
@@ -11984,7 +12012,7 @@ function cfEnviarSelloutArsenal_(acaoFonte){
   if(!novaAba){mostrarToast('O navegador bloqueou a nova aba. Permita pop-ups para abrir o Arsenal. Lote preparado: '+grupos.length+' grupo(s).','warn');return;}
   var itens=grupos.reduce(function(n,g){return n+g.itens.length;},0);
   var avisos=[];if(semCodigo)avisos.push(semCodigo+' sem código ignorado(s)');if(semPreco)avisos.push(semPreco+' sem preço de ação ignorado(s)');
-  mostrarToast('R$ Sellout enviado: '+itens+' produto(s) em '+grupos.length+' grupo(s) de preço.'+(avisos.length?' '+avisos.join('; ')+'.':''),'ok');
+  mostrarToast('R$ Sellout enviado: '+itens+' produto(s) em '+grupos.length+' grupo(s) por preço e classificação.'+(avisos.length?' '+avisos.join('; ')+'.':''),'ok');
 }
 function cfEnviarSelloutDaAcao_(id){
   var acao=cfAcoes.find(function(x){return String(x.id)===String(id);});
