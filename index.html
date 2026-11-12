@@ -11806,8 +11806,15 @@ function cfAtualizarLinhaAoDigitar_(i,campo,valor,input){
 }
 function cfAtualizarLinha_(i,campo,valor){
   if(!cfProdutos[i])return;
-  cfProdutos[i][campo]=cfNum_(valor);
-  if(campo==='estoqueInicial')cfProdutos[i].qtdCoberta=cfProdutos[i][campo];
+  var p=cfProdutos[i];
+  p[campo]=cfNum_(valor);
+  if(campo==='estoqueInicial')p.qtdCoberta=p.estoqueInicial;
+  // Recalcula também no commit (blur/change), além do evento de digitação.
+  // Assim o preço da ação e a cobertura não ficam defasados ao redesenhar a linha.
+  if((campo==='precoAcao'||campo==='coberturaUnit')&&String(valor).trim()!==''){
+    if(campo==='coberturaUnit')p.precoAcao=cfCentavos_(Math.max(0,cfNum_(p.precoNormal)-cfNum_(p.coberturaUnit)));
+    else p.coberturaUnit=cfCentavos_(Math.max(0,cfNum_(p.precoNormal)-cfNum_(p.precoAcao)));
+  }
   cfRenderProdutos_();
 }
 function cfRemoverProduto_(i){cfProdutos.splice(i,1);cfRenderProdutos_();}
